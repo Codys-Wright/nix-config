@@ -9,6 +9,14 @@ default:
 list:
     @just --list
 
+# Create a new module using the template
+module name:
+    @echo "Creating new module: {{name}}"
+    @mkdir -p {{name}}
+    @cp $(git rev-parse --show-toplevel)/templates/module/default.nix {{name}}/default.nix
+    @echo "Module created at: $$(pwd)/{{name}}/default.nix"
+    @echo "Edit $$(pwd)/{{name}}/default.nix to customize your module"
+
 # Set target IP
 target_ip ip:
     @echo "Setting target IP to {{ip}}..."
@@ -96,6 +104,9 @@ setup-my-target:
 help:
     @echo "NixOS Anywhere Deployment Commands:"
     @echo ""
+    @echo "Module Creation:"
+    @echo "  just module                    - Create new module in current directory"
+    @echo ""
     @echo "Target Configuration:"
     @echo "  just target_ip <ip>           - Set target IP address"
     @echo "  just target_password <pass>   - Set target password"
@@ -116,6 +127,8 @@ help:
     @echo "  just setup-my-target          - Setup for your specific target"
     @echo ""
     @echo "Example Usage:"
+    @echo "  cd modules/nixos/services && just module  # Creates 'services' module"
+    @echo "  cd modules/home/programs && just module   # Creates 'programs' module"
     @echo "  just target 192.168.1.100 mypassword"
     @echo "  just nixos-anywhere           # Initial installation"
     @echo "  just deploy                   # Configuration updates"
