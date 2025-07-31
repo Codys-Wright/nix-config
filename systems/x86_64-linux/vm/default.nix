@@ -55,10 +55,8 @@ with lib.${namespace};
 
     # FTS-FLEET namespace configuration
     FTS-FLEET = {
+        bundles.common = enabled;
         desktop.kde = enabled;
-        hardware.audio = enabled;
-        hardware.bluetooth = enabled;
-        hardware.networking = enabled;
         system.themes.stylix = enabled;
     };
 

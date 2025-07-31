@@ -48,7 +48,7 @@ in
       Defaults to Gruvbox dark medium theme.
     '';
     
-    image = mkOpt (either path str) (lib.custom.relativeToRoot "Windows-11-PRO.png") ''
+    image = mkOpt (either path str) "/home/cody/nix-config/Windows-11-PRO.png" ''
       Path to the wallpaper image.
       Defaults to Windows 11 Pro wallpaper.
     '';
