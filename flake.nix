@@ -25,7 +25,7 @@
         snowfall = {
           meta = {
             name = "nix-config";
-            title = "Nix Config";
+            title = "Cody Wright's personal system fleet";
           };
 
           namespace = "FTS-FLEET";
@@ -36,44 +36,9 @@
       inherit inputs;
       src = ./.;
 
-      # Configure Snowfall Lib
-      snowfall = {
-        # Tell Snowfall Lib to look in the current directory for your Nix files
-        root = ./.;
-
-        # Choose a namespace to use for your flake's packages, library, and overlays
-        namespace = "FTS-FLEET";
-
-        # Add flake metadata
-        meta = {
-          # A slug to use in documentation when displaying things like file paths
-          name = "nix-config";
-
-          # A title to show for your flake
-          title = "Nix Config";
-        };
-      };
-
-      # Systems configuration
-      systems = {
-        x86_64-linux = {
-          hosts = {
-            vm = {
-              # The system will automatically load ./systems/x86_64-linux/vm/default.nix
-            };
-          };
-        };
-      };
-
-      # Homes configuration
-      homes = {
-        x86_64-linux = {
-          users = {
-            cody = {
-              # The home will automatically load ./homes/x86_64-linux/cody@personal/default.nix
-            };
-          };
-        };
+      channels-config = {
+        allowUnfree = true;
+        permittedInsecurePackages = [ ];
       };
 
       # Deploy-rs configuration for managing deployments
@@ -96,7 +61,7 @@
         };
       };
 
-      # Snowfall Lib automatically creates nixosConfigurations from the systems structure
+      templates = import ./templates { };
 
       # Deploy-rs checks for deployment validation
       checks = builtins.mapAttrs (system: deployLib: deployLib.deployChecks inputs.self.deploy) inputs.deploy-rs.lib;
