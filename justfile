@@ -9,6 +9,27 @@ default:
 list:
     @just --list
 
+# Generate documentation using Snowfall Frost
+docs:
+    @echo "Generating documentation with Snowfall Frost..."
+    @nix run github:snowfallorg/frost#frost -- build $(pwd)
+    @echo "Documentation generated in frost-docs/ directory"
+
+# Generate documentation for a specific module
+docs-module module:
+    @echo "Generating documentation for module: {{module}}"
+    @nix run github:snowfallorg/frost#frost -- generate $(pwd) --module {{module}}
+
+# Generate all module documentation
+docs-all:
+    @echo "Generating documentation for all modules..."
+    @nix run github:snowfallorg/frost#frost -- generate $(pwd) --all-modules
+
+# Serve documentation locally
+docs-serve:
+    @echo "Serving documentation locally..."
+    @cd frost-docs && python3 -m http.server 8000
+
 # Create a new module using the template
 module name:
     @echo "Creating new module: {{name}}"

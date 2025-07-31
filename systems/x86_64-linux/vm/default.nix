@@ -77,6 +77,7 @@ with lib.${namespace};
         git
         vscode
         btop
+        snowfallorg.frost
     ];
 
     # Auto-login for KDE Plasma

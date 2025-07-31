@@ -1,0 +1,1 @@
+{"declarations":[{"channelPath":"<flake>/modules/sops","path":"modules/sops","url":"/home/cody/nix-config/modules/sops"}],"default":{"_type":"literalExpression","text":"\"‹name›\""},"description":"Name of the file used in /run/secrets\n","internal":false,"loc":["sops","secrets","<name>","name"],"name":"sops.secrets.<name>.name","readOnly":false,"type":"string","visible":true}

@@ -13,7 +13,22 @@ let
 in
 {
   options.${namespace}.desktop.kde = with types; {
-    enable = mkBoolOpt false "Whether or not to use KDE Plasma as the desktop environment.";
+    enable = mkBoolOpt false ''
+      Whether or not to use KDE Plasma as the desktop environment.
+      
+      When enabled, this module will:
+      - Enable X11 server
+      - Configure SDDM display manager
+      - Enable KDE Plasma 6 desktop environment
+      - Set up basic KDE services and applications
+      
+      Example:
+      ```nix
+      FTS-FLEET = {
+        desktop.kde = enabled;
+      };
+      ```
+    '';
   };
 
   config = mkIf cfg.enable {

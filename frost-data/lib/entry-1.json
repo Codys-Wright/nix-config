@@ -1,0 +1,1 @@
+{"location":{"column":5,"file":"/nix/store/y5mk3y019aj8m38fa6f1q0131a8041yg-g02s4fr7iw6vayh1izwqx406gl9159gb-source/lib/modules/default.nix","line":50},"name":"enable","path":["enabled"],"type":"bool","comment":"# Quickly enable an option.\n#\n# ```nix\n# services.nginx = enabled;\n# ```\n#\n@ true"}
