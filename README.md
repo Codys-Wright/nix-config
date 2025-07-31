@@ -55,6 +55,9 @@ A modern, modular NixOS configuration system built with best practices and cutti
 ## 🛠️ Current Features
 
 ### **Deployment System**
+
+We use **Just** to simplify complex deployment commands and make them easy to remember:
+
 ```bash
 # Set target
 just target <ip> <password>
@@ -71,6 +74,8 @@ just eval <config>
 # Connect to target
 just connect
 ```
+
+**Why Just?** Instead of remembering complex `nix run` commands with multiple flags, Just provides simple, memorable commands that handle all the complexity behind the scenes.
 
 ### **Configuration Structure**
 - **Stylix theming** with custom wallpaper
