@@ -33,7 +33,7 @@ in
       fzf
       tree
       bat
-      exa
+      eza
       du-dust
       procs
       bottom
@@ -54,7 +54,7 @@ in
       # File and text processing
       jq
       yq
-      xsv
+      xan
       csvkit
       
       # Development tools
