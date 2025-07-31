@@ -17,27 +17,42 @@
   };
 
   outputs = inputs:
-    inputs.snowfall-lib.mkFlake {
+    let
+      lib = inputs.snowfall-lib.mkLib {
+        inherit inputs;
+        src = ./.;
+
+        snowfall = {
+          meta = {
+            name = "nix-config";
+            title = "Nix Config";
+          };
+
+          namespace = "FTS-FLEET";
+        };
+      };
+    in
+    lib.mkFlake {
       inherit inputs;
       src = ./.;
 
       # Configure Snowfall Lib
-              snowfall = {
-          # Tell Snowfall Lib to look in the current directory for your Nix files
-          root = ./.;
+      snowfall = {
+        # Tell Snowfall Lib to look in the current directory for your Nix files
+        root = ./.;
 
-          # Choose a namespace to use for your flake's packages, library, and overlays
-          namespace = "nix-config";
+        # Choose a namespace to use for your flake's packages, library, and overlays
+        namespace = "FTS-FLEET";
 
-          # Add flake metadata
-          meta = {
-            # A slug to use in documentation when displaying things like file paths
-            name = "nix-config";
+        # Add flake metadata
+        meta = {
+          # A slug to use in documentation when displaying things like file paths
+          name = "nix-config";
 
-            # A title to show for your flake
-            title = "Nix Config";
-          };
+          # A title to show for your flake
+          title = "Nix Config";
         };
+      };
 
       # Systems configuration
       systems = {
