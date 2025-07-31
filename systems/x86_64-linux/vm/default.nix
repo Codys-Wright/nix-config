@@ -58,6 +58,13 @@ with lib.${namespace};
         bundles.common = enabled;
         desktop.kde = enabled;
         system.themes.stylix = enabled;
+        services.ssh = {
+            enable = true;
+            allowRootLogin = true;
+            rootKeys = [
+                "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKXs4YKtweDc2OcDDE6LoENPqQc8W79QQczfK9XErG4z CodyWright@THEBATTLESHIP"
+            ];
+        };
     };
 
     # Allow unfree packages
@@ -87,10 +94,7 @@ with lib.${namespace};
         };
     };
 
-    # SSH keys for root user
-    users.users.root.openssh.authorizedKeys.keys = [
-        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKXs4YKtweDc2OcDDE6LoENPqQc8W79QQczfK9XErG4z CodyWright@THEBATTLESHIP"
-    ];
+
 
     # Backup user for emergency access
     users.users.cody = {

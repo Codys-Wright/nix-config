@@ -38,6 +38,7 @@ in
 
       services = {
         printing = enabled;
+        ssh = enabled;
         tailscale = enabled;
       };
 
