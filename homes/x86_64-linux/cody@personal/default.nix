@@ -35,6 +35,11 @@
         home-manager.enable = true;
     };
 
+    # FTS-FLEET namespace configuration
+    FTS-FLEET = {
+        bundles.cli = enabled;
+    };
+
     # Enable stylix in Home Manager (will inherit from system)
     stylix = {
         autoEnable = true;

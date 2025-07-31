@@ -56,6 +56,7 @@ with lib.${namespace};
     # FTS-FLEET namespace configuration
     FTS-FLEET = {
         bundles.common = enabled;
+        bundles.cli = enabled;
         desktop.kde = enabled;
         system.themes.stylix = enabled;
         services.ssh = {
@@ -70,19 +71,10 @@ with lib.${namespace};
     # Allow unfree packages
     nixpkgs.config.allowUnfree = true;
 
-    # Basic system packages
+    # Additional system packages (GUI and specific tools)
     environment.systemPackages = with pkgs; [
-        curl
-        gitMinimal
-        vim
         brave
-        kitty
-        neovim
-        tmux
-        zsh
-        git
         vscode
-        btop
         snowfallorg.frost
     ];
 
