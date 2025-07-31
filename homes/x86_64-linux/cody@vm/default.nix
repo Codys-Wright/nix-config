@@ -19,6 +19,8 @@ with lib.${namespace};
       # desktop.hyprland = enabled; # Disabled - using KDE
       development = enabled;
       office = enabled;
+      music = enabled;
+      music-production = enabled;
     };
 
     programs = {
