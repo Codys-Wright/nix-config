@@ -53,6 +53,9 @@ with lib.${namespace};
         };
     };
 
+    # Configure home-manager for the cody user
+    home-manager.users.cody = inputs.self.homeConfigurations."cody@personal".activationPackage;
+
     # FTS-FLEET namespace configuration
     FTS-FLEET = {
         bundles.common = enabled;

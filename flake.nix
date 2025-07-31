@@ -79,12 +79,14 @@
         snowfall-frost.overlays.default
       ];
 
+
+
       # Deploy-rs configuration for managing deployments
       deploy = {
         nodes = {
           # VM deployment using nixos-anywhere
           vm = {
-            hostname = "192.168.122.217"; # Your VM IP
+            hostname = "192.168.122.218"; # Update this IP when VM IP changes
             sshOpts = [ "-o" "StrictHostKeyChecking=no" ];
             fastConnection = true;
             interactiveSudo = false; # root user, no sudo needed
@@ -93,6 +95,11 @@
                 sshUser = "root";
                 user = "root";
                 path = inputs.deploy-rs.lib.x86_64-linux.activate.nixos inputs.self.nixosConfigurations.vm;
+              };
+              home-manager = {
+                sshUser = "root";
+                user = "cody";
+                path = inputs.deploy-rs.lib.x86_64-linux.activate.home-manager inputs.self.homeConfigurations."cody@personal";
               };
             };
           };

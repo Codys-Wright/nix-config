@@ -19,6 +19,8 @@
     config,
     ...
 }:
+with lib;
+with lib.${namespace};
 {
     # Enable Snowfall Lib's user configuration
     snowfallorg.user.enable = true;

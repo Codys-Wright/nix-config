@@ -53,7 +53,6 @@ in
       programs = {
         brave = enabled; # Keep as fallback browser
         kitty = enabled;
-        librewolf = disabled;
         lazygit = enabled;
         neovim = enabled;
         stylix = enabled;
