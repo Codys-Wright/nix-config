@@ -20,7 +20,7 @@ in
     home.packages = with pkgs; [
       # Browser utilities
       firefox
-      chromium
+      # chromium  # Removed to avoid collision with ungoogled-chromium
       ungoogled-chromium
     ];
 

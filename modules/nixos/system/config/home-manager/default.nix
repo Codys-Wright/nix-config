@@ -22,5 +22,17 @@ in
       useGlobalPkgs = false;
       backupFileExtension = "bak-gen-${toString config.system.nixos.revision}";
     };
+
+    # Ensure home-manager services wait for Nix daemon
+    systemd.services.home-manager-cody = {
+      after = [ "nix-daemon.service" "network.target" ];
+      wants = [ "nix-daemon.service" ];
+      requires = [ "nix-daemon.service" ];
+      restartIfChanged = false;
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+      };
+    };
   };
 }

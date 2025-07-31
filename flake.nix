@@ -42,6 +42,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     
+    # Apple Color Emoji font
+    apple-emoji-linux = {
+      url = "github:samuelngs/apple-emoji-linux";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    
     # Documentation tools
     nixdoc = {
       url = "github:nix-community/nixdoc";

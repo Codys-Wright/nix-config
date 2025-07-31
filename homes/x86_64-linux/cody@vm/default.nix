@@ -3,6 +3,7 @@
   lib,
   osConfig,
   namespace,
+  inputs,
   ...
 }:
 with lib;
@@ -32,6 +33,14 @@ with lib.${namespace};
       email = "cody@example.com"; # Update this with your actual email
     };
   };
+
+  # Add Apple Color Emoji font to home packages
+  home.packages = with pkgs; [
+    inputs.apple-emoji-linux.packages.x86_64-linux.default
+  ];
+
+  # Configure fontconfig for Apple Color Emoji
+  fonts.fontconfig.enable = true;
 
   # This value determines the Home Manager release that your
   # configuration is compatible with. This helps avoid breakage

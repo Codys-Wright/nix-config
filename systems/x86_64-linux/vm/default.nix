@@ -40,8 +40,6 @@ with lib.${namespace};
         else
             throw "Have you forgotten to run nixos-anywhere with `--generate-hardware-config nixos-facter ./facter.json`?";
 
-
-
     # Configure the cody user with Home Manager
     snowfallorg.users.cody = {
         create = true;
@@ -52,9 +50,13 @@ with lib.${namespace};
         };
     };
 
-
-
-
+    # System user configuration
+    FTS-FLEET.config.user = {
+        name = "cody";
+        fullName = "Cody Wright";
+        email = "cody@example.com";
+        initialPassword = "";
+    };
 
     # FTS-FLEET namespace configuration
     FTS-FLEET = {
@@ -69,9 +71,13 @@ with lib.${namespace};
                 "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKXs4YKtweDc2OcDDE6LoENPqQc8W79QQczfK9XErG4z CodyWright@THEBATTLESHIP"
             ];
         };
+        
+        # Enable fonts with Apple Color Emoji
+        system.fonts = {
+            enable = true;
+            enableAppleEmoji = true;
+        };
     };
-
-
 
     # Additional system packages (GUI and specific tools)
     environment.systemPackages = with pkgs; [
@@ -87,10 +93,6 @@ with lib.${namespace};
             Session = "plasma";
         };
     };
-
-
-
-
 
     system.stateVersion = "24.05";
 } 
