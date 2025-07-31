@@ -18,12 +18,41 @@
   };
   services.openssh.enable = true;
 
+  # Allow unfree packages
+  nixpkgs.config.allowUnfree = true;
+
   # Basic system packages
   environment.systemPackages = with pkgs; [
     curl
     gitMinimal
+    vim
+    brave
+    kitty
+    neovim
+    tmux
+    zsh
+    git
+    vscode
+
     # Add any other packages you want
   ];
+
+  programs = {
+  };
+
+  # KDE Plasma Desktop Environment
+  services.xserver.enable = true;
+  services.displayManager.sddm.enable = true;
+  services.desktopManager.plasma6.enable = true;
+
+  # Enable sound with pipewire
+  security.rtkit.enable = true;
+  services.pipewire = {
+    enable = true;
+    alsa.enable = true;
+    alsa.support32Bit = true;
+    pulse.enable = true;
+  };
 
   # Stylix theming
   stylix = {
