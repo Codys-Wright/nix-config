@@ -61,7 +61,7 @@
         };
       };
 
-      templates = import ./templates { };
+      templates = import ./templates;
 
       # Deploy-rs checks for deployment validation
       checks = builtins.mapAttrs (system: deployLib: deployLib.deployChecks inputs.self.deploy) inputs.deploy-rs.lib;

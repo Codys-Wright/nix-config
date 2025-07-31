@@ -72,26 +72,35 @@ with lib.${namespace};
     ];
 
     # Boot configuration
-    boot.loader.grub = enabled;
+    boot.loader.grub = {
+        efiSupport = true;
+        efiInstallAsRemovable = true;
+    };
 
     # SSH service
     services.openssh = enabled;
 
     # KDE Plasma Desktop Environment
     services.xserver = enabled;
-    services.desktopManager.plasma6 = enabled;
-    
-    # Auto-login for KDE Plasma
-    services.displayManager.sddm.settings = {
-        Autologin = {
-            User = "cody";
-            Session = "plasma";
+    services.displayManager.sddm = {
+        enable = true;
+        settings = {
+            Autologin = {
+                User = "cody";
+                Session = "plasma";
+            };
         };
     };
+    services.desktopManager.plasma6 = enabled;
 
     # Enable sound with pipewire
     security.rtkit = enabled;
-    services.pipewire = enabled;
+    services.pipewire = {
+        enable = true;
+        alsa.enable = true;
+        alsa.support32Bit = true;
+        pulse.enable = true;
+    };
 
     # Stylix theming configuration
     stylix = {
