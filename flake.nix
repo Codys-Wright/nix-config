@@ -3,59 +3,30 @@
   inputs.disko.url = "github:nix-community/disko";
   inputs.disko.inputs.nixpkgs.follows = "nixpkgs";
   inputs.nixos-facter-modules.url = "github:numtide/nixos-facter-modules";
+  inputs.deploy-rs.url = "github:serokell/deploy-rs";
+  inputs.deploy-rs.inputs.nixpkgs.follows = "nixpkgs";
+  inputs.stylix.url = "github:danth/stylix";
+  inputs.stylix.inputs.nixpkgs.follows = "nixpkgs";
 
   outputs =
     {
+      self,
       nixpkgs,
       disko,
       nixos-facter-modules,
+      deploy-rs,
       ...
-    }:
+    }@inputs:
     {
-      nixosConfigurations.hetzner-cloud = nixpkgs.lib.nixosSystem {
+      # VM-specific configuration with virtio disk
+      nixosConfigurations.vm-nixos-facter = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         modules = [
           disko.nixosModules.disko
           ./configuration.nix
-        ];
-      };
-      # tested with 2GB/2CPU droplet, 1GB droplets do not have enough RAM for kexec
-      nixosConfigurations.digitalocean = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        modules = [
-          ./digitalocean.nix
-          disko.nixosModules.disko
-          { disko.devices.disk.disk1.device = "/dev/vda"; }
-          ./configuration.nix
-        ];
-      };
-      nixosConfigurations.hetzner-cloud-aarch64 = nixpkgs.lib.nixosSystem {
-        system = "aarch64-linux";
-        modules = [
-          disko.nixosModules.disko
-          ./configuration.nix
-        ];
-      };
-
-      # Use this for all other targets
-      # nixos-anywhere --flake .#generic --generate-hardware-config nixos-generate-config ./hardware-configuration.nix <hostname>
-      nixosConfigurations.generic = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        modules = [
-          disko.nixosModules.disko
-          ./configuration.nix
-          ./hardware-configuration.nix
-        ];
-      };
-
-      # Slightly experimental: Like generic, but with nixos-facter (https://github.com/numtide/nixos-facter)
-      # nixos-anywhere --flake .#generic-nixos-facter --generate-hardware-config nixos-facter facter.json <hostname>
-      nixosConfigurations.generic-nixos-facter = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        modules = [
-          disko.nixosModules.disko
-          ./configuration.nix
+          inputs.stylix.nixosModules.stylix
           nixos-facter-modules.nixosModules.facter
+          { disko.devices.disk.disk1.device = "/dev/vda"; }
           {
             config.facter.reportPath =
               if builtins.pathExists ./facter.json then
@@ -63,7 +34,34 @@
               else
                 throw "Have you forgotten to run nixos-anywhere with `--generate-hardware-config nixos-facter ./facter.json`?";
           }
+          # Add wallpaper to flake
+          {
+            stylix.image = ./Windows-11-PRO.png;
+          }
         ];
       };
+
+      # Deploy-rs configuration for managing deployments
+      deploy = {
+        nodes = {
+          # VM deployment using nixos-anywhere
+          vm = {
+            hostname = "192.168.122.217"; # Your VM IP
+            sshOpts = [ "-o" "StrictHostKeyChecking=no" ];
+            fastConnection = true;
+            interactiveSudo = false; # root user, no sudo needed
+            profiles = {
+              system = {
+                sshUser = "root";
+                user = "root";
+                path = deploy-rs.lib.x86_64-linux.activate.nixos self.nixosConfigurations.vm-nixos-facter;
+              };
+            };
+          };
+        };
+      };
+
+      # Deploy-rs checks for deployment validation
+      checks = builtins.mapAttrs (system: deployLib: deployLib.deployChecks self.deploy) deploy-rs.lib;
     };
 }

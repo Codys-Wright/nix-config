@@ -1,0 +1,122 @@
+# NixOS Anywhere Deployment Justfile
+# Usage: just <command>
+
+# Default target
+default:
+    @just --list
+
+# List all available commands
+list:
+    @just --list
+
+# Set target IP
+target_ip ip:
+    @echo "Setting target IP to {{ip}}..."
+    @echo "NIXOS_TARGET_IP={{ip}}" > .env
+    @echo "Target IP set to: {{ip}}"
+
+# Set target password
+target_password password:
+    @echo "Setting target password..."
+    @echo "NIXOS_TARGET_PASSWORD={{password}}" >> .env
+    @echo "Target password set"
+
+# Set both IP and password
+target ip password:
+    @echo "Setting target IP and password..."
+    @echo "NIXOS_TARGET_IP={{ip}}" > .env
+    @echo "NIXOS_TARGET_PASSWORD={{password}}" >> .env
+    @echo "Target IP set to: {{ip}}"
+    @echo "Target password set"
+
+# Initial installation using nixos-anywhere
+nixos-anywhere:
+    @echo "Installing NixOS using nixos-anywhere..."
+    @if [ ! -f .env ]; then echo "Error: .env file not found. Run 'just target <ip> <password>' first"; exit 1; fi
+    @nix-shell -p sshpass --run 'bash -c "source .env && SSHPASS=$NIXOS_TARGET_PASSWORD nix run github:nix-community/nixos-anywhere -- --flake .#vm-nixos-facter --generate-hardware-config nixos-facter ./facter.json --target-host root@$NIXOS_TARGET_IP --env-password"'
+
+# Deploy configuration updates using deploy-rs
+deploy:
+    @echo "Deploying configuration using deploy-rs..."
+    @if [ ! -f .env ]; then echo "Error: .env file not found. Run 'just target <ip> <password>' first"; exit 1; fi
+    @nix-shell -p sshpass --run 'bash -c "source .env && nix run github:serokell/deploy-rs .#vm"'
+
+# Deploy specific node using deploy-rs
+deploy-node node:
+    @echo "Deploying node {{node}} using deploy-rs..."
+    @nix-shell -p sshpass --run "nix run github:serokell/deploy-rs .#{{node}}"
+
+# Evaluate a NixOS configuration
+eval config:
+    @echo "Evaluating configuration {{config}}..."
+    @nix eval .#nixosConfigurations.{{config}}.config.system.build.toplevel
+
+# Test connection to target
+test-connection:
+    @echo "Testing connection to target..."
+    @if [ ! -f .env ]; then echo "Error: .env file not found. Run 'just target <ip> <password>' first"; exit 1; fi
+    @nix-shell -p sshpass --run "bash -c 'source .env && SSHPASS=\$NIXOS_TARGET_PASSWORD sshpass -e ssh -o ConnectTimeout=10 -o StrictHostKeyChecking=no root@\$NIXOS_TARGET_IP \"echo SSH connection successful!\"'"
+
+# Connect to target via SSH
+connect:
+    @echo "Connecting to target..."
+    @if [ ! -f .env ]; then echo "Error: .env file not found. Run 'just target <ip> <password>' first"; exit 1; fi
+    @nix-shell -p sshpass --run "bash -c 'source .env && SSHPASS=\$NIXOS_TARGET_PASSWORD sshpass -e ssh -o StrictHostKeyChecking=no root@\$NIXOS_TARGET_IP'"
+
+# Show current target configuration
+show-config:
+    @echo "Current target configuration:"
+    @if [ -f .env ]; then \
+        grep NIXOS_TARGET_IP .env | sed 's/export //'; \
+        grep NIXOS_TARGET_PASSWORD .env | sed 's/export //'; \
+    else \
+        echo "No configuration set. Run 'just target <ip> <password>' first"; \
+    fi
+
+# Build configuration locally
+build:
+    @echo "Building configuration locally..."
+    nix build .#vm-nixos-facter
+
+# Test configuration in VM
+test-vm:
+    @echo "Testing configuration in VM..."
+    nix run github:nix-community/nixos-anywhere -- --flake .#vm-nixos-facter --vm-test
+
+# Quick setup for your specific target
+setup-my-target:
+    @echo "Setting up for your target (192.168.122.217)..."
+    just target 192.168.122.217 breeze-crazily-pristine
+    @echo "Now you can use:"
+    @echo "  just deploy           - Deploy to your target"
+    @echo "  just test-connection  - Test SSH connection"
+    @echo "  just show-config      - Show current configuration"
+
+# Help
+help:
+    @echo "NixOS Anywhere Deployment Commands:"
+    @echo ""
+    @echo "Target Configuration:"
+    @echo "  just target_ip <ip>           - Set target IP address"
+    @echo "  just target_password <pass>   - Set target password"
+    @echo "  just target <ip> <pass>       - Set both IP and password"
+    @echo "  just show-config              - Show current configuration"
+    @echo ""
+    @echo "Deployment:"
+    @echo "  just nixos-anywhere           - Initial NixOS installation"
+    @echo "  just deploy                   - Deploy configuration updates"
+    @echo "  just deploy-node <node>       - Deploy to specific node"
+    @echo "  just eval <config>            - Evaluate NixOS configuration"
+    @echo "  just test-connection          - Test SSH connection"
+    @echo "  just connect                  - Connect to target via SSH"
+    @echo "  just build                    - Build configuration locally"
+    @echo "  just test-vm                  - Test configuration in VM"
+    @echo ""
+    @echo "Quick Setup:"
+    @echo "  just setup-my-target          - Setup for your specific target"
+    @echo ""
+    @echo "Example Usage:"
+    @echo "  just target 192.168.1.100 mypassword"
+    @echo "  just nixos-anywhere           # Initial installation"
+    @echo "  just deploy                   # Configuration updates"
+    @echo "  just connect" 

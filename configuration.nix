@@ -18,16 +18,65 @@
   };
   services.openssh.enable = true;
 
-  environment.systemPackages = map lib.lowPrio [
-    pkgs.curl
-    pkgs.gitMinimal
+  # Basic system packages
+  environment.systemPackages = with pkgs; [
+    curl
+    gitMinimal
+    # Add any other packages you want
   ];
+
+  # Stylix theming
+  stylix = {
+    enable = true;
+    base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-medium.yaml";
+    
+    image = ./Windows-11-PRO.png;
+    
+    cursor = {
+      package = pkgs.bibata-cursors;
+      name = "Bibata-Modern-Ice";
+      size = 24;
+    };
+    
+    fonts = {
+      monospace = {
+        package = pkgs.nerd-fonts.jetbrains-mono;
+        name = "JetBrainsMono Nerd Font Mono";
+      };
+      sansSerif = {
+        package = pkgs.dejavu_fonts;
+        name = "DejaVu Sans";
+      };
+      serif = {
+        package = pkgs.dejavu_fonts;
+        name = "DejaVu Serif";
+      };
+      emoji = {
+        package = pkgs.noto-fonts-emoji;
+        name = "Noto Color Emoji";
+      };
+    };
+    
+    polarity = "dark";
+  };
 
   users.users.root.openssh.authorizedKeys.keys =
   [
-    # change this to your ssh key
-    "# CHANGE"
+    # Your SSH key for VM access
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKXs4YKtweDc2OcDDE6LoENPqQc8W79QQczfK9XErG4z CodyWright@THEBATTLESHIP"
   ] ++ (args.extraPublicKeys or []); # this is used for unit-testing this module and can be removed if not needed
+
+  # Backup user for emergency access
+  users.users.cody = {
+    isNormalUser = true;
+    password = ""; # Simple password for emergency access
+    uid = 1001;
+    extraGroups = [ "wheel" "networkmanager" ];
+    openssh.authorizedKeys.keys = [
+      # Your SSH key for backup access
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKXs4YKtweDc2OcDDE6LoENPqQc8W79QQczfK9XErG4z CodyWright@THEBATTLESHIP"
+    ];
+  };
 
   system.stateVersion = "24.05";
 }
