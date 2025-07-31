@@ -34,7 +34,7 @@ in
       wl-gammactl
     ];
 
-    zeus = {
+    ${namespace} = {
       desktop.hyprland = enabled;
       programs = {
         ags = enabled;

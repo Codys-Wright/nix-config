@@ -24,7 +24,7 @@ in
   };
 
   config = mkIf cfg.enable {
-    zeus.desktop.hyprland = {
+    ${namespace}.desktop.hyprland = {
       animations = enabled;
       keybindings = enabled;
     };

@@ -18,12 +18,12 @@ in
 
   config = mkIf cfg.enable {
     home.packages = with pkgs; [ yazi ];
-    zeus = {
+    ${namespace} = {
       programs = {
         atuin = enabled;
         eza = enabled;
         fzf = enabled;
-        powerlevel10k = disabled;
+        powerlevel10k = enabled ;
         starship = enabled;
         zoxide = enabled;
         zsh = enabled;

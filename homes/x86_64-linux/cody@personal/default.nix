@@ -25,8 +25,6 @@
 
     # Home Manager configuration
     home = {
-        username = "cody";
-        homeDirectory = "/home/cody";
         stateVersion = "24.05";
     };
 
@@ -37,7 +35,26 @@
 
     # FTS-FLEET namespace configuration
     FTS-FLEET = {
-        bundles.cli = enabled;
+        bundles.common = enabled;
+        bundles.shell = enabled;
+        bundles.browsers = enabled;
+        # bundles.desktop.hyprland = enabled; # Disabled - using KDE
+        bundles.development = enabled;
+        bundles.office = enabled;
+        
+        # User configuration
+        config.user = {
+            enable = true;
+            name = "cody";
+            fullName = "Cody Wright";
+            email = "cody@example.com"; # Update this with your actual email
+        };
+        
+        # Additional programs
+        programs = {
+            git = enabled;
+            spotify = enabled;
+        };
     };
 
     # Enable stylix in Home Manager (will inherit from system)

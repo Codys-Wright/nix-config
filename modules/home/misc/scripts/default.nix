@@ -17,7 +17,7 @@ in
   };
 
   config = mkIf cfg.enable {
-    zeus.misc.scripts = {
+    ${namespace}.misc.scripts = {
       brightness = enabled;
       caffeine = enabled;
       hyprfocus = enabled;

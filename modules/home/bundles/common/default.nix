@@ -40,7 +40,7 @@ in
       # Config formatting
       nixfmt-rfc-style
     ];
-    zeus = {
+    ${namespace} = {
       bundles.shell = enabled;
       config = {
         apps = enabled;
@@ -51,14 +51,13 @@ in
         scripts = enabled;
       };
       programs = {
-        brave = enabled;
+        brave = enabled; # Keep as fallback browser
         kitty = enabled;
         librewolf = disabled;
         lazygit = enabled;
         neovim = enabled;
         stylix = enabled;
         tmux = enabled;
-        zen = enabled;
       };
     };
   };
