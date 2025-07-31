@@ -62,7 +62,7 @@ in
       ];
     };
 
-    zeus = {
+    ${namespace} = {
       programs = {
         dconf = enabled;
         kde-connect = enabled;
