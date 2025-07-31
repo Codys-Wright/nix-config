@@ -53,54 +53,6 @@ with lib.${namespace};
         };
     };
 
-    # FTS-FLEET configuration
-    FTS-FLEET = {
-        config = {
-            user = {
-                name = "cody";
-                extraGroups = [
-                    "wheel"
-                    "networkmanager"
-                    "audio"
-                    "video"
-                    "libvirtd"
-                    "docker"
-                    "render"
-                ];
-            };
-            nix = enabled;
-        };
-        hardware = {
-            nvidia = disabled;
-            cuda = disabled;
-            bluetooth = enabled;
-            sound = enabled;
-        };
-        services = {
-            ssh = enabled;
-            openssh = enabled;
-            pipewire = enabled;
-            xserver = enabled;
-            displayManager = {
-                sddm = enabled;
-            };
-            desktopManager = {
-                plasma6 = enabled;
-            };
-        };
-        system = {
-            boot = {
-                grub = enabled;
-            };
-            locale = enabled;
-            xkb = enabled;
-        };
-        programs = {
-            home-manager = enabled;
-            stylix = enabled;
-        };
-    };
-
     # Allow unfree packages
     nixpkgs.config.allowUnfree = true;
 
@@ -119,6 +71,16 @@ with lib.${namespace};
         btop
     ];
 
+    # Boot configuration
+    boot.loader.grub = enabled;
+
+    # SSH service
+    services.openssh = enabled;
+
+    # KDE Plasma Desktop Environment
+    services.xserver = enabled;
+    services.desktopManager.plasma6 = enabled;
+    
     # Auto-login for KDE Plasma
     services.displayManager.sddm.settings = {
         Autologin = {
@@ -126,6 +88,10 @@ with lib.${namespace};
             Session = "plasma";
         };
     };
+
+    # Enable sound with pipewire
+    security.rtkit = enabled;
+    services.pipewire = enabled;
 
     # Stylix theming configuration
     stylix = {
