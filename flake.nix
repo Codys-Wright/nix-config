@@ -17,14 +17,14 @@
     }@inputs:
     {
       # VM-specific configuration with virtio disk
-      nixosConfigurations.vm-nixos-facter = nixpkgs.lib.nixosSystem {
+      nixosConfigurations.vm-nixos-facter = inputs.nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         modules = [
-          disko.nixosModules.disko
+          inputs.disko.nixosModules.disko
           ./configuration.nix
           inputs.stylix.nixosModules.stylix
           inputs.home-manager.nixosModules.home-manager
-          nixos-facter-modules.nixosModules.facter
+          inputs.nixos-facter-modules.nixosModules.facter
           { disko.devices.disk.disk1.device = "/dev/vda"; }
           {
             config.facter.reportPath =
@@ -34,8 +34,39 @@
                 throw "Have you forgotten to run nixos-anywhere with `--generate-hardware-config nixos-facter ./facter.json`?";
           }
           {
-            home-manager.users.cody = import ./home.nix;
+            # Configure Home Manager to handle file conflicts with unique identifier
+            home-manager.backupFileExtension = "bak-${builtins.substring 0 8 (builtins.hashString "sha256" (toString self.rev + toString inputs.nixpkgs.rev + toString inputs.nixpkgs.lastModified))}";
           }
+          {
+            home-manager.users.cody = { config, pkgs, ... }: {
+              # Home Manager configuration
+              home = {
+                username = "cody";
+                homeDirectory = "/home/cody";
+                stateVersion = "24.05";
+              };
+
+              # Programs
+              programs = {
+                home-manager.enable = true;
+              };
+
+              imports = [
+              ];
+
+              # Enable stylix in Home Manager (will inherit from system)
+              stylix = {
+                autoEnable = true;
+
+                targets = {
+                  kitty = {
+                    enable = true;
+                  };
+                };
+              };
+            };
+          }
+
         ];
       };
 
@@ -52,7 +83,7 @@
               system = {
                 sshUser = "root";
                 user = "root";
-                path = deploy-rs.lib.x86_64-linux.activate.nixos self.nixosConfigurations.vm-nixos-facter;
+                path = inputs.deploy-rs.lib.x86_64-linux.activate.nixos self.nixosConfigurations.vm-nixos-facter;
               };
             };
           };
@@ -60,6 +91,6 @@
       };
 
       # Deploy-rs checks for deployment validation
-      checks = builtins.mapAttrs (system: deployLib: deployLib.deployChecks self.deploy) deploy-rs.lib;
+      checks = builtins.mapAttrs (system: deployLib: deployLib.deployChecks self.deploy) inputs.deploy-rs.lib;
     };
 }
