@@ -7,14 +7,12 @@
   inputs.deploy-rs.inputs.nixpkgs.follows = "nixpkgs";
   inputs.stylix.url = "github:danth/stylix";
   inputs.stylix.inputs.nixpkgs.follows = "nixpkgs";
+  inputs.home-manager.url = "github:nix-community/home-manager";
+  inputs.home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
   outputs =
     {
       self,
-      nixpkgs,
-      disko,
-      nixos-facter-modules,
-      deploy-rs,
       ...
     }@inputs:
     {
@@ -25,6 +23,7 @@
           disko.nixosModules.disko
           ./configuration.nix
           inputs.stylix.nixosModules.stylix
+          inputs.home-manager.nixosModules.home-manager
           nixos-facter-modules.nixosModules.facter
           { disko.devices.disk.disk1.device = "/dev/vda"; }
           {
@@ -33,6 +32,9 @@
                 ./facter.json
               else
                 throw "Have you forgotten to run nixos-anywhere with `--generate-hardware-config nixos-facter ./facter.json`?";
+          }
+          {
+            home-manager.users.cody = import ./home.nix;
           }
         ];
       };

@@ -5,8 +5,12 @@ A modern, modular NixOS configuration system built with best practices and cutti
 ## 🎯 Project Goals
 
 ### ✅ Completed
-- [x] **Remote Deployment with Nixos-Anywhere + Deploy-RS**
-  - Initial installation with nixos-anywhere
+- [x] **Installation Options**
+  - **Remote Deployment**: nixos-anywhere + deploy-rs for remote machines
+  - **One Command Install**: Single command installation when you have physical access + any machine w/ git
+  - Bootstrap script for any machine with git
+  - Downloads and installs your entire NixOS setup
+  - Like "curl | bash" but for NixOS configuration
   - Safe configuration updates with deploy-rs
   - Automatic rollback protection
   - Multi-node deployment support
@@ -58,6 +62,7 @@ A modern, modular NixOS configuration system built with best practices and cutti
 
 We use **Just** to simplify complex deployment commands and make them easy to remember:
 
+#### **Remote Installation** (for remote machines)
 ```bash
 # Set target
 just target <ip> <password>
@@ -68,11 +73,29 @@ just nixos-anywhere
 # Configuration updates
 just deploy
 
+# Connect to target
+just connect
+```
+
+#### **Local Installation** (when you have physical access)
+```bash
+# One command installation (future)
+just install-local
+
+# Bootstrap from any machine with git (future)
+curl -sSL https://raw.githubusercontent.com/Codys-Wright/dotfiles/nix-starter/install.sh | bash
+
+# Configuration updates
+just deploy
+```
+
+#### **Development & Testing**
+```bash
 # Evaluate configuration
 just eval <config>
 
-# Connect to target
-just connect
+# Test in VM
+just test-vm
 ```
 
 **Why Just?** Instead of remembering complex `nix run` commands with multiple flags, Just provides simple, memorable commands that handle all the complexity behind the scenes.

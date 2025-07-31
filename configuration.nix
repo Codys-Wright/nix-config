@@ -44,6 +44,14 @@
   services.xserver.enable = true;
   services.displayManager.sddm.enable = true;
   services.desktopManager.plasma6.enable = true;
+  
+  # Auto-login for KDE Plasma
+  services.displayManager.sddm.settings = {
+    Autologin = {
+      User = "cody";
+      Session = "plasma";
+    };
+  };
 
   # Enable sound with pipewire
   security.rtkit.enable = true;
@@ -54,40 +62,7 @@
     pulse.enable = true;
   };
 
-  # Stylix theming
-  stylix = {
-    enable = true;
-    base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-medium.yaml";
-    
-    image = ./Windows-11-PRO.png;
-    
-    cursor = {
-      package = pkgs.bibata-cursors;
-      name = "Bibata-Modern-Ice";
-      size = 24;
-    };
-    
-    fonts = {
-      monospace = {
-        package = pkgs.nerd-fonts.jetbrains-mono;
-        name = "JetBrainsMono Nerd Font Mono";
-      };
-      sansSerif = {
-        package = pkgs.dejavu_fonts;
-        name = "DejaVu Sans";
-      };
-      serif = {
-        package = pkgs.dejavu_fonts;
-        name = "DejaVu Serif";
-      };
-      emoji = {
-        package = pkgs.noto-fonts-emoji;
-        name = "Noto Color Emoji";
-      };
-    };
-    
-    polarity = "dark";
-  };
+  # Stylix theming is now handled by Home Manager in home.nix
 
   users.users.root.openssh.authorizedKeys.keys =
   [
