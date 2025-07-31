@@ -39,6 +39,15 @@ module name:
     @echo "Module created at: {{name}}/default.nix"
     @echo "Edit {{name}}/default.nix to customize your module"
 
+# Create a new lib module using the template
+[no-cd]
+lib name:
+    @echo "Creating new lib module: {{name}}"
+    @mkdir -p {{name}}
+    @cp $(git rev-parse --show-toplevel)/templates/lib/default.nix {{name}}/default.nix
+    @echo "Lib module created at: {{name}}/default.nix"
+    @echo "Edit {{name}}/default.nix to customize your lib module"
+
 # Set target IP
 target_ip ip:
     @echo "Setting target IP to {{ip}}..."

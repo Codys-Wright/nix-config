@@ -22,10 +22,10 @@
 with lib;
 with lib.${namespace};
 let
-  cfg = config.${namespace}.module;
+  cfg = config.${namespace}.system.themes.stylix;
 in
 {
-  options.${namespace}.module = with types; {
+  options.${namespace}.system.themes.stylix = with types; {
     enable = mkBoolOpt false ''
       Whether to enable Stylix theming.
       
@@ -48,9 +48,9 @@ in
       Defaults to Gruvbox dark medium theme.
     '';
     
-    image = mkOpt (either path str) null ''
+    image = mkOpt (either path str) (lib.custom.relativeToRoot "Windows-11-PRO.png") ''
       Path to the wallpaper image.
-      If null, no wallpaper will be set.
+      Defaults to Windows 11 Pro wallpaper.
     '';
     
     cursor = {
@@ -106,9 +106,6 @@ in
   };
 
   config = mkIf cfg.enable {
-    # Import Stylix module
-    imports = [ inputs.stylix.nixosModules.stylix ];
-    
     # Configure Stylix
     stylix = {
       enable = true;
