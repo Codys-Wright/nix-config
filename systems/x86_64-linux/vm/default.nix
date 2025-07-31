@@ -59,6 +59,7 @@ with lib.${namespace};
         hardware.audio = enabled;
         hardware.bluetooth = enabled;
         hardware.networking = enabled;
+        system.themes.stylix = enabled;
     };
 
     # Allow unfree packages
@@ -86,41 +87,6 @@ with lib.${namespace};
             User = "cody";
             Session = "plasma";
         };
-    };
-
-    # Stylix theming configuration
-    stylix = {
-        enable = true;
-        base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-medium.yaml";
-        
-        image = ../../../Windows-11-PRO.png;
-        
-        cursor = {
-            package = pkgs.bibata-cursors;
-            name = "Bibata-Modern-Ice";
-            size = 24;
-        };
-        
-        fonts = {
-            monospace = {
-                package = pkgs.nerd-fonts.jetbrains-mono;
-                name = "JetBrainsMono Nerd Font Mono";
-            };
-            sansSerif = {
-                package = pkgs.dejavu_fonts;
-                name = "DejaVu Sans";
-            };
-            serif = {
-                package = pkgs.dejavu_fonts;
-                name = "DejaVu Serif";
-            };
-            emoji = {
-                package = pkgs.noto-fonts-emoji;
-                name = "Noto Color Emoji";
-            };
-        };
-        
-        polarity = "dark";
     };
 
     # SSH keys for root user

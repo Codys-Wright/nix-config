@@ -31,12 +31,13 @@ docs-serve:
     @cd frost-docs && python3 -m http.server 8000
 
 # Create a new module using the template
+[no-cd]
 module name:
     @echo "Creating new module: {{name}}"
     @mkdir -p {{name}}
     @cp $(git rev-parse --show-toplevel)/templates/module/default.nix {{name}}/default.nix
-    @echo "Module created at: $$(pwd)/{{name}}/default.nix"
-    @echo "Edit $$(pwd)/{{name}}/default.nix to customize your module"
+    @echo "Module created at: {{name}}/default.nix"
+    @echo "Edit {{name}}/default.nix to customize your module"
 
 # Set target IP
 target_ip ip:
