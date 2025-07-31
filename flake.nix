@@ -81,60 +81,7 @@
         };
       };
 
-      # Explicitly define nixosConfigurations for deploy-rs compatibility
-      nixosConfigurations = {
-        vm = inputs.nixpkgs.lib.nixosSystem {
-          system = "x86_64-linux";
-          modules = [
-            inputs.disko.nixosModules.disko
-            ./configuration.nix
-            inputs.stylix.nixosModules.stylix
-            inputs.home-manager.nixosModules.home-manager
-            inputs.nixos-facter-modules.nixosModules.facter
-            { disko.devices.disk.disk1.device = "/dev/vda"; }
-            {
-              config.facter.reportPath =
-                if builtins.pathExists ./facter.json then
-                  ./facter.json
-                else
-                  throw "Have you forgotten to run nixos-anywhere with `--generate-hardware-config nixos-facter ./facter.json`?";
-            }
-            {
-              # Configure Home Manager to handle file conflicts with unique identifier
-              home-manager.backupFileExtension = "bak-2025-07-31";
-            }
-            {
-              home-manager.users.cody = { config, pkgs, ... }: {
-                # Home Manager configuration
-                home = {
-                  username = "cody";
-                  homeDirectory = "/home/cody";
-                  stateVersion = "24.05";
-                };
-
-                # Programs
-                programs = {
-                  home-manager.enable = true;
-                };
-
-                imports = [
-                ];
-
-                # Enable stylix in Home Manager (will inherit from system)
-                stylix = {
-                  autoEnable = true;
-
-                  targets = {
-                    kitty = {
-                      enable = true;
-                    };
-                  };
-                };
-              };
-            }
-          ];
-        };
-      };
+      # Snowfall Lib automatically creates nixosConfigurations from the systems structure
 
       # Deploy-rs checks for deployment validation
       checks = builtins.mapAttrs (system: deployLib: deployLib.deployChecks inputs.self.deploy) inputs.deploy-rs.lib;

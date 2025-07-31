@@ -20,34 +20,138 @@
     ...
 }:
 {
-    # Import the base configuration
     imports = [
         inputs.disko.nixosModules.disko
         inputs.stylix.nixosModules.stylix
         inputs.home-manager.nixosModules.home-manager
         inputs.nixos-facter-modules.nixosModules.facter
+        ../../../disk-config.nix
     ];
 
-    # Disko disk configuration for VM
-    disko.devices.disk.disk1.device = "/dev/vda";
+    config = {
+        # Disko disk configuration for VM
+        disko.devices.disk.disk1.device = "/dev/vda";
 
-    # Facter configuration
-    config.facter.reportPath =
-        if builtins.pathExists ../../facter.json then
-            ../../facter.json
-        else
-            throw "Have you forgotten to run nixos-anywhere with `--generate-hardware-config nixos-facter ./facter.json`?";
+        # Facter configuration
+        facter.reportPath =
+            if builtins.pathExists ./facter.json then
+                ./facter.json
+            else
+                throw "Have you forgotten to run nixos-anywhere with `--generate-hardware-config nixos-facter ./facter.json`?";
 
-    # Configure Home Manager to handle file conflicts with unique identifier
-    home-manager.backupFileExtension = "bak-2025-07-31";
+        # Configure Home Manager to handle file conflicts with unique identifier
+        home-manager.backupFileExtension = "bak-2025-07-31";
 
-    # Configure the cody user with Home Manager
-    snowfallorg.users.cody = {
-        create = true;
-        admin = true;
-        home = {
-            enable = true;
-            path = "/home/cody";
+        # Configure the cody user with Home Manager
+        snowfallorg.users.cody = {
+            create = true;
+            admin = true;
+            home = {
+                enable = true;
+                path = "/home/cody";
+            };
         };
+
+        # Boot configuration
+        boot.loader.grub = {
+            efiSupport = true;
+            efiInstallAsRemovable = true;
+        };
+
+        # SSH service
+        services.openssh.enable = true;
+
+        # Allow unfree packages
+        nixpkgs.config.allowUnfree = true;
+
+        # Basic system packages
+        environment.systemPackages = with pkgs; [
+            curl
+            gitMinimal
+            vim
+            brave
+            kitty
+            neovim
+            tmux
+            zsh
+            git
+            vscode
+            btop
+        ];
+
+        # KDE Plasma Desktop Environment
+        services.xserver.enable = true;
+        services.displayManager.sddm.enable = true;
+        services.desktopManager.plasma6.enable = true;
+        
+        # Auto-login for KDE Plasma
+        services.displayManager.sddm.settings = {
+            Autologin = {
+                User = "cody";
+                Session = "plasma";
+            };
+        };
+
+        # Enable sound with pipewire
+        security.rtkit.enable = true;
+        services.pipewire = {
+            enable = true;
+            alsa.enable = true;
+            alsa.support32Bit = true;
+            pulse.enable = true;
+        };
+
+        # Stylix theming configuration
+        stylix = {
+            enable = true;
+            base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-medium.yaml";
+            
+            image = ../../../Windows-11-PRO.png;
+            
+            cursor = {
+                package = pkgs.bibata-cursors;
+                name = "Bibata-Modern-Ice";
+                size = 24;
+            };
+            
+            fonts = {
+                monospace = {
+                    package = pkgs.nerd-fonts.jetbrains-mono;
+                    name = "JetBrainsMono Nerd Font Mono";
+                };
+                sansSerif = {
+                    package = pkgs.dejavu_fonts;
+                    name = "DejaVu Sans";
+                };
+                serif = {
+                    package = pkgs.dejavu_fonts;
+                    name = "DejaVu Serif";
+                };
+                emoji = {
+                    package = pkgs.noto-fonts-emoji;
+                    name = "Noto Color Emoji";
+                };
+            };
+            
+            polarity = "dark";
+        };
+
+        # SSH keys for root user
+        users.users.root.openssh.authorizedKeys.keys = [
+            "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKXs4YKtweDc2OcDDE6LoENPqQc8W79QQczfK9XErG4z CodyWright@THEBATTLESHIP"
+        ];
+
+        # Backup user for emergency access
+        users.users.cody = {
+            isNormalUser = true;
+            password = ""; # Simple password for emergency access
+            uid = 1001;
+            extraGroups = [ "wheel" "networkmanager" ];
+            openssh.authorizedKeys.keys = [
+                "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKXs4YKtweDc2OcDDE6LoENPqQc8W79QQczfK9XErG4z CodyWright@THEBATTLESHIP"
+            ];
+        };
+
+        system.stateVersion = "24.05";
     };
 } 

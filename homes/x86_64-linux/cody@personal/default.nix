@@ -35,11 +35,6 @@
         home-manager.enable = true;
     };
 
-    # Import stylix for theming
-    imports = [
-        inputs.stylix.homeModules.stylix
-    ];
-
     # Enable stylix in Home Manager (will inherit from system)
     stylix = {
         autoEnable = true;
