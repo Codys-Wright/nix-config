@@ -1078,6 +1078,26 @@
         "type": "github"
       }
     },
+    "rand-nix": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1683831768,
+        "narHash": "sha256-TLVoRQfltZsRSOaVrz2WVx3RdIdzrHEFGwj2fAsM6Ew=",
+        "owner": "figsoda",
+        "repo": "rand-nix",
+        "rev": "c62e952d4f143169276f23d22cd8cb823552994a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "figsoda",
+        "repo": "rand-nix",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "ags": "ags",
@@ -1092,6 +1112,7 @@
         "nixos-facter-modules": "nixos-facter-modules",
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs_4",
+        "rand-nix": "rand-nix",
         "snowfall-frost": "snowfall-frost",
         "snowfall-lib": "snowfall-lib_2",
         "sops-nix": "sops-nix",

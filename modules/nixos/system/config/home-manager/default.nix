@@ -19,7 +19,8 @@ in
       config.${namespace}.programs.home-manager.extraOptions;
     home-manager = {
       useUserPackages = true;
-      backupFileExtension = "backup";
+      useGlobalPkgs = false;
+      backupFileExtension = "bak-gen-${toString config.system.nixos.revision}";
     };
   };
 }

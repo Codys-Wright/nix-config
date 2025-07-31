@@ -1,71 +1,45 @@
 {
-    # Snowfall Lib provides a customized `lib` instance with access to your flake's library
-    # as well as the libraries available from your flake's inputs.
-    lib,
-    # An instance of `pkgs` with your overlays and packages applied is also available.
-    pkgs,
-    # You also have access to your flake's inputs.
-    inputs,
-
-    # Additional metadata is provided by Snowfall Lib.
-    namespace, # The namespace used for your flake, defaulting to "internal" if not set.
-    home, # The home architecture for this host (eg. `x86_64-linux`).
-    target, # The Snowfall Lib target for this home (eg. `x86_64-home`).
-    format, # A normalized name for the home target (eg. `home`).
-    virtual, # A boolean to determine whether this home is a virtual target using nixos-generators.
-    host, # The host name for this home.
-
-    # All other arguments come from the home home.
-    config,
-    ...
+  config,
+  lib,
+  osConfig,
+  namespace,
+  ...
 }:
 with lib;
 with lib.${namespace};
 {
-    # Enable Snowfall Lib's user configuration
-    snowfallorg.user.enable = true;
-
-    # Home Manager configuration
-    home = {
-        stateVersion = "24.05";
+  snowfallorg.user.enable = true;
+  
+  FTS-FLEET = {
+    bundles = {
+      common = enabled;
+      shell = enabled;
+      browsers = enabled;
+      # desktop.hyprland = enabled; # Disabled - using KDE
+      development = enabled;
+      office = enabled;
     };
 
-    # Programs
     programs = {
-        home-manager.enable = true;
+      git = enabled;
+      spotify = enabled;
     };
+    
+    config.user = {
+      enable = true;
+      name = "cody";
+      fullName = "Cody Wright";
+      email = "cody@example.com"; # Update this with your actual email
+    };
+  };
 
-    # FTS-FLEET namespace configuration
-    FTS-FLEET = {
-        bundles.common = enabled;
-        bundles.shell = enabled;
-        bundles.browsers = enabled;
-        # bundles.desktop.hyprland = enabled; # Disabled - using KDE
-        bundles.development = enabled;
-        bundles.office = enabled;
-        
-        # User configuration
-        config.user = {
-            enable = true;
-            name = "cody";
-            fullName = "Cody Wright";
-            email = "cody@example.com"; # Update this with your actual email
-        };
-        
-        # Additional programs
-        programs = {
-            git = enabled;
-            spotify = enabled;
-        };
-    };
-
-    # Enable stylix in Home Manager (will inherit from system)
-    stylix = {
-        autoEnable = true;
-        targets = {
-            kitty = {
-                enable = true;
-            };
-        };
-    };
+  # This value determines the Home Manager release that your
+  # configuration is compatible with. This helps avoid breakage
+  # when a new Home Manager release introduces backwards
+  # incompatible changes.
+  #
+  # You can update Home Manager without changing this value. See
+  # the Home Manager release notes for a list of state version
+  # changes in each release.
+  home.stateVersion = lib.mkDefault (osConfig.system.stateVersion or "24.05");
 } 

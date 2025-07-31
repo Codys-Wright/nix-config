@@ -40,8 +40,7 @@ with lib.${namespace};
         else
             throw "Have you forgotten to run nixos-anywhere with `--generate-hardware-config nixos-facter ./facter.json`?";
 
-    # Configure Home Manager to handle file conflicts with unique identifier
-    home-manager.backupFileExtension = "bak-2025-07-31";
+
 
     # Configure the cody user with Home Manager
     snowfallorg.users.cody = {
@@ -53,15 +52,16 @@ with lib.${namespace};
         };
     };
 
-    # Configure home-manager for the cody user
-    home-manager.users.cody = inputs.self.homeConfigurations."cody@personal".activationPackage;
+
+
+
 
     # FTS-FLEET namespace configuration
     FTS-FLEET = {
         bundles.common = enabled;
         bundles.cli = enabled;
         desktop.kde = enabled;
-        system.themes.stylix = enabled;
+        # system.themes.stylix = enabled;
         services.ssh = {
             enable = true;
             allowRootLogin = true;
@@ -71,8 +71,7 @@ with lib.${namespace};
         };
     };
 
-    # Allow unfree packages
-    nixpkgs.config.allowUnfree = true;
+
 
     # Additional system packages (GUI and specific tools)
     environment.systemPackages = with pkgs; [
@@ -91,16 +90,7 @@ with lib.${namespace};
 
 
 
-    # Backup user for emergency access
-    users.users.cody = {
-        isNormalUser = true;
-        password = ""; # Simple password for emergency access
-        uid = 1001;
-        extraGroups = [ "wheel" "networkmanager" ];
-        openssh.authorizedKeys.keys = [
-            "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKXs4YKtweDc2OcDDE6LoENPqQc8W79QQczfK9XErG4z CodyWright@THEBATTLESHIP"
-        ];
-    };
+
 
     system.stateVersion = "24.05";
 } 

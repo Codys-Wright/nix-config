@@ -47,6 +47,12 @@
       url = "github:nix-community/nixdoc";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    
+    # Random number generator for backup extensions
+    rand-nix = {
+      url = "github:figsoda/rand-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs:
@@ -95,11 +101,6 @@
                 sshUser = "root";
                 user = "root";
                 path = inputs.deploy-rs.lib.x86_64-linux.activate.nixos inputs.self.nixosConfigurations.vm;
-              };
-              home-manager = {
-                sshUser = "root";
-                user = "cody";
-                path = inputs.deploy-rs.lib.x86_64-linux.activate.home-manager inputs.self.homeConfigurations."cody@personal";
               };
             };
           };

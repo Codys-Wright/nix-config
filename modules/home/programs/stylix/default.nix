@@ -72,6 +72,14 @@ in
         waybar.enable = false;
         hyprlock.enable = false;
         neovim.enable = false;
+        librewolf = {
+          enable = true;
+          profileNames = [ "default" ];
+        };
+        zen-browser = {
+          enable = true;
+          profileNames = [ "default" ];
+        };
       };
     };
   };
