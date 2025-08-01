@@ -12,8 +12,8 @@ with lib.${namespace};
   };
 
   config = mkIf config.${namespace}.bundles.music.enable {
-    ${namespace}.programs = {
-      cider = enabled;
+    ${namespace} = {
+      music.spotify = enabled;
     };
   };
 } 

@@ -12,8 +12,8 @@ with lib.${namespace};
   };
 
   config = mkIf config.${namespace}.bundles.music-production.enable {
-    ${namespace}.programs = {
-      reaper = enabled;
+    ${namespace} = {
+      music.production.reaper = enabled;
     };
   };
 } 

@@ -11,7 +11,7 @@ let
   cfg = config.${namespace}.programs.reaper;
 in
 {
-  options.${namespace}.programs.reaper = {
+  options.${namespace}.music.production.reaper = {
     enable = mkBoolOpt false "Enable Reaper DAW";
   };
 

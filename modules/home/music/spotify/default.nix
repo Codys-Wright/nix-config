@@ -9,10 +9,10 @@
 with lib;
 with lib.${namespace};
 let
-  cfg = config.${namespace}.programs.spotify;
+  cfg = config.${namespace}.music.spotify;
 in
 {
-  options.${namespace}.programs.spotify = with types; {
+  options.${namespace}.music.spotify = with types; {
     enable = mkBoolOpt false "Enable ncspot a spotify client";
   };
 
