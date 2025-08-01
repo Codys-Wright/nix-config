@@ -12,7 +12,7 @@
   mkForcable = value:
     if cfg.force
     then lib.mkForce value
-    else lib.mkForce value; # Always force to override existing stylix config
+    else value;
 in {
   options.${namespace}.themes = with lib.types; {
     enable = lib.mkEnableOption "Unified theme system";
@@ -133,7 +133,7 @@ in {
       })
 
       (mkIf cfg.targets.shell.enable {
-        home.packages = with pkgs.gnomeExtensions; mkForcable [
+        environment.systemPackages = with pkgs.gnomeExtensions; mkForcable [
           blur-my-shell
           user-themes
           dash-to-dock

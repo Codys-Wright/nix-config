@@ -1,1 +1,0 @@
-{"declarations":[{"channelPath":"<flake>/modules/sops","path":"modules/sops","url":"/home/cody/nix-config/modules/sops"}],"default":{"_type":"literalExpression","text":"{ }"},"description":"Path where the latest secrets are mounted to.\n","internal":false,"loc":["sops","secrets"],"name":"sops.secrets","readOnly":false,"type":"attribute set of (submodule)","visible":true}

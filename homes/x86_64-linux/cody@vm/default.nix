@@ -34,6 +34,22 @@ with lib.${namespace};
       fullName = "Cody Wright";
       email = "cody@example.com"; # Update this with your actual email
     };
+    
+    # Unified theme system
+    themes = {
+      enable = true;
+      selected = "whitesur";
+      polarity = "dark";
+      targets = {
+        colors = enabled;
+        fonts = enabled;
+        icons = enabled;
+        cursor = enabled;
+        gtk = enabled;
+        shell = enabled;
+        wallpaper = enabled;
+      };
+    };
   };
 
   # Add Apple Color Emoji font to home packages

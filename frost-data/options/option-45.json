@@ -1,1 +1,0 @@
-{"declarations":[{"channelPath":"<flake>/modules/sops","path":"modules/sops","url":"/home/cody/nix-config/modules/sops"}],"description":"Default sops file used for all secrets.\n","internal":false,"loc":["sops","defaultSopsFile"],"name":"sops.defaultSopsFile","readOnly":false,"type":"absolute path","visible":true}

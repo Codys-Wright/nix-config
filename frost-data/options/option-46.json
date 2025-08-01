@@ -1,1 +1,0 @@
-{"declarations":[{"channelPath":"<flake>/modules/sops","path":"modules/sops","url":"/home/cody/nix-config/modules/sops"}],"default":{"_type":"literalExpression","text":"\"yaml\""},"description":"Default sops format used for all secrets.\n","internal":false,"loc":["sops","defaultSopsFormat"],"name":"sops.defaultSopsFormat","readOnly":false,"type":"string","visible":true}

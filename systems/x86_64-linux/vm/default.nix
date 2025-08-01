@@ -64,22 +64,6 @@ with lib.${namespace};
         bundles.cli = enabled;
         desktop.type = "gnome";  # Choose between "hyprland", "kde", "gnome", or "none"
         
-        # Unified theme system
-        themes = {
-            enable = true;
-            selected = "whitesur";
-            polarity = "dark";
-            targets = {
-                colors = enabled;
-                fonts = enabled;
-                icons = enabled;
-                cursor = enabled;
-                gtk = enabled;
-                shell = enabled;
-                wallpaper = enabled;
-            };
-        };
-        
         # system.themes.stylix = enabled;
         services.ssh = {
             enable = true;

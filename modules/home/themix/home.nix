@@ -3,75 +3,19 @@
   lib,
   pkgs,
   inputs,
-  namespace,
   ...
 }: let
   inherit (lib) mkIf mkMerge toSentenceCase;
-  cfg = config.${namespace}.themes;
-  
-  mkForcable = value:
-    if cfg.force
-    then lib.mkForce value
-    else lib.mkForce value; # Always force to override existing stylix config
+  inherit (config.lib.themix) mkForcable;
+  cfg = config.themix;
 in {
-  options.${namespace}.themes = with lib.types; {
-    enable = lib.mkEnableOption "Unified theme system";
-    force = lib.mkEnableOption "overriding options";
-    
-    selected = lib.mkOption {
-      description = "The theme to apply";
-      type = lib.types.enum [ "whitesur" "windows" "material" "adwaita" "none" ];
-      default = "none";
-    };
-    
-    polarity = lib.mkOption {
-      description = "Polarity of the color palette";
-      type = lib.types.enum [ "light" "dark" ];
-      default = "dark";
-    };
-    
-    targets = {
-      colors.enable = lib.mkOption {
-        description = "Whether to enable color palette target";
-        type = lib.types.bool;
-        default = true;
-      };
-      fonts.enable = lib.mkOption {
-        description = "Whether to enable fonts target";
-        type = lib.types.bool;
-        default = true;
-      };
-      icons.enable = lib.mkOption {
-        description = "Whether to enable icons target";
-        type = lib.types.bool;
-        default = true;
-      };
-      cursor.enable = lib.mkOption {
-        description = "Whether to enable cursor target";
-        type = lib.types.bool;
-        default = true;
-      };
-      gtk.enable = lib.mkOption {
-        description = "Whether to enable GTK target";
-        type = lib.types.bool;
-        default = true;
-      };
-      shell.enable = lib.mkOption {
-        description = "Whether to enable desktop shell target";
-        type = lib.types.bool;
-        default = true;
-      };
-      wallpaper.enable = lib.mkOption {
-        description = "Whether to enable wallpaper target";
-        type = lib.types.bool;
-        default = true;
-      };
-    };
-  };
-
+  imports = [
+    ./common.nix
+  ];
+  
   config = mkIf cfg.enable (mkMerge [
     # WhiteSur theme
-    (mkIf (cfg.selected == "whitesur") (mkMerge [
+    (mkIf cfg.themes.whitesur.enable (mkMerge [
       (mkIf cfg.targets.colors.enable {
         stylix.override = mkForcable {
           base00 = if cfg.polarity == "light" then "ffffff" else "242424";
