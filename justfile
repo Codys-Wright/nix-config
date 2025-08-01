@@ -69,18 +69,18 @@ target ip password:
     @echo "Target password set"
 
 # Initial installation using nixos-anywhere
-nixos-anywhere:
-    @echo "Installing NixOS using nixos-anywhere..."
+nixos-anywhere target:
+    @echo "Installing NixOS using nixos-anywhere for target {{target}}..."
     @if [ ! -f .env ]; then echo "Error: .env file not found. Run 'just target <ip> <password>' first"; exit 1; fi
-    @nix-shell -p sshpass --run 'bash -c "source .env && SSHPASS=$NIXOS_TARGET_PASSWORD nix run github:nix-community/nixos-anywhere -- --flake .#vm-nixos-facter --generate-hardware-config nixos-facter ./facter.json --target-host root@$NIXOS_TARGET_IP --env-password"'
+    @nix-shell -p sshpass --run 'bash -c "source .env && SSHPASS=$NIXOS_TARGET_PASSWORD nix run github:nix-community/nixos-anywhere -- --flake .#{{target}} --generate-hardware-config nixos-facter ./facter.json --target-host root@$NIXOS_TARGET_IP --env-password"'
 
 # Deploy configuration updates using deploy-rs
-deploy:
-    @echo "Deploying configuration using deploy-rs..."
+deploy node:
+    @echo "Deploying configuration using deploy-rs to {{node}}..."
     @if [ ! -f .env ]; then echo "Error: .env file not found. Run 'just target <ip> <password>' first"; exit 1; fi
-    @nix-shell -p sshpass --run 'bash -c "source .env && nix run github:serokell/deploy-rs .#vm"'
+    @nix-shell -p sshpass --run 'bash -c "source .env && nix run github:serokell/deploy-rs .#{{node}}"'
 
-# Deploy specific node using deploy-rs
+# Deploy specific node using deploy-rs (alias for deploy)
 deploy-node node:
     @echo "Deploying node {{node}} using deploy-rs..."
     @nix-shell -p sshpass --run "nix run github:serokell/deploy-rs .#{{node}}"
@@ -113,14 +113,14 @@ show-config:
     fi
 
 # Build configuration locally
-build:
-    @echo "Building configuration locally..."
-    nix build .#vm-nixos-facter
+build target:
+    @echo "Building configuration locally for {{target}}..."
+    nix build .#{{target}}
 
 # Test configuration in VM
-test-vm:
-    @echo "Testing configuration in VM..."
-    nix run github:nix-community/nixos-anywhere -- --flake .#vm-nixos-facter --vm-test
+test-vm target:
+    @echo "Testing configuration in VM for {{target}}..."
+    nix run github:nix-community/nixos-anywhere -- --flake .#{{target}} --vm-test
 
 # Quick setup for your specific target
 setup-my-target:
@@ -145,14 +145,14 @@ help:
     @echo "  just show-config              - Show current configuration"
     @echo ""
     @echo "Deployment:"
-    @echo "  just nixos-anywhere           - Initial NixOS installation"
-    @echo "  just deploy                   - Deploy configuration updates"
-    @echo "  just deploy-node <node>       - Deploy to specific node"
+    @echo "  just nixos-anywhere <target>  - Initial NixOS installation"
+    @echo "  just deploy <node>            - Deploy configuration updates"
+    @echo "  just deploy-node <node>       - Deploy to specific node (alias)"
     @echo "  just eval <config>            - Evaluate NixOS configuration"
     @echo "  just test-connection          - Test SSH connection"
     @echo "  just connect                  - Connect to target via SSH"
-    @echo "  just build                    - Build configuration locally"
-    @echo "  just test-vm                  - Test configuration in VM"
+    @echo "  just build <target>           - Build configuration locally"
+    @echo "  just test-vm <target>         - Test configuration in VM"
     @echo ""
     @echo "Quick Setup:"
     @echo "  just setup-my-target          - Setup for your specific target"
@@ -161,6 +161,6 @@ help:
     @echo "  cd modules/nixos/services && just module  # Creates 'services' module"
     @echo "  cd modules/home/programs && just module   # Creates 'programs' module"
     @echo "  just target 192.168.1.100 mypassword"
-    @echo "  just nixos-anywhere           # Initial installation"
+    @echo "  just nixos-anywhere vm       # Initial installation"
     @echo "  just deploy                   # Configuration updates"
     @echo "  just connect" 
