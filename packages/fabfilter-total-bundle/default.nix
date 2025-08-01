@@ -40,6 +40,7 @@ stdenv.mkDerivation rec {
     
     # Create installation directory
     mkdir -p $out/share/fabfilter-total-bundle
+    mkdir -p $out/bin
     
     # Copy the installer
     cp $src $out/share/fabfilter-total-bundle/fftotalbundlex64.exe
@@ -81,7 +82,13 @@ stdenv.mkDerivation rec {
     
     # Run the FabFilter installer
     echo "Installing FabFilter Total Bundle..."
-    wine $out/share/fabfilter-total-bundle/fftotalbundlex64.exe
+    INSTALLER_PATH=$(find /nix/store -name "fftotalbundlex64.exe" -path "*/fabfilter-total-bundle/*" 2>/dev/null | head -1)
+    if [ -n "$INSTALLER_PATH" ]; then
+      wine "$INSTALLER_PATH"
+    else
+      echo "Error: Could not find FabFilter installer"
+      exit 1
+    fi
     
     # Sync yabridge plugins
     echo "Syncing yabridge plugins..."

@@ -22,6 +22,7 @@ in
       cmake
       python3
       devenv
+      cursor
     ];
 
     programs.direnv = {

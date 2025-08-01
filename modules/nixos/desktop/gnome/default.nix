@@ -23,7 +23,7 @@ in
       
       Example:
       ```nix
-      FTS-FLEET = {
+      ${namespace} = {
         desktop.gnome = enabled;
       };
       ```
