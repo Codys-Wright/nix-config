@@ -43,6 +43,18 @@ with lib.${namespace};
       enable = true;
       preset = "whitesur";
       polarity = "dark";
+      # WhiteSur-specific options
+      whitesur = {
+        opacity = "25";           # Panel opacity: 15, 25, 35, 45, 55, 65, 75, 85
+        panelHeight = "40";       # Panel height: 32, 40, 48, 56, 64
+        activitiesIcon = "colorful"; # Activities icon: standard, colorful, white, ubuntu
+        smallerFont = false;      # Use 10pt instead of 13pt font
+        showAppsNormal = false;   # Use normal show apps button style
+        montereyStyle = false;    # Use Monterey style instead of BigSur
+        highDefinition = false;   # Use high-DPI size
+        libadwaita = false;       # Enable GTK4/libadwaita theming
+        fixedAccent = false;      # Use fixed accent colors
+      };
       targets = {
         colors = enabled;
         fonts = enabled;

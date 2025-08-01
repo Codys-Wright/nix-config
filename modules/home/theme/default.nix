@@ -37,6 +37,22 @@ in {
       example = "windows";
     };
     
+    # Desktop environment detection (derived from system config)
+    desktop = mkOption {
+      description = "Primary desktop environment to theme for (derived from system config)";
+      type = types.enum ["gnome" "kde" "hyprland"];
+      default = config.${namespace}.desktop.type or "gnome";
+      example = "kde";
+    };
+    
+    # Available desktop environments for theming
+    availableDesktops = mkOption {
+      description = "Available desktop environments for theming (derived from system config)";
+      type = types.listOf (types.enum ["gnome" "kde" "hyprland"]);
+      default = config.${namespace}.desktop.environments or [config.${namespace}.desktop.type or "gnome"];
+      example = ["gnome" "kde"];
+    };
+    
     # Individual components
     targets = {
       colors.enable = mkTargetOption "color palette";

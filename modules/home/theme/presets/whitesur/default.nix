@@ -15,7 +15,66 @@
     then mkForce value
     else value;
 in {
-  config = mkIf (cfg.preset == "whitesur") (mkMerge [
+  options.${namespace}.theme.whitesur = with lib.types; {
+    opacity = mkOption {
+      description = "Panel opacity for GNOME shell";
+      type = enum ["15" "25" "35" "45" "55" "65" "75" "85"];
+      default = "15";
+      example = "25";
+    };
+    panelHeight = mkOption {
+      description = "Panel height for GNOME shell";
+      type = enum ["32" "40" "48" "56" "64"];
+      default = "32";
+      example = "40";
+    };
+    activitiesIcon = mkOption {
+      description = "Activities icon style";
+      type = enum ["standard" "colorful" "white" "ubuntu"];
+      default = "standard";
+      example = "colorful";
+    };
+    smallerFont = mkOption {
+      description = "Use smaller font size (10pt instead of 11pt)";
+      type = bool;
+      default = false;
+      example = true;
+    };
+    showAppsNormal = mkOption {
+      description = "Use normal show apps button style instead of BigSur style";
+      type = bool;
+      default = false;
+      example = true;
+    };
+    montereyStyle = mkOption {
+      description = "Use macOS Monterey style instead of BigSur";
+      type = bool;
+      default = false;
+      example = true;
+    };
+    highDefinition = mkOption {
+      description = "Use high definition size for high-DPI displays";
+      type = bool;
+      default = false;
+      example = true;
+    };
+    libadwaita = mkOption {
+      description = "Enable GTK4/libadwaita theming";
+      type = bool;
+      default = false;
+      example = true;
+    };
+    fixedAccent = mkOption {
+      description = "Use fixed accent colors instead of adaptive";
+      type = bool;
+      default = false;
+      example = true;
+    };
+  };
+
+  config = mkIf (cfg.preset == "whitesur") (let
+    whitesurCfg = cfg.whitesur or {};
+  in mkMerge [
     # Colors
     (mkIf cfg.targets.colors.enable {
       stylix.override = mkForcable {
@@ -58,10 +117,10 @@ in {
           name = mkForcable "Noto Color Emoji";
         };
         sizes = {
-          applications = 13;
-          desktop = 13;
-          popups = 13;
-          terminal = 13;
+          applications = if whitesurCfg.smallerFont then 10 else 13;
+          desktop = if whitesurCfg.smallerFont then 10 else 13;
+          popups = if whitesurCfg.smallerFont then 10 else 13;
+          terminal = if whitesurCfg.smallerFont then 10 else 13;
         };
       };
     })
@@ -95,34 +154,91 @@ in {
     })
 
     # Shell/Desktop
-    (mkIf cfg.targets.shell.enable {
-      home.packages = with pkgs.gnomeExtensions; mkForcable [
-        blur-my-shell
-        user-themes
-        dash-to-dock
-        arc-menu
-        desktop-icons-ng-ding
-        wiggle
-      ];
-      dconf.settings = mkForcable {
-        "org/gnome/shell/extensions/user-theme" = {
-          name = lib.mkForce "WhiteSur-${toSentenceCase cfg.polarity}";
+    (mkIf cfg.targets.shell.enable (mkMerge [
+      # GNOME-specific theming
+      (mkIf (lib.elem "gnome" cfg.availableDesktops) {
+        home.packages = with pkgs.gnomeExtensions; mkForcable [
+          blur-my-shell
+          user-themes
+          dash-to-dock
+          arc-menu
+          desktop-icons-ng-ding
+          wiggle
+        ];
+        dconf.settings = mkForcable {
+          "org/gnome/shell/extensions/user-theme" = {
+            name = lib.mkForce "WhiteSur-${toSentenceCase cfg.polarity}";
+          };
+          "org/gnome/desktop/wm/preferences" = {
+            button-layout = "close,maximize,minimize:appmenu";
+          };
+          "org/gnome/shell/extensions/arcmenu" = {
+            arc-menu-icon = 64;
+            menu-layout = "GnomeOverview";
+          };
+          "org/gnome/shell/extensions/dash-to-dock" = {
+            dash-max-icon-size = 64;
+            dock-fixed = true;
+            multi-monitur = true;
+            scroll-action = "switch-workspace";
+            show-show-apps-button = false;
+          };
+          # Additional WhiteSur GNOME customizations
+          "org/gnome/shell/extensions/blur-my-shell" = {
+            panel = {
+              override-background = true;
+              background-opacity = (builtins.toFloat whitesurCfg.opacity) / 100.0;
+            };
+            dash-to-dock = {
+              blur = true;
+              blur-on-overview = true;
+            };
+          };
+          "org/gnome/desktop/interface" = {
+            enable-hot-corners = true;
+            show-battery-percentage = true;
+          };
+          "org/gnome/desktop/background" = {
+            picture-uri = "file://${pkgs.whitesur-gtk-theme}/share/backgrounds/WhiteSur-${toSentenceCase cfg.polarity}.jpg";
+            picture-uri-dark = "file://${pkgs.whitesur-gtk-theme}/share/backgrounds/WhiteSur-${toSentenceCase cfg.polarity}.jpg";
+          };
         };
-        "org/gnome/desktop/wm/preferences" = {
-          button-layout = "close,maximize,minimize:appmenu";
+      })
+      
+      # KDE-specific theming
+      (mkIf (lib.elem "kde" cfg.availableDesktops) {
+        home.packages = with pkgs; mkForcable [
+          whitesur-kde-theme
+          whitesur-icon-theme
+          whitesur-cursors
+        ];
+        qt = {
+          enable = true;
+          platformTheme.name = "kde";
+          style.name = "breeze";
         };
-        "org/gnome/shell/extensions/arcmenu" = {
-          arc-menu-icon = 64;
-          menu-layout = "GnomeOverview";
+        xdg.configFile = mkForcable {
+          "kglobalshortcutsrc".source = ./kde/kglobalshortcutsrc;
+          "kwinrc".source = ./kde/kwinrc;
+          "plasmarc".source = ./kde/plasmarc;
         };
-        "org/gnome/shell/extensions/dash-to-dock" = {
-          dash-max-icon-size = 64;
-          dock-fixed = true;
-          multi-monitur = true;
-          scroll-action = "switch-workspace";
-          show-show-apps-button = false;
+      })
+      
+      # Hyprland-specific theming
+      (mkIf (lib.elem "hyprland" cfg.availableDesktops) {
+        home.packages = with pkgs; mkForcable [
+          waybar
+          rofi-wayland
+          wl-clipboard
+          grim
+          slurp
+        ];
+        xdg.configFile = mkForcable {
+          "hypr/hyprland.conf".source = ./hyprland/hyprland.conf;
+          "waybar/config".source = ./hyprland/waybar-config;
+          "waybar/style.css".source = ./hyprland/waybar-style.css;
         };
-      };
-    })
+      })
+    ]))
   ]);
 } 

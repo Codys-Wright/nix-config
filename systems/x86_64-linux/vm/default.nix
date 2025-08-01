@@ -62,7 +62,8 @@ with lib.${namespace};
     FTS-FLEET = {
         bundles.common = enabled;
         bundles.cli = enabled;
-        desktop.type = "gnome";  # Choose between "hyprland", "kde", "gnome", or "none"
+        desktop.type = "gnome";  # Primary desktop environment
+        desktop.environments = ["gnome" "kde"];  # Available desktop environments for theming
         
         # system.themes.stylix = enabled;
         services.ssh = {

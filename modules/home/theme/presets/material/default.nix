@@ -94,34 +94,72 @@ in {
     })
 
     # Shell/Desktop
-    (mkIf cfg.targets.shell.enable {
-      home.packages = with pkgs.gnomeExtensions; mkForcable [
-        blur-my-shell
-        user-themes
-        dash-to-dock
-        arc-menu
-        desktop-icons-ng-ding
-        wiggle
-      ];
-      dconf.settings = mkForcable {
-        "org/gnome/shell/extensions/user-theme" = {
-          name = lib.mkForce "Material-${toSentenceCase cfg.polarity}";
+    (mkIf cfg.targets.shell.enable (mkMerge [
+      # GNOME-specific theming
+      (mkIf (lib.elem "gnome" cfg.availableDesktops) {
+        home.packages = with pkgs.gnomeExtensions; mkForcable [
+          blur-my-shell
+          user-themes
+          dash-to-dock
+          arc-menu
+          desktop-icons-ng-ding
+          wiggle
+        ];
+        dconf.settings = mkForcable {
+          "org/gnome/shell/extensions/user-theme" = {
+            name = lib.mkForce "Material-${toSentenceCase cfg.polarity}";
+          };
+          "org/gnome/desktop/wm/preferences" = {
+            button-layout = "close,minimize,maximize:appmenu";
+          };
+          "org/gnome/shell/extensions/arcmenu" = {
+            arc-menu-icon = 64;
+            menu-layout = "Material";
+          };
+          "org/gnome/shell/extensions/dash-to-dock" = {
+            dash-max-icon-size = 64;
+            dock-fixed = true;
+            multi-monitur = true;
+            scroll-action = "switch-workspace";
+            show-show-apps-button = false;
+          };
         };
-        "org/gnome/desktop/wm/preferences" = {
-          button-layout = "close,minimize,maximize:appmenu";
+      })
+      
+      # KDE-specific theming
+      (mkIf (lib.elem "kde" cfg.availableDesktops) {
+        home.packages = with pkgs; mkForcable [
+          material-kde-theme
+          papirus-icon-theme
+          bibata-cursors
+        ];
+        qt = {
+          enable = true;
+          platformTheme.name = "kde";
+          style.name = "breeze";
         };
-        "org/gnome/shell/extensions/arcmenu" = {
-          arc-menu-icon = 64;
-          menu-layout = "Material";
+        xdg.configFile = mkForcable {
+          "kglobalshortcutsrc".source = ./kde/kglobalshortcutsrc;
+          "kwinrc".source = ./kde/kwinrc;
+          "plasmarc".source = ./kde/plasmarc;
         };
-        "org/gnome/shell/extensions/dash-to-dock" = {
-          dash-max-icon-size = 64;
-          dock-fixed = true;
-          multi-monitur = true;
-          scroll-action = "switch-workspace";
-          show-show-apps-button = false;
+      })
+      
+      # Hyprland-specific theming
+      (mkIf (lib.elem "hyprland" cfg.availableDesktops) {
+        home.packages = with pkgs; mkForcable [
+          waybar
+          rofi-wayland
+          wl-clipboard
+          grim
+          slurp
+        ];
+        xdg.configFile = mkForcable {
+          "hypr/hyprland.conf".source = ./hyprland/hyprland.conf;
+          "waybar/config".source = ./hyprland/waybar-config;
+          "waybar/style.css".source = ./hyprland/waybar-style.css;
         };
-      };
-    })
+      })
+    ]))
   ]);
 } 

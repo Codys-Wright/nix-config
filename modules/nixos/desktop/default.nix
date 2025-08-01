@@ -13,8 +13,9 @@ let
 in
 {
   options.${namespace}.desktop = with types; {
+    # Primary desktop environment
     type = mkOpt (types.enum [ "hyprland" "kde" "gnome" "none" ]) "none" ''
-      The desktop environment to use.
+      The primary desktop environment to use.
       
       Options:
       - hyprland: Modern Wayland-based tiling window manager
@@ -29,6 +30,20 @@ in
       };
       ```
     '';
+    
+    # Multiple desktop environments support
+    environments = mkOpt (types.listOf (types.enum [ "hyprland" "kde" "gnome" ])) [] ''
+      List of desktop environments to enable (for theming and packages).
+      This allows multiple desktop environments to be available for theming.
+      
+      Example:
+      ```nix
+      FTS-FLEET = {
+        desktop.environments = [ "gnome" "kde" ];
+      };
+      ```
+    '';
+    
     autoLogin = mkOpt (types.submodule {
       options = {
         enable = mkBoolOpt false "Enable automatic login";

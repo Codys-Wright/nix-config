@@ -20,7 +20,7 @@ in
     home-manager = {
       useUserPackages = true;
       useGlobalPkgs = false;
-      backupFileExtension = "backup234789237489328";
+      backupFileExtension = "back_alsdjfsdfsjd";
     };
 
     # Ensure home-manager services wait for Nix daemon
