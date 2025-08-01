@@ -63,6 +63,13 @@ with lib.${namespace};
         bundles.common = enabled;
         bundles.cli = enabled;
         desktop.type = "gnome";  # Choose between "hyprland", "kde", "gnome", or "none"
+        
+        # GNOME theme configuration
+        desktop.gnome.themes = {
+            enable = true;
+            selected = "whitesur";
+        };
+        
         # system.themes.stylix = enabled;
         services.ssh = {
             enable = true;

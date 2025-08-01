@@ -33,16 +33,16 @@ in
 
   config = mkIf (cfg.type != "none") {
     # Enable the appropriate desktop environment based on the type
-    ${namespace}.desktop = mkIf (cfg.type == "hyprland") {
-      hyprland = enabled;
-    };
-    
-    ${namespace}.desktop = mkIf (cfg.type == "kde") {
-      kde = enabled;
-    };
-    
-    ${namespace}.desktop = mkIf (cfg.type == "gnome") {
-      gnome = enabled;
-    };
+    ${namespace}.desktop = mkMerge [
+      (mkIf (cfg.type == "hyprland") {
+        hyprland = enabled;
+      })
+      (mkIf (cfg.type == "kde") {
+        kde = enabled;
+      })
+      (mkIf (cfg.type == "gnome") {
+        gnome = enabled;
+      })
+    ];
   };
 } 
