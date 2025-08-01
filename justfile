@@ -77,23 +77,23 @@ nixos-anywhere target:
 # Terraform deployment commands
 terraform-init:
     @echo "Initializing Terraform..."
-    @cd terraform && NIXPKGS_ALLOW_UNFREE=1 nix-shell -p terraform --run "terraform init"
+    @cd deployments/nixos && NIXPKGS_ALLOW_UNFREE=1 nix-shell -p terraform --run "terraform init"
 
 terraform-plan:
     @echo "Planning Terraform deployment..."
-    @cd terraform && NIXPKGS_ALLOW_UNFREE=1 nix-shell -p terraform --run "terraform plan"
+    @cd deployments/nixos && NIXPKGS_ALLOW_UNFREE=1 nix-shell -p terraform --run "terraform plan"
 
 terraform-apply:
     @echo "Applying Terraform deployment..."
-    @cd terraform && NIXPKGS_ALLOW_UNFREE=1 nix-shell -p terraform --run "terraform apply -auto-approve"
+    @cd deployments/nixos && NIXPKGS_ALLOW_UNFREE=1 nix-shell -p terraform --run "terraform apply -auto-approve"
 
 terraform-destroy:
     @echo "Destroying Terraform deployment..."
-    @cd terraform && NIXPKGS_ALLOW_UNFREE=1 nix-shell -p terraform --run "terraform destroy -auto-approve"
+    @cd deployments/nixos && NIXPKGS_ALLOW_UNFREE=1 nix-shell -p terraform --run "terraform destroy -auto-approve"
 
 terraform-output:
     @echo "Showing Terraform outputs..."
-    @cd terraform && NIXPKGS_ALLOW_UNFREE=1 nix-shell -p terraform --run "terraform output"
+    @cd deployments/nixos && NIXPKGS_ALLOW_UNFREE=1 nix-shell -p terraform --run "terraform output"
 
 # Deploy using Terraform (replaces deploy-rs)
 deploy:
