@@ -15,7 +15,7 @@ stdenv.mkDerivation rec {
 
   src = fetchurl {
     url = "https://cdn-b.fabfilter.com/downloads/fftotalbundlex64.exe";
-    sha256 = "0000000000000000000000000000000000000000000000000000"; # You'll need to update this
+    sha256 = "sha256-oDwSjWWRQP0gPL+RSStbbWVhTmZM3vRppJJMuSLKbqk=";
   };
 
   nativeBuildInputs = with pkgs; [
@@ -25,6 +25,9 @@ stdenv.mkDerivation rec {
   buildInputs = with pkgs; [
     wine
   ];
+
+  # Skip unpack phase since we're dealing with a single .exe file
+  dontUnpack = true;
 
   installPhase = ''
     runHook preInstall

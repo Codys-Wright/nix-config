@@ -154,16 +154,6 @@
     packages.x86_64-linux = {
       docs = inputs.nixdoc.packages.x86_64-linux.nixdoc;
       frost = inputs.snowfall-frost.packages.x86_64-linux.frost;
-      fabfilter-total-bundle = lib.mkPackage {
-        src = ./packages/fabfilter-total-bundle;
-      };
-    };
-
-    # Legacy packages for compatibility
-    legacyPackages.x86_64-linux = {
-      fabfilter-total-bundle = lib.mkPackage {
-        src = ./packages/fabfilter-total-bundle;
-      };
     };
 
     # Deploy-rs checks for deployment validation

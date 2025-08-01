@@ -37,7 +37,7 @@ in
   config = mkIf cfg.enable {
     home.packages = with pkgs; [
       wine
-      inputs.self.packages.x86_64-linux.fabfilter-total-bundle
+      fabfilter-total-bundle
     ];
     
     # Set up Wine environment variables
