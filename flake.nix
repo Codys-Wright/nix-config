@@ -59,6 +59,34 @@
       url = "github:figsoda/rand-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    
+    # Astal for AGS shell
+    astal = {
+      url = "github:aylur/astal";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    
+    # Theme-related inputs
+    whitesur-wallpapers = {
+      url = "github:vinceliuice/whitesur-wallpapers";
+      flake = false;
+    };
+    
+    orchis-theme = {
+      url = "github:vinceliuice/orchis-theme";
+      flake = false;
+    };
+    
+    # Additional theme assets
+    wallpapers = {
+      url = "github:orangci/walls-catppuccin-mocha";
+      flake = false;
+    };
+    
+    firefox-gnome-theme = {
+      url = "github:rafaelmardojai/firefox-gnome-theme";
+      flake = false;
+    };
   };
 
   outputs = inputs:
@@ -102,6 +130,7 @@
             sshOpts = [ "-o" "StrictHostKeyChecking=no" ];
             fastConnection = true;
             interactiveSudo = false; # root user, no sudo needed
+            # Shorter timeouts to prevent hanging
             profiles = {
               system = {
                 sshUser = "root";

@@ -67,7 +67,8 @@ in
 
       shell = pkgs.zsh;
 
-      uid = 1000;
+      # Let NixOS assign UID automatically to avoid conflicts
+      # uid = 1000;
 
       extraGroups = cfg.extraGroups;
     };

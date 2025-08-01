@@ -11,6 +11,8 @@ with lib.${namespace};
 {
   snowfallorg.user.enable = true;
   
+ 
+  
   FTS-FLEET = {
     bundles = {
       common = enabled;
@@ -34,11 +36,12 @@ with lib.${namespace};
       fullName = "Cody Wright";
       email = "cody@example.com"; # Update this with your actual email
     };
+
     
     # Unified theme system
-    themix = {
+    theme = {
       enable = true;
-      themes.whitesur.enable = true;
+      preset = "whitesur";
       polarity = "dark";
       targets = {
         colors = enabled;

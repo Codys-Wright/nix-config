@@ -10,11 +10,22 @@
 with lib;
 with lib.${namespace};
 let
-  cfg = config.${namespace}.programs.stylix;
+  cfg = config.${namespace}.theme.stylix;
 in
 {
-  options.${namespace}.programs.stylix = with types; {
+  options.${namespace}.theme.stylix = with types; {
     enable = mkBoolOpt false "Enable stylix";
+    autoEnable = mkBoolOpt true "Auto-enable stylix targets";
+          base16Scheme = mkOption {
+        description = "Base16 scheme path";
+        type = types.path;
+        default = ../../base16/catppuccin/custom.yaml;
+      };
+      image = mkOption {
+        description = "Wallpaper image path";
+        type = types.path;
+        default = ../../wallpapers/sports.png;
+      };
   };
 
   imports = [ inputs.stylix.homeModules.stylix ];
@@ -22,10 +33,10 @@ in
   config = mkIf cfg.enable {
     stylix = {
       enable = true;
-
-      autoEnable = true;
-      #base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-hard.yaml";
-      base16Scheme = ./base16/catppuccin/custom.yaml;
+      autoEnable = cfg.autoEnable;
+      base16Scheme = cfg.base16Scheme;
+      image = cfg.image;
+      
       cursor = {
         package = pkgs.bibata-cursors;
         name = "Bibata-Original-Ice";
@@ -63,8 +74,6 @@ in
         light = "Papirus-Light";
         dark = "Papirus-Dark";
       };
-
-      image = ./wallpapers/sports.png;
 
       polarity = "dark";
       targets = {
