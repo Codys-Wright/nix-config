@@ -77,6 +77,11 @@ with lib.${namespace};
             enable = true;
             enableAppleEmoji = true;
         };
+        
+        # Enable quiet boot
+        system.quiet-boot = {
+            enable = true;
+        };
     };
 
     # Additional system packages (GUI and specific tools)

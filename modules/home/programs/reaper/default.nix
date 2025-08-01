@@ -20,6 +20,10 @@ in
       # Reaper DAW
       reaper
       
+      # Reaper extensions
+      reaper-sws-extension
+      reaper-reapack-extension
+      
       # Audio tools and utilities
       audacity
       ardour
@@ -27,10 +31,6 @@ in
       # Audio plugins and effects
       calf
       lv2
-      
-      # MIDI tools
-      qmidictl
-      qmidinet
       
       # Audio analysis tools
       sox
@@ -71,15 +71,6 @@ in
       # JACK settings
       JACK_NO_AUDIO_RESERVATION = "1";
       JACK_PROMISCUOUS_SERVER = "jackd";
-    };
-
-    # Configure Reaper settings directory
-    home.file.".config/REAPER" = {
-      source = ./config;
-      recursive = true;
-      onChange = ''
-        echo "Reaper configuration updated"
-      '';
     };
   };
 } 

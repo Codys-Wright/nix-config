@@ -12,13 +12,14 @@ let
 in
 {
   options.${namespace}.programs.cider = {
-    enable = mkBoolOpt false "Enable Cider-2 Apple Music client";
+    enable = mkBoolOpt false "Enable Cider Apple Music client";
+    pkg = mkOpt (types.enum [ "cider" "cider-2" ]) "cider" "Choose between Cider (version 1) or Cider-2 (version 2)";
   };
 
   config = mkIf cfg.enable {
     home.packages = with pkgs; [
-      # Cider-2 Apple Music client
-      cider-2
+      # Cider Apple Music client (free version from nixpkgs)
+      cider
       
       # Additional music players and tools
       spotify
@@ -39,22 +40,12 @@ in
       
       # Music streaming tools
       yt-dlp
-      youtube-dl
     ];
 
     # Configure Cider settings
     home.sessionVariables = {
       # Set Cider as default music player
-      DEFAULT_MUSIC_PLAYER = "cider-2";
-    };
-
-    # Configure Cider settings directory
-    home.file.".config/Cider" = {
-      source = ./config;
-      recursive = true;
-      onChange = ''
-        echo "Cider configuration updated"
-      '';
+      DEFAULT_MUSIC_PLAYER = "cider";
     };
   };
 } 
