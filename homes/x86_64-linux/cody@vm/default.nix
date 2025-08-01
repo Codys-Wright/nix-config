@@ -36,9 +36,9 @@ with lib.${namespace};
     };
     
     # Unified theme system
-    themes = {
+    themix = {
       enable = true;
-      selected = "whitesur";
+      themes.whitesur.enable = true;
       polarity = "dark";
       targets = {
         colors = enabled;
