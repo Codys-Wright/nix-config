@@ -10,65 +10,78 @@ terraform {
 
 # Local variables for configuration
 locals {
-  # Instance ID for tracking reinstallations
-  instance_id = var.instance_id != "" ? var.instance_id : "vm-${formatdate("YYYYMMDD-hhmmss", timestamp())}"
+  # Find all host.tf.json files in the systems directory
+  host_files = fileset(path.module, "../systems/**/host.tf.json")
   
-  # NixOS system attributes
-  nixos_system_attr = ".#nixosConfigurations.vm.config.system.build.toplevel"
-  nixos_partitioner_attr = ".#nixosConfigurations.vm.config.system.build.diskoScript"
+  # Parse each host file and create a map
+  hosts = {
+    for file in local.host_files : file => jsondecode(file(file))
+  }
 }
 
 # Main deployment module using nixos-anywhere all-in-one
 module "deploy" {
+  for_each = local.hosts
   source = "github.com/nix-community/nixos-anywhere//terraform/all-in-one"
   
-  # Target configuration
-  target_host = var.target_host
-  target_user = var.target_user
-  target_port = var.target_port
+  # Target configuration from host file
+  target_host = each.value.ipv4
+  target_user = "root"
+  target_port = 22
   
-  # NixOS system configuration
-  nixos_system_attr      = local.nixos_system_attr
-  nixos_partitioner_attr = local.nixos_partitioner_attr
+  # NixOS system configuration using hostname
+  nixos_system_attr = ".#nixosConfigurations.${each.value.hostname}.config.system.build.toplevel"
+  nixos_partitioner_attr = ".#nixosConfigurations.${each.value.hostname}.config.system.build.diskoScript"
   
-  # Instance tracking for reinstallations
-  instance_id = local.instance_id
+  # Hardware config generation path
+  nixos_generate_config_path = format("%s/hardware-configuration.nix", trimsuffix(each.key, "host.tf.json"))
+  
+  # Instance tracking for reinstallations (use IP address)
+  instance_id = each.value.ipv4
   
   # Optional: Enable debug logging
-  debug_logging = var.debug_logging
+  debug_logging = true
   
   # Optional: Build on remote machine instead of locally
-  build_on_remote = var.build_on_remote
+  build_on_remote = false
   
   # Optional: Custom phases
-  phases = var.phases
+  phases = ["kexec", "disko", "install", "reboot"]
   
   # Optional: Extra environment variables
-  extra_environment = var.extra_environment
+  extra_environment = {
+    # Add any extra environment variables here
+  }
   
   # Optional: Special arguments passed to NixOS modules
   special_args = {
     # These will be available in your NixOS modules as specialArgs
     terraform = {
-      target_host = var.target_host
-      instance_id = local.instance_id
+      target_host = each.value.ipv4
+      instance_id = each.value.ipv4
+      hostname = each.value.hostname
     }
   }
 }
 
-# Output the deployment result
-output "deployment_result" {
-  description = "Result of the NixOS deployment"
-  value       = module.deploy.result
+# Output the deployment results
+output "deployment_results" {
+  description = "Results of the NixOS deployments"
+  value = {
+    for k, v in module.deploy : k => v.result
+  }
 }
 
 # Output target information
 output "target_info" {
   description = "Target host information"
   value = {
-    host = var.target_host
-    user = var.target_user
-    port = var.target_port
-    instance_id = local.instance_id
+    for k, v in local.hosts : k => {
+      host = v.ipv4
+      hostname = v.hostname
+      user = "root"
+      port = 22
+      instance_id = v.ipv4
+    }
   }
 } 

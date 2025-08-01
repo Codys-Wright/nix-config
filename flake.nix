@@ -143,6 +143,13 @@
 
     templates = import ./templates;
 
+    # Development shell
+    devShells.x86_64-linux.default = lib.mkShell {
+      inherit inputs;
+      src = ./.;
+      shell = ./shells/default;
+    };
+
     # Documentation packages
     packages.x86_64-linux = {
       docs = inputs.nixdoc.packages.x86_64-linux.nixdoc;
