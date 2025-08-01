@@ -1,0 +1,20 @@
+{
+	"folders": [
+		{
+			"path": "../../.."
+		},
+		{
+			"path": "../../../../nix-secrets"
+		},
+		{
+			"path": "../../../../.dotfiles"
+		},
+		{
+			"path": "../../../../flakes"
+		},
+		{
+			"path": "../../../../nix-config.bak"
+		}
+	],
+	"settings": {}
+}
