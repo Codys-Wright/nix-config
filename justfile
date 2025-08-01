@@ -72,18 +72,45 @@ target ip password:
 nixos-anywhere target:
     @echo "Installing NixOS using nixos-anywhere for target {{target}}..."
     @if [ ! -f .env ]; then echo "Error: .env file not found. Run 'just target <ip> <password>' first"; exit 1; fi
-    @nix-shell -p sshpass --run 'bash -c "source .env && SSHPASS=$NIXOS_TARGET_PASSWORD nix run github:nix-community/nixos-anywhere -- --flake .#{{target}} --generate-hardware-config nixos-facter ./facter.json --target-host root@$NIXOS_TARGET_IP --env-password"'
+    @nix-shell -p sshpass --run "bash -c 'source .env && SSHPASS=\$NIXOS_TARGET_PASSWORD nix run github:nix-community/nixos-anywhere -- --flake .#{{target}} --generate-hardware-config nixos-facter ./facter.json --target-host root@\$NIXOS_TARGET_IP --env-password'"
 
-# Deploy configuration updates using deploy-rs
-deploy node:
+# Terraform deployment commands
+terraform-init:
+    @echo "Initializing Terraform..."
+    @cd terraform && NIXPKGS_ALLOW_UNFREE=1 nix-shell -p terraform --run "terraform init"
+
+terraform-plan:
+    @echo "Planning Terraform deployment..."
+    @cd terraform && NIXPKGS_ALLOW_UNFREE=1 nix-shell -p terraform --run "terraform plan"
+
+terraform-apply:
+    @echo "Applying Terraform deployment..."
+    @cd terraform && NIXPKGS_ALLOW_UNFREE=1 nix-shell -p terraform --run "terraform apply -auto-approve"
+
+terraform-destroy:
+    @echo "Destroying Terraform deployment..."
+    @cd terraform && NIXPKGS_ALLOW_UNFREE=1 nix-shell -p terraform --run "terraform destroy -auto-approve"
+
+terraform-output:
+    @echo "Showing Terraform outputs..."
+    @cd terraform && NIXPKGS_ALLOW_UNFREE=1 nix-shell -p terraform --run "terraform output"
+
+# Deploy using Terraform (replaces deploy-rs)
+deploy:
+    @echo "Deploying using Terraform..."
+    @just terraform-apply
+
+# Deploy specific node using Terraform
+deploy-node node:
+    @echo "Deploying node {{node}} using Terraform..."
+    @echo "Note: Terraform deployment is configured in terraform/terraform.tfvars"
+    @just terraform-apply
+
+# Deploy configuration updates using deploy-rs (legacy)
+deploy-legacy node:
     @echo "Deploying configuration using deploy-rs to {{node}}..."
     @if [ ! -f .env ]; then echo "Error: .env file not found. Run 'just target <ip> <password>' first"; exit 1; fi
     @nix-shell -p sshpass --run 'bash -c "source .env && nix run github:serokell/deploy-rs .#{{node}}"'
-
-# Deploy specific node using deploy-rs (alias for deploy)
-deploy-node node:
-    @echo "Deploying node {{node}} using deploy-rs..."
-    @nix-shell -p sshpass --run "nix run github:serokell/deploy-rs .#{{node}}"
 
 # Evaluate a NixOS configuration
 eval config:
@@ -127,7 +154,7 @@ setup-my-target:
     @echo "Setting up for your target (192.168.122.217)..."
     just target 192.168.122.217 breeze-crazily-pristine
     @echo "Now you can use:"
-    @echo "  just deploy           - Deploy to your target"
+    @echo "  just deploy           - Deploy to your target using Terraform"
     @echo "  just test-connection  - Test SSH connection"
     @echo "  just show-config      - Show current configuration"
 
@@ -144,10 +171,20 @@ help:
     @echo "  just target <ip> <pass>       - Set both IP and password"
     @echo "  just show-config              - Show current configuration"
     @echo ""
-    @echo "Deployment:"
+    @echo "Deployment (Terraform):"
+    @echo "  just terraform-init           - Initialize Terraform"
+    @echo "  just terraform-plan           - Plan Terraform deployment"
+    @echo "  just terraform-apply          - Apply Terraform deployment"
+    @echo "  just deploy                   - Deploy using Terraform (alias)"
+    @echo "  just deploy-node <node>       - Deploy to specific node"
+    @echo ""
+    @echo "Deployment (Legacy deploy-rs):"
+    @echo "  just deploy-legacy <node>     - Deploy using deploy-rs"
+    @echo ""
+    @echo "Initial Installation:"
     @echo "  just nixos-anywhere <target>  - Initial NixOS installation"
-    @echo "  just deploy <node>            - Deploy configuration updates"
-    @echo "  just deploy-node <node>       - Deploy to specific node (alias)"
+    @echo ""
+    @echo "Other Commands:"
     @echo "  just eval <config>            - Evaluate NixOS configuration"
     @echo "  just test-connection          - Test SSH connection"
     @echo "  just connect                  - Connect to target via SSH"
@@ -162,5 +199,5 @@ help:
     @echo "  cd modules/home/programs && just module   # Creates 'programs' module"
     @echo "  just target 192.168.1.100 mypassword"
     @echo "  just nixos-anywhere vm       # Initial installation"
-    @echo "  just deploy                   # Configuration updates"
+    @echo "  just deploy                   # Configuration updates (Terraform)"
     @echo "  just connect" 

@@ -29,6 +29,11 @@
                 mountOptions = [ "defaults" ];
               };
             };
+            bios = {
+              name = "BIOS";
+              size = "1M";
+              type = "EF02";
+            };
             luks = {
               size = "100%";
               content = {

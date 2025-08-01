@@ -68,7 +68,7 @@ with lib.${namespace};
     FTS-FLEET = {
         bundles.common = enabled;
         bundles.cli = enabled;
-        desktop.type = "kde";  # Primary desktop environment
+        desktop.type = "gnome";  # Primary desktop environment
         desktop.environments = ["kde" "gnome"];  # Available desktop environments for theming
         
         # system.themes.stylix = enabled;

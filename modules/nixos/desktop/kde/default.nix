@@ -74,10 +74,39 @@ in
       QT_SCALE_FACTOR = "1";
     };
 
+    # X11 and display manager configuration
     services = {
-      xserver.enable = true;
-      displayManager.sddm.enable = true;
-      displayManager.sddm.wayland.enable = true;
+      xserver = {
+        enable = true;
+        # Ensure X11 is properly configured
+        layout = "us";
+        xkbVariant = "";
+        # Enable touchpad support
+        libinput.enable = true;
+      };
+      
+      displayManager = {
+        sddm = {
+          enable = true;
+          wayland.enable = true;
+          # Ensure SDDM is properly configured
+          settings = {
+            General = {
+              DisplayServer = "x11";
+              GreeterEnvironment = "QT_QPA_PLATFORM=xcb";
+            };
+            Theme = {
+              Current = "breeze";
+            };
+          };
+        };
+      };
+      
+      desktopManager = {
+       
+      };
+      
+      # Additional services
       flatpak.enable = true;
       desktopManager.plasma6.enable = true;
     };
