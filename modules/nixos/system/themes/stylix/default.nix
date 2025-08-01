@@ -117,8 +117,13 @@ in
       base16Scheme = cfg.base16Scheme;
       image = cfg.image;
       
-      # GTK and icon theme configuration
-      targets.gtk.enable = cfg.gtk.enable;
+      # Disable GTK and QT to avoid conflicts with home-manager theme system
+      targets.gtk.enable = false;
+      targets.qt.enable = false;
+      
+      # Disable home-manager integration to keep it independent
+      homeManagerIntegration.autoImport = false;
+      homeManagerIntegration.followSystem = false;
       
       cursor = {
         package = cfg.cursor.package;

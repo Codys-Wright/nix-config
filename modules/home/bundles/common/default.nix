@@ -55,7 +55,6 @@ in
         kitty = enabled;
         lazygit = enabled;
         neovim = enabled;
-        stylix = mkDefault enabled; # Default enabled, can be overridden by themes
         tmux = enabled;
       };
     };

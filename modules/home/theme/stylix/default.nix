@@ -11,21 +11,22 @@ with lib;
 with lib.${namespace};
 let
   cfg = config.${namespace}.theme.stylix;
+  themeCfg = config.${namespace}.theme;
 in
 {
   options.${namespace}.theme.stylix = with types; {
     enable = mkBoolOpt false "Enable stylix";
     autoEnable = mkBoolOpt true "Auto-enable stylix targets";
-          base16Scheme = mkOption {
-        description = "Base16 scheme path";
-        type = types.path;
-        default = ../../base16/catppuccin/custom.yaml;
-      };
-      image = mkOption {
-        description = "Wallpaper image path";
-        type = types.path;
-        default = ../../wallpapers/sports.png;
-      };
+    base16Scheme = mkOption {
+      description = "Base16 scheme path";
+      type = types.path;
+      default = ../../base16/catppuccin/custom.yaml;
+    };
+    image = mkOption {
+      description = "Wallpaper image path";
+      type = types.path;
+      default = ../../wallpapers/sports.png;
+    };
   };
 
   imports = [ inputs.stylix.homeModules.stylix ];
@@ -36,14 +37,16 @@ in
       autoEnable = cfg.autoEnable;
       base16Scheme = cfg.base16Scheme;
       image = cfg.image;
+      polarity = themeCfg.polarity;
       
-      cursor = {
+      # Only set default values if no preset is active
+      cursor = mkIf (themeCfg.preset == "stylix") {
         package = pkgs.bibata-cursors;
         name = "Bibata-Original-Ice";
         size = 24;
       };
 
-      fonts = {
+      fonts = mkIf (themeCfg.preset == "stylix") {
         monospace = {
           package = pkgs.nerd-fonts.jetbrains-mono;
           name = "JetBrainsMono Nerd Font Mono";
@@ -68,14 +71,13 @@ in
         };
       };
 
-      iconTheme = {
+      iconTheme = mkIf (themeCfg.preset == "stylix") {
         enable = true;
         package = pkgs.papirus-icon-theme;
         light = "Papirus-Light";
         dark = "Papirus-Dark";
       };
 
-      polarity = "dark";
       targets = {
         kitty.enable = false;
         waybar.enable = false;
