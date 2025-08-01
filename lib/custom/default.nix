@@ -51,4 +51,6 @@
       {
         inherit systemConfig userConfig;
       };
+
+  randomBackupExt = inputs: "backup_${toString (builtins.hashString "sha256" (toString inputs.nixpkgs))}";
 }

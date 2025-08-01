@@ -185,22 +185,18 @@ in {
           };
           # Additional WhiteSur GNOME customizations
           "org/gnome/shell/extensions/blur-my-shell" = {
-            panel = {
-              override-background = true;
-              background-opacity = (builtins.toFloat whitesurCfg.opacity) / 100.0;
-            };
-            dash-to-dock = {
-              blur = true;
-              blur-on-overview = true;
-            };
+            "panel-override-background" = true;
+            "panel-background-opacity" = (builtins.fromJSON whitesurCfg.opacity) / 100.0;
+            "dash-to-dock-blur" = true;
+            "dash-to-dock-blur-on-overview" = true;
           };
           "org/gnome/desktop/interface" = {
             enable-hot-corners = true;
             show-battery-percentage = true;
           };
           "org/gnome/desktop/background" = {
-            picture-uri = "file://${inputs.whitesur-wallpapers}/4k/WhiteSur-${toSentenceCase cfg.polarity}.jpg";
-            picture-uri-dark = "file://${inputs.whitesur-wallpapers}/4k/WhiteSur-${toSentenceCase cfg.polarity}.jpg";
+            picture-uri = "file://${inputs.whitesur-wallpapers}/4k/WhiteSur-${cfg.polarity}.jpg";
+            picture-uri-dark = "file://${inputs.whitesur-wallpapers}/4k/WhiteSur-${cfg.polarity}.jpg";
           };
         };
       })
@@ -243,7 +239,7 @@ in {
 
     # Wallpaper
     (mkIf cfg.targets.wallpaper.enable {
-      stylix.image = mkForce "${inputs.whitesur-wallpapers}/4k/WhiteSur-${toSentenceCase cfg.polarity}.jpg";
+      stylix.image = mkForce "${inputs.whitesur-wallpapers}/4k/WhiteSur-${cfg.polarity}.jpg";
     })
   ]);
 } 

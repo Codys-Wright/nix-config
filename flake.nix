@@ -89,68 +89,67 @@
     };
   };
 
-  outputs = inputs:
-    let
-      lib = inputs.snowfall-lib.mkLib {
-        inherit inputs;
-        src = ./.;
-
-        snowfall = {
-          meta = {
-            name = "nix-config";
-            title = "Cody Wright's personal system fleet";
-          };
-
-          namespace = "FTS-FLEET";
-        };
-      };
-    in
-    lib.mkFlake {
+  outputs = inputs: let
+    randomBackupExt = "backup_${toString inputs.rand-nix.lib.rng.int}";
+    lib = inputs.snowfall-lib.mkLib {
       inherit inputs;
       src = ./.;
-
-      channels-config = {
-        allowUnfree = true;
-        permittedInsecurePackages = [ ];
+      snowfall = {
+        meta = {
+          name = "nix-config";
+          title = "Cody Wright's personal system fleet";
+        };
+        namespace = "FTS-FLEET";
       };
+    };
+  in
+  lib.mkFlake {
+    inherit inputs;
+    src = ./.;
+   
 
-      # Add Frost overlay
-      overlays = with inputs; [
-        snowfall-frost.overlays.default
-      ];
+    channels-config = {
+      allowUnfree = true;
+      permittedInsecurePackages = [ ];
+    };
+
+    # Add Frost overlay
+    overlays = with inputs; [
+      snowfall-frost.overlays.default
+    ];
 
 
 
-      # Deploy-rs configuration for managing deployments
-      deploy = {
-        nodes = {
-          # VM deployment using nixos-anywhere
-          vm = {
-            hostname = "192.168.122.218"; # Update this IP when VM IP changes
-            sshOpts = [ "-o" "StrictHostKeyChecking=no" ];
-            fastConnection = true;
-            interactiveSudo = false; # root user, no sudo needed
-            # Shorter timeouts to prevent hanging
-            profiles = {
-              system = {
-                sshUser = "root";
-                user = "root";
-                path = inputs.deploy-rs.lib.x86_64-linux.activate.nixos inputs.self.nixosConfigurations.vm;
-              };
+    # Deploy-rs configuration for managing deployments
+    deploy = {
+      nodes = {
+        # VM deployment using nixos-anywhere
+        vm = {
+          hostname = "192.168.122.218"; # Update this IP when VM IP changes
+          sshOpts = [ "-o" "StrictHostKeyChecking=no" ];
+          fastConnection = true;
+          interactiveSudo = false; # root user, no sudo needed
+          # Shorter timeouts to prevent hanging
+          profiles = {
+            system = {
+              sshUser = "root";
+              user = "root";
+              path = inputs.deploy-rs.lib.x86_64-linux.activate.nixos inputs.self.nixosConfigurations.vm;
             };
           };
         };
       };
-
-      templates = import ./templates;
-
-      # Documentation packages
-      packages.x86_64-linux = {
-        docs = inputs.nixdoc.packages.x86_64-linux.nixdoc;
-        frost = inputs.snowfall-frost.packages.x86_64-linux.frost;
-      };
-
-      # Deploy-rs checks for deployment validation
-      checks = builtins.mapAttrs (system: deployLib: deployLib.deployChecks inputs.self.deploy) inputs.deploy-rs.lib;
     };
+
+    templates = import ./templates;
+
+    # Documentation packages
+    packages.x86_64-linux = {
+      docs = inputs.nixdoc.packages.x86_64-linux.nixdoc;
+      frost = inputs.snowfall-frost.packages.x86_64-linux.frost;
+    };
+
+    # Deploy-rs checks for deployment validation
+    checks = builtins.mapAttrs (system: deployLib: deployLib.deployChecks inputs.self.deploy) inputs.deploy-rs.lib;
+  };
 }

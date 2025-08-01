@@ -2,6 +2,7 @@
   config,
   lib,
   namespace,
+  inputs,
   ...
 }:
 with lib;
@@ -19,8 +20,8 @@ in
       config.${namespace}.programs.home-manager.extraOptions;
     home-manager = {
       useUserPackages = false;
-      useGlobalPkgs = true;
-      backupFileExtension = "back_alsdjfsdfsjd";
+      useGlobalPkgs = false;
+      backupFileExtension = lib.${namespace}.randomBackupExt inputs;
     };
 
     # Ensure home-manager services wait for Nix daemon
