@@ -24,7 +24,7 @@ in
       
       Example:
       ```nix
-      ${namespace} = {
+      FTS-FLEET = {
         desktop.kde = enabled;
       };
       ```

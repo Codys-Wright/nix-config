@@ -25,7 +25,7 @@ in
       
       Example:
       ```nix
-      ${namespace} = {
+      FTS-FLEET = {
         desktop.type = "kde";
       };
       ```
@@ -38,7 +38,7 @@ in
       
       Example:
       ```nix
-      ${namespace} = {
+      FTS-FLEET = {
         desktop.environments = [ "gnome" "kde" ];
       };
       ```

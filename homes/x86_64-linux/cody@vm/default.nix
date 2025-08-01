@@ -13,7 +13,7 @@ with lib.${namespace};
   
  
   
-  ${namespace} = {
+  FTS-FLEET = {
     bundles = {
       common = enabled;
       shell = enabled;

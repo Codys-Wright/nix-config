@@ -37,7 +37,7 @@ in
       
       Example:
       ```nix
-      ${namespace} = {
+      FTS-FLEET = {
         system.themes.stylix = enabled;
       };
       ```

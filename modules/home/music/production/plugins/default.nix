@@ -26,7 +26,7 @@ in
       
       Example:
       ```nix
-      ${namespace} = {
+      FTS-FLEET = {
         music.production.plugins = enabled;
       };
       ```

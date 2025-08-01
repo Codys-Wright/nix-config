@@ -30,14 +30,14 @@ with lib.${namespace};
     ];
 
     # Disk configuration
-    ${namespace}.system.disk = {
+    FTS-FLEET.system.disk = {
       enable = true;
       type = "btrfs-impermanence";
       device = "/dev/vda";
     };
     
     # Bootloader configuration
-    ${namespace}.system.boot.grub = enabled;
+    FTS-FLEET.system.boot.grub = enabled;
 
     # Facter configuration
     facter.reportPath =
@@ -57,7 +57,7 @@ with lib.${namespace};
     };
 
     # System user configuration
-    ${namespace}.config.user = {
+    FTS-FLEET.config.user = {
         name = "cody";
         fullName = "Cody Wright";
         email = "cody@example.com";
@@ -65,7 +65,7 @@ with lib.${namespace};
     };
 
     # FTS-FLEET namespace configuration
-    ${namespace} = {
+    FTS-FLEET = {
         bundles.common = enabled;
         bundles.cli = enabled;
         desktop.type = "gnome";  # Primary desktop environment
