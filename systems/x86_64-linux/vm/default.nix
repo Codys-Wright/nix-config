@@ -27,11 +27,17 @@ with lib.${namespace};
         inputs.stylix.nixosModules.stylix
         inputs.home-manager.nixosModules.home-manager
         inputs.nixos-facter-modules.nixosModules.facter
-        ../../../disk-config.nix
     ];
 
-    # Disko disk configuration for VM
-    disko.devices.disk.disk1.device = "/dev/vda";
+    # Disk configuration
+    FTS-FLEET.system.disk = {
+      enable = true;
+      type = "btrfs-impermanence";
+      device = "/dev/vda";
+    };
+    
+    # Bootloader configuration
+    FTS-FLEET.system.boot.grub = enabled;
 
     # Facter configuration
     facter.reportPath =

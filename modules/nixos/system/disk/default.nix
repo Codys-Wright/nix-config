@@ -32,6 +32,12 @@ in
       default = 8;
       description = "Swap size in GB";
     };
+    
+    persistFolder = mkOption {
+      type = types.str;
+      default = "/persist";
+      description = "Folder to persist data for impermanence configurations";
+    };
   };
 
   config = mkIf cfg.enable {
@@ -42,13 +48,14 @@ in
       else if cfg.type == "btrfs" then
         (import ./btrfs-disk.nix { inherit lib; device = cfg.device; withSwap = cfg.withSwap; swapSize = cfg.swapSize; }).disko.devices
       else if cfg.type == "btrfs-impermanence" then
-        (import ./btrfs-impermanence-disk.nix { inherit lib config; device = cfg.device; withSwap = cfg.withSwap; swapSize = cfg.swapSize; }).disko.devices
+        (import ./btrfs-impermanence-disk.nix { inherit lib; device = cfg.device; withSwap = cfg.withSwap; swapSize = cfg.swapSize; persistFolder = cfg.persistFolder; }).disko.devices
       else if cfg.type == "btrfs-luks-impermanence" then
         (import ./btrfs-luks-impermanence-disk.nix { 
-          inherit lib config; 
+          inherit lib; 
           device = cfg.device; 
           withSwap = cfg.withSwap;
           swapSize = cfg.swapSize;
+          persistFolder = cfg.persistFolder;
         }).disko.devices
       else
         throw "Unknown disk type: ${cfg.type}";
