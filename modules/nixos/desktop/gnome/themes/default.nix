@@ -16,13 +16,11 @@ let
     whitesur = {
       name = "WhiteSur";
       description = "macOS Big Sur inspired theme";
-      module = ./whitesur;
     };
     # Add more themes here as needed
     # catppuccin = {
     #   name = "Catppuccin";
     #   description = "Soothing pastel theme";
-    #   module = ./catppuccin;
     # };
   };
   
@@ -51,9 +49,7 @@ in
   };
 
   config = mkIf (cfg.enable && cfg.selected != "none") {
-    # Import the selected theme module
-    imports = [
-      availableThemes.${cfg.selected}.module
-    ];
+    # Enable the selected theme module
+    ${namespace}.desktop.gnome.themes.whitesur = mkIf (cfg.selected == "whitesur") enabled;
   };
 } 

@@ -17,43 +17,35 @@ in
   };
 
   config = mkIf config.${namespace}.desktop.gnome.themes.enable {
-    # WhiteSur theme packages and GNOME extensions
+    # WhiteSur theme packages
     environment.systemPackages = with pkgs; [
       # WhiteSur theme packages
       whitesur-gtk-theme
       whitesur-icon-theme
       whitesur-cursors
       
-      # GNOME Shell extensions for better theme integration
-      gnomeExtensions.blur-my-shell
-      gnomeExtensions.just-perfection
+      # Required build dependencies for WhiteSur
+      sassc
+      glib
+      libxml2
+      
+      # Optional dependencies for WhiteSur
+      imagemagick  # For GDM theme tweak
+      dialog       # For installation in dialog mode
+      optipng      # For asset rendering
+      inkscape     # For asset rendering
+      
+      # Recommended GNOME Shell extensions for WhiteSur
+      gnomeExtensions.user-themes      # Enable gnome-shell theme
+      gnomeExtensions.dash-to-dock     # Dock extension
+      gnomeExtensions.blur-my-shell    # Blur effects
+      gnomeExtensions.just-perfection  # Customization
     ];
     
-    # GNOME-specific theme configurations
+    # Set theme via environment variables
     environment.sessionVariables = {
-      # GNOME Shell theme
-      GNOME_SHELL_THEME = "WhiteSur-${cfg.variant}";
-      
-      # Additional GNOME theme variables
       GTK_THEME = "WhiteSur-${cfg.variant}";
       XCURSOR_THEME = "WhiteSur-cursors";
-    };
-    
-    # GTK theme configuration
-    gtk = {
-      enable = true;
-      theme = {
-        name = "WhiteSur-${cfg.variant}";
-        package = pkgs.whitesur-gtk-theme;
-      };
-      iconTheme = {
-        name = "WhiteSur";
-        package = pkgs.whitesur-icon-theme;
-      };
-      cursorTheme = {
-        name = "WhiteSur-cursors";
-        package = pkgs.whitesur-cursors;
-      };
     };
   };
 } 
