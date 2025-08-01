@@ -20,7 +20,7 @@ in
     home-manager = {
       useUserPackages = true;
       useGlobalPkgs = false;
-      backupFileExtension = "bak-gen-${toString config.system.nixos.revision}";
+      backupFileExtension = "backup234789237489328";
     };
 
     # Ensure home-manager services wait for Nix daemon

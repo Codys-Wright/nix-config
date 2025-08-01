@@ -62,7 +62,7 @@ with lib.${namespace};
     FTS-FLEET = {
         bundles.common = enabled;
         bundles.cli = enabled;
-        desktop.kde = enabled;
+        desktop.type = "gnome";  # Choose between "hyprland", "kde", "gnome", or "none"
         # system.themes.stylix = enabled;
         services.ssh = {
             enable = true;
@@ -78,10 +78,7 @@ with lib.${namespace};
             enableAppleEmoji = true;
         };
         
-        # Enable quiet boot
-        system.quiet-boot = {
-            enable = true;
-        };
+       
     };
 
     # Additional system packages (GUI and specific tools)
