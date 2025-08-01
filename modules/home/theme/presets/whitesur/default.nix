@@ -199,8 +199,8 @@ in {
             show-battery-percentage = true;
           };
           "org/gnome/desktop/background" = {
-            picture-uri = "file://${pkgs.whitesur-gtk-theme}/share/backgrounds/WhiteSur-${toSentenceCase cfg.polarity}.jpg";
-            picture-uri-dark = "file://${pkgs.whitesur-gtk-theme}/share/backgrounds/WhiteSur-${toSentenceCase cfg.polarity}.jpg";
+            picture-uri = "file://${pkgs.whitesur-wallpapers}/share/backgrounds/WhiteSur-${toSentenceCase cfg.polarity}.jpg";
+            picture-uri-dark = "file://${pkgs.whitesur-wallpapers}/share/backgrounds/WhiteSur-${toSentenceCase cfg.polarity}.jpg";
           };
         };
       })
@@ -240,5 +240,10 @@ in {
         };
       })
     ]))
+
+    # Wallpaper
+    (mkIf cfg.targets.wallpaper.enable {
+      stylix.image = mkForcable "${pkgs.whitesur-wallpapers}/share/backgrounds/WhiteSur-${toSentenceCase cfg.polarity}.jpg";
+    })
   ]);
 } 
