@@ -15,6 +15,7 @@ in
   imports = [
     ./lsp
     ./fabfilter
+    ./yabridge
   ];
 
   options.${namespace}.music.production.plugins = with types; {
@@ -34,6 +35,7 @@ in
     # Individual plugin options
     lsp = mkOpt (submodule {}) {} "LSP (Linux Studio Plugins) configuration";
     fabfilter = mkOpt (submodule {}) {} "FabFilter Total Bundle configuration";
+    yabridge = mkOpt (submodule {}) {} "Yabridge Windows plugin bridging configuration";
   };
 
   config = mkIf cfg.enable {
@@ -41,6 +43,7 @@ in
     ${namespace}.music.production.plugins = {
       lsp.enable = mkDefault true;
       fabfilter.enable = mkDefault true;
+      yabridge.enable = mkDefault true;
     };
   };
 } 

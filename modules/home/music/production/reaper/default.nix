@@ -8,17 +8,29 @@
 with lib;
 with lib.${namespace};
 let
-  cfg = config.${namespace}.programs.reaper;
+  cfg = config.${namespace}.music.production.reaper;
 in
 {
   options.${namespace}.music.production.reaper = {
     enable = mkBoolOpt false "Enable Reaper DAW";
+    
+    # Yabridge integration
+    enableYabridge = mkBoolOpt true ''
+      Enable yabridge integration for Windows plugins.
+      
+      This will set up yabridge plugin directories and configure REAPER
+      to use Windows plugins through yabridge.
+    '';
   };
 
   config = mkIf cfg.enable {
     home.packages = with pkgs; [
       # Reaper DAW
       reaper
+      
+      # Yabridge for Windows plugins
+      yabridge
+      yabridgectl
       
       # Audio tools and utilities
       audacity
@@ -84,6 +96,28 @@ in
       '';
     };
 
+    # Set up yabridge for REAPER
+    home.activation.setupYabridgeForReaper = lib.dag.entryAfter ["writeBoundary"] (lib.mkIf cfg.enableYabridge ''
+      echo "Setting up yabridge for REAPER..."
+      
+      # Create yabridge plugin directories if they don't exist
+      mkdir -p ~/.vst/yabridge
+      mkdir -p ~/.vst3/yabridge
+      mkdir -p ~/.clap/yabridge
+      
+      # Add common VST directories to yabridgectl
+      yabridgectl add "$HOME/.wine/drive_c/Program Files/Steinberg/VstPlugins" 2>/dev/null || true
+      yabridgectl add "$HOME/.wine/drive_c/Program Files/VstPlugins" 2>/dev/null || true
+      yabridgectl add "$HOME/.wine/drive_c/Program Files/Common Files/VST3" 2>/dev/null || true
+      yabridgectl add "$HOME/.wine/drive_c/Program Files/Common Files/CLAP" 2>/dev/null || true
+      
+      # Sync yabridge plugins
+      yabridgectl sync 2>/dev/null || echo "Warning: Could not sync yabridge plugins"
+      
+      echo "Yabridge setup complete. Windows plugins will be available in REAPER."
+      echo "Make sure REAPER is configured to scan ~/.vst, ~/.vst3, and ~/.clap directories."
+    '');
+
     # Configure audio settings
     home.sessionVariables = {
       # Set default audio backend
@@ -92,6 +126,10 @@ in
       # JACK settings
       JACK_NO_AUDIO_RESERVATION = "1";
       JACK_PROMISCUOUS_SERVER = "jackd";
+      
+      # Yabridge settings
+      WINEPREFIX = "$HOME/.wine";
+      WINEARCH = "win64";
     };
   };
 } 

@@ -23,11 +23,13 @@ in
         enable = mkBoolOpt true "Enable plugins by default";
         lsp = mkBoolOpt true "Enable LSP (Linux Studio Plugins)";
         fabfilter = mkBoolOpt true "Enable FabFilter Total Bundle";
+        yabridge = mkBoolOpt true "Enable Yabridge for Windows plugins";
       };
     }) {
       enable = true;
       lsp = true;
       fabfilter = true;
+      yabridge = true;
     } "Plugin configuration for music production";
   };
 
@@ -40,6 +42,7 @@ in
         enable = true;
         lsp.enable = cfg.plugins.lsp;
         fabfilter.enable = cfg.plugins.fabfilter;
+        yabridge.enable = cfg.plugins.yabridge;
       };
     };
   };
