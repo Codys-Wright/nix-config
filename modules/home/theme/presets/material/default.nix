@@ -88,8 +88,8 @@ in {
     # GTK Theme
     (mkIf cfg.targets.gtk.enable {
       gtk.theme = {
-        package = mkForcable pkgs.material-gtk-theme;
-        name = mkForcable "Material-${toSentenceCase cfg.polarity}";
+        name = lib.mkForce (mkForcable "Material-${toSentenceCase cfg.polarity}");
+        package = lib.mkForce (mkForcable pkgs.material-gtk-theme);
       };
     })
 
@@ -105,7 +105,7 @@ in {
       ];
       dconf.settings = mkForcable {
         "org/gnome/shell/extensions/user-theme" = {
-          name = "Material-${toSentenceCase cfg.polarity}";
+          name = lib.mkForce "Material-${toSentenceCase cfg.polarity}";
         };
         "org/gnome/desktop/wm/preferences" = {
           button-layout = "close,minimize,maximize:appmenu";

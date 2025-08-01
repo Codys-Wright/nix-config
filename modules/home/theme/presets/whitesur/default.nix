@@ -88,8 +88,8 @@ in {
     # GTK Theme
     (mkIf cfg.targets.gtk.enable {
       gtk.theme = {
-        package = mkForcable pkgs.whitesur-gtk-theme;
-        name = mkForcable "WhiteSur-${toSentenceCase cfg.polarity}";
+        name = lib.mkForce (mkForcable "WhiteSur-${toSentenceCase cfg.polarity}");
+        package = lib.mkForce (mkForcable pkgs.whitesur-gtk-theme);
       };
       stylix.targets.gtk.flatpakSupport.enable = mkForcable false;
     })
@@ -106,7 +106,7 @@ in {
       ];
       dconf.settings = mkForcable {
         "org/gnome/shell/extensions/user-theme" = {
-          name = "WhiteSur-${toSentenceCase cfg.polarity}";
+          name = lib.mkForce "WhiteSur-${toSentenceCase cfg.polarity}";
         };
         "org/gnome/desktop/wm/preferences" = {
           button-layout = "close,maximize,minimize:appmenu";

@@ -88,8 +88,8 @@ in {
     # GTK Theme
     (mkIf cfg.targets.gtk.enable {
       gtk.theme = {
-        package = mkForcable pkgs.win11-gtk-theme;
-        name = mkForcable "Win11-${toSentenceCase cfg.polarity}";
+        name = lib.mkForce (mkForcable "Win11-${toSentenceCase cfg.polarity}");
+        package = lib.mkForce (mkForcable pkgs.win11-gtk-theme);
       };
     })
 
@@ -105,7 +105,7 @@ in {
       ];
       dconf.settings = mkForcable {
         "org/gnome/shell/extensions/user-theme" = {
-          name = "Win11-${toSentenceCase cfg.polarity}";
+          name = lib.mkForce "Win11-${toSentenceCase cfg.polarity}";
         };
         "org/gnome/desktop/wm/preferences" = {
           button-layout = "close,minimize,maximize:appmenu";
