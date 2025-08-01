@@ -43,6 +43,11 @@ in
       ```
     '';
     
+    # GTK and icon theme options
+    gtk = {
+      enable = mkBoolOpt true "Whether to enable GTK3, GTK4 and Libadwaita theming";
+    };
+    
     base16Scheme = mkOpt str "${pkgs.base16-schemes}/share/themes/gruvbox-dark-medium.yaml" ''
       The base16 color scheme to use for theming.
       Defaults to Gruvbox dark medium theme.
@@ -111,6 +116,9 @@ in
       enable = true;
       base16Scheme = cfg.base16Scheme;
       image = cfg.image;
+      
+      # GTK and icon theme configuration
+      targets.gtk.enable = cfg.gtk.enable;
       
       cursor = {
         package = cfg.cursor.package;

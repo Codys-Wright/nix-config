@@ -24,14 +24,14 @@ in
       catppuccin-kvantum
     ];
     qt = {
-      enable = true;
-      platformTheme.name = "qtct";
+      enable = mkDefault true;
+      platformTheme.name = mkDefault "qtct";
       style = {
-        name = "Catppuccin-Mocha-Teal";
-        package = pkgs.catppuccin-kvantum.override {
+        name = mkDefault "Catppuccin-Mocha-Teal";
+        package = mkForce (pkgs.catppuccin-kvantum.override {
           accent = "teal";
           variant = "mocha";
-        };
+        });
       };
     };
     #xdg.configFile = {

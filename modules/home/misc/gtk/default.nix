@@ -18,27 +18,27 @@ in
 
   config = mkIf cfg.enable {
     gtk = {
-      enable = true;
+      enable = mkDefault true;
 
       cursorTheme = {
-        name = "macOS-BigSur";
-        package = pkgs.apple-cursor;
-        size = 32; # Affects gtk applications as the name suggests
+        name = mkDefault "macOS-BigSur";
+        package = mkDefault pkgs.apple-cursor;
+        size = mkDefault 32; # Affects gtk applications as the name suggests
       };
 
       iconTheme = {
-        name = "Papirus-Dark";
-        package = pkgs.papirus-icon-theme;
+        name = mkDefault "Papirus-Dark";
+        package = mkDefault pkgs.papirus-icon-theme;
       };
 
       theme = {
-        name = "Catppuccin-Mocha-Compact-Teal-Dark";
-        package = pkgs.catppuccin-gtk.override {
+        name = mkDefault "Catppuccin-Mocha-Compact-Teal-Dark";
+        package = mkDefault (pkgs.catppuccin-gtk.override {
           accents = [ "teal" ];
           size = "compact";
           tweaks = [ "rimless" ];
           variant = "mocha";
-        };
+        });
       };
     };
   };

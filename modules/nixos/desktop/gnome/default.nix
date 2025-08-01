@@ -31,11 +31,6 @@ in
   };
 
   config = mkIf cfg.enable {
-    # Import themes module
-    imports = [
-      ./themes
-    ];
-
     # Essential GNOME packages and extensions
     environment.systemPackages = with pkgs; [
       # Core GNOME applications (top-level packages)

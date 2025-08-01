@@ -13,10 +13,11 @@ let
 in
 {
   options.${namespace}.desktop.gnome.themes.whitesur = with types; {
+    enable = mkBoolOpt false "Enable WhiteSur theme for GNOME";
     variant = mkOpt (types.enum [ "light" "dark" ]) "light" "WhiteSur theme variant for GNOME";
   };
 
-  config = mkIf config.${namespace}.desktop.gnome.themes.enable {
+  config = mkIf cfg.enable {
     # WhiteSur theme packages
     environment.systemPackages = with pkgs; [
       # WhiteSur theme packages
@@ -46,6 +47,11 @@ in
     environment.sessionVariables = {
       GTK_THEME = "WhiteSur-${cfg.variant}";
       XCURSOR_THEME = "WhiteSur-cursors";
+    };
+    
+    # Override Stylix GTK theme to use WhiteSur instead
+    home-manager.users.cody.stylix = {
+      targets.gtk.enable = mkForce false;  # Disable Stylix GTK theme
     };
   };
 } 

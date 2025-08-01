@@ -25,6 +25,7 @@ in
         fzf = enabled;
         powerlevel10k = enabled ;
         starship = enabled;
+        stylix = mkForce enabled; # Force enable for shell features
         zoxide = enabled;
         zsh = enabled;
       };

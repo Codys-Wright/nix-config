@@ -46,8 +46,8 @@ in
         apps = enabled;
       };
       misc = {
-        gtk = disabled; # Done by stylix
-        qt = disabled; # Done by stylix
+        # gtk = enabled; # Disabled - conflicts with WhiteSur theme
+        # qt = enabled; # Disabled - conflicts with other Qt modules
         scripts = enabled;
       };
       programs = {
@@ -55,7 +55,7 @@ in
         kitty = enabled;
         lazygit = enabled;
         neovim = enabled;
-        stylix = enabled;
+        stylix = mkDefault enabled; # Default enabled, can be overridden by themes
         tmux = enabled;
       };
     };
