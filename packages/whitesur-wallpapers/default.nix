@@ -27,7 +27,8 @@ in
       # Create backgrounds directory
       mkdir --parents $out/share/backgrounds
 
-      # Install all 4k wallpapers (main variants)
+      # Install all 4k wallpapers (main variants) - this matches the install script behavior
+      # The script copies files with their exact names from the source
       cp --recursive 4k/*.jpg $out/share/backgrounds/
 
       # Install Nord wallpapers
@@ -40,24 +41,20 @@ in
       mkdir --parents $out/share/backgrounds/2k
       cp --recursive 2k/*.jpg $out/share/backgrounds/2k/
 
-      # Create symbolic links for common names
+      # Create symbolic links for common names based on the install script logic
       cd $out/share/backgrounds
       
-      # WhiteSur variants
-      ln --symbolic WhiteSur-dark.jpg WhiteSur.jpg
-      ln --symbolic WhiteSur-light.jpg WhiteSur-light.jpg
+      # For Ventura and Sonoma, default to -light if no color specified
+      # This matches the install script behavior
       
-      # Monterey variants
-      ln --symbolic Monterey-dark.jpg Monterey.jpg
-      ln --symbolic Monterey-light.jpg Monterey-light.jpg
+      # WhiteSur variants (already exist as WhiteSur.jpg, WhiteSur-light.jpg, WhiteSur-dark.jpg)
+      # Monterey variants (already exist as Monterey.jpg, Monterey-light.jpg, Monterey-dark.jpg)
+      # Ventura variants (already exist as Ventura-light.jpg, Ventura-dark.jpg)
+      # Sonoma variants (already exist as Sonoma-light.jpg, Sonoma-dark.jpg)
       
-      # Ventura variants
-      ln --symbolic Ventura-dark.jpg Ventura.jpg
-      ln --symbolic Ventura-light.jpg Ventura-light.jpg
-      
-      # Sonoma variants
-      ln --symbolic Sonoma-dark.jpg Sonoma.jpg
-      ln --symbolic Sonoma-light.jpg Sonoma-light.jpg
+      # Create default links for Ventura and Sonoma (default to light)
+      ln --symbolic Ventura-light.jpg Ventura.jpg
+      ln --symbolic Sonoma-light.jpg Sonoma.jpg
 
       runHook postInstall
     '';

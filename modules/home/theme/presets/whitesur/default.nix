@@ -6,7 +6,7 @@
   namespace,
   ...
 }: let
-  inherit (lib) mkIf mkMerge toSentenceCase mkForce;
+  inherit (lib) mkIf mkMerge toSentenceCase mkForce mkOption;
   cfg = config.${namespace}.theme;
   
   # Helper function for forcable values

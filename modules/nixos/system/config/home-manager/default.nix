@@ -18,8 +18,8 @@ in
     snowfallorg.users.${config.${namespace}.config.user.name}.home.config =
       config.${namespace}.programs.home-manager.extraOptions;
     home-manager = {
-      useUserPackages = true;
-      useGlobalPkgs = false;
+      useUserPackages = false;
+      useGlobalPkgs = true;
       backupFileExtension = "back_alsdjfsdfsjd";
     };
 

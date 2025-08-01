@@ -88,6 +88,7 @@ with lib.${namespace};
         brave
         vscode
         snowfallorg.frost
+        whitesur-wallpapers
     ];
 
     system.stateVersion = "24.05";
