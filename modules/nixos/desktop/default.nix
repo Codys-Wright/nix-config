@@ -29,6 +29,15 @@ in
       };
       ```
     '';
+    autoLogin = mkOpt (types.submodule {
+      options = {
+        enable = mkBoolOpt false "Enable automatic login";
+        user = mkOpt types.str "cody" "User to auto-login";
+      };
+    }) {
+      enable = true;
+      user = "cody";
+    } "Auto-login configuration";
   };
 
   config = mkIf (cfg.type != "none") {
@@ -44,5 +53,36 @@ in
         gnome = enabled;
       })
     ];
+    
+    # Auto-login configuration based on desktop type
+    services = mkIf cfg.autoLogin.enable (mkMerge [
+      # GNOME auto-login
+      (mkIf (cfg.type == "gnome") {
+        displayManager.gdm.settings = {
+          daemon = {
+            AutomaticLogin = cfg.autoLogin.user;
+            AutomaticLoginEnable = true;
+          };
+        };
+      })
+      # KDE auto-login
+      (mkIf (cfg.type == "kde") {
+        displayManager.sddm.settings = {
+          Autologin = {
+            User = cfg.autoLogin.user;
+            Session = "plasma-x11";
+          };
+        };
+      })
+      # Hyprland auto-login
+      (mkIf (cfg.type == "hyprland") {
+        displayManager.gdm.settings = {
+          daemon = {
+            AutomaticLogin = cfg.autoLogin.user;
+            AutomaticLoginEnable = true;
+          };
+        };
+      })
+    ]);
   };
 } 

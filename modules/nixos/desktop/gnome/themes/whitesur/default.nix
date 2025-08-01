@@ -17,16 +17,17 @@ in
   };
 
   config = mkIf config.${namespace}.desktop.gnome.themes.enable {
-    # Import the base WhiteSur theme
-    imports = [
-      ../../../../themes/whitesur
+    # WhiteSur theme packages and GNOME extensions
+    environment.systemPackages = with pkgs; [
+      # WhiteSur theme packages
+      whitesur-gtk-theme
+      whitesur-icon-theme
+      whitesur-cursors
+      
+      # GNOME Shell extensions for better theme integration
+      gnomeExtensions.blur-my-shell
+      gnomeExtensions.just-perfection
     ];
-    
-    # Enable WhiteSur theme with GNOME-specific variant
-    ${namespace}.themes.whitesur = {
-      enable = true;
-      variant = cfg.variant;
-    };
     
     # GNOME-specific theme configurations
     environment.sessionVariables = {
@@ -38,10 +39,21 @@ in
       XCURSOR_THEME = "WhiteSur-cursors";
     };
     
-    # GNOME Shell extensions for better theme integration
-    environment.systemPackages = with pkgs; [
-      gnomeExtensions.blur-my-shell
-      gnomeExtensions.just-perfection
-    ];
+    # GTK theme configuration
+    gtk = {
+      enable = true;
+      theme = {
+        name = "WhiteSur-${cfg.variant}";
+        package = pkgs.whitesur-gtk-theme;
+      };
+      iconTheme = {
+        name = "WhiteSur";
+        package = pkgs.whitesur-icon-theme;
+      };
+      cursorTheme = {
+        name = "WhiteSur-cursors";
+        package = pkgs.whitesur-cursors;
+      };
+    };
   };
 } 

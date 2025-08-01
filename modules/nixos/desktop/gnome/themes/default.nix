@@ -55,8 +55,5 @@ in
     imports = [
       availableThemes.${cfg.selected}.module
     ];
-    
-    # Enable the selected theme
-    ${namespace}.themes.${cfg.selected} = enabled;
   };
 } 

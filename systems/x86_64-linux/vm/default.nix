@@ -95,13 +95,5 @@ with lib.${namespace};
         snowfallorg.frost
     ];
 
-    # Auto-login for KDE Plasma
-    services.displayManager.sddm.settings = {
-        Autologin = {
-            User = "cody";
-            Session = "plasma";
-        };
-    };
-
     system.stateVersion = "24.05";
 } 
