@@ -20,10 +20,6 @@ in
       # Reaper DAW
       reaper
       
-      # Reaper extensions
-      reaper-sws-extension
-      reaper-reapack-extension
-      
       # Audio tools and utilities
       audacity
       ardour
@@ -62,6 +58,31 @@ in
       libsndfile
       fftw
     ];
+
+    # Install REAPER extensions properly
+    home.activation.installReaperExtensions = {
+      after = [ "writeBoundary" ];
+      before = [ ];
+      data = ''
+        mkdir -p "$HOME/.config/REAPER/UserPlugins"
+        
+        # Install SWS Extension
+        if [ -f "${pkgs.reaper-sws-extension}/UserPlugins/reaper_sws-x86_64.so" ]; then
+          ln -sf "${pkgs.reaper-sws-extension}/UserPlugins/reaper_sws-x86_64.so" "$HOME/.config/REAPER/UserPlugins/"
+        fi
+        
+        # Install ReaPack Extension
+        if [ -f "${pkgs.reaper-reapack-extension}/UserPlugins/reaper_reapack-x86_64.so" ]; then
+          ln -sf "${pkgs.reaper-reapack-extension}/UserPlugins/reaper_reapack-x86_64.so" "$HOME/.config/REAPER/UserPlugins/"
+        fi
+        
+        # Install SWS Scripts
+        if [ -d "${pkgs.reaper-sws-extension}/Scripts" ]; then
+          mkdir -p "$HOME/.config/REAPER/Scripts"
+          cp -r "${pkgs.reaper-sws-extension}/Scripts/"* "$HOME/.config/REAPER/Scripts/" 2>/dev/null || true
+        fi
+      '';
+    };
 
     # Configure audio settings
     home.sessionVariables = {

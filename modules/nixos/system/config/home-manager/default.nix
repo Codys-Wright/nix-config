@@ -21,7 +21,7 @@ in
     home-manager = {
       useUserPackages = false;
       useGlobalPkgs = false;
-      backupFileExtension = lib.${namespace}.randomBackupExt inputs;
+      backupFileExtension = "backup_ksadjfsj";
     };
 
     # Ensure home-manager services wait for Nix daemon
