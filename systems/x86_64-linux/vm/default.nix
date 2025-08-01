@@ -91,5 +91,12 @@ with lib.${namespace};
         whitesur-wallpapers
     ];
 
+    # Add overlay to make custom packages available
+    nixpkgs.overlays = [
+        (final: prev: {
+          whitesur-wallpapers = inputs.self.packages.${prev.system}.whitesur-wallpapers;
+        })
+      ];
+
     system.stateVersion = "24.05";
 } 
