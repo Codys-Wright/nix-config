@@ -97,26 +97,30 @@ in
     };
 
     # Set up yabridge for REAPER
-    home.activation.setupYabridgeForReaper = lib.dag.entryAfter ["writeBoundary"] (lib.mkIf cfg.enableYabridge ''
-      echo "Setting up yabridge for REAPER..."
-      
-      # Create yabridge plugin directories if they don't exist
-      mkdir -p ~/.vst/yabridge
-      mkdir -p ~/.vst3/yabridge
-      mkdir -p ~/.clap/yabridge
-      
-      # Add common VST directories to yabridgectl
-      yabridgectl add "$HOME/.wine/drive_c/Program Files/Steinberg/VstPlugins" 2>/dev/null || true
-      yabridgectl add "$HOME/.wine/drive_c/Program Files/VstPlugins" 2>/dev/null || true
-      yabridgectl add "$HOME/.wine/drive_c/Program Files/Common Files/VST3" 2>/dev/null || true
-      yabridgectl add "$HOME/.wine/drive_c/Program Files/Common Files/CLAP" 2>/dev/null || true
-      
-      # Sync yabridge plugins
-      yabridgectl sync 2>/dev/null || echo "Warning: Could not sync yabridge plugins"
-      
-      echo "Yabridge setup complete. Windows plugins will be available in REAPER."
-      echo "Make sure REAPER is configured to scan ~/.vst, ~/.vst3, and ~/.clap directories."
-    '');
+    home.activation.setupYabridgeForReaper = lib.mkIf cfg.enableYabridge {
+      after = [ "writeBoundary" ];
+      before = [ ];
+      data = ''
+        echo "Setting up yabridge for REAPER..."
+        
+        # Create yabridge plugin directories if they don't exist
+        mkdir -p ~/.vst/yabridge
+        mkdir -p ~/.vst3/yabridge
+        mkdir -p ~/.clap/yabridge
+        
+        # Add common VST directories to yabridgectl
+        yabridgectl add "$HOME/.wine/drive_c/Program Files/Steinberg/VstPlugins" 2>/dev/null || true
+        yabridgectl add "$HOME/.wine/drive_c/Program Files/VstPlugins" 2>/dev/null || true
+        yabridgectl add "$HOME/.wine/drive_c/Program Files/Common Files/VST3" 2>/dev/null || true
+        yabridgectl add "$HOME/.wine/drive_c/Program Files/Common Files/CLAP" 2>/dev/null || true
+        
+        # Sync yabridge plugins
+        yabridgectl sync 2>/dev/null || echo "Warning: Could not sync yabridge plugins"
+        
+        echo "Yabridge setup complete. Windows plugins will be available in REAPER."
+        echo "Make sure REAPER is configured to scan ~/.vst, ~/.vst3, and ~/.clap directories."
+      '';
+    };
 
     # Configure audio settings
     home.sessionVariables = {

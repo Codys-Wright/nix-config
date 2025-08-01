@@ -90,43 +90,55 @@ in
     };
     
     # Create Wine prefix and set up yabridge
-    home.activation.setupYabridge = lib.dag.entryAfter ["writeBoundary"] ''
-      $DRY_RUN_CMD mkdir -p $VERBOSE_ARG ${cfg.winePrefix}
-      $DRY_RUN_CMD echo "Setting up yabridge in ${cfg.winePrefix}..."
-      
-      # Add VST2 directories to yabridgectl
-      ${lib.concatStringsSep "\n" (map (dir: ''
-        $DRY_RUN_CMD yabridgectl add "${dir}" || echo "Warning: Could not add VST2 directory ${dir}"
-      '') cfg.vst2Directories)}
-      
-      # Add VST3 directories to yabridgectl
-      ${lib.concatStringsSep "\n" (map (dir: ''
-        $DRY_RUN_CMD yabridgectl add "${dir}" || echo "Warning: Could not add VST3 directory ${dir}"
-      '') cfg.vst3Directories)}
-      
-      # Add CLAP directories to yabridgectl
-      ${lib.concatStringsSep "\n" (map (dir: ''
-        $DRY_RUN_CMD yabridgectl add "${dir}" || echo "Warning: Could not add CLAP directory ${dir}"
-      '') cfg.clapDirectories)}
-      
-      # Sync yabridge plugins
-      $DRY_RUN_CMD yabridgectl sync || echo "Warning: Could not sync yabridge plugins"
-    '';
+    home.activation.setupYabridge = {
+      after = [ "writeBoundary" ];
+      before = [ ];
+      data = ''
+        mkdir -p ${cfg.winePrefix}
+        echo "Setting up yabridge in ${cfg.winePrefix}..."
+        
+        # Add VST2 directories to yabridgectl
+        ${lib.concatStringsSep "\n" (map (dir: ''
+          yabridgectl add "${dir}" 2>/dev/null || echo "Warning: Could not add VST2 directory ${dir}"
+        '') cfg.vst2Directories)}
+        
+        # Add VST3 directories to yabridgectl
+        ${lib.concatStringsSep "\n" (map (dir: ''
+          yabridgectl add "${dir}" 2>/dev/null || echo "Warning: Could not add VST3 directory ${dir}"
+        '') cfg.vst3Directories)}
+        
+        # Add CLAP directories to yabridgectl
+        ${lib.concatStringsSep "\n" (map (dir: ''
+          yabridgectl add "${dir}" 2>/dev/null || echo "Warning: Could not add CLAP directory ${dir}"
+        '') cfg.clapDirectories)}
+        
+        # Sync yabridge plugins
+        yabridgectl sync 2>/dev/null || echo "Warning: Could not sync yabridge plugins"
+      '';
+    };
     
     # Create yabridge configuration directories
-    home.activation.createYabridgeDirs = lib.dag.entryAfter ["writeBoundary"] ''
-      $DRY_RUN_CMD mkdir -p $VERBOSE_ARG ~/.vst/yabridge
-      $DRY_RUN_CMD mkdir -p $VERBOSE_ARG ~/.vst3/yabridge
-      $DRY_RUN_CMD mkdir -p $VERBOSE_ARG ~/.clap/yabridge
-      $DRY_RUN_CMD echo "Created yabridge plugin directories"
-    '';
+    home.activation.createYabridgeDirs = {
+      after = [ "writeBoundary" ];
+      before = [ ];
+      data = ''
+        mkdir -p ~/.vst/yabridge
+        mkdir -p ~/.vst3/yabridge
+        mkdir -p ~/.clap/yabridge
+        echo "Created yabridge plugin directories"
+      '';
+    };
     
     # Set up realtime privileges if enabled
-    home.activation.setupRealtime = lib.dag.entryAfter ["writeBoundary"] (lib.mkIf cfg.enableRealtime ''
-      $DRY_RUN_CMD echo "Note: For realtime privileges, ensure your user is in the 'realtime' group"
-      $DRY_RUN_CMD echo "On Arch/Manjaro: sudo gpasswd -a $USER realtime"
-      $DRY_RUN_CMD echo "On Ubuntu/Debian: sudo usermod -a -G audio $USER"
-      $DRY_RUN_CMD echo "Then reboot your system"
-    '');
+    home.activation.setupRealtime = lib.mkIf cfg.enableRealtime {
+      after = [ "writeBoundary" ];
+      before = [ ];
+      data = ''
+        echo "Note: For realtime privileges, ensure your user is in the 'realtime' group"
+        echo "On Arch/Manjaro: sudo gpasswd -a $USER realtime"
+        echo "On Ubuntu/Debian: sudo usermod -a -G audio $USER"
+        echo "Then reboot your system"
+      '';
+    };
   };
 } 

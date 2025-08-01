@@ -116,6 +116,9 @@
     # Add Frost overlay
     overlays = with inputs; [
       snowfall-frost.overlays.default
+      (final: prev: {
+        fabfilter-total-bundle = final.callPackage ./packages/fabfilter-total-bundle { };
+      })
     ];
 
 

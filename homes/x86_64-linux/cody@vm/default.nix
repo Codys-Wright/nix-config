@@ -27,8 +27,8 @@ with lib.${namespace};
 
     programs = {
       git = enabled;
-      spotify = enabled;
     };
+
     
     config.user = {
       enable = true;

@@ -1,38 +1,17 @@
-{
-  lib,
-  inputs,
-  namespace,
-  pkgs,
-  stdenv,
-  fetchurl,
-  wine,
-  yabridge,
-  yabridgectl,
-  ...
-}:
+{ pkgs, lib, ... }:
 
-stdenv.mkDerivation rec {
+pkgs.stdenv.mkDerivation rec {
   pname = "fabfilter-total-bundle";
   version = "1.0.0";
 
-  src = fetchurl {
+  src = pkgs.fetchurl {
     url = "https://cdn-b.fabfilter.com/downloads/fftotalbundlex64.exe";
     sha256 = "sha256-oDwSjWWRQP0gPL+RSStbbWVhTmZM3vRppJJMuSLKbqk=";
   };
 
-  nativeBuildInputs = with pkgs; [
-    wine
-    yabridge
-    yabridgectl
-  ];
+  nativeBuildInputs = with pkgs; [ wine yabridge yabridgectl ];
+  buildInputs = with pkgs; [ wine yabridge yabridgectl ];
 
-  buildInputs = with pkgs; [
-    wine
-    yabridge
-    yabridgectl
-  ];
-
-  # Skip unpack phase since we're dealing with a single .exe file
   dontUnpack = true;
 
   installPhase = ''

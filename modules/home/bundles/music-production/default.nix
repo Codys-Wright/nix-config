@@ -10,10 +10,6 @@ let
   cfg = config.${namespace}.bundles.music-production;
 in
 {
-  imports = [
-    ../../music/production/plugins
-  ];
-
   options.${namespace}.bundles.music-production = with types; {
     enable = mkBoolOpt false "Enable music production bundle";
     
@@ -39,7 +35,6 @@ in
       
       # Enable plugins if the bundle is enabled and plugins are enabled
       music.production.plugins = mkIf cfg.plugins.enable {
-        enable = true;
         lsp.enable = cfg.plugins.lsp;
         fabfilter.enable = cfg.plugins.fabfilter;
         yabridge.enable = cfg.plugins.yabridge;
