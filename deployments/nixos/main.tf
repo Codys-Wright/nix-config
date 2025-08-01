@@ -9,19 +9,36 @@ terraform {
 }
 
 locals {
-  host_files = fileset(".", "../systems/**/**/host.tf.json")
+  host_files = fileset(".", "../../systems/**/**/host.tf.json")
   hosts = {
     for file in local.host_files :
     file => jsondecode(file(file))
   }
 }
 
-module "deploy" {
-  for_each                   = local.hosts
-  source                     = "github.com/nix-community/nixos-anywhere//terraform/all-in-one"
-  nixos_system_attr          = ".#nixosConfigurations.${each.value.hostname}.config.system.build.toplevel"
-  nixos_partitioner_attr     = ".#nixosConfigurations.${each.value.hostname}.config.system.build.diskoScript"
-  target_host                = each.value.ipv4
-  instance_id                = each.value.ipv4
-  nixos_generate_config_path = format("%s/hardware-configuration.nix", trimsuffix(each.key, "host.tf.json"))
+# Deploy to each host using null_resource with local-exec
+resource "null_resource" "deploy" {
+  for_each = local.hosts
+  
+  triggers = {
+    instance_id = each.value.ipv4
+    hostname    = each.value.hostname
+  }
+  
+  provisioner "local-exec" {
+    command = <<-EOF
+      # Remove old host key if it exists
+      ssh-keygen -R ${each.value.ipv4} 2>/dev/null || true
+      
+      # Run nixos-anywhere with password from environment
+      SSHPASS="${each.value.install_password}" nix run github:nix-community/nixos-anywhere -- \
+        --flake .#${each.value.hostname} \
+        --target-host root@${each.value.ipv4} \
+        --env-password
+    EOF
+    
+    environment = {
+      SSHPASS = each.value.install_password
+    }
+  }
 } 
