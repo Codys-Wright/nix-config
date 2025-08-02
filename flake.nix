@@ -61,11 +61,13 @@
     templates = import ./templates;
 
     # Development shell
-    devShells.x86_64-linux.default = lib.mkShell {
-      inherit inputs;
-      src = ./.;
-      shell = ./shells/default;
-    };
+    devShells = forAllSystems (system: {
+      default = lib.mkShell {
+        inherit inputs;
+        src = ./.;
+        shell = ./shells/default;
+      };
+    });
 
     # Documentation packages
     packages = forAllSystems (system: {
@@ -118,10 +120,6 @@
     unstable.url = "github:nixos/nixpkgs/nixos-unstable";
     ags.url = "github:Aylur/ags";
     nixos-hardware.url = "github:nixos/nixos-hardware";
-    nix-ld = {
-      url = "github:Mic92/nix-ld";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     hyprland.url = "github:hyprwm/Hyprland";
     hyprpanel = {
       url = "github:Jas-SinghFSU/HyprPanel";
