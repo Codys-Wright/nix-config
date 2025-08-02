@@ -21,7 +21,7 @@ in
       enable = true;
       mouse = true;
       shell = "${pkgs.zsh}/bin/zsh";
-      prefix = "C-s";
+      prefix = "C-a";
       terminal = "kitty";
       keyMode = "vi";
       baseIndex = 1;
