@@ -14,11 +14,11 @@
       ])
       + ":$HOME/.${format}";
   in {
-    DSSI_PATH   = makePluginPath "dssi";
-    LADSPA_PATH = makePluginPath "ladspa";
-    LV2_PATH    = makePluginPath "lv2";
-    LXVST_PATH  = makePluginPath "lxvst";
-    VST_PATH    = makePluginPath "vst";
-    VST3_PATH   = makePluginPath "vst3";
+    DSSI_PATH   = lib.mkForce (makePluginPath "dssi");
+    LADSPA_PATH = lib.mkForce (makePluginPath "ladspa");
+    LV2_PATH    = lib.mkForce (makePluginPath "lv2");
+    LXVST_PATH  = lib.mkForce (makePluginPath "lxvst");
+    VST_PATH    = lib.mkForce (makePluginPath "vst");
+    VST3_PATH   = lib.mkForce (makePluginPath "vst3");
   };
 }
