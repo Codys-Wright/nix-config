@@ -97,6 +97,9 @@ with lib.${namespace};
     environment.systemPackages = with pkgs; [
         brave
         vscode
+	code-cursor
+	opencode
+	gemini-cli
         snowfallorg.frost
         whitesur-wallpapers
     ];
