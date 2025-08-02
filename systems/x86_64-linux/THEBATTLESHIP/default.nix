@@ -72,7 +72,7 @@ with lib.${namespace};
     FTS-FLEET = {
         bundles.common = enabled;
         bundles.cli = enabled;
-        bundles.music-production = enabled;
+        music.production = enabled;
         desktop.type = "gnome";  # Primary desktop environment
         desktop.environments = ["kde" "gnome"];  # Available desktop environments for theming
         

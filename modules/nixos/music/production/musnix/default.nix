@@ -13,7 +13,7 @@ let
   cfg = config.${namespace}.music.musnix;
 in
 {
-  options.${namespace}.music.musnix = with types; {
+  options.${namespace}.music.production.musnix = with types; {
     enable = mkBoolOpt false "Enable musnix for real-time audio processing";
     
     kernel.realtime = mkBoolOpt false "Enable real-time kernel for musnix";
