@@ -10,12 +10,13 @@
 with lib;
 with lib.${namespace};
 let
-  cfg = config.${namespace}.music.musnix;
+  cfg = config.${namespace}.music.production.musnix;
 in
 {
+  imports = [ inputs.musnix.nixosModules.musnix ];
+
   options.${namespace}.music.production.musnix = with types; {
     enable = mkBoolOpt false "Enable musnix for real-time audio processing";
-    
     kernel.realtime = mkBoolOpt false "Enable real-time kernel for musnix";
   };
 
