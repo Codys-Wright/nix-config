@@ -27,6 +27,7 @@ with lib.${namespace};
         inputs.stylix.nixosModules.stylix
         inputs.home-manager.nixosModules.home-manager
         inputs.nixos-facter-modules.nixosModules.facter
+	./hardware-configuration.nix
     ];
 
     # Disk configuration
