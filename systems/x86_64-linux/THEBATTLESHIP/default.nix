@@ -32,7 +32,7 @@ with lib.${namespace};
     # Disk configuration
     FTS-FLEET.system.disk = {
       enable = true;
-      type = "btrfs";
+      type = "btrfs-impermanence";
       device = "/dev/nvme2n1";
     };
     
