@@ -76,14 +76,14 @@ run_terraform_deploy() {
     if [ ! -d "deployments/nixos/.terraform" ]; then
         echo "📦 Initializing Terraform..."
         cd deployments/nixos
-        NIXPKGS_ALLOW_UNFREE=1 nix-shell -p terraform --run "terraform init"
+        nix develop --command terraform init
         cd ../..
     fi
     
     # Run Terraform apply with target host
     echo "🚀 Running Terraform deployment..."
     cd deployments/nixos
-    NIXPKGS_ALLOW_UNFREE=1 nix-shell -p terraform --run "terraform apply -var=\"target_host=$target_host\" -auto-approve"
+    nix develop --command terraform apply -var="target_host=$target_host" -auto-approve
     cd ../..
     
     echo ""
@@ -109,19 +109,19 @@ show_deployment_options() {
             run_terraform_deploy "$SELECTED_HOST"
             ;;
         2)
-            echo ""
-            echo "🚀 Deploying to ALL hosts..."
-            cd deployments/nixos
-            NIXPKGS_ALLOW_UNFREE=1 nix-shell -p terraform --run "terraform apply -auto-approve"
-            cd ../..
-            echo "✅ Deployment to all hosts completed!"
+                    echo ""
+        echo "🚀 Deploying to ALL hosts..."
+        cd deployments/nixos
+        nix develop --command terraform apply -auto-approve
+        cd ../..
+        echo "✅ Deployment to all hosts completed!"
             ;;
         3)
-            echo ""
-            echo "📊 Current Terraform state:"
-            cd deployments/nixos
-            NIXPKGS_ALLOW_UNFREE=1 nix-shell -p terraform --run "terraform show"
-            cd ../..
+                    echo ""
+        echo "📊 Current Terraform state:"
+        cd deployments/nixos
+        nix develop --command terraform show
+        cd ../..
             ;;
         4)
             echo "👋 Goodbye!"

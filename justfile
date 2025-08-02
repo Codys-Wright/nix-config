@@ -89,23 +89,23 @@ nixos-anywhere target:
 # Terraform deployment commands
 terraform-init:
     @echo "Initializing Terraform..."
-    @cd deployments/nixos && NIXPKGS_ALLOW_UNFREE=1 nix-shell -p terraform --run "terraform init"
+    @cd deployments/nixos && terraform init
 
 terraform-plan:
     @echo "Planning Terraform deployment..."
-    @cd deployments/nixos && NIXPKGS_ALLOW_UNFREE=1 nix-shell -p terraform --run "terraform plan"
+    @cd deployments/nixos && terraform plan
 
 terraform-apply:
     @echo "Applying Terraform deployment..."
-    @cd deployments/nixos && NIXPKGS_ALLOW_UNFREE=1 nix-shell -p terraform --run "terraform apply -auto-approve"
+    @cd deployments/nixos && terraform apply -auto-approve
 
 terraform-destroy:
     @echo "Destroying Terraform deployment..."
-    @cd deployments/nixos && NIXPKGS_ALLOW_UNFREE=1 nix-shell -p terraform --run "terraform destroy -auto-approve"
+    @cd deployments/nixos && terraform destroy -auto-approve
 
 terraform-output:
     @echo "Showing Terraform outputs..."
-    @cd deployments/nixos && NIXPKGS_ALLOW_UNFREE=1 nix-shell -p terraform --run "terraform output"
+    @cd deployments/nixos && terraform output
 
 # Deploy using Terraform (replaces deploy-rs)
 deploy:
@@ -178,7 +178,7 @@ setup-my-target:
 # Quick deployment to all hosts
 deploy-all:
     @echo "Deploying to all hosts..."
-    @cd deployments/nixos && NIXPKGS_ALLOW_UNFREE=1 nix-shell -p terraform --run "terraform apply -auto-approve"
+    @cd deployments/nixos && terraform apply -auto-approve
 
 # Build the configuration
 build-config:

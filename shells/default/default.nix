@@ -24,6 +24,7 @@ mkShell {
     shfmt
     nixd
     just
+    sshpass
     
     (terraform.withPlugins (p: with p; [
       p.null

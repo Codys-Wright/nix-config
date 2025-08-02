@@ -1,61 +1,55 @@
 terraform {
-  required_version = ">= 1.0"
   required_providers {
     null = {
       source  = "hashicorp/null"
-      version = "~> 3.0"
+      version = "~> 3.2"
+    }
+    external = {
+      source  = "hashicorp/external"
+      version = "~> 2.3"
     }
   }
 }
 
-# Variable to target specific host(s)
-variable "target_host" {
-  description = "Hostname to target (leave empty for all hosts)"
-  type        = string
-  default     = ""
-}
-
-# Namespace from the flake configuration
+# Read the host configuration
 locals {
-  namespace = "FTS-FLEET"
-  
-  host_files = fileset(".", "../../systems/**/**/host.tf.json")
-  hosts = {
-    for file in local.host_files :
-    file => jsondecode(file(file))
-  }
-  
-  # Filter hosts based on target_host variable
-  target_hosts = var.target_host != "" ? {
-    for file, host in local.hosts :
-    file => host
-    if host.hostname == var.target_host
-  } : local.hosts
+  hosts = jsondecode(file("../../systems/x86_64-linux/THEBATTLESHIP/host.tf.json"))
 }
 
-# Deploy to each host using null_resource with local-exec
-resource "null_resource" "deploy" {
-  for_each = local.target_hosts
-  
-  triggers = {
-    instance_id = each.value.ipv4
-    hostname    = each.value.hostname
+# Deploy each host
+module "deploy" {
+  for_each = local.hosts
+
+  source = "github.com/nix-community/nixos-anywhere//terraform/all-in-one"
+
+  # NixOS system configuration
+  nixos_system_attr      = ".#nixosConfigurations.${each.value.hostname}.config.system.build.toplevel"
+  nixos_partitioner_attr = ".#nixosConfigurations.${each.value.hostname}.config.system.build.diskoScript"
+
+  # Target configuration
+  target_host = each.value.ipv4
+  target_user = "root"
+  target_port = 22
+
+  # Instance ID for tracking reinstallations
+  instance_id = each.value.ipv4
+
+  # Build on remote to avoid signature issues
+  build_on_remote = true
+
+  # Debug logging for troubleshooting
+  debug_logging = true
+
+  # Phases to run
+  phases = ["kexec", "disko", "install", "reboot"]
+
+  # Extra environment variables
+  extra_environment = {
+    SSHPASS = each.value.install_password
   }
-  
-  provisioner "local-exec" {
-    command = <<-EOF
-      # Remove old host key if it exists
-      ssh-keygen -R ${each.value.ipv4} 2>/dev/null || true
-      
-      # Run nixos-anywhere with password from environment
-      SSHPASS="${each.value.install_password}" nix run github:nix-community/nixos-anywhere -- \
-        --flake .#${each.value.hostname} \
-        --target-host root@${each.value.ipv4} \
-        --env-password
-    EOF
-    
-    environment = {
-      SSHPASS = each.value.install_password
-    }
-  }
+}
+
+# Output the deployment results
+output "deployments" {
+  value = module.deploy
 } 
