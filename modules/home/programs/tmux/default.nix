@@ -28,6 +28,7 @@ in
 
       extraConfig = ''
         set -g set-clipboard on
+        bind r source-file ~/.config/tmux/tmux.conf \; display "Reloaded!"
       '';
 
       plugins = with pkgs; [

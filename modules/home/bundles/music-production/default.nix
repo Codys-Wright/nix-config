@@ -30,6 +30,7 @@ in
   };
 
   config = mkIf cfg.enable {
+    home.packages = with pkgs; [ audacity ];
     ${namespace} = {
       music.production.reaper = enabled;
       
