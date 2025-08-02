@@ -2,7 +2,7 @@
 {
   lib,
   pkgs,
-  disk ? "/dev/vda",
+  disk,
   withSwap ? false,
   swapSize,
   persistFolder ? "/persist",

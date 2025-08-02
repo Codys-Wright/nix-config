@@ -46,13 +46,13 @@ in
       if cfg.type == "simple" then
         (import ./simple-disk.nix { inherit lib; device = cfg.device; }).disko.devices
       else if cfg.type == "btrfs" then
-        (import ./btrfs-disk.nix { inherit lib; device = cfg.device; withSwap = cfg.withSwap; swapSize = cfg.swapSize; }).disko.devices
+        (import ./btrfs-disk.nix { inherit lib; disk = cfg.device; withSwap = cfg.withSwap; swapSize = cfg.swapSize; }).disko.devices
       else if cfg.type == "btrfs-impermanence" then
-        (import ./btrfs-impermanence-disk.nix { inherit lib; device = cfg.device; withSwap = cfg.withSwap; swapSize = cfg.swapSize; persistFolder = cfg.persistFolder; }).disko.devices
+        (import ./btrfs-impermanence-disk.nix { inherit lib; disk = cfg.device; withSwap = cfg.withSwap; swapSize = cfg.swapSize; persistFolder = cfg.persistFolder; }).disko.devices
       else if cfg.type == "btrfs-luks-impermanence" then
         (import ./btrfs-luks-impermanence-disk.nix { 
-          inherit lib; 
-          device = cfg.device; 
+          inherit lib pkgs; 
+          disk = cfg.device; 
           withSwap = cfg.withSwap;
           swapSize = cfg.swapSize;
           persistFolder = cfg.persistFolder;

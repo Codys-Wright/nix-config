@@ -1,7 +1,7 @@
 # NOTE: ... is needed because dikso passes diskoFile
 {
   lib,
-  disk ? "/dev/vda",
+  disk,
   withSwap ? false,
   swapSize,
   persistFolder ? "/persist",
