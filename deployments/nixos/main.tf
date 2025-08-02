@@ -44,11 +44,15 @@ resource "null_resource" "deploy" {
       # Remove old host key if it exists
       ssh-keygen -R ${each.value.ipv4} 2>/dev/null || true
       
+      # Extract disk device from NixOS configuration
+      DISK_DEVICE=$(nix eval .#nixosConfigurations.${each.value.hostname}.config.${namespace}.system.disk.device --raw)
+      
       # Run nixos-anywhere with password from environment
       SSHPASS="${each.value.install_password}" nix run github:nix-community/nixos-anywhere -- \
         --flake .#${each.value.hostname} \
         --target-host root@${each.value.ipv4} \
-        --env-password
+        --env-password \
+        --disk "$DISK_DEVICE"
     EOF
     
     environment = {
