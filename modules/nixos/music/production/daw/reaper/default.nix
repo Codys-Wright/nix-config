@@ -12,7 +12,7 @@ let
   cfg = config.${namespace}.music.production.reaper;
 in
 {
-  options.${namespace}.music.production.reaper = with types; {
+  options.${namespace}.music.production.daw.reaper = with types; {
     enable = mkBoolOpt false "Enable Reaper DAW at system level";
     
     # Yabridge integration
