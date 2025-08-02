@@ -34,6 +34,8 @@ with lib.${namespace};
       enable = true;
       type = "btrfs-impermanence";
       device = "/dev/nvme2n1";
+      withSwap = true;
+      swapSize = 205;  # 205GB swap partition for full hibernation
     };
     
     # Bootloader configuration

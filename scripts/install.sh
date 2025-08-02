@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 set -e
 
@@ -36,7 +36,7 @@ get_available_disks() {
     echo "================"
     local disk_count=0
     local disks=()
-    
+
     # Get disk information
     while IFS= read -r line; do
         if [[ $line =~ ^(nvme|sd|hd)[a-z]+ ]]; then
@@ -44,24 +44,24 @@ get_available_disks() {
             disk_name=$(echo "$line" | awk '{print $1}')
             disk_size=$(echo "$line" | awk '{print $2}')
             disk_type=$(echo "$line" | awk '{print $3}')
-            
+
             echo "$disk_count) $disk_name ($disk_size, $disk_type)"
             disks+=("$disk_name")
         fi
     done < <(lsblk -d -o NAME,SIZE,TYPE | grep -E "^(NAME|nvme|sd|hd)")
-    
+
     echo ""
     echo "Select a disk to install to (1-$disk_count), or 'q' to quit:"
-    
+
     # Read user selection
     while true; do
         read -p "Enter your choice: " choice
-        
+
         if [[ "$choice" == "q" || "$choice" == "Q" ]]; then
             echo "❌ Installation cancelled"
             exit 1
         fi
-        
+
         if [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 1 ] && [ "$choice" -le "$disk_count" ]; then
             TARGET_DISK="${disks[$((choice - 1))]}"
             break

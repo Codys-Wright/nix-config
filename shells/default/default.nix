@@ -23,6 +23,7 @@ mkShell {
     python310Packages.mdformat
     shfmt
     nixd
+    just
     
     (terraform.withPlugins (p: with p; [
       p.null

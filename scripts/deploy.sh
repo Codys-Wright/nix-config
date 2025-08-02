@@ -109,19 +109,19 @@ show_deployment_options() {
             run_terraform_deploy "$SELECTED_HOST"
             ;;
         2)
-                    echo ""
-        echo "🚀 Deploying to ALL hosts..."
-        cd deployments/nixos
-        NIXPKGS_ALLOW_UNFREE=1 nix-shell -p terraform --run "terraform apply -auto-approve"
-        cd ../..
-        echo "✅ Deployment to all hosts completed!"
+            echo ""
+            echo "🚀 Deploying to ALL hosts..."
+            cd deployments/nixos
+            NIXPKGS_ALLOW_UNFREE=1 nix-shell -p terraform --run "terraform apply -auto-approve"
+            cd ../..
+            echo "✅ Deployment to all hosts completed!"
             ;;
         3)
-                    echo ""
-        echo "📊 Current Terraform state:"
-        cd deployments/nixos
-        NIXPKGS_ALLOW_UNFREE=1 nix-shell -p terraform --run "terraform show"
-        cd ../..
+            echo ""
+            echo "📊 Current Terraform state:"
+            cd deployments/nixos
+            NIXPKGS_ALLOW_UNFREE=1 nix-shell -p terraform --run "terraform show"
+            cd ../..
             ;;
         4)
             echo "👋 Goodbye!"
@@ -139,13 +139,6 @@ echo ""
 echo "Welcome to the NixOS deployment script!"
 echo "This script will help you deploy your NixOS configuration to your hosts."
 echo ""
-
-# Check if jq is available
-if ! command -v jq &> /dev/null; then
-    echo "❌ Error: jq is required but not installed"
-    echo "Install it with: nix-shell -p jq"
-    exit 1
-fi
 
 # Show deployment options
 show_deployment_options 

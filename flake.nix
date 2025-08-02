@@ -1,4 +1,99 @@
 {
+  outputs = inputs: let
+    randomBackupExt = "backup_${toString inputs.rand-nix.lib.rng.int}";
+    lib = inputs.snowfall-lib.mkLib {
+      inherit inputs;
+      src = ./.;
+      snowfall = {
+        meta = {
+          name = "nix-config";
+          title = "Cody Wright's personal system fleet";
+        };
+        namespace = "FTS-FLEET";
+      };
+    };
+    
+    # Systems that can run tests:
+    supportedSystems = [ "aarch64-linux" "i686-linux" "x86_64-linux" "aarch64-darwin" "x86_64-darwin" ];
+
+    # Function to generate a set based on supported systems:
+    forAllSystems = inputs.nixpkgs.lib.genAttrs supportedSystems;
+  in
+  lib.mkFlake {
+    inherit inputs;
+    src = ./.;
+   
+
+    channels-config = {
+      allowUnfree = true;
+      permittedInsecurePackages = [ ];
+    };
+
+    # Add Frost overlay
+    overlays = with inputs; [
+      snowfall-frost.overlays.default
+      (final: prev: {
+        fabfilter-total-bundle = final.callPackage ./packages/fabfilter-total-bundle { };
+      })
+    ];
+
+    # Deploy-rs configuration for managing deployments
+    deploy = {
+      nodes = {
+        # VM deployment using nixos-anywhere
+        vm = {
+          hostname = "192.168.122.218"; # Update this IP when VM IP changes
+          sshOpts = [ "-o" "StrictHostKeyChecking=no" ];
+          fastConnection = true;
+          interactiveSudo = false; # root user, no sudo needed
+          # Shorter timeouts to prevent hanging
+          profiles = {
+            system = {
+              sshUser = "root";
+              user = "root";
+              path = inputs.deploy-rs.lib.x86_64-linux.activate.nixos inputs.self.nixosConfigurations.vm;
+            };
+          };
+        };
+      };
+    };
+
+    templates = import ./templates;
+
+    # Development shell
+    devShells.x86_64-linux.default = lib.mkShell {
+      inherit inputs;
+      src = ./.;
+      shell = ./shells/default;
+    };
+
+    # Documentation packages
+    packages = forAllSystems (system: {
+      docs = inputs.nixdoc.packages.${system}.nixdoc;
+      frost = inputs.snowfall-frost.packages.${system}.frost;
+    });
+
+    # Apps for nix run support
+    apps = forAllSystems (system: let
+      pkgs = inputs.nixpkgs.legacyPackages.${system};
+    in {
+      default = inputs.self.apps.${system}.deploy;
+
+      install = {
+        type = "app";
+        program = "${pkgs.writeShellScriptBin "install" "exec bash ${./scripts/install.sh} \"$@\""}/bin/install";
+      };
+      
+      deploy = {
+        type = "app";
+        program = "${pkgs.writeShellScriptBin "deploy" "exec bash ${./scripts/deploy.sh} \"$@\""}/bin/deploy";
+      };
+    });
+
+    # Deploy-rs checks for deployment validation
+    checks = builtins.mapAttrs (system: deployLib: deployLib.deployChecks inputs.self.deploy) inputs.deploy-rs.lib;
+  };
+
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     disko.url = "github:nix-community/disko";
@@ -87,96 +182,5 @@
       url = "github:rafaelmardojai/firefox-gnome-theme";
       flake = false;
     };
-  };
-
-  outputs = inputs: let
-    randomBackupExt = "backup_${toString inputs.rand-nix.lib.rng.int}";
-    lib = inputs.snowfall-lib.mkLib {
-      inherit inputs;
-      src = ./.;
-      snowfall = {
-        meta = {
-          name = "nix-config";
-          title = "Cody Wright's personal system fleet";
-        };
-        namespace = "FTS-FLEET";
-      };
-    };
-  in
-  lib.mkFlake {
-    inherit inputs;
-    src = ./.;
-   
-
-    channels-config = {
-      allowUnfree = true;
-      permittedInsecurePackages = [ ];
-    };
-
-    # Add Frost overlay
-    overlays = with inputs; [
-      snowfall-frost.overlays.default
-      (final: prev: {
-        fabfilter-total-bundle = final.callPackage ./packages/fabfilter-total-bundle { };
-      })
-    ];
-
-
-
-    # Deploy-rs configuration for managing deployments
-    deploy = {
-      nodes = {
-        # VM deployment using nixos-anywhere
-        vm = {
-          hostname = "192.168.122.218"; # Update this IP when VM IP changes
-          sshOpts = [ "-o" "StrictHostKeyChecking=no" ];
-          fastConnection = true;
-          interactiveSudo = false; # root user, no sudo needed
-          # Shorter timeouts to prevent hanging
-          profiles = {
-            system = {
-              sshUser = "root";
-              user = "root";
-              path = inputs.deploy-rs.lib.x86_64-linux.activate.nixos inputs.self.nixosConfigurations.vm;
-            };
-          };
-        };
-      };
-    };
-
-    templates = import ./templates;
-
-    # Development shell
-    devShells.x86_64-linux.default = lib.mkShell {
-      inherit inputs;
-      src = ./.;
-      shell = ./shells/default;
-    };
-
-    # Documentation packages
-    packages.x86_64-linux = {
-      docs = inputs.nixdoc.packages.x86_64-linux.nixdoc;
-      frost = inputs.snowfall-frost.packages.x86_64-linux.frost;
-      
-      # Install script package
-      install = inputs.pkgs.writeShellApplication {
-        name = "install";
-        runtimeInputs = with inputs.pkgs; [ git ]; # I could make this fancier by adding other deps
-        text = ''${./install.sh} "$@"'';
-      };
-    };
-
-    # Apps for nix run support
-    apps.x86_64-linux = {
-      default = inputs.self.apps.x86_64-linux.install;
-
-      install = {
-        type = "app";
-        program = "${inputs.self.packages.x86_64-linux.install}/bin/install";
-      };
-    };
-
-    # Deploy-rs checks for deployment validation
-    checks = builtins.mapAttrs (system: deployLib: deployLib.deployChecks inputs.self.deploy) inputs.deploy-rs.lib;
   };
 }
