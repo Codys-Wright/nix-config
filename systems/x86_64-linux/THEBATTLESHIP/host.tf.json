@@ -1,5 +1,5 @@
 {
-  "ipv4": "192.168.122.217",
-  "hostname": "vm",
+  "ipv4": "192.168.1.25",
+  "hostname": "THEBATTLESHIP",
   "install_password": "snowman-frenzied-grout"
-} 
+}
