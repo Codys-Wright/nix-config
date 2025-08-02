@@ -1,7 +1,8 @@
 {
+  options,
   config,
-  pkgs,
   lib,
+  pkgs,
   namespace,
   inputs,
   ...
@@ -12,10 +13,11 @@ let
   cfg = config.${namespace}.programs.code-cursor;
 in
 {
-  options.${namespace}.programs.code-cursor = {
-    enable = mkBoolOpt false "${namespace}.programs.code-cursor.enable";
+  options.${namespace}.programs.code-cursor = with types; {
+    enable = mkBoolOpt false "Enable code-cursor";
   };
-   config = mkIf cfg.enable {
+  
+  config = mkIf cfg.enable {
     home.packages = with pkgs; [
       code-cursor
     ];

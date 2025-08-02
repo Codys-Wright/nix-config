@@ -24,6 +24,7 @@ in
       devenv
     ];
 
+    # Enable code-cursor in the development bundle
     ${namespace}.programs.code-cursor = enabled;
 
     programs.direnv = {
