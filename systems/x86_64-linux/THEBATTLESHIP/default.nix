@@ -39,7 +39,8 @@ with lib.${namespace};
     };
     
     # Bootloader configuration
-    FTS-FLEET.system.boot.grub = enabled;
+    # Alternative: Use systemd-boot instead of GRUB (often more reliable)
+    FTS-FLEET.system.boot.systemd-boot = enabled;
 
     # Facter configuration
     facter.reportPath =

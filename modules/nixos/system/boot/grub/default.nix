@@ -18,29 +18,40 @@ in
 
   config = mkIf cfg.enable {
     boot.loader = {
-      efi.canTouchEfiVariables = false; # Disable since we're using efiInstallAsRemovable
+      # EFI configuration
+      efi = {
+        canTouchEfiVariables = true;
+        efiSysMountPoint = "/boot/efi";
+      };
 
       grub = {
         enable = true;
+        # Use nodev for UEFI systems
         device = "nodev";
         efiSupport = true;
-        useOSProber = true; # Re-enable os-prober for multi-boot support
-        # Install as removable media for better compatibility during installation
-        efiInstallAsRemovable = true; # Install as removable media
-        # Additional options for better compatibility
-        forceInstall = true; # Force installation even if EFI variables fail
-        enableCryptodisk = true; # Enable crypto disk support for LUKS
-        # Try to be more robust during installation
-        splashImage = null; # Disable splash to avoid issues
-        gfxmodeEfi = "auto"; # Auto-detect graphics mode
-        # Make os-prober more robust
+        # Disable os-prober to avoid installation issues
+        useOSProber = false;
+        # Install as removable media for better compatibility
+        efiInstallAsRemovable = true;
+        # Force installation
+        forceInstall = true;
+        # Enable crypto disk support for LUKS
+        enableCryptodisk = true;
+        # Disable splash to avoid issues
+        splashImage = null;
+        # Auto-detect graphics mode
+        gfxmodeEfi = "auto";
+        # Minimal configuration to avoid blkid issues
         extraConfig = ''
-          # Make os-prober more robust
-          GRUB_DISABLE_OS_PROBER=false
-          GRUB_OS_PROBER_SKIP_LIST=""
+          GRUB_DISABLE_OS_PROBER=true
+          GRUB_TIMEOUT=5
+          GRUB_TIMEOUT_STYLE=menu
         '';
-        # Ensure os-prober doesn't break installation
-        extraGrubInstallArgs = [ "--no-nvram" ]; # Don't try to modify NVRAM
+        # Minimal installation arguments
+        extraGrubInstallArgs = [
+          "--no-nvram"
+          "--removable"
+        ];
       };
 
       timeout = 5;
