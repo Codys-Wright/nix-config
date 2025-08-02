@@ -89,32 +89,56 @@ verify_disk_configuration() {
     
     # Get the disko configuration for this host
     echo "📋 Evaluating disko configuration..."
-    disko_config=$(nix eval --json .#nixosConfigurations.$config_name.config.system.build.diskoScript --apply 'builtins.toString' 2>/dev/null || echo "")
     
-    if [ -z "$disko_config" ]; then
-        echo "⚠️  Warning: Could not evaluate disko configuration for $config_name"
-        echo "Proceeding without disk verification..."
-        return 0
+    # First, let's get the disk device from the NixOS configuration
+    echo "🎯 Extracting target disk device from configuration..."
+    target_disk=$(nix eval .#nixosConfigurations.$config_name.config.FTS-FLEET.system.disk.device 2>/dev/null | tail -1 | sed 's/^"//;s/"$//' || echo "")
+    
+    if [ -n "$target_disk" ]; then
+        echo "✅ Target disk from NixOS config: $target_disk"
+    else
+        echo "⚠️  Could not extract disk device from NixOS config"
+        echo "Trying alternative approach..."
+        
+        # Try to get it from the disko configuration
+        target_disk=$(nix eval .#nixosConfigurations.$config_name.config.system.build.diskoScript --apply 'builtins.toString' 2>/dev/null | tail -1 | grep -o '/dev/[^[:space:]]*' | head -1 || echo "")
+        
+        if [ -n "$target_disk" ]; then
+            echo "✅ Target disk from disko script: $target_disk"
+        else
+            echo "❌ Could not determine target disk"
+            target_disk=""
+        fi
     fi
     
-    # Extract the disk device from the disko configuration
-    # This is a simplified approach - in practice, you might need more sophisticated parsing
-    echo "📋 Disko configuration found:"
-    echo "$disko_config" | head -20
+    # Get the full disko configuration for display
+    disko_config=$(nix eval .#nixosConfigurations.$config_name.config.system.build.diskoScript --apply 'builtins.toString' 2>/dev/null | tail -10 || echo "")
+    
+    if [ -n "$disko_config" ]; then
+        echo "📋 Disko configuration found:"
+        echo "$disko_config" | head -10
+        echo "..."
+    fi
     
     # Show current disk devices
     echo ""
     echo "💾 Current disk devices:"
     echo "========================"
-    lsblk -f
+    
+    # Use lsblk if available, otherwise use diskutil (macOS) or df
+    if command -v lsblk >/dev/null 2>&1; then
+        lsblk -f
+    elif command -v diskutil >/dev/null 2>&1; then
+        echo "macOS detected, using diskutil:"
+        diskutil list
+    else
+        echo "Using df to show mounted filesystems:"
+        df -h
+    fi
     
     echo ""
     echo "🔍 Disk device analysis:"
     echo "========================"
-    
-    # Try to extract the target disk device from the configuration
-    # This is a simplified approach - you might need to adjust based on your disko setup
-    target_disk=$(echo "$disko_config" | grep -o '/dev/[^[:space:]]*' | head -1 || echo "")
     
     if [ -n "$target_disk" ]; then
         echo "🎯 Target disk from configuration: $target_disk"
@@ -124,18 +148,36 @@ verify_disk_configuration() {
             echo "✅ Target disk exists: $target_disk"
             echo ""
             echo "📊 Disk details:"
-            lsblk "$target_disk" -f
+            if command -v lsblk >/dev/null 2>&1; then
+                lsblk "$target_disk" -f
+            elif command -v diskutil >/dev/null 2>&1; then
+                diskutil info "$target_disk" 2>/dev/null || echo "Could not get disk info"
+            else
+                ls -la "$target_disk" 2>/dev/null || echo "Could not access disk"
+            fi
         else
             echo "❌ Target disk not found: $target_disk"
             echo ""
             echo "Available disks:"
-            lsblk | grep -E "^(NAME|sd|nvme|hd)"
+            if command -v lsblk >/dev/null 2>&1; then
+                lsblk | grep -E "^(NAME|sd|nvme|hd)"
+            elif command -v diskutil >/dev/null 2>&1; then
+                diskutil list | head -20
+            else
+                ls /dev/sd* /dev/nvme* 2>/dev/null || echo "No disk devices found"
+            fi
         fi
     else
         echo "⚠️  Could not determine target disk from configuration"
         echo ""
         echo "Available disks:"
-        lsblk | grep -E "^(NAME|sd|nvme|hd)"
+        if command -v lsblk >/dev/null 2>&1; then
+            lsblk | grep -E "^(NAME|sd|nvme|hd)"
+        elif command -v diskutil >/dev/null 2>&1; then
+            diskutil list | head -20
+        else
+            ls /dev/sd* /dev/nvme* 2>/dev/null || echo "No disk devices found"
+        fi
     fi
     
     echo ""
