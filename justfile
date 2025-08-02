@@ -100,6 +100,12 @@ deploy:
     @echo "Deploying using Terraform..."
     @just terraform-apply
 
+# Interactive deployment script
+deploy-interactive:
+    @echo "Running interactive deployment script..."
+    @chmod +x deploy.sh
+    @./deploy.sh
+
 # Deploy specific node using Terraform
 deploy-node node:
     @echo "Deploying node {{node}} using Terraform..."
@@ -176,6 +182,7 @@ help:
     @echo "  just terraform-plan           - Plan Terraform deployment"
     @echo "  just terraform-apply          - Apply Terraform deployment"
     @echo "  just deploy                   - Deploy using Terraform (alias)"
+    @echo "  just deploy-interactive       - Interactive deployment script"
     @echo "  just deploy-node <node>       - Deploy to specific node"
     @echo ""
     @echo "Deployment (Legacy deploy-rs):"
