@@ -13,43 +13,31 @@ terraform {
 
 # Read the host configuration
 locals {
-  hosts = jsondecode(file("../../systems/x86_64-linux/THEBATTLESHIP/host.tf.json"))
+  host = jsondecode(file("../../systems/x86_64-linux/THEBATTLESHIP/host.tf.json"))
 }
 
-# Deploy each host
-module "deploy" {
-  for_each = local.hosts
-
-  source = "github.com/nix-community/nixos-anywhere//terraform/all-in-one"
-
-  # NixOS system configuration
-  nixos_system_attr      = ".#nixosConfigurations.${each.value.hostname}.config.system.build.toplevel"
-  nixos_partitioner_attr = ".#nixosConfigurations.${each.value.hostname}.config.system.build.diskoScript"
-
-  # Target configuration
-  target_host = each.value.ipv4
-  target_user = "root"
-  target_port = 22
-
-  # Instance ID for tracking reinstallations
-  instance_id = each.value.ipv4
-
-  # Build on remote to avoid signature issues
-  build_on_remote = true
-
-  # Debug logging for troubleshooting
-  debug_logging = true
-
-  # Phases to run
-  phases = ["kexec", "disko", "install", "reboot"]
-
-  # Extra environment variables
-  extra_environment = {
-    SSHPASS = each.value.install_password
+# Deploy using nixos-anywhere directly
+resource "null_resource" "deploy" {
+  triggers = {
+    instance_id = local.host.ipv4
+    hostname    = local.host.hostname
   }
-}
-
-# Output the deployment results
-output "deployments" {
-  value = module.deploy
+  
+  provisioner "local-exec" {
+    command = <<-EOF
+      # Remove old host key if it exists
+      ssh-keygen -R ${local.host.ipv4} 2>/dev/null || true
+      
+      # Run nixos-anywhere with build-on-remote and env-password
+      nix run github:nix-community/nixos-anywhere -- \
+        --flake .#${local.host.hostname} \
+        --target-host root@${local.host.ipv4} \
+        --build-on-remote \
+        --env-password
+    EOF
+    
+    environment = {
+      SSHPASS = local.host.install_password
+    }
+  }
 } 
