@@ -73,6 +73,7 @@
     packages = forAllSystems (system: {
       docs = inputs.nixdoc.packages.${system}.nixdoc;
       frost = inputs.snowfall-frost.packages.${system}.frost;
+      default = inputs.self.packages.${system}.docs;  # Default to docs package
     });
 
     # Apps for nix run support

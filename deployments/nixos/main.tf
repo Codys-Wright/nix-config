@@ -15,7 +15,10 @@ variable "target_host" {
   default     = ""
 }
 
+# Namespace from the flake configuration
 locals {
+  namespace = "FTS-FLEET"
+  
   host_files = fileset(".", "../../systems/**/**/host.tf.json")
   hosts = {
     for file in local.host_files :
@@ -45,7 +48,7 @@ resource "null_resource" "deploy" {
       ssh-keygen -R ${each.value.ipv4} 2>/dev/null || true
       
       # Extract disk device from NixOS configuration
-      DISK_DEVICE=$(nix eval .#nixosConfigurations.${each.value.hostname}.config.${namespace}.system.disk.device --raw)
+      DISK_DEVICE=$(nix eval .#nixosConfigurations.${each.value.hostname}.config.${local.namespace}.system.disk.device --raw)
       
       # Run nixos-anywhere with password from environment
       SSHPASS="${each.value.install_password}" nix run github:nix-community/nixos-anywhere -- \
