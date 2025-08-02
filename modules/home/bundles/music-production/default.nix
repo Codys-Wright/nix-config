@@ -42,5 +42,32 @@ in
         yabridge.enable = cfg.plugins.yabridge;
       };
     };
+    
+    # Set up user-specific plugin directory symlinks
+    home.activation.setupUserPluginDirs = {
+      after = [ "writeBoundary" ];
+      before = [ ];
+      data = ''
+        plugin_types=("dssi" "ladspa" "lv2" "lxvst" "vst" "vst3")
+        for plugintype in "''${plugin_types[@]}"; do
+          # Create user plugin directories if they don't exist
+          mkdir -p "$HOME/.$plugintype"
+          
+          # Check if user profile has plugins and create symlinks
+          if [[ -d "$HOME/.nix-profile/lib/$plugintype" ]]; then
+            echo "Setting up $plugintype plugins from user profile..."
+            # Create symlinks for each plugin in the user profile
+            for plugin in "$HOME/.nix-profile/lib/$plugintype"/*; do
+              if [[ -d "$plugin" ]]; then
+                plugin_name=$(basename "$plugin")
+                if [[ ! -e "$HOME/.$plugintype/$plugin_name" ]]; then
+                  ln -sf "$plugin" "$HOME/.$plugintype/$plugin_name"
+                fi
+              fi
+            done
+          fi
+        done
+      '';
+    };
   };
 } 

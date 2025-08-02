@@ -1,4 +1,4 @@
-{ lib, inputs, ... }:
+{ lib, inputs, pkgs, ... }:
 {
   imports = [ inputs.musnix.nixosModules.musnix ];
 
@@ -20,5 +20,22 @@
     LXVST_PATH  = lib.mkForce (makePluginPath "lxvst");
     VST_PATH    = lib.mkForce (makePluginPath "vst");
     VST3_PATH   = lib.mkForce (makePluginPath "vst3");
+  };
+
+  system.activationScripts.symlinkMusnixPlugins = {
+    text = ''
+      plugin_types=("dssi" "ladspa" "lv2" "lxvst" "vst" "vst3")
+      for plugintype in "''${plugin_types[@]}"; do
+        # Check if the source directory exists in system profile
+        if [[ -d "/run/current-system/sw/lib/$plugintype" ]]; then
+          if [[ ! -h "/usr/lib/$plugintype" ]]; then
+            ${pkgs.coreutils}/bin/ln -s "/run/current-system/sw/lib/$plugintype" "/usr/lib/$plugintype"
+          fi
+        else
+          echo "Warning: /run/current-system/sw/lib/$plugintype does not exist, skipping symlink"
+        fi
+      done
+    '';
+    deps = [ "users" ];
   };
 }
