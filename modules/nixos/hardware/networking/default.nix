@@ -19,5 +19,11 @@ in
     networking = {
       networkmanager.enable = true;
     };
+
+    # Enable network manager applet
+    programs.nm-applet.enable = true;
+
+    # Disable systemd network wait-online
+    systemd.network.wait-online.enable = false;
   };
 }
