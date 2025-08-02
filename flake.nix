@@ -157,6 +157,23 @@
     packages.x86_64-linux = {
       docs = inputs.nixdoc.packages.x86_64-linux.nixdoc;
       frost = inputs.snowfall-frost.packages.x86_64-linux.frost;
+      
+      # Install script package
+      install = inputs.pkgs.writeShellApplication {
+        name = "install";
+        runtimeInputs = with inputs.pkgs; [ git ]; # I could make this fancier by adding other deps
+        text = ''${./install.sh} "$@"'';
+      };
+    };
+
+    # Apps for nix run support
+    apps.x86_64-linux = {
+      default = inputs.self.apps.x86_64-linux.install;
+
+      install = {
+        type = "app";
+        program = "${inputs.self.packages.x86_64-linux.install}/bin/install";
+      };
     };
 
     # Deploy-rs checks for deployment validation
