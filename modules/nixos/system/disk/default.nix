@@ -28,8 +28,8 @@ in
     withSwap = mkBoolOpt false "Enable swap partition";
     
     swapSize = mkOption {
-      type = types.int;
-      default = 8;
+      type = types.str;
+      default = "8";
       description = "Swap size in GB";
     };
     

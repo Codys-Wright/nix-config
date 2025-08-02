@@ -903,26 +903,6 @@
         "type": "github"
       }
     },
-    "nix-ld": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1753702960,
-        "narHash": "sha256-g8N9NSrZs7EE6EpKroIa8rYQ/t+qTKjLoVBHHt6qNhg=",
-        "owner": "Mic92",
-        "repo": "nix-ld",
-        "rev": "bc1a7a1b88589bfd26846fc5341fe44fc73b3fbd",
-        "type": "github"
-      },
-      "original": {
-        "owner": "Mic92",
-        "repo": "nix-ld",
-        "type": "github"
-      }
-    },
     "nixdoc": {
       "inputs": {
         "flake-compat": "flake-compat_3",
@@ -1183,7 +1163,6 @@
         "home-manager": "home-manager",
         "hyprland": "hyprland",
         "hyprpanel": "hyprpanel",
-        "nix-ld": "nix-ld",
         "nixdoc": "nixdoc",
         "nixos-facter-modules": "nixos-facter-modules",
         "nixos-hardware": "nixos-hardware",
