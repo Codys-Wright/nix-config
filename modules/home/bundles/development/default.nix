@@ -22,10 +22,8 @@ in
       cmake
       python3
       devenv
+      code-cursor
     ];
-
-    # Enable code-cursor in the development bundle
-    ${namespace}.programs.code-cursor = enabled;
 
     programs.direnv = {
       enable = true;
