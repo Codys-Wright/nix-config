@@ -30,6 +30,7 @@ in
       hardware = {
         audio = enabled;
         networking = enabled;
+        nvidia = enabled;
       };
 
       programs = {

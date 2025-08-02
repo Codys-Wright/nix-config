@@ -24,6 +24,8 @@ in
       devenv
     ];
 
+    ${namespace}.programs.code-cursor = enabled;
+
     programs.direnv = {
       enable = true;
       enableZshIntegration = true; # see note on other shells below
