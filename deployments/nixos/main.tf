@@ -8,17 +8,31 @@ terraform {
   }
 }
 
+# Variable to target specific host(s)
+variable "target_host" {
+  description = "Hostname to target (leave empty for all hosts)"
+  type        = string
+  default     = ""
+}
+
 locals {
   host_files = fileset(".", "../../systems/**/**/host.tf.json")
   hosts = {
     for file in local.host_files :
     file => jsondecode(file(file))
   }
+  
+  # Filter hosts based on target_host variable
+  target_hosts = var.target_host != "" ? {
+    for file, host in local.hosts :
+    file => host
+    if host.hostname == var.target_host
+  } : local.hosts
 }
 
 # Deploy to each host using null_resource with local-exec
 resource "null_resource" "deploy" {
-  for_each = local.hosts
+  for_each = local.target_hosts
   
   triggers = {
     instance_id = each.value.ipv4
