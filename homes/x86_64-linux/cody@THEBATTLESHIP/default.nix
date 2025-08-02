@@ -22,7 +22,7 @@ with lib.${namespace};
       development = enabled;
       office = enabled;
       music = enabled;
-      music-production = enabled;
+      # music-production = enabled; # Disabled - using system-level music production
     };
 
     programs = {
