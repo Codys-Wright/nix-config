@@ -112,10 +112,13 @@ deploy:
     @echo "Deploying using Terraform..."
     @just terraform-apply
 
-# Quick install script for devices with host configuration already set up
+# Quick install script for pre-configured hosts
 quick-install:
-    @echo "Running NixOS Quick Install script..."
-    @bash scripts/quick-install.sh
+    bash scripts/quick-install.sh
+
+# Installer install using nixos-anywhere (for use from within NixOS installer)
+installer-install:
+    bash scripts/quick-install.sh
 
 # Interactive deployment script
 deploy-interactive:
