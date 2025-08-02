@@ -19,5 +19,18 @@ in
   config = mkIf cfg.enable {
     # The individual modules (musnix, reaper, plugins) will handle their own enable/disable logic
     # when this module is enabled, they will be automatically enabled by snowfall-lib
+
+    ${namespace} = {
+      music.production = {
+        musnix = enabled;
+        daw.reaper = enabled;
+
+        plugins = {
+          lsp = enabled;
+          fabfilter = enabled;
+          yabridge = enabled;
+        }
+      }
+    }
   };
 } 
