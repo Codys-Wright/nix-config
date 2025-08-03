@@ -66,6 +66,6 @@ in
       };
     };
 
-    environment.systemPackages = with pkgs; [ pavucontrol helvum qpwgraph coppwr ];
+    environment.systemPackages = with pkgs; [ pavucontrol helvum qpwgraph coppwr raysession];
   };
 } 
