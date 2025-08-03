@@ -1,3 +1,0 @@
-[submodule "modules/standalone/nvim"]
-	path = modules/standalone/nvim
-	url = https://github.com/Codys-Wright/nvim.git
