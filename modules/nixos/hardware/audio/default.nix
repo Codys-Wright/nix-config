@@ -13,24 +13,16 @@ let
 in
 {
   options.${namespace}.hardware.audio = with types; {
-    enable = mkBoolOpt false "Enable pipewire";
+    enable = mkBoolOpt false "Enable audio system";
   };
 
   config = mkIf cfg.enable {
-    security.rtkit.enable = true;
-    services.pipewire = {
-      enable = true;
-
-      alsa = {
-        enable = true;
-        support32Bit = true;
+    # Enable the modular audio components
+    ${namespace} = {
+      hardware.audio = {
+        pipewire = enabled;
+        wireguard = enabled;
       };
-
-      jack.enable = true;
-      pulse.enable = true;
-      wireplumber.enable = true;
     };
-
-    environment.systemPackages = with pkgs; [ pavucontrol ];
   };
 }
