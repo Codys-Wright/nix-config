@@ -22,8 +22,8 @@ in
       viAlias = true;
       vimAlias = true;
 
-      # Use the standalone neovim package
-      package = inputs.self.packages.${pkgs.system}.neovim;
+      # Use the standalone nvim package
+      package = inputs.nvim.packages.${pkgs.system}.default;
 
       extraPackages = with pkgs; [
         # LSPs

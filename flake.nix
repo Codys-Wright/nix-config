@@ -73,10 +73,9 @@
     packages = forAllSystems (system: {
       docs = inputs.nixdoc.packages.${system}.nixdoc;
       frost = inputs.snowfall-frost.packages.${system}.frost;
-      neovim = lib.mkPackage {
-        inherit system;
-        src = ./packages/neovim;
-      };
+      neovim = inputs.nvim.packages.${system}.default;
+      neovim-lazy = inputs.nvim.packages.${system}.lazy;
+      neovim-minimal = inputs.nvim.packages.${system}.minimal;
       default = inputs.self.packages.${system}.docs;  # Default to docs package
     });
 
@@ -144,6 +143,12 @@
     # Apple Color Emoji font
     apple-emoji-linux = {
       url = "github:samuelngs/apple-emoji-linux";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    
+    # Standalone nvim configuration
+    nvim = {
+      url = "path:./modules/standalone/nvim";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     
