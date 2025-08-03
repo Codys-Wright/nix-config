@@ -19,17 +19,16 @@ in
 
   config = mkIf cfg.enable {
     # Force OpenGL support for gaming
-    hardware.opengl = {
+    hardware.graphics = {
       enable = mkForce true;
-      driSupport = mkForce true;
-      driSupport32Bit = mkForce true;
+      enable32Bit = mkForce true;
     };
 
-    # Set video driver for gaming
-    services.xserver.videoDrivers = mkForce [ cfg.videoDriver ];
+    # Set video driver for gaming based on system GPU configuration
+    services.xserver.videoDrivers = mkForce [ config.${namespace}.gpu ];
 
     # Enable NVIDIA modesetting if nvidia driver is selected
-    hardware.nvidia.modesetting.enable = mkIf (cfg.videoDriver == "nvidia") (mkForce true);
+    hardware.nvidia.modesetting.enable = mkIf (config.${namespace}.gpu == "nvidia") (mkForce true);
 
     ${namespace} = {
       gaming.lutris = mkDefault { enable = true; };

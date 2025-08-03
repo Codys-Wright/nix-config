@@ -25,13 +25,6 @@ in
       STEAM_EXTRA_COMPAT_TOOLS_PATHS = "\${HOME}/.steam/root/compatibilitytools.d";
     };
 
-    # Configure home-manager for the user
-    snowfallorg.users.${config.${namespace}.config.user.name}.home.packages = with pkgs; [
-      protonup
-    ];
-
-    snowfallorg.users.${config.${namespace}.config.user.name}.home.sessionVariables = {
-      STEAM_EXTRA_COMPAT_TOOLS_PATHS = "\${HOME}/.steam/root/compatibilitytools.d";
-    };
+    
   };
 } 
