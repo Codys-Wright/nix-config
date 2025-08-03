@@ -73,7 +73,10 @@
     packages = forAllSystems (system: {
       docs = inputs.nixdoc.packages.${system}.nixdoc;
       frost = inputs.snowfall-frost.packages.${system}.frost;
-      neovim = inputs.neovim.packages.${system}.default;
+      neovim = lib.mkPackage {
+        inherit system;
+        src = ./packages/neovim;
+      };
       default = inputs.self.packages.${system}.docs;  # Default to docs package
     });
 
@@ -144,11 +147,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     
-    # Neovim configuration as sub-flake
-    neovim = {
-      url = "path:./modules/home/programs/neovim";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+
     
     # Documentation tools
     nixdoc = {

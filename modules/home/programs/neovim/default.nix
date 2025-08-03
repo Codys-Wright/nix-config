@@ -22,7 +22,7 @@ in
       viAlias = true;
       vimAlias = true;
 
-      # Use the standalone nvf flake
+      # Use the standalone neovim package
       package = inputs.self.packages.${pkgs.system}.neovim;
 
       extraPackages = with pkgs; [
