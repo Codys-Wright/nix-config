@@ -71,9 +71,6 @@ in
       helvum 
       qpwgraph 
       coppwr 
-      (python3.withPackages (ps: with ps; [
-        raysession
-      ]))
     ];
   };
 } 

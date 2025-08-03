@@ -92,6 +92,7 @@ with lib.${namespace};
                 dawOutput = "alsa_card.usb-Yamaha_Corporation_Yamaha_TF-00";
                 defaultInput = "alsa_card.usb-Yamaha_Corporation_Yamaha_TF-00";
             };
+            raysession = enabled;
         };
         
         # system.themes.stylix = enabled;
