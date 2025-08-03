@@ -18,19 +18,20 @@ in
 
   config = mkIf cfg.enable {
     services = {
-      udisks2.enable = true; # Required for e-reader connections to calibre
       xserver = {
         enable = true;
         excludePackages = [ pkgs.xterm ];
       };
     };
+    
     ${namespace} = {
       config.nix = enabled;
 
       hardware = {
         audio = enabled;
         networking = enabled;
-	nvidia = enabled;
+        nvidia = enabled;
+        storage = enabled;
       };
 
       programs = {
