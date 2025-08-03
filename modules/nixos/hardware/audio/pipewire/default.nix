@@ -66,6 +66,14 @@ in
       };
     };
 
-    environment.systemPackages = with pkgs; [ pavucontrol helvum qpwgraph coppwr raysession];
+    environment.systemPackages = with pkgs; [ 
+      pavucontrol 
+      helvum 
+      qpwgraph 
+      coppwr 
+      (python3.withPackages (ps: with ps; [
+        raysession
+      ]))
+    ];
   };
 } 

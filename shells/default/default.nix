@@ -20,6 +20,9 @@ mkShell {
   packages = with pkgs; [
     treefmt
     nixfmt-rfc-style
+    (python3.withPackages (ps: with ps; [
+      mdformat
+    ]))
     shfmt
     nixd
     just
