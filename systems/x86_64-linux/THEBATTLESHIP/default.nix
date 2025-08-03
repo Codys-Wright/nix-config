@@ -76,6 +76,24 @@ with lib.${namespace};
         desktop.type = "gnome";  # Primary desktop environment
         desktop.environments = ["kde" "gnome"];  # Available desktop environments for theming
         
+        # Audio device configuration
+        hardware.audio = {
+            enable = true;
+            pipewire = {
+                enable = true;
+                sampleRate = 48000;
+                bufferSize = 128;
+                minBufferSize = 128;
+                maxBufferSize = 128;
+            };
+            wireguard = {
+                enable = true;
+                systemOutput = "alsa_card.usb-Yamaha_Corporation_Yamaha_TF-00";
+                dawOutput = "alsa_card.usb-Yamaha_Corporation_Yamaha_TF-00";
+                defaultInput = "alsa_card.usb-Yamaha_Corporation_Yamaha_TF-00";
+            };
+        };
+        
         # system.themes.stylix = enabled;
         services.ssh = {
             enable = true;

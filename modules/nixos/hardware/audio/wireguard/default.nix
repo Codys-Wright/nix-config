@@ -14,24 +14,25 @@ in
 {
   options.${namespace}.hardware.audio.wireguard = with types; {
     enable = mkBoolOpt false "Enable WireGuard audio device management";
-    systemOutput = mkStrOpt "Yamaha TF Multichannel" "Default system output device name";
-    dawOutput = mkStrOpt "Yamaha TF Multichannel" "Default DAW output device name";
-    defaultInput = mkStrOpt "Yamaha TF Multichannel" "Default input device name";
+    systemOutput = mkOpt (nullOr str) null "System output device name (optional)";
+    dawOutput = mkOpt (nullOr str) null "DAW output device name (optional)";
+    defaultInput = mkOpt (nullOr str) null "Default input device name (optional)";
   };
 
   config = mkIf cfg.enable {
     # WirePlumber configuration for device management
-    services.pipewire.wireplumber.extraLuaConfig.main."50-device-preferences" = ''
+    services.pipewire.wireplumber.extraConfig.main."50-device-preferences" = ''
       -- WireGuard Audio Device Preferences
       -- Set default devices for different audio contexts
       
-      -- Default device preferences
-      local system_output = "${cfg.systemOutput}"
-      local daw_output = "${cfg.dawOutput}"
-      local default_input = "${cfg.defaultInput}"
+      -- Default device preferences (only set if provided)
+      local system_output = ${if cfg.systemOutput != null then "\"${cfg.systemOutput}\"" else "nil"}
+      local daw_output = ${if cfg.dawOutput != null then "\"${cfg.dawOutput}\"" else "nil"}
+      local default_input = ${if cfg.defaultInput != null then "\"${cfg.defaultInput}\"" else "nil"}
       
-      -- Rules for setting default devices
+      -- Rules for setting default devices (only if devices are specified)
       alsa_monitor.rules = {
+        ${if cfg.systemOutput != null then ''
         {
           -- Set system output device preference
           matches = {
@@ -43,6 +44,8 @@ in
             ["node.description"] = "System Output - " .. system_output,
           };
         },
+        '' else ""}
+        ${if cfg.dawOutput != null then ''
         {
           -- Set DAW output device preference  
           matches = {
@@ -54,6 +57,8 @@ in
             ["node.description"] = "DAW Output - " .. daw_output,
           };
         },
+        '' else ""}
+        ${if cfg.defaultInput != null then ''
         {
           -- Set default input device preference
           matches = {
@@ -65,10 +70,12 @@ in
             ["node.description"] = "Default Input - " .. default_input,
           };
         },
+        '' else ""}
       };
       
-      -- Set default sink/source based on device preferences
+      -- Set default sink/source based on device preferences (only if devices are specified)
       default_access.rules = {
+        ${if cfg.systemOutput != null then ''
         {
           matches = {
             { "node.name", "matches", "alsa_output.*" },
@@ -78,6 +85,8 @@ in
             ["node.priority"] = 1000,
           };
         },
+        '' else ""}
+        ${if cfg.defaultInput != null then ''
         {
           matches = {
             { "node.name", "matches", "alsa_input.*" },
@@ -87,6 +96,7 @@ in
             ["node.priority"] = 1000,
           };
         },
+        '' else ""}
       };
     '';
   };
