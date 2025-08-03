@@ -77,7 +77,7 @@
         blameLine = "<leader>ghb";
         diffThis = "<leader>ghd";
         diffProject = "<leader>ghD";
-        toggleSigns = "<leader>uG";
+        # toggleSigns = "<leader>uG";  # TODO: Not available in nvf gitsigns module
       };
       setupOpts = {
         signs = {
@@ -115,6 +115,49 @@
             win = { position = "right"; };
           };
         };
+      };
+    };
+
+    # Todo comments highlighting and search
+    notes.todo-comments = {
+      enable = true;
+      mappings = {
+        telescope = "<leader>st";
+        trouble = "<leader>xt";
+        quickFix = "<leader>tdq";
+      };
+      setupOpts = {
+        search.command = "rg";
+        search.args = [
+          "--color=never"
+          "--no-heading"
+          "--with-filename"
+          "--line-number"
+          "--column"
+        ];
+        search.pattern = "\\b(KEYWORDS)(\\([^\\)]*\\))?:";
+        highlight.pattern = ".*<(KEYWORDS)(\\([^\\)]*\\))?:";
+        # Additional mappings not exposed by nvf
+        keys = [
+          {
+            "]t" = {
+              function = "require('todo-comments').jump_next()";
+              desc = "Next Todo Comment";
+            };
+            "[t" = {
+              function = "require('todo-comments').jump_prev()";
+              desc = "Previous Todo Comment";
+            };
+            "<leader>xT" = {
+              cmd = "Trouble todo toggle filter = {tag = {TODO,FIX,FIXME}}";
+              desc = "Todo/Fix/Fixme (Trouble)";
+            };
+            "<leader>sT" = {
+              cmd = "TodoTelescope keywords=TODO,FIX,FIXME";
+              desc = "Todo/Fix/Fixme";
+            };
+          }
+        ];
       };
     };
 
