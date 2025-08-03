@@ -3,6 +3,7 @@
     ../../modules/coding
     ../../modules/ui
     ../../modules/editor
+    ../../modules/formatting
   ];
 
   config.vim = {
