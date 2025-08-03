@@ -94,13 +94,13 @@ in
             # Install SWS Extension
             if [ -f "${pkgs.reaper-sws-extension}/UserPlugins/reaper_sws-x86_64.so" ]; then
               ln -sf "${pkgs.reaper-sws-extension}/UserPlugins/reaper_sws-x86_64.so" "$reaper_config/"
-              chown "$username" "$reaper_config/reaper_sws-x86_64.so"
+              # Don't try to chown symlinks as they're read-only in NixOS
             fi
             
             # Install ReaPack Extension
             if [ -f "${pkgs.reaper-reapack-extension}/UserPlugins/reaper_reapack-x86_64.so" ]; then
               ln -sf "${pkgs.reaper-reapack-extension}/UserPlugins/reaper_reapack-x86_64.so" "$reaper_config/"
-              chown "$username" "$reaper_config/reaper_reapack-x86_64.so"
+              # Don't try to chown symlinks as they're read-only in NixOS
             fi
             
             # Install SWS Scripts

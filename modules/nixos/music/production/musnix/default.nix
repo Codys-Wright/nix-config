@@ -46,6 +46,9 @@ in
     # System activation script for plugin symlinks
     system.activationScripts.symlinkMusnixPlugins = {
       text = ''
+        # Create /usr/lib directory if it doesn't exist
+        mkdir -p /usr/lib
+        
         plugin_types=("dssi" "ladspa" "lv2" "lxvst" "vst" "vst3")
         for plugintype in "''${plugin_types[@]}"; do
           # Check if the source directory exists in system profile
