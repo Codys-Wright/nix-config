@@ -5,6 +5,7 @@
     ../../modules/editor
     ../../modules/formatting
     ../../modules/linting
+    ../../modules/util
   ];
 
   config.vim = {
