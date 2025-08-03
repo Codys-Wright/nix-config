@@ -19,10 +19,16 @@ in
   config = mkIf cfg.enable {
     environment.systemPackages = with pkgs; [
       steam
+      mangohud
     ];
     
-    ${namespace} = {
-      programs.steam = enabled;
+    # Enable Steam with gamescope session
+    programs.steam = {
+      enable = mkForce true;
+      gamescopeSession.enable = mkForce true;
     };
+    
+    # Enable gamemode for better gaming performance
+    programs.gamemode.enable = mkForce true;
   };
 } 
