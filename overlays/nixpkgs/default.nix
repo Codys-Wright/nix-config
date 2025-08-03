@@ -12,4 +12,7 @@ final: prev: {
     inherit (final) system;
     config.allowUnfree = true;
   };
+
+  # Add custom packages
+  nvf-flake = final.callPackage ../packages/nvf-flake { inherit inputs; };
 } 

@@ -49,6 +49,8 @@ in
         z = "cd";
         ls = "eza --icons=always --no-quotes";
         tree = "eza --icons=always --tree --no-quotes";
+        # Ensure flake nvim is used (backup in case PATH doesn't work)
+        nvim = "nix run .#nvim";
       };
 
       plugins = [ ];

@@ -94,6 +94,11 @@
         type = "app";
         program = "${pkgs.writeShellScriptBin "deploy" "exec bash ${./scripts/deploy.sh} \"$@\""}/bin/deploy";
       };
+
+      # Neovim apps
+      nvim = inputs.nvim.apps.${system}.default;
+      nvim-lazy = inputs.nvim.apps.${system}.lazy;
+      nvim-minimal = inputs.nvim.apps.${system}.minimal;
     });
 
     # Deploy-rs checks for deployment validation

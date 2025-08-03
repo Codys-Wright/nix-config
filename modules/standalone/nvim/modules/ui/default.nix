@@ -8,7 +8,63 @@
     };
 
     # Statusline
-    statusline.lualine.enable = true;
+    statusline.lualine = {
+      enable = true;
+      theme = "auto";
+      globalStatus = true;
+      icons.enable = true;
+      alwaysDivideMiddle = true;
+      componentSeparator = {
+        left = "";
+        right = "";
+      };
+      sectionSeparator = {
+        left = "";
+        right = "";
+      };
+      refresh = {
+        statusline = 1000;
+        tabline = 1000;
+        winbar = 1000;
+      };
+      disabledFiletypes = [ "alpha" ];
+      ignoreFocus = [ "NvimTree" ];
+      # Active sections (A | B | C       X | Y | Z)
+      activeSection = {
+        a = [ "mode" ];
+        b = [ "branch" "diff" "diagnostics" ];
+        c = [ "filename" ];
+        x = [ "encoding" "fileformat" "filetype" ];
+        y = [ "progress" ];
+        z = [ "location" ];
+      };
+      # Inactive sections
+      inactiveSection = {
+        a = [ ];
+        b = [ ];
+        c = [ "filename" ];
+        x = [ "location" ];
+        y = [ ];
+        z = [ ];
+      };
+      # Extra sections for customization
+      extraActiveSection = {
+        a = [ ];
+        b = [ ];
+        c = [ ];
+        x = [ ];
+        y = [ ];
+        z = [ ];
+      };
+      extraInactiveSection = {
+        a = [ ];
+        b = [ ];
+        c = [ ];
+        x = [ ];
+        y = [ ];
+        z = [ ];
+      };
+    };
 
     # Visual enhancements
     mini = {

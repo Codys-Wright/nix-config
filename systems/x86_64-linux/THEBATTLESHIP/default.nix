@@ -135,7 +135,8 @@ with lib.${namespace};
 	gemini-cli
         snowfallorg.frost
         whitesur-wallpapers
-        inputs.nvim.packages.${pkgs.system}.default
+        # Use flake nvim as the default nvim
+        nvf-flake
     ];
 
     # Add overlay to make custom packages available
