@@ -7,6 +7,7 @@
       style = "moon";
     };
 
+
     # Statusline
     statusline.lualine.enable = true;
 
