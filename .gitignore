@@ -1,0 +1,32 @@
+# Devenv files
+.devenv/
+.direnv/
+
+# Nix build artifacts
+result
+result-*
+
+# System-specific files
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# IDE files
+.vscode/
+.idea/
+*.code-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Backup files
+*.bak
+*.backup 

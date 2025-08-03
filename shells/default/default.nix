@@ -20,7 +20,6 @@ mkShell {
   packages = with pkgs; [
     treefmt
     nixfmt-rfc-style
-    python310Packages.mdformat
     shfmt
     nixd
     just
