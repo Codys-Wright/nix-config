@@ -9,7 +9,7 @@
 with lib;
 with lib.${namespace};
 let
-  cfg = config.${namespace}.music.production.reaper;
+  cfg = config.${namespace}.music.production.daw.reaper;
 in
 {
   options.${namespace}.music.production.daw.reaper = with types; {
@@ -25,6 +25,10 @@ in
   };
 
   config = mkIf cfg.enable {
+    # Add users to audio and realtime groups for music production
+    users.groups.audio.members = [ "cody" ];
+    users.groups.realtime.members = [ "cody" ];
+    
     # System packages for music production
     environment.systemPackages = with pkgs; [
       # Reaper DAW
@@ -84,19 +88,19 @@ in
             
             if [ ! -d "$reaper_config" ]; then
               mkdir -p "$reaper_config"
-              chown "$username:$username" "$reaper_config"
+              chown "$username" "$reaper_config"
             fi
             
             # Install SWS Extension
             if [ -f "${pkgs.reaper-sws-extension}/UserPlugins/reaper_sws-x86_64.so" ]; then
               ln -sf "${pkgs.reaper-sws-extension}/UserPlugins/reaper_sws-x86_64.so" "$reaper_config/"
-              chown "$username:$username" "$reaper_config/reaper_sws-x86_64.so"
+              chown "$username" "$reaper_config/reaper_sws-x86_64.so"
             fi
             
             # Install ReaPack Extension
             if [ -f "${pkgs.reaper-reapack-extension}/UserPlugins/reaper_reapack-x86_64.so" ]; then
               ln -sf "${pkgs.reaper-reapack-extension}/UserPlugins/reaper_reapack-x86_64.so" "$reaper_config/"
-              chown "$username:$username" "$reaper_config/reaper_reapack-x86_64.so"
+              chown "$username" "$reaper_config/reaper_reapack-x86_64.so"
             fi
             
             # Install SWS Scripts
@@ -104,7 +108,7 @@ in
               scripts_dir="$user_home/.config/REAPER/Scripts"
               mkdir -p "$scripts_dir"
               cp -r "${pkgs.reaper-sws-extension}/Scripts/"* "$scripts_dir/" 2>/dev/null || true
-              chown -R "$username:$username" "$scripts_dir"
+              chown -R "$username" "$scripts_dir"
             fi
           fi
         done
@@ -124,15 +128,15 @@ in
             mkdir -p "$user_home/.vst/yabridge"
             mkdir -p "$user_home/.vst3/yabridge"
             mkdir -p "$user_home/.clap/yabridge"
-            chown -R "$username:$username" "$user_home/.vst"
-            chown -R "$username:$username" "$user_home/.vst3"
-            chown -R "$username:$username" "$user_home/.clap"
+            chown -R "$username" "$user_home/.vst"
+            chown -R "$username" "$user_home/.vst3"
+            chown -R "$username" "$user_home/.clap"
             
             # Set up Wine prefix for the user
             wine_prefix="$user_home/.wine"
             if [ ! -d "$wine_prefix" ]; then
               mkdir -p "$wine_prefix"
-              chown "$username:$username" "$wine_prefix"
+              chown "$username" "$wine_prefix"
             fi
             
             # Add common VST directories to yabridgectl (run as user)

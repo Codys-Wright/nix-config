@@ -74,6 +74,10 @@ in
   };
 
   config = mkIf cfg.enable {
+    # Add users to audio and realtime groups for music production
+    users.groups.audio.members = [ "cody" ];
+    users.groups.realtime.members = [ "cody" ];
+    
     environment.systemPackages = with pkgs; [
       yabridge
       yabridgectl
@@ -101,15 +105,15 @@ in
             mkdir -p "$user_home/.vst/yabridge"
             mkdir -p "$user_home/.vst3/yabridge"
             mkdir -p "$user_home/.clap/yabridge"
-            chown -R "$username:$username" "$user_home/.vst"
-            chown -R "$username:$username" "$user_home/.vst3"
-            chown -R "$username:$username" "$user_home/.clap"
+            chown -R "$username" "$user_home/.vst"
+            chown -R "$username" "$user_home/.vst3"
+            chown -R "$username" "$user_home/.clap"
             
             # Set up Wine prefix for the user
             wine_prefix="$user_home/.wine"
             if [ ! -d "$wine_prefix" ]; then
               mkdir -p "$wine_prefix"
-              chown "$username:$username" "$wine_prefix"
+              chown "$username" "$wine_prefix"
             fi
             
             # Add VST2 directories to yabridgectl (run as user)
