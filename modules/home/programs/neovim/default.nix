@@ -22,7 +22,8 @@ in
       viAlias = true;
       vimAlias = true;
 
-      #plugins = with pkgs.vimPlugins; [];
+      # Use the standalone nvf flake
+      package = inputs.self.packages.${pkgs.system}.neovim;
 
       extraPackages = with pkgs; [
         # LSPs
@@ -49,9 +50,5 @@ in
         fzf
       ];
     };
-    #xdg.configFile."nvim" = {
-    #  source = config.lib.file.mkOutOfStoreSymlink ./config;
-    #  recursive = true;
-    #};
   };
 }
