@@ -22,7 +22,7 @@ in
       hardware.audio = {
         pipewire = enabled;
         wireguard = enabled;
-      };
+    };
     };
   };
 }
