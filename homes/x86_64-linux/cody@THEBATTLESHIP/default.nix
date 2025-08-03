@@ -43,6 +43,8 @@ with lib.${namespace};
         useEquibop = true; 
       };
     };
+
+    
     
     # Unified theme system
     theme = {

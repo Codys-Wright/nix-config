@@ -14,8 +14,6 @@ in
 {
   options.${namespace}.gaming = with types; {
     enable = mkBoolOpt false "Enable gaming modules";
-    lutris = mkOpt attrs { } "Lutris configuration";
-    steam = mkOpt attrs { } "Steam configuration";
   };
 
   config = mkIf cfg.enable {

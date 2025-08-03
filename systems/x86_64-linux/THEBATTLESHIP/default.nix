@@ -73,6 +73,7 @@ with lib.${namespace};
         bundles.common = enabled;
         bundles.cli = enabled;
         music.production = enabled;
+        gaming = enabled;
         desktop.type = "gnome";  # Primary desktop environment
         desktop.environments = ["kde" "gnome"];  # Available desktop environments for theming
         
