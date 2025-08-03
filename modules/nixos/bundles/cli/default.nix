@@ -24,7 +24,7 @@ in
       wget
       git
       vim
-      neovim
+      # neovim # Disabled - using flake nvim instead
       tmux
       htop
       btop

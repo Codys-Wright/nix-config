@@ -54,7 +54,7 @@ in
         brave = enabled; # Keep as fallback browser
         kitty = enabled;
         lazygit = enabled;
-        neovim = enabled;
+        # neovim = enabled; # Disabled - using flake nvim instead
         tmux = enabled;
       };
     };

@@ -86,7 +86,7 @@ with lib.${namespace};
         # System kernel configuration
         system.kernel = enabled;
         
-        hardware.cuda = enabled;
+        hardware.cuda = disabled;
 
 
         # Audio device configuration
@@ -136,7 +136,7 @@ with lib.${namespace};
         snowfallorg.frost
         whitesur-wallpapers
         # Use flake nvim as the default nvim
-        nvf-flake
+        inputs.self.packages.${pkgs.system}.nvf-flake
     ];
 
     # Add overlay to make custom packages available

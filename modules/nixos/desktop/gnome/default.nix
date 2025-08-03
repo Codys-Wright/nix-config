@@ -51,6 +51,7 @@ in
       gnomeExtensions.dash-to-dock
       gnomeExtensions.appindicator
       gnomeExtensions.gsconnect
+      gnomeExtensions.tactile
     ];
 
     # GNOME services (as of 25.11)

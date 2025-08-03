@@ -27,6 +27,7 @@ with lib.${namespace};
 
     programs = {
       git = enabled;
+      zed-editor = enabled;
     };
 
     

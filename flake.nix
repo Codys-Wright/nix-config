@@ -76,6 +76,7 @@
       neovim = inputs.nvim.packages.${system}.default;
       neovim-lazy = inputs.nvim.packages.${system}.lazy;
       neovim-minimal = inputs.nvim.packages.${system}.minimal;
+      nvf-flake = inputs.nvim.packages.${system}.default;  # Alias for the flake nvim
       default = inputs.self.packages.${system}.docs;  # Default to docs package
     });
 
