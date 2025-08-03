@@ -37,6 +37,12 @@ with lib.${namespace};
       email = "cody@example.com"; # Update this with your actual email
     };
 
+    communications = {
+      discord = {
+        enable = true;
+        useEquibop = true; 
+      };
+    };
     
     # Unified theme system
     theme = {

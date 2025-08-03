@@ -79,6 +79,9 @@ with lib.${namespace};
         # System kernel configuration
         system.kernel = enabled;
         
+        hardware.cuda = enabled;
+
+
         # Audio device configuration
         hardware.audio = {
             enable = true;
