@@ -9,40 +9,53 @@
         terminal = {
           win = {
             keys = {
-              nav_h = { "<C-h>", "term_nav('h')", desc = "Go to Left Window", expr = true, mode = "t" };
-              nav_j = { "<C-j>", "term_nav('j')", desc = "Go to Lower Window", expr = true, mode = "t" };
-              nav_k = { "<C-k>", "term_nav('k')", desc = "Go to Upper Window", expr = true, mode = "t" };
-              nav_l = { "<C-l>", "term_nav('l')", desc = "Go to Right Window", expr = true, mode = "t" };
+              nav_h = [ "<C-h>" "term_nav('h')" "Go to Left Window" true "t" ];
+              nav_j = [ "<C-j>" "term_nav('j')" "Go to Lower Window" true "t" ];
+              nav_k = [ "<C-k>" "term_nav('k')" "Go to Upper Window" true "t" ];
+              nav_l = [ "<C-l>" "term_nav('l')" "Go to Right Window" true "t" ];
             };
           };
         };
       };
     };
 
-    # Additional keybindings for snacks
+    # Mini.sessions for session management
+    mini.sessions = {
+      enable = true;
+      setupOpts = {
+        # Custom keybindings for session management
+        keys = [
+          {
+            "<leader>qs" = {
+              function = "require('mini.sessions').read()";
+              desc = "Restore Session";
+            };
+            "<leader>qS" = {
+              function = "require('mini.sessions').select()";
+              desc = "Select Session";
+            };
+            "<leader>ql" = {
+              function = "require('mini.sessions').read({ last = true })";
+              desc = "Restore Last Session";
+            };
+            "<leader>qd" = {
+              function = "require('mini.sessions').delete()";
+              desc = "Delete Current Session";
+            };
+          }
+        ];
+      };
+    };
+
+    # Additional keybindings for snacks and sessions
     binds.whichKey.register = {
       "<leader>." = "Toggle Scratch Buffer";
       "<leader>S" = "Select Scratch Buffer";
       "<leader>dps" = "Profiler Scratch Buffer";
+      "<leader>qs" = "Restore Session";
+      "<leader>qS" = "Select Session";
+      "<leader>ql" = "Restore Last Session";
+      "<leader>qd" = "Delete Current Session";
     };
-
-    # Keybindings for snacks functionality
-    binds.whichKey.spec = [
-      {
-        mode = [ "n" ];
-        "<leader>." = {
-          function = "Snacks.scratch()";
-          desc = "Toggle Scratch Buffer";
-        };
-        "<leader>S" = {
-          function = "Snacks.scratch.select()";
-          desc = "Select Scratch Buffer";
-        };
-        "<leader>dps" = {
-          function = "Snacks.profiler.scratch()";
-          desc = "Profiler Scratch Buffer";
-        };
-      }
-    ];
   };
 } 
