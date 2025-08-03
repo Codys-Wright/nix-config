@@ -26,6 +26,9 @@ in
     programs.steam = {
       enable = mkForce true;
       gamescopeSession.enable = mkForce true;
+      remotePlay.openFirewall = mkDefault true;
+      dedicatedServer.openFirewall = mkDefault true;
+      localNetworkGameTransfers.openFirewall = mkDefault true;
     };
     
     # Enable gamemode for better gaming performance

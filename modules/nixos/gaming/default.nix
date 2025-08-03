@@ -25,10 +25,13 @@ in
     };
 
     # Set video driver for gaming based on system GPU configuration
-    services.xserver.videoDrivers = mkForce [ config.${namespace}.gpu ];
+    services.xserver.videoDrivers = mkForce [ config.${namespace}.gpu.type ];
 
     # Enable NVIDIA modesetting if nvidia driver is selected
-    hardware.nvidia.modesetting.enable = mkIf (config.${namespace}.gpu == "nvidia") (mkForce true);
+    hardware.nvidia.modesetting.enable = mkIf (config.${namespace}.gpu.type == "nvidia") (mkForce true);
+
+    # Enable ntsync for better gaming performance
+    boot.kernelModules = mkForce [ "ntsync" ];
 
     ${namespace} = {
       gaming.lutris = mkDefault { enable = true; };
