@@ -29,6 +29,12 @@ in
 
     # Enable NVIDIA modesetting if nvidia driver is selected
     hardware.nvidia.modesetting.enable = mkIf (config.${namespace}.gpu.type == "nvidia") (mkForce true);
+    
+    # Use NVIDIA beta drivers for better gaming performance
+    hardware.nvidia.package = mkIf (config.${namespace}.gpu.type == "nvidia") (mkForce config.boot.kernelPackages.nvidiaPackages.beta);
+    
+    # Ensure nvidia-control-devices service uses the same beta drivers
+    systemd.services.nvidia-control-devices.path = mkIf (config.${namespace}.gpu.type == "nvidia") (mkForce [ config.boot.kernelPackages.nvidiaPackages.beta ]);
 
     # Enable ntsync for better gaming performance
     boot.kernelModules = mkForce [ "ntsync" ];

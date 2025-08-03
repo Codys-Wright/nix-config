@@ -20,6 +20,8 @@ in
     environment.systemPackages = with pkgs; [
       steam
       mangohud
+      steam-tui
+      steamcmd
     ];
     
     # Enable Steam with gamescope session
