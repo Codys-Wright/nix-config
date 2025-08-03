@@ -16,39 +16,14 @@ in
     enable = mkBoolOpt false "${namespace}.programs.neovim.enable";
   };
   config = mkIf cfg.enable {
-    programs.neovim = {
-      enable = true;
-      defaultEditor = true;
-      viAlias = true;
-      vimAlias = true;
-
-      # Use the standalone nvim package
-      package = inputs.nvim.packages.${pkgs.system}.default;
-
-      extraPackages = with pkgs; [
-        # LSPs
-        luajitPackages.lua-lsp
-        nil
-        pyright
-
-        # Formatter
-        stylua
-        ruff
-        nixfmt-rfc-style
-
-        # Languages and Compiler
-        gcc
-        python3
-        nodejs
-        cargo
-        rustc
-        cmake
-        gnumake
-        clang-tools
-
-        ripgrep
-        fzf
-      ];
-    };
+    # Disabled - using system neovim instead
+    # programs.neovim = {
+    #   enable = true;
+    #   defaultEditor = true;
+    #   viAlias = true;
+    #   vimAlias = true;
+    #   package = inputs.nvim.packages.${pkgs.system}.default;
+    #   extraPackages = with pkgs; [ ... ];
+    # };
   };
 }
