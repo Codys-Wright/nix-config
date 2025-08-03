@@ -1,9 +1,4 @@
-{
-  channels,
-  namespace,
-  inputs,
-  ...
-}:
+{ inputs, ... }:
 
 final: prev: {
   # Add stable packages (25.05)
@@ -17,10 +12,4 @@ final: prev: {
     inherit (final) system;
     config.allowUnfree = true;
   };
-
-  # You can add more versions here as needed
-  # "23.11" = import inputs.nixpkgs-23.11 {
-  #   inherit (final) system;
-  #   config.allowUnfree = true;
-  # };
 } 
