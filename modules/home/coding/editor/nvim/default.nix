@@ -21,5 +21,16 @@ in
         };
       };
     };
+
+    # Enable the editor module
+    ${namespace}.coding.editor.nvim.modules = {
+      editor = enabled;
+    };
+
+    # Set environment variables
+    home.sessionVariables = {
+      EDITOR = "nvim";
+      VISUAL = "nvim";
+    };
   };
 } 
