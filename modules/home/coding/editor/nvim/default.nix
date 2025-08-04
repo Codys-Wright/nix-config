@@ -5,6 +5,8 @@ let
   cfg = config.${namespace}.coding.editor.nvim;
 in
 {
+
+
   options.${namespace}.coding.editor.nvim = with types; {
     enable = mkBoolOpt false "Enable Neovim editor";
     preset = mkOption {
@@ -15,10 +17,7 @@ in
   };
 
   config = mkIf cfg.enable {
-    # Import the nvf home-manager module
-    imports = [ inputs.nvf.homeManagerModules.default ];
-
-    # Configure nvf with the selected preset
+    # Configure nvf using the home-manager module
     programs.nvf = {
       enable = true;
       settings = {
@@ -26,9 +25,6 @@ in
           # Basic settings
           viAlias = false;
           vimAlias = true;
-          
-          # Import the selected preset
-          imports = [ ./presets/${cfg.preset} ];
         };
       };
     };

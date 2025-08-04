@@ -35,10 +35,11 @@ with lib.${namespace};
 
     coding.editor = {
       zed-editor = enabled;
-      nvim = {
-        enable = true;
-        preset = "default"; # or "lazy" or "minimal"
-      };
+      # nvim = {
+      #   enable = true;
+      #   preset = "default"; # or "lazy" or "minimal"
+      #   presets.default.enable = true;
+      # };
     };
 
     coding.lang = {
