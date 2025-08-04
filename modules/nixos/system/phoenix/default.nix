@@ -22,7 +22,7 @@ let
         [
           git
           nix
-          inputs.nh.packages.${pkgs.system}.default
+          nh
         ]
         ++ cfg.extraRuntimeInputs;
       text = script;
@@ -33,13 +33,17 @@ let
     #!/bin/bash
     echo "🔄 Syncing system and user configurations..."
 
+    # Get current hostname and username
+    HOSTNAME=$(hostname)
+    USERNAME=$(whoami)
+
     # Sync system
     echo "📦 Updating system configuration..."
-    nh os switch ${cfg.dotfilesDir}#nixosConfigurations.${cfg.systemConfigName}
+    nh os switch ${cfg.dotfilesDir}#nixosConfigurations."$HOSTNAME"
 
     # Sync user
     echo "🏠 Updating user configuration..."
-    nh home switch ${cfg.dotfilesDir}#homeConfigurations.${cfg.homeConfigName} -b backup
+    nh home switch ${cfg.dotfilesDir}#homeConfigurations."$USERNAME@$HOSTNAME".activationPackage -b backup
 
     # Run post-sync hooks
     phoenix posthook
@@ -48,14 +52,23 @@ let
   syncSystemScript = createScript "phoenix-sync-system" ''
     #!/bin/bash
     echo "📦 Updating system configuration..."
-    nh os switch ${cfg.dotfilesDir}#nixosConfigurations.${cfg.systemConfigName}
+    
+    # Get current hostname
+    HOSTNAME=$(hostname)
+    
+    nh os switch ${cfg.dotfilesDir}#nixosConfigurations."$HOSTNAME"
     echo "✅ System sync complete!"
   '';
 
   syncUserScript = createScript "phoenix-sync-user" ''
     #!/bin/bash
     echo "🏠 Updating user configuration..."
-    nh home switch ${cfg.dotfilesDir}#homeConfigurations.${cfg.homeConfigName} -b backup
+    
+    # Get current hostname and username
+    HOSTNAME=$(hostname)
+    USERNAME=$(whoami)
+    
+    nh home switch ${cfg.dotfilesDir}#homeConfigurations."$USERNAME@$HOSTNAME".activationPackage -b backup
     echo "✅ User sync complete!"
   '';
 
@@ -72,8 +85,16 @@ let
     echo "⬆️ Upgrading system..."
     cd ${cfg.dotfilesDir}
     nix flake update
-    nh os switch ${cfg.dotfilesDir}#nixosConfigurations.${cfg.systemConfigName}
-    nh home switch ${cfg.dotfilesDir}#homeConfigurations.${cfg.homeConfigName}
+    
+    # Get current hostname
+    HOSTNAME=$(hostname)
+    
+    nh os switch ${cfg.dotfilesDir}#nixosConfigurations."$HOSTNAME"
+    # Get current hostname and username
+    HOSTNAME=$(hostname)
+    USERNAME=$(whoami)
+    
+    nh home switch ${cfg.dotfilesDir}#homeConfigurations."$USERNAME@$HOSTNAME".activationPackage
     echo "✅ System upgraded!"
   '';
 
@@ -112,7 +133,7 @@ let
       [
         git
         nix
-        inputs.nh.packages.${pkgs.system}.default
+        nh
       ]
       ++ cfg.extraRuntimeInputs;
     text = ''
@@ -206,11 +227,11 @@ in
   options.${namespace}.system.phoenix = with types; {
     enable = mkBoolOpt false "Enable the Phoenix system management tool";
 
-    dotfilesDir = mkOpt str "/home/${userCfg.name}/.dotfiles" "Path to the dotfiles directory";
+    dotfilesDir = mkOpt str "/home/${userCfg.name}/nix-config" "Path to the dotfiles directory";
 
-    systemConfigName = mkOpt str "system" "Name of the system configuration in the flake";
+    systemConfigName = mkOpt str "THEBATTLESHIP" "Name of the system configuration in the flake";
 
-    homeConfigName = mkOpt str "user.activationPackage" "Name of the home configuration in the flake";
+    homeConfigName = mkOpt str "cody@THEBATTLESHIP" "Name of the home configuration in the flake";
 
     defaultGcAge = mkOpt str "30d" "Default age for garbage collection";
 
@@ -226,7 +247,6 @@ in
   config = mkIf cfg.enable {
     environment.systemPackages = [
       phoenixScript
-      nh
     ];
   };
 }

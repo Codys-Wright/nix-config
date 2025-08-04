@@ -25,7 +25,7 @@ in
     ];
 
     ${namespace} = {
-      programs = {
+      app.browser = {
         zen = enabled;
         brave = enabled;
         librewolf = enabled; # Alternative privacy-focused browser

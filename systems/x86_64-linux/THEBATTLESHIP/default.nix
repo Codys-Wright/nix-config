@@ -77,6 +77,9 @@ with lib.${namespace};
         desktop.type = "gnome";  # Primary desktop environment
         desktop.environments = ["kde" "gnome"];  # Available desktop environments for theming
         
+        # Programs
+        programs.nh = enabled;
+        
         # GPU configuration
         gpu = {
           enable = true;

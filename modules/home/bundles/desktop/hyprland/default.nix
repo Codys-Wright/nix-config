@@ -35,16 +35,20 @@ in
     ];
 
     ${namespace} = {
-      desktop.hyprland = enabled;
+      desktop.hyprland = {
+        enable = true;
+        modules = {
+          hypridle = enabled;
+          hyprlock = enabled;
+          hyprpanel = enabled;
+          hyprpaper = enabled;
+          rofi = enabled;
+          # waybar = disabled;
+        };
+      };
       programs = {
         ags = enabled;
         # dolphin = disabled;
-        hypridle = enabled;
-        hyprlock = enabled;
-        hyprpanel = enabled;
-        hyprpaper = enabled;
-        rofi = enabled;
-        # waybar = disabled;
       };
     };
   };

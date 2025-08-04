@@ -19,14 +19,18 @@ in
   config = mkIf cfg.enable {
     home.packages = with pkgs; [ yazi ];
     ${namespace} = {
-      programs = {
-        atuin = enabled;
-        eza = enabled;
-        fzf = enabled;
-        powerlevel10k = enabled ;
-        starship = enabled;
-        zoxide = enabled;
-        zsh = enabled;
+      coding = {
+        cli = {
+          atuin = enabled;
+          eza = enabled;
+          fzf = enabled;
+          zoxide = enabled;
+        };
+        shell = {
+          powerlevel10k = enabled;
+          starship = enabled;
+          zsh = enabled;
+        };
       };
     };
   };

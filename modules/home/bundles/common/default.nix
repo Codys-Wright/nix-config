@@ -50,12 +50,14 @@ in
         # qt = enabled; # Disabled - conflicts with other Qt modules
         scripts = enabled;
       };
-      programs = {
+      app.browser = {
         brave = enabled; # Keep as fallback browser
-        kitty = enabled;
-        lazygit = enabled;
-        # neovim = enabled; # Disabled - using flake nvim instead
-        tmux = enabled;
+      };
+      coding = {
+        terminal = {
+          kitty = enabled;
+          tmux = enabled;
+        };
       };
     };
   };

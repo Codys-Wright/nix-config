@@ -17,26 +17,29 @@ with lib.${namespace};
       shell = enabled;
       browsers = enabled;
       # desktop.hyprland = enabled; # Disabled - using KDE
-      development = enabled;
       office = enabled;
       music = enabled;
       # music-production = enabled; # Disabled - using system-level music production
     };
 
-    programs = {
+    coding.tools = {
       git = enabled;
-      zed-editor = enabled;
+      lazygit = enabled;
     };
 
     coding = {
       enable = true;
       languages = true;
-      tools = true;
       editors = true;
-      lang = {
-        typescript = {
-          enable = true;
-        };
+    };
+
+    coding.editor = {
+      zed-editor = enabled;
+    };
+
+    coding.lang = {
+      typescript = {
+        enable = true;
       };
     };
 

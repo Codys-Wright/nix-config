@@ -14,7 +14,6 @@ in
   options.${namespace}.coding = with types; {
     enable = mkBoolOpt false "Enable coding environment";
     languages = mkBoolOpt false "Enable programming language support";
-    tools = mkBoolOpt false "Enable development tools";
     editors = mkBoolOpt false "Enable code editors";
     databases = mkBoolOpt false "Enable database tools";
     containerization = mkBoolOpt false "Enable Docker and container tools";
@@ -31,75 +30,7 @@ in
     # Development tools
     home.packages =
       with pkgs;
-      (optionals (cfg.tools || cfg.all) [
-        # Version control
-        git
-        git-lfs
-        gh # GitHub CLI
-        gitlab-runner
-
-        # Build tools
-        gnumake
-        cmake
-        meson
-        ninja
-        pkg-config
-
-        # Debugging tools
-        gdb
-        lldb
-        valgrind
-
-        # Performance tools
-        perf-tools
-        hyperfine
-
-        # Documentation
-        pandoc
-        graphviz
-
-        # API development
-        postman
-        insomnia
-
-        # Text processing
-        jq
-        yq
-        xmlstarlet
-
-        # Network tools
-        curl
-        wget
-        httpie
-        netcat
-        nmap
-        wireshark
-
-        # File tools
-        tree
-        fd
-        ripgrep
-        bat
-        eza
-
-        # Archive tools
-        unzip
-        zip
-        p7zip
-
-        # Monitoring
-        htop
-        btop
-        iotop
-
-        # Development utilities
-        watchman
-        entr
-        tmux
-        screen
-      ])
-
-      ++ (optionals (cfg.editors || cfg.all) [
+      (optionals (cfg.editors || cfg.all) [
         # Editors
         vim
         neovim
@@ -167,102 +98,8 @@ in
         grafana-loki
       ]);
 
-    # Global Git configuration
-    programs.git = mkIf (cfg.tools || cfg.all) {
-      enable = mkDefault true;
-      delta.enable = mkDefault true;
-      extraConfig = {
-        init.defaultBranch = mkDefault "main";
-        pull.rebase = mkDefault true;
-        push.autoSetupRemote = mkDefault true;
-        core.autocrlf = mkDefault false;
-        core.safecrlf = mkDefault false;
-        rebase.autoStash = mkDefault true;
-        merge.conflictStyle = mkDefault "diff3";
-        diff.algorithm = mkDefault "histogram";
-        branch.sort = mkDefault "-committerdate";
-        tag.sort = mkDefault "version:refname";
-      };
-      aliases = {
-        st = "status";
-        co = "checkout";
-        br = "branch";
-        ci = "commit";
-        lg = "log --oneline --graph --decorate";
-        unstage = "reset HEAD --";
-        last = "log -1 HEAD";
-        visual = "!gitk";
-        amend = "commit --amend";
-        pushf = "push --force-with-lease";
-        recent = "branch --sort=-committerdate";
-      };
-    };
-
-    # Direnv for project environments
-    programs.direnv = mkIf (cfg.tools || cfg.all) {
-      enable = mkDefault true;
-      enableZshIntegration = mkDefault true;
-      enableBashIntegration = mkDefault true;
-      nix-direnv.enable = mkDefault true;
-    };
-
-    # Tmux for terminal multiplexing
-    programs.tmux = mkIf (cfg.tools || cfg.all) {
-      enable = mkDefault true;
-      terminal = mkDefault "screen-256color";
-      historyLimit = mkDefault 10000;
-      keyMode = mkDefault "vi";
-      extraConfig = mkDefault ''
-        # Enable mouse support
-        set -g mouse on
-
-        # Start windows and panes at 1, not 0
-        set -g base-index 1
-        setw -g pane-base-index 1
-
-        # Renumber windows when one is closed
-        set -g renumber-windows on
-
-        # Increase scrollback buffer size
-        set -g history-limit 50000
-
-        # Display messages for 2 seconds
-        set -g display-time 2000
-
-        # Refresh status line every 5 seconds
-        set -g status-interval 5
-
-        # Upgrade $TERM
-        set -g default-terminal "screen-256color"
-
-        # Enable RGB colour if running in xterm
-        set-option -sa terminal-overrides ",xterm*:Tc"
-
-        # Change default meta key to same as screen
-        unbind C-b
-        set -g prefix C-a
-
-        # Form vim/tmux d/y buffer sync
-        set -g focus-events on
-
-        # Use vim keybindings in copy mode
-        setw -g mode-keys vi
-
-        # Setup 'v' to begin selection, just like Vim
-        bind-key -T copy-mode-vi 'v' send -X begin-selection
-
-        # Setup 'y' to yank (copy), just like Vim
-        bind-key -T copy-mode-vi 'y' send -X copy-pipe-and-cancel "pbcopy"
-        bind-key -T copy-mode-vi 'V' send -X select-line
-        bind-key -T copy-mode-vi 'r' send -X rectangle-toggle
-
-        # Bind ']' to use the clipboard
-        bind ] run "reattach-to-user-namespace pbpaste | tmux load-buffer - && tmux paste-buffer"
-      '';
-    };
-
     # Environment variables for development
-    home.sessionVariables = mkIf (cfg.tools || cfg.all) {
+    home.sessionVariables = mkIf (cfg.all) {
       EDITOR = mkDefault "vim";
       VISUAL = mkDefault "vim";
       PAGER = mkDefault "less";
@@ -271,7 +108,7 @@ in
     };
 
     # XDG directories for development
-    xdg.configFile = mkIf (cfg.tools || cfg.all) {
+    xdg.configFile = mkIf (cfg.all) {
       "git/ignore".text = ''
         # OS generated files
         .DS_Store
