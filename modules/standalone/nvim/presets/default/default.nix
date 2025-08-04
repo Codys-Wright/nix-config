@@ -6,6 +6,7 @@
     ../../modules/formatting
     ../../modules/linting
     ../../modules/util
+    ../../modules/snacks
   ];
 
   config.vim = {

@@ -1,5 +1,11 @@
 {
   config.vim = {
+    # Vim options
+    options = {
+      # Enable shada for yanky.nvim
+      shada = "'100,<50,s10,h";
+    };
+
     # Core editing features
     mini = {
       basics.enable = true;
@@ -8,7 +14,21 @@
       cursorword.enable = true;
       diff.enable = true;
       doc.enable = true;
-      files.enable = true;
+      files = {
+        enable = true;
+        setupOpts = {
+          windows = {
+            preview = true;
+            width_focus = 30;
+            width_preview = 30;
+          };
+          options = {
+            # Whether to use for editing directories
+            # Disabled by default in LazyVim because neo-tree is used for that
+            use_as_default_explorer = false;
+          };
+        };
+      };
       jump.enable = true;
       map.enable = true;
       misc.enable = true;
@@ -19,7 +39,7 @@
       pick.enable = true;
       sessions.enable = true;
       splitjoin.enable = true;
-      starter.enable = true;
+      # starter.enable = true; # Disabled - using snacks dashboard instead
       surround.enable = true;
       test.enable = true;
       visits.enable = true;
@@ -175,5 +195,14 @@
         toggle = "<c-s>";
       };
     };
+
+    navigation.harpoon.enable = true;
+
+    # Mini.files keybindings
+    binds.whichKey.register = {
+      "<leader>fm" = "Open mini.files (Directory of Current File)";
+      "<leader>fM" = "Open mini.files (cwd)";
+    };
+    
   };
 } 

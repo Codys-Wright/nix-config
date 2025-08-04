@@ -5,7 +5,25 @@
       enable = true;
       setupOpts = {
         bigfile = { enabled = true; };
+        dashboard = { enabled = true; };
+        explorer = { enabled = true; };
+        indent = { enabled = true; };
+        input = { enabled = true; };
+        notifier = {
+          enabled = true;
+          timeout = 3000;
+        };
+        picker = { enabled = true; };
         quickfile = { enabled = true; };
+        scope = { enabled = true; };
+        scroll = { enabled = true; };
+        statuscolumn = { enabled = true; };
+        words = { enabled = true; };
+        styles = {
+          notification = {
+            # wo = { wrap = true } # Wrap notifications
+          };
+        };
         terminal = {
           win = {
             keys = {
@@ -18,6 +36,8 @@
         };
       };
     };
+
+    utility.yanky-nvim.enable = true;
 
     # Mini.sessions for session management
     mini.sessions = {
@@ -47,11 +67,8 @@
       };
     };
 
-    # Additional keybindings for snacks and sessions
+    # Additional keybindings for sessions
     binds.whichKey.register = {
-      "<leader>." = "Toggle Scratch Buffer";
-      "<leader>S" = "Select Scratch Buffer";
-      "<leader>dps" = "Profiler Scratch Buffer";
       "<leader>qs" = "Restore Session";
       "<leader>qS" = "Select Session";
       "<leader>ql" = "Restore Last Session";
