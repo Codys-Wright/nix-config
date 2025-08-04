@@ -3,7 +3,6 @@ with lib;
 with lib.${namespace};
 let
   cfg = config.${namespace}.coding.editor.nvim;
-  nvimPackage = inputs.nvim.packages.${pkgs.system}.${cfg.preset};
 in
 {
   options.${namespace}.coding.editor.nvim = with types; {
@@ -16,23 +15,22 @@ in
   };
 
   config = mkIf cfg.enable {
-    home.packages = with pkgs; [
-      # Add the nvf flake package to home packages
-      nvimPackage
-    ];
+    # Import the nvf home-manager module
+    imports = [ inputs.nvf.homeManagerModules.default ];
 
-    # Create aliases for the nvim flake
-    home.shellAliases = {
-      nvim = "exec ${nvimPackage}/bin/nvim";
-      nvim-default = "exec ${inputs.nvim.packages.${pkgs.system}.default}/bin/nvim";
-      nvim-lazy = "exec ${inputs.nvim.packages.${pkgs.system}.lazy}/bin/nvim";
-      nvim-minimal = "exec ${inputs.nvim.packages.${pkgs.system}.minimal}/bin/nvim";
-    };
-
-    # Add environment variables for nvim
-    home.sessionVariables = {
-      EDITOR = "${nvimPackage}/bin/nvim";
-      VISUAL = "${nvimPackage}/bin/nvim";
+    # Configure nvf with the selected preset
+    programs.nvf = {
+      enable = true;
+      settings = {
+        vim = {
+          # Basic settings
+          viAlias = false;
+          vimAlias = true;
+          
+          # Import the selected preset
+          imports = [ ./presets/${cfg.preset} ];
+        };
+      };
     };
   };
 } 

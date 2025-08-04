@@ -1,11 +1,11 @@
 {
   imports = [
-    ../../nvf-modules/coding
-    ../../nvf-modules/ui
-    ../../nvf-modules/editor
-    ../../nvf-modules/formatting
-    ../../nvf-modules/linting
-    ../../nvf-modules/util
+    ../../modules/coding
+    ../../modules/ui
+    ../../modules/editor
+    ../../modules/formatting
+    ../../modules/linting
+    ../../modules/util
   ];
 
   config.vim = {

@@ -73,10 +73,6 @@
     packages = forAllSystems (system: {
       docs = inputs.nixdoc.packages.${system}.nixdoc;
       frost = inputs.snowfall-frost.packages.${system}.frost;
-      neovim = inputs.nvim.packages.${system}.default;
-      neovim-lazy = inputs.nvim.packages.${system}.lazy;
-      neovim-minimal = inputs.nvim.packages.${system}.minimal;
-      nvf-flake = inputs.nvim.packages.${system}.default;  # Alias for the flake nvim
       default = inputs.self.packages.${system}.docs;  # Default to docs package
     });
 
@@ -96,10 +92,11 @@
         program = "${pkgs.writeShellScriptBin "deploy" "exec bash ${./scripts/deploy.sh} \"$@\""}/bin/deploy";
       };
 
-      # Neovim apps
-      nvim = inputs.nvim.apps.${system}.default;
-      nvim-lazy = inputs.nvim.apps.${system}.lazy;
-      nvim-minimal = inputs.nvim.apps.${system}.minimal;
+      # Neovim apps (using nvf)
+      nvim = {
+        type = "app";
+        program = "${inputs.nvf.packages.${system}.default}/bin/nvim";
+      };
     });
 
     # Deploy-rs checks for deployment validation
@@ -152,9 +149,9 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     
-    # Standalone nvim configuration
-    nvim = {
-      url = "path:./modules/home/coding/editor/nvim";
+    # Nvf - Neovim configuration framework
+    nvf = {
+      url = "github:notashelf/nvf";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     
