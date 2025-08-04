@@ -10,9 +10,9 @@ in
   };
 
   config = mkIf cfg.enable {
-    # Add editor modules here
-    imports = [
-      ./nvim
-    ];
+    # Enable nvim module
+    ${namespace}.coding.editor.nvim = {
+      enable = true;
+    };
   };
 } 

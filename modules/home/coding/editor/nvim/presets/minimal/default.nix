@@ -1,6 +1,6 @@
 {
   imports = [
-    ../../modules/editor
+    ../../nvf-modules/editor
   ];
 
   config.vim = {

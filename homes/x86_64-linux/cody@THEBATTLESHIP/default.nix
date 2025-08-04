@@ -38,7 +38,6 @@ with lib.${namespace};
       nvim = {
         enable = true;
         preset = "default"; # or "lazy" or "minimal"
-        useFlake = true;
       };
     };
 
