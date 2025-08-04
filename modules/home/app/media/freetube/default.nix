@@ -9,11 +9,11 @@
 with lib;
 with lib.${namespace};
 let
-  cfg = config.${namespace}.programs.freetube;
+  cfg = config.${namespace}.app.media.freetube;
 in
 {
-  options.${namespace}.programs.freetube = with types; {
-    enable = mkBoolOpt false "Enable freetube";
+  options.${namespace}.app.media.freetube = with types; {
+    enable = mkBoolOpt false "Enable FreeTube YouTube client";
   };
 
   config = mkIf cfg.enable {

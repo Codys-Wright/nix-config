@@ -10,13 +10,13 @@
 with lib;
 with lib.${namespace};
 let
-  cfg = config.${namespace}.programs.ags;
+  cfg = config.${namespace}.desktop.hyprland.modules.ags;
 in
 {
   imports = [ inputs.ags.homeManagerModules.default ];
 
-  options.${namespace}.programs.ags = with types; {
-    enable = mkBoolOpt false "Enable ags";
+  options.${namespace}.desktop.hyprland.modules.ags = with types; {
+    enable = mkBoolOpt false "Enable AGS desktop shell";
   };
 
   config = mkIf cfg.enable {

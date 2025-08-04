@@ -25,6 +25,7 @@ in
           eza = enabled;
           fzf = enabled;
           zoxide = enabled;
+          btop = enabled;
         };
         shell = {
           powerlevel10k = enabled;

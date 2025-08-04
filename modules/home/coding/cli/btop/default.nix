@@ -9,11 +9,11 @@
 with lib;
 with lib.${namespace};
 let
-  cfg = config.${namespace}.programs.btop;
+  cfg = config.${namespace}.coding.cli.btop;
 in
 {
-  options.${namespace}.programs.btop = with types; {
-    enable = mkBoolOpt false "Enable btop";
+  options.${namespace}.coding.cli.btop = with types; {
+    enable = mkBoolOpt false "Enable Btop system monitor";
   };
 
   config = mkIf cfg.enable {

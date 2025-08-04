@@ -9,11 +9,11 @@
 with lib;
 with lib.${namespace};
 let
-  cfg = config.${namespace}.programs.gimp;
+  cfg = config.${namespace}.app.graphics.gimp;
 in
 {
-  options.${namespace}.programs.gimp = with types; {
-    enable = mkBoolOpt false "Enable gimp";
+  options.${namespace}.app.graphics.gimp = with types; {
+    enable = mkBoolOpt false "Enable GIMP image editor";
   };
 
   config = mkIf cfg.enable {

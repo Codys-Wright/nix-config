@@ -43,13 +43,11 @@ in
           hyprpanel = enabled;
           hyprpaper = enabled;
           rofi = enabled;
+          ags = enabled;
           # waybar = disabled;
         };
       };
-      programs = {
-        ags = enabled;
-        # dolphin = disabled;
-      };
+
     };
   };
 }
