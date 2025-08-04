@@ -11,8 +11,6 @@ in
 
   config = mkIf cfg.enable {
     # Enable nvim module
-    ${namespace}.coding.editor.nvim = {
-      enable = true;
-    };
+    
   };
 } 

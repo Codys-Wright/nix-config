@@ -139,8 +139,6 @@ with lib.${namespace};
         snowfallorg.frost
         zed-editor
         whitesur-wallpapers
-        # Use flake nvim as the default nvim
-        inputs.self.packages.${pkgs.system}.nvf-flake
     ];
 
     # Add overlay to make custom packages available
