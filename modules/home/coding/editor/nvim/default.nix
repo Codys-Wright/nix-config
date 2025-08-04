@@ -25,6 +25,10 @@ in
     # Enable the editor module
     ${namespace}.coding.editor.nvim.modules = {
       editor = enabled;
+      formatting = enabled;
+      coding = enabled;
+      ui = enabled;
+      snacks = enabled;
     };
 
     # Set environment variables
