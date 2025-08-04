@@ -11,5 +11,8 @@ in
 
   config = mkIf cfg.enable {
     # Add editor modules here
+    imports = [
+      ./nvim
+    ];
   };
 } 

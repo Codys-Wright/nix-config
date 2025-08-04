@@ -154,7 +154,7 @@
     
     # Standalone nvim configuration
     nvim = {
-      url = "path:./modules/standalone/nvim";
+      url = "path:./modules/home/coding/editor/nvim";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     
