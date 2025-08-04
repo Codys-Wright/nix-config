@@ -23,7 +23,7 @@ in
         excludePackages = [ pkgs.xterm ];
       };
     };
-    
+
     ${namespace} = {
       config.nix = enabled;
 
@@ -47,6 +47,7 @@ in
       system = {
         fonts = enabled;
         locale = enabled;
+        phoenix = enabled;
       };
     };
   };
