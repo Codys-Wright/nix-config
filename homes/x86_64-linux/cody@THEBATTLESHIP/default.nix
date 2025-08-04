@@ -10,9 +10,7 @@ with lib;
 with lib.${namespace};
 {
   snowfallorg.user.enable = true;
-  
- 
-  
+
   FTS-FLEET = {
     bundles = {
       common = enabled;
@@ -30,7 +28,16 @@ with lib.${namespace};
       zed-editor = enabled;
     };
 
-    
+    coding = {
+      enable = true;
+      languages = true;
+      tools = true;
+      editors = true;
+      lang = {
+        typescript = true;
+      };
+    };
+
     config.user = {
       enable = true;
       name = "cody";
@@ -41,12 +48,10 @@ with lib.${namespace};
     communications = {
       discord = {
         enable = true;
-        useEquibop = true; 
+        useEquibop = true;
       };
     };
 
-    
-    
     # Unified theme system
     theme = {
       enable = true;
@@ -54,15 +59,15 @@ with lib.${namespace};
       polarity = "dark";
       # WhiteSur-specific options
       whitesur = {
-        opacity = "25";           # Panel opacity: 15, 25, 35, 45, 55, 65, 75, 85
-        panelHeight = "40";       # Panel height: 32, 40, 48, 56, 64
+        opacity = "25"; # Panel opacity: 15, 25, 35, 45, 55, 65, 75, 85
+        panelHeight = "40"; # Panel height: 32, 40, 48, 56, 64
         activitiesIcon = "colorful"; # Activities icon: standard, colorful, white, ubuntu
-        smallerFont = false;      # Use 10pt instead of 13pt font
-        showAppsNormal = false;   # Use normal show apps button style
-        montereyStyle = false;    # Use Monterey style instead of BigSur
-        highDefinition = false;   # Use high-DPI size
-        libadwaita = false;       # Enable GTK4/libadwaita theming
-        fixedAccent = false;      # Use fixed accent colors
+        smallerFont = false; # Use 10pt instead of 13pt font
+        showAppsNormal = false; # Use normal show apps button style
+        montereyStyle = false; # Use Monterey style instead of BigSur
+        highDefinition = false; # Use high-DPI size
+        libadwaita = false; # Enable GTK4/libadwaita theming
+        fixedAccent = false; # Use fixed accent colors
       };
       targets = {
         colors = enabled;
@@ -93,4 +98,4 @@ with lib.${namespace};
   # the Home Manager release notes for a list of state version
   # changes in each release.
   home.stateVersion = lib.mkDefault (osConfig.system.stateVersion or "24.05");
-} 
+}
