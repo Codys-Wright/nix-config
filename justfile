@@ -177,7 +177,7 @@ test-vm target:
 # Quick setup for your specific target
 setup-my-target:
     @echo "Setting up for your target (192.168.122.217)..."
-    just target 192.168.122.217 breeze-crazily-pristine
+    just target 192.168.120.217 breeze-crazily-pristine
     @echo "Now you can use:"
     @echo "  just deploy           - Deploy to your target using Terraform"
     @echo "  just test-connection  - Test SSH connection"
@@ -253,4 +253,4 @@ help:
     @echo "  just target 192.168.1.100 mypassword"
     @echo "  just nixos-anywhere vm       # Initial installation"
     @echo "  just deploy                   # Configuration updates (Terraform)"
-    @echo "  just connect" 
+    @echo "  just connect"

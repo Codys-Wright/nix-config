@@ -6,11 +6,10 @@
     ../../modules/formatting
     ../../modules/linting
     ../../modules/util
-    ../../modules/snacks
   ];
 
   config.vim = {
     # Default configuration - balanced setup
     # This preset includes all modules for a full-featured experience
   };
-} 
+}

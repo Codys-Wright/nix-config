@@ -53,7 +53,7 @@ A modern, modular NixOS configuration system built with best practices and cutti
 
 - [ ] **Opt-In Unstable Channel**
   - Package-level unstable channel selection
-  - Stable defaults with opt-in bleeding edge
+  - Stab
   - Granular control over package versions
 
 ## 🛠️ Current Features
@@ -79,6 +79,7 @@ just connect
 
 #### **Local Installation** (when you have physical access)
 ```bash
+
 # One command installation (future)
 just install-local
 

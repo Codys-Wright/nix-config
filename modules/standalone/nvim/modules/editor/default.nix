@@ -29,6 +29,7 @@
           };
         };
       };
+
       jump.enable = true;
       map.enable = true;
       misc.enable = true;
@@ -101,19 +102,41 @@
       };
       setupOpts = {
         signs = {
-          add = { text = "▎"; };
-          change = { text = "▎"; };
-          delete = { text = ""; };
-          topdelete = { text = ""; };
-          changedelete = { text = "▎"; };
-          untracked = { text = "▎"; };
+          add = {
+            text = "▎";
+          };
+          change = {
+            text = "▎";
+          };
+          delete = {
+            text = "";
+          };
+          topdelete = {
+            text = "";
+          };
+          changedelete = {
+            text = "▎";
+          };
+          untracked = {
+            text = "▎";
+          };
         };
         signs_staged = {
-          add = { text = "▎"; };
-          change = { text = "▎"; };
-          delete = { text = ""; };
-          topdelete = { text = ""; };
-          changedelete = { text = "▎"; };
+          add = {
+            text = "▎";
+          };
+          change = {
+            text = "▎";
+          };
+          delete = {
+            text = "";
+          };
+          topdelete = {
+            text = "";
+          };
+          changedelete = {
+            text = "▎";
+          };
         };
       };
     };
@@ -132,7 +155,9 @@
       setupOpts = {
         modes = {
           lsp = {
-            win = { position = "right"; };
+            win = {
+              position = "right";
+            };
           };
         };
       };
@@ -203,6 +228,6 @@
       "<leader>fm" = "Open mini.files (Directory of Current File)";
       "<leader>fM" = "Open mini.files (cwd)";
     };
-    
+
   };
-} 
+}

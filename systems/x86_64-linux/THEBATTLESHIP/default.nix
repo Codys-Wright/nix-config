@@ -134,6 +134,7 @@ with lib.${namespace};
 	opencode
 	gemini-cli
         snowfallorg.frost
+        zed-editor
         whitesur-wallpapers
         # Use flake nvim as the default nvim
         inputs.self.packages.${pkgs.system}.nvf-flake
