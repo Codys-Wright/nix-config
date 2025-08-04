@@ -34,7 +34,9 @@ with lib.${namespace};
       tools = true;
       editors = true;
       lang = {
-        typescript = true;
+        typescript = {
+          enable = true;
+        };
       };
     };
 

@@ -13,31 +13,22 @@ in
 {
   options.${namespace}.coding.lang = with types; {
     enable = mkBoolOpt false "Enable programming language support";
-    typescript = mkBoolOpt false "Enable TypeScript/JavaScript development environment";
-    python = mkBoolOpt false "Enable Python development environment";
-    rust = mkBoolOpt false "Enable Rust development environment";
-    go = mkBoolOpt false "Enable Go development environment";
-    java = mkBoolOpt false "Enable Java development environment";
-    csharp = mkBoolOpt false "Enable C# development environment";
-    cpp = mkBoolOpt false "Enable C++ development environment";
-    php = mkBoolOpt false "Enable PHP development environment";
-    ruby = mkBoolOpt false "Enable Ruby development environment";
     all = mkBoolOpt false "Enable all supported programming languages";
   };
 
   config = mkIf cfg.enable {
     # Enable individual language modules based on options
-    ${namespace}.coding.lang.typescript.enable = mkIf (cfg.typescript || cfg.all) true;
+    ${namespace}.coding.lang.typescript.enable = mkIf cfg.all true;
 
     # Future language modules can be added here:
-    # ${namespace}.coding.lang.python.enable = mkIf (cfg.python || cfg.all) true;
-    # ${namespace}.coding.lang.rust.enable = mkIf (cfg.rust || cfg.all) true;
-    # ${namespace}.coding.lang.go.enable = mkIf (cfg.go || cfg.all) true;
-    # ${namespace}.coding.lang.java.enable = mkIf (cfg.java || cfg.all) true;
-    # ${namespace}.coding.lang.csharp.enable = mkIf (cfg.csharp || cfg.all) true;
-    # ${namespace}.coding.lang.cpp.enable = mkIf (cfg.cpp || cfg.all) true;
-    # ${namespace}.coding.lang.php.enable = mkIf (cfg.php || cfg.all) true;
-    # ${namespace}.coding.lang.ruby.enable = mkIf (cfg.ruby || cfg.all) true;
+    # ${namespace}.coding.lang.python.enable = mkIf cfg.all true;
+    # ${namespace}.coding.lang.rust.enable = mkIf cfg.all true;
+    # ${namespace}.coding.lang.go.enable = mkIf cfg.all true;
+    # ${namespace}.coding.lang.java.enable = mkIf cfg.all true;
+    # ${namespace}.coding.lang.csharp.enable = mkIf cfg.all true;
+    # ${namespace}.coding.lang.cpp.enable = mkIf cfg.all true;
+    # ${namespace}.coding.lang.php.enable = mkIf cfg.all true;
+    # ${namespace}.coding.lang.ruby.enable = mkIf cfg.all true;
 
     # Common development tools for all languages
     home.packages = with pkgs; [
