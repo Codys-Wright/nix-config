@@ -48,6 +48,13 @@ in
           desc = "Smart Find Files";
           lua = true;
         }
+        {
+          key = "<leader>,";
+          mode = [ "n" ];
+          action = "function() Snacks.picker.buffers() end";
+          desc = "Buffers";
+          lua = true;
+        }
       ];
     };
   };
