@@ -9,7 +9,7 @@
 with lib;
 with lib.${namespace};
 let
-  cfg = config.${namespace}.misc.scripts.system;
+  cfg = config.${namespace}.desktop.hyprland.modules.scripts.system;
 
   menu =
     pkgs.writeShellScriptBin "menu"
@@ -68,8 +68,8 @@ let
       '';
 in
 {
-  options.${namespace}.misc.scripts.system = with types; {
-    enable = mkBoolOpt false "Enable misc.scripts.system";
+  options.${namespace}.desktop.hyprland.modules.scripts.system = with types; {
+    enable = mkBoolOpt false "Enable system control scripts";
   };
 
   config = mkIf cfg.enable {

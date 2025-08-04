@@ -9,7 +9,7 @@
 with lib;
 with lib.${namespace};
 let
-  cfg = config.${namespace}.misc.scripts.hyprfocus;
+  cfg = config.${namespace}.desktop.hyprland.modules.scripts.hyprfocus;
 
   hyprfocus-on =
     pkgs.writeShellScriptBin "hyprfocus-on"
@@ -47,8 +47,8 @@ let
       '';
 in
 {
-  options.${namespace}.misc.scripts.hyprfocus = with types; {
-    enable = mkBoolOpt false "Enable misc.scripts.hyprfocus";
+  options.${namespace}.desktop.hyprland.modules.scripts.hyprfocus = with types; {
+    enable = mkBoolOpt false "Enable Hyprland focus mode scripts";
   };
 
   config = mkIf cfg.enable {

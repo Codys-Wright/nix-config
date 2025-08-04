@@ -9,7 +9,7 @@
 with lib;
 with lib.${namespace};
 let
-  cfg = config.${namespace}.misc.scripts.screenshot;
+  cfg = config.${namespace}.desktop.hyprland.modules.scripts.screenshot;
 
   screenshot = pkgs.writeShellScriptBin "screenshot" ''
     if [[ $2 == "swappy" ]];then
@@ -41,8 +41,8 @@ let
   '';
 in
 {
-  options.${namespace}.misc.scripts.screenshot = with types; {
-    enable = mkBoolOpt false "Enable misc.scripts.screenshot";
+  options.${namespace}.desktop.hyprland.modules.scripts.screenshot = with types; {
+    enable = mkBoolOpt false "Enable screenshot control scripts";
   };
 
   config = mkIf cfg.enable {

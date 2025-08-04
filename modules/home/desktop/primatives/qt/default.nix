@@ -9,11 +9,11 @@
 with lib;
 with lib.${namespace};
 let
-  cfg = config.${namespace}.misc.qt;
+  cfg = config.${namespace}.desktop.primatives.qt;
 in
 {
-  options.${namespace}.misc.qt = with types; {
-    enable = mkBoolOpt false "Enable qt theme";
+  options.${namespace}.desktop.primatives.qt = with types; {
+    enable = mkBoolOpt false "Enable Qt theming";
   };
 
   config = mkIf cfg.enable {

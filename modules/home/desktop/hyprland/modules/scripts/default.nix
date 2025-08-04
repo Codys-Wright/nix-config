@@ -9,15 +9,15 @@
 with lib;
 with lib.${namespace};
 let
-  cfg = config.${namespace}.misc.scripts;
+  cfg = config.${namespace}.desktop.hyprland.modules.scripts;
 in
 {
-  options.${namespace}.misc.scripts = with types; {
-    enable = mkBoolOpt false "Enable misc.scripts";
+  options.${namespace}.desktop.hyprland.modules.scripts = with types; {
+    enable = mkBoolOpt false "Enable Hyprland utility scripts";
   };
 
   config = mkIf cfg.enable {
-    ${namespace}.misc.scripts = {
+    ${namespace}.desktop.hyprland.modules.scripts = {
       brightness = enabled;
       caffeine = enabled;
       hyprfocus = enabled;

@@ -9,7 +9,7 @@
 with lib;
 with lib.${namespace};
 let
-  cfg = config.${namespace}.misc.scripts.notification;
+  cfg = config.${namespace}.desktop.hyprland.modules.scripts.notification;
 
   notif =
     pkgs.writeShellScriptBin "notif" # bash
@@ -37,8 +37,8 @@ let
 
 in
 {
-  options.${namespace}.misc.scripts.notification = with types; {
-    enable = mkBoolOpt false "Enable misc.scripts.notification";
+  options.${namespace}.desktop.hyprland.modules.scripts.notification = with types; {
+    enable = mkBoolOpt false "Enable notification control scripts";
   };
 
   config = mkIf cfg.enable {

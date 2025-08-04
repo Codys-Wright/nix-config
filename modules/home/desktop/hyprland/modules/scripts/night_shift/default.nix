@@ -9,7 +9,7 @@
 with lib;
 with lib.${namespace};
 let
-  cfg = config.${namespace}.misc.scripts.night_shift;
+  cfg = config.${namespace}.desktop.hyprland.modules.scripts.night_shift;
 
   night-shift-on = pkgs.writeShellScriptBin "night-shift-on" ''
     ${pkgs.hyprshade}/bin/hyprshade on blue-light-filter
@@ -52,8 +52,8 @@ let
   '';
 in
 {
-  options.${namespace}.misc.scripts.night_shift = with types; {
-    enable = mkBoolOpt false "Enable misc.scripts.night_shift";
+  options.${namespace}.desktop.hyprland.modules.scripts.night_shift = with types; {
+    enable = mkBoolOpt false "Enable night shift control scripts";
   };
 
   config = mkIf cfg.enable {

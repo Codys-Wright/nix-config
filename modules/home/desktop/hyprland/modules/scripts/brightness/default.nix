@@ -18,7 +18,7 @@
 with lib;
 with lib.${namespace};
 let
-  cfg = config.${namespace}.misc.scripts.brightness;
+  cfg = config.${namespace}.desktop.hyprland.modules.scripts.brightness;
 
   increments = "5";
 
@@ -41,8 +41,8 @@ let
 
 in
 {
-  options.${namespace}.misc.scripts.brightness = with types; {
-    enable = mkBoolOpt false "Enable misc.scripts.brightness";
+  options.${namespace}.desktop.hyprland.modules.scripts.brightness = with types; {
+    enable = mkBoolOpt false "Enable brightness control scripts";
   };
 
   config = mkIf cfg.enable {

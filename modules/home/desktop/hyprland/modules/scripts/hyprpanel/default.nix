@@ -9,7 +9,7 @@
 with lib;
 with lib.${namespace};
 let
-  cfg = config.${namespace}.misc.scripts.hyprpanel;
+  cfg = config.${namespace}.desktop.hyprland.modules.scripts.hyprpanel;
 
   hyprpanel-toggle = pkgs.writeShellScriptBin "hyprpanel-toggle" ''
     hyprpanel -t bar-0
@@ -46,8 +46,8 @@ let
   '';
 in
 {
-  options.${namespace}.misc.scripts.hyprpanel = with types; {
-    enable = mkBoolOpt false "Enable misc.scripts.hyprpanel";
+  options.${namespace}.desktop.hyprland.modules.scripts.hyprpanel = with types; {
+    enable = mkBoolOpt false "Enable Hyprland panel control scripts";
   };
 
   config = mkIf cfg.enable {

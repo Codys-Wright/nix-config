@@ -45,10 +45,17 @@ in
       config = {
         apps = enabled;
       };
-      misc = {
-        # gtk = enabled; # Disabled - conflicts with WhiteSur theme
-        # qt = enabled; # Disabled - conflicts with other Qt modules
-        scripts = enabled;
+      desktop = {
+        primatives = {
+          # gtk = enabled; # Disabled - conflicts with WhiteSur theme
+          # qt = enabled; # Disabled - conflicts with other Qt modules
+          xdg = enabled;
+        };
+        hyprland = {
+          modules = {
+            scripts = enabled;
+          };
+        };
       };
       app.browser = {
         brave = enabled; # Keep as fallback browser

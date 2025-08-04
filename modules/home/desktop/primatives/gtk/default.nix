@@ -9,11 +9,11 @@
 with lib;
 with lib.${namespace};
 let
-  cfg = config.${namespace}.misc.gtk;
+  cfg = config.${namespace}.desktop.primatives.gtk;
 in
 {
-  options.${namespace}.misc.gtk = with types; {
-    enable = mkBoolOpt false "Enable gtk";
+  options.${namespace}.desktop.primatives.gtk = with types; {
+    enable = mkBoolOpt false "Enable GTK theming";
   };
 
   config = mkIf cfg.enable {

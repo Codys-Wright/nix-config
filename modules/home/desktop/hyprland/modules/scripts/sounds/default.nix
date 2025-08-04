@@ -9,7 +9,7 @@
 with lib;
 with lib.${namespace};
 let
-  cfg = config.${namespace}.misc.scripts.sounds;
+  cfg = config.${namespace}.desktop.hyprland.modules.scripts.sounds;
 
   increments = "5";
 
@@ -37,8 +37,8 @@ let
   '';
 in
 {
-  options.${namespace}.misc.scripts.sounds = with types; {
-    enable = mkBoolOpt false "Enable misc.scripts.sounds";
+  options.${namespace}.desktop.hyprland.modules.scripts.sounds = with types; {
+    enable = mkBoolOpt false "Enable sound control scripts";
   };
 
   config = mkIf cfg.enable {

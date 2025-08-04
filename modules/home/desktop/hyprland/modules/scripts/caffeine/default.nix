@@ -9,7 +9,7 @@
 with lib;
 with lib.${namespace};
 let
-  cfg = config.${namespace}.misc.scripts.caffeine;
+  cfg = config.${namespace}.desktop.hyprland.modules.scripts.caffeine;
 
   caffeine-status = pkgs.writeShellScriptBin "caffeine-status" ''
     [[ $(pidof "hypridle") ]] && echo "0" || echo "1"
@@ -34,8 +34,8 @@ let
   '';
 in
 {
-  options.${namespace}.misc.scripts.caffeine = with types; {
-    enable = mkBoolOpt false "Enable misc.scripts.caffeine";
+  options.${namespace}.desktop.hyprland.modules.scripts.caffeine = with types; {
+    enable = mkBoolOpt false "Enable caffeine control scripts";
   };
 
   config = mkIf cfg.enable {
