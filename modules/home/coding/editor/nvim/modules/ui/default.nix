@@ -32,42 +32,88 @@ in
           tabline = 1000;
           winbar = 1000;
         };
-        disabledFiletypes = [ "alpha" ];
+        disabledFiletypes = [ "dashboard" "alpha" "ministarter" "snacks_dashboard" ];
         ignoreFocus = [ "NvimTree" ];
-        # Active sections (A | B | C       X | Y | Z)
-        activeSection = {
-          a = [ "mode" ];
-          b = [ "branch" "diff" "diagnostics" ];
-          c = [ "filename" ];
-          x = [ "encoding" "fileformat" "filetype" ];
-          y = [ "progress" ];
-          z = [ "location" ];
-        };
-        # Inactive sections
-        inactiveSection = {
-          a = [ ];
-          b = [ ];
-          c = [ "filename" ];
-          x = [ "location" ];
-          y = [ ];
-          z = [ ];
-        };
-        # Extra sections for customization
-        extraActiveSection = {
-          a = [ ];
-          b = [ ];
-          c = [ ];
-          x = [ ];
-          y = [ ];
-          z = [ ];
-        };
-        extraInactiveSection = {
-          a = [ ];
-          b = [ ];
-          c = [ ];
-          x = [ ];
-          y = [ ];
-          z = [ ];
+        setupOpts = {
+          options = {
+            theme = "auto";
+            globalstatus = true;
+            disabled_filetypes = { statusline = [ "dashboard" "alpha" "ministarter" "snacks_dashboard" ]; };
+          };
+          sections = {
+            lualine_a = [ "mode" ];
+            lualine_b = [ "branch" ];
+            lualine_c = [
+              "root_dir"
+              {
+                diagnostics = {
+                  symbols = {
+                    error = "󰅚";
+                    warn = "󰀪";
+                    info = "󰋼";
+                    hint = "󰌵";
+                  };
+                };
+              }
+              {
+                filetype = {
+                  icon_only = true;
+                  separator = "";
+                  padding = { left = 1; right = 0; };
+                };
+              }
+              "pretty_path"
+            ];
+            lualine_x = [
+              {
+                function = "Snacks.profiler.status";
+              }
+              {
+                function = "require('noice').api.status.command.get";
+                cond = "package.loaded['noice'] and require('noice').api.status.command.has()";
+                color = "function() return { fg = Snacks.util.color('Statement') } end";
+              }
+              {
+                function = "require('noice').api.status.mode.get";
+                cond = "package.loaded['noice'] and require('noice').api.status.mode.has()";
+                color = "function() return { fg = Snacks.util.color('Constant') } end";
+              }
+              {
+                function = "function() return '  ' .. require('dap').status() end";
+                cond = "package.loaded['dap'] and require('dap').status() ~= ''";
+                color = "function() return { fg = Snacks.util.color('Debug') } end";
+              }
+              {
+                diff = {
+                  symbols = {
+                    added = "󰐕";
+                    modified = "󰆓";
+                    removed = "󰍴";
+                  };
+                  source = "function() local gitsigns = vim.b.gitsigns_status_dict if gitsigns then return { added = gitsigns.added, modified = gitsigns.changed, removed = gitsigns.removed } end end";
+                };
+              }
+            ];
+            lualine_y = [
+              {
+                progress = {
+                  separator = " ";
+                  padding = { left = 1; right = 0; };
+                };
+              }
+              {
+                location = {
+                  padding = { left = 0; right = 1; };
+                };
+              }
+            ];
+            lualine_z = [
+              {
+                function = "function() return ' ' .. os.date('%R') end";
+              }
+            ];
+          };
+          extensions = lib.mkForce [ "neo-tree" "lazy" "fzf" ];
         };
       };
 
@@ -77,11 +123,51 @@ in
         icons.enable = true;
         indentscope.enable = true;
         trailspace.enable = true;
+        icons.setupOpts = {
+          file = {
+            ".keep" = { glyph = "󰊢"; hl = "MiniIconsGrey"; };
+            "devcontainer.json" = { glyph = ""; hl = "MiniIconsAzure"; };
+          };
+          filetype = {
+            dotenv = { glyph = " "; hl = "MiniIconsYellow"; };
+          };
+        };
+      };
+      
+      # Noice UI enhancement
+      ui.noice = {
+        enable = true;
+        setupOpts = {
+          lsp = {
+            override = {
+              "vim.lsp.util.convert_input_to_markdown_lines" = true;
+              "vim.lsp.util.stylize_markdown" = true;
+              "cmp.entry.get_documentation" = true;
+            };
+          };
+          routes = [
+            {
+              filter = {
+                event = "msg_show";
+                any = [
+                  { find = "%d+L, %d+B"; }
+                  { find = "; after #%d+"; }
+                  { find = "; before #%d+"; }
+                ];
+              };
+              view = "mini";
+            }
+          ];
+          presets = {
+            bottom_search = true;
+            command_palette = true;
+            long_message_to_split = true;
+          };
+        };
       };
 
 
-      # Tabline
-      mini.tabline.enable = true;
+      
 
       # Bufferline for enhanced buffer management
       tabline.nvimBufferline = {
@@ -122,6 +208,70 @@ in
         "[B" = "Move buffer prev";
         "]B" = "Move buffer next";
       };
+      
+      # Noice keybindings
+      keymaps = [
+        {
+          key = "<S-Enter>";
+          mode = [ "c" ];
+          action = "function() require('noice').redirect(vim.fn.getcmdline()) end";
+          desc = "Redirect Cmdline";
+          lua = true;
+        }
+        {
+          key = "<leader>snl";
+          mode = [ "n" ];
+          action = "function() require('noice').cmd('last') end";
+          desc = "Noice Last Message";
+          lua = true;
+        }
+        {
+          key = "<leader>snh";
+          mode = [ "n" ];
+          action = "function() require('noice').cmd('history') end";
+          desc = "Noice History";
+          lua = true;
+        }
+        {
+          key = "<leader>sna";
+          mode = [ "n" ];
+          action = "function() require('noice').cmd('all') end";
+          desc = "Noice All";
+          lua = true;
+        }
+        {
+          key = "<leader>snd";
+          mode = [ "n" ];
+          action = "function() require('noice').cmd('dismiss') end";
+          desc = "Dismiss All";
+          lua = true;
+        }
+        {
+          key = "<leader>snt";
+          mode = [ "n" ];
+          action = "function() require('noice').cmd('pick') end";
+          desc = "Noice Picker (Telescope/FzfLua)";
+          lua = true;
+        }
+        {
+          key = "<c-f>";
+          mode = [ "i" "n" "s" ];
+          action = "function() if not require('noice.lsp').scroll(4) then return '<c-f>' end end";
+          desc = "Scroll Forward";
+          lua = true;
+          expr = true;
+          silent = true;
+        }
+        {
+          key = "<c-b>";
+          mode = [ "i" "n" "s" ];
+          action = "function() if not require('noice.lsp').scroll(-4) then return '<c-b>' end end";
+          desc = "Scroll Backward";
+          lua = true;
+          expr = true;
+          silent = true;
+        }
+      ];
     };
   };
 } 

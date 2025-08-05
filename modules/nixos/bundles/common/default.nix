@@ -36,6 +36,7 @@ in
 
       programs = {
         sops = disabled;
+        nix-ld = enabled;
       };
 
       services = {
