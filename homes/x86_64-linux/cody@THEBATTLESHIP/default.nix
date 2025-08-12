@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   osConfig,
   namespace,
   inputs,
@@ -48,7 +49,7 @@ with lib.${namespace};
       enable = true;
       name = "cody";
       fullName = "Cody Wright";
-      email = "cody@example.com"; # Update this with your actual email
+      email = "acodywright@gmail.com"; # Update this with your actual email
     };
 
     communications = {
@@ -90,6 +91,7 @@ with lib.${namespace};
   # Add Apple Color Emoji font to home packages
   home.packages = with pkgs; [
     inputs.apple-emoji-linux.packages.x86_64-linux.default
+    gh
   ];
 
   # Configure fontconfig for Apple Color Emoji

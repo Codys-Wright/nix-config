@@ -66,6 +66,7 @@ in
       # Version control
       git-crypt
       git-lfs
+      gh
       
       # Shell utilities
       zsh
