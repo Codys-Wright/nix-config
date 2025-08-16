@@ -17,9 +17,8 @@ in
 
   config = mkIf cfg.enable {
     home.packages = with pkgs; [
-      # Toolchain manager and language server
+      # Toolchain manager
       rustup
-      rust-analyzer
 
       # Common cargo utilities
       cargo-watch

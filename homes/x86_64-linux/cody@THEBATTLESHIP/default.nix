@@ -43,6 +43,9 @@ with lib.${namespace};
       typescript = {
         enable = true;
       };
+      rust = {
+        enable = true;
+      };
     };
 
     config.user = {

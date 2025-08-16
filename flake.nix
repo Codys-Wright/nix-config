@@ -118,6 +118,11 @@
       url = "github:snowfallorg/frost";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    fenix = {
+      url = "github:nix-community/fenix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     
     # Additional inputs from nixos-config
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
