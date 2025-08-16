@@ -1,4 +1,4 @@
-{ inputs, channels, namespace, ... }:
+{ inputs, ... }:
 
 final: prev: {
   # Expose the Fenix package set for this system
