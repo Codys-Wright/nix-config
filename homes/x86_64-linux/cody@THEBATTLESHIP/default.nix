@@ -45,6 +45,7 @@ with lib.${namespace};
       };
       rust = {
         enable = true;
+        useFenix = true;
       };
     };
 
@@ -95,8 +96,12 @@ with lib.${namespace};
   home.packages = with pkgs; [
     inputs.apple-emoji-linux.packages.x86_64-linux.default
     gh
-  ];
+    chawan
 
+    ];
+ 
+  programs.chawan.enable = true;
+ 
   # Configure fontconfig for Apple Color Emoji
   fonts.fontconfig.enable = true;
 

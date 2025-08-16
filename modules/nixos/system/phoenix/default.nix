@@ -94,7 +94,7 @@ let
     HOSTNAME=$(hostname)
     USERNAME=$(whoami)
     
-    nh home switch ${cfg.dotfilesDir}#homeConfigurations."$USERNAME@$HOSTNAME".activationPackage
+    nh home switch ${cfg.dotfilesDir}#homeConfigurations."$USERNAME@$HOSTNAME"
     echo "✅ System upgraded!"
   '';
 
