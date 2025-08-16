@@ -37,6 +37,10 @@
       })
     ];
 
+    systems.modules.nixos = with inputs; [
+      home-manager.nixosModules.home-manager
+    ];
+
     # Deploy-rs configuration for managing deployments
     deploy = {
       nodes = {
