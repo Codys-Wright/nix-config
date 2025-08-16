@@ -17,6 +17,10 @@ in
 
   config = mkIf cfg.enable {
     home.packages = with pkgs; [
+      # Fenix-provided toolchain and language server
+      (pkgs."rust-toolchain")
+      (pkgs."rust-analyzer")
+
       # Toolchain manager
       rustup
 
