@@ -84,10 +84,6 @@ with lib.${namespace};
 
     };
 
-    services.minecraft = {
-        enable = true;
-        eula = true;
-    };
 
     # Additional system packages (GUI and specific tools)
     environment.systemPackages = with pkgs; [
@@ -97,6 +93,11 @@ with lib.${namespace};
         whitesur-wallpapers
     ];
 
+    services.minecraft-server = {
+        enable = true;
+        eula = true;
+        openFirewall = true;
+    };
     # Add overlay to make custom packages available
     nixpkgs.overlays = [
         (final: prev: {
