@@ -66,6 +66,10 @@ with lib.${namespace};
         desktop.type = "gnome";  # Primary desktop environment
         desktop.environments = ["kde" "gnome"];  # Available desktop environments for theming
 
+        services.rustdesk-server = {
+            enable = true;
+        };
+
         # system.themes.stylix = enabled;
         services.ssh = {
             enable = true;
@@ -91,6 +95,7 @@ with lib.${namespace};
         vscode
         snowfallorg.frost
         whitesur-wallpapers
+        just
     ];
 
     services.minecraft-server = {
