@@ -70,6 +70,10 @@ with lib.${namespace};
             enable = true;
         };
 
+        services.homepage-dashboard = {
+            enable = true;
+        };
+
         # system.themes.stylix = enabled;
         services.ssh = {
             enable = true;
