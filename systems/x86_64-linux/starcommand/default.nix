@@ -66,12 +66,20 @@ with lib.${namespace};
         desktop.type = "gnome";  # Primary desktop environment
         desktop.environments = ["kde" "gnome"];  # Available desktop environments for theming
 
-        services.rustdesk-server = {
-            enable = true;
-        };
-
-        services.homepage-dashboard = {
-            enable = true;
+        services.selfhost = {
+            homepage-dashboard.enable = true;
+            rustdesk-server.enable = true;
+            immich.enable = true;
+            # firefly-iii.enable = true;
+            # grafana.enable = true;
+            jellyfin.enable = true;
+            # ollama.enable = true;
+            syncthing.enable = true;
+            # wanderer.enable = true;
+            mealie.enable = true;
+            audiobookshelf.enable = true;
+            # navidrome.enable = true;
+            stirling-pdf.enable = true;
         };
 
         # system.themes.stylix = enabled;
