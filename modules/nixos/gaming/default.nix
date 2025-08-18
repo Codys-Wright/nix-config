@@ -43,6 +43,9 @@ in
       gaming.lutris = mkDefault { enable = true; };
       gaming.steam = mkDefault { enable = true; };
       gaming.proton = mkDefault { enable = true; };
+      gaming.games = {
+        minecraft = mkDefault { enable = true; };
+      };
     };
   };
 }
