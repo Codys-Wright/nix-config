@@ -22,5 +22,10 @@ in
         rustdesk-server
     ];
 
+    services.rustdesk-server = {
+        enable = true;
+        openFirewall = true;
+    };
+
   };
 }
