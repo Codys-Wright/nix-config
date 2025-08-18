@@ -37,14 +37,9 @@ with lib.${namespace};
     };
     
     # Bootloader configuration
-    FTS-FLEET.system.boot.grub = enabled;
+    FTS-FLEET.system.boot.systemd-boot = enabled;
 
-    # Facter configuration
-    facter.reportPath =
-        if builtins.pathExists ./facter.json then
-            ./facter.json
-        else
-            throw "Have you forgotten to run nixos-anywhere with `--generate-hardware-config nixos-facter ./facter.json`?";
+   
 
     # Configure the cody user with Home Manager
     snowfallorg.users.cody = {

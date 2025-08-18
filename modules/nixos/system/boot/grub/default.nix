@@ -20,7 +20,7 @@ in
     boot.loader = {
       # EFI configuration
       efi = {
-        canTouchEfiVariables = true;
+        canTouchEfiVariables = false;
         efiSysMountPoint = "/boot/efi";
       };
 
