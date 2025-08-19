@@ -15,4 +15,12 @@ in
   options.${namespace}.services.selfhost.media = with types; {
     enable = mkBoolOpt false "Enable media services";
   };
+
+  config = mkIf cfg.enable {
+    ${namespace}.services.selfhost.media = {
+      jellyfin.enable = mkDefault true;
+      navidrome.enable = mkDefault true;
+      audiobookshelf.enable = mkDefault true;
+    };
+  };
 } 

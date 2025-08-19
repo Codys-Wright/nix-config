@@ -15,4 +15,10 @@ in
   options.${namespace}.services.selfhost.backup = with types; {
     enable = mkBoolOpt false "Enable backup services";
   };
+
+  config = mkIf cfg.enable {
+    ${namespace}.services.selfhost.backup = {
+      restic.enable = mkDefault true;
+    };
+  };
 } 

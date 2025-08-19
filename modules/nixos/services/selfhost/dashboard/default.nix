@@ -15,4 +15,10 @@ in
   options.${namespace}.services.selfhost.dashboard = with types; {
     enable = mkBoolOpt false "Enable dashboard services";
   };
+
+  config = mkIf cfg.enable {
+    ${namespace}.services.selfhost.dashboard = {
+      homepage.enable = mkDefault true;
+    };
+  };
 } 

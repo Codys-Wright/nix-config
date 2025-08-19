@@ -15,4 +15,13 @@ in
   options.${namespace}.services.selfhost.networking = with types; {
     enable = mkBoolOpt false "Enable networking services";
   };
+
+  config = mkIf cfg.enable {
+    ${namespace}.services.selfhost.networking = {
+      tailscale.enable = mkDefault true;
+      rustdesk-server.enable = mkDefault true;
+      syncthing.enable = mkDefault true;
+      wireguard-netns.enable = mkDefault true;
+    };
+  };
 } 
