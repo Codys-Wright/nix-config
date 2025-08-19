@@ -14,9 +14,12 @@ in
 {
   options.${namespace}.system.kernel = with types; {
     enable = mkBoolOpt false "Enable kernel configuration";
+    version = mkDefault "6_16";
   };
 
   config = mkIf cfg.enable {
-    boot.kernelPackages = pkgs.linuxKernel.packages.linux_6_16;
+    boot.kernelPackages = mkDefault (
+      pkgs.linuxKernel.packages."linux_${cfg.version}"
+    );
   };
 } 
