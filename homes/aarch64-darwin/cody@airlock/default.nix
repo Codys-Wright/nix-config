@@ -10,6 +10,6 @@
 with lib;
 with lib.${namespace};
 {
-  snowfallorg.user.enable = true;
 
+ home.stateVersion = "24.05";
 }

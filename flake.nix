@@ -12,7 +12,7 @@
         namespace = "FTS-FLEET";
       };
     };
-    
+
     # Systems that can run tests:
     supportedSystems = [ "aarch64-linux" "i686-linux" "x86_64-linux" "aarch64-darwin" "x86_64-darwin" ];
 
@@ -22,7 +22,7 @@
   lib.mkFlake {
     inherit inputs;
     src = ./.;
-   
+
 
     channels-config = {
       allowUnfree = true;
@@ -37,7 +37,7 @@
       })
     ];
 
-   
+
 
     # Deploy-rs configuration for managing deployments
     deploy = {
@@ -88,7 +88,7 @@
         type = "app";
         program = "${pkgs.writeShellScriptBin "install" "exec bash ${./scripts/install.sh} \"$@\""}/bin/install";
       };
-      
+
       deploy = {
         type = "app";
         program = "${pkgs.writeShellScriptBin "deploy" "exec bash ${./scripts/deploy.sh} \"$@\""}/bin/deploy";
@@ -105,6 +105,11 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     disko.url = "github:nix-community/disko";
     disko.inputs.nixpkgs.follows = "nixpkgs";
+
+    #macOs support
+    darwin.url ="github:lnl7/nix-darwin";
+    darwin.inputs.nixpkgs.follows = "nixpkgs";
+
     nixos-facter-modules.url = "github:numtide/nixos-facter-modules";
     deploy-rs.url = "github:serokell/deploy-rs";
     deploy-rs.inputs.nixpkgs.follows = "nixpkgs";
@@ -125,7 +130,7 @@
       url = "github:nix-community/fenix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    
+
     # Additional inputs from nixos-config
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.05";
@@ -145,58 +150,58 @@
       url = "github:0xc000022070/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    
+
     # Apple Color Emoji font
     apple-emoji-linux = {
       url = "github:samuelngs/apple-emoji-linux";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    
+
     # Nvf - Neovim configuration framework
     nvf = {
       url = "github:notashelf/nvf";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    
 
-    
+
+
     # Documentation tools
     nixdoc = {
       url = "github:nix-community/nixdoc";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    
+
     # Random number generator for backup extensions
     rand-nix = {
       url = "github:figsoda/rand-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    
+
     # Astal for AGS shell
     astal = {
       url = "github:aylur/astal";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    
 
-    
+
+
     # Theme-related inputs
     whitesur-wallpapers = {
       url = "github:vinceliuice/whitesur-wallpapers";
       flake = false;
     };
-    
+
     orchis-theme = {
       url = "github:vinceliuice/orchis-theme";
       flake = false;
     };
-    
+
     # Additional theme assets
     wallpapers = {
       url = "github:orangci/walls-catppuccin-mocha";
       flake = false;
     };
-    
+
     firefox-gnome-theme = {
       url = "github:rafaelmardojai/firefox-gnome-theme";
       flake = false;
