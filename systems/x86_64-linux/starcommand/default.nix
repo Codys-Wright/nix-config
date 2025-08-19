@@ -66,23 +66,7 @@ with lib.${namespace};
         desktop.type = "gnome";  # Primary desktop environment
         desktop.environments = ["kde" "gnome"];  # Available desktop environments for theming
 
-        services.selfhost = {
-            enable = true;
-            dashboard.homepage.enable = true;
-            networking.rustdesk-server.enable = true;
-            cloud.immich.enable = true;
-            # productivity.firefly-iii.enable = true;
-            # utility.grafana.enable = true;
-            media.jellyfin.enable = true;
-            # utility.ollama.enable = true;
-            networking.syncthing.enable = true;
-            # productivity.wanderer.enable = true;
-            productivity.mealie.enable = true;
-            media.audiobookshelf.enable = true;
-            # media.navidrome.enable = true;
-            utility.stirling-pdf.enable = true;
-        };
-
+        
         # system.themes.stylix = enabled;
         services.ssh = {
             enable = true;
@@ -97,7 +81,44 @@ with lib.${namespace};
             enable = true;
             enableAppleEmoji = true;
         };
-
+# 🏠 Selfhost Configuration
+        services.selfhost = {
+            enable = true;
+            baseDomain = "starcommand.live";
+            # Enable ACME for local SSL certificates
+            acme.email = "acodywright@gmail.com";
+            cloudflare.dnsCredentialsFile = "/etc/nixos/secrets/cloudflare-dns.env";
+            
+            # Enable network access for local devices
+            networkAccess.enable = true;
+            
+            # Storage configuration
+            mounts = {
+                fast = "/mnt/cache";     # Fast storage (SSD)
+                slow = "/mnt/storage";   # Slow storage (HDD)
+                config = "/persist/opt/services";  # Service configs
+                merged = "/mnt/user";    # Merged storage view
+            };
+            
+            # Enable service categories gradually to find working ones
+            networking.enable = true;      # Tailscale, Syncthing, etc.
+            dashboard.enable = true;       # Homepage dashboard
+            media.enable = true;           # Jellyfin, Navidrome, etc.
+            arr.enable = true;             # Sonarr, Radarr, Prowlarr, etc.
+            productivity.enable = true;    # Vaultwarden, Miniflux, Paperless, etc.
+            cloud.enable = true;           # Immich, Nextcloud, etc.
+            utility.enable = true;         # Uptime Kuma, etc.
+            downloads.enable = true;       # Deluge, etc.
+            backup.enable = true;          # Backup services
+            smarthome.enable = true;       # Home Assistant, etc.
+            
+            # 🛡️ Fail2Ban + Cloudflare Protection (optional but recommended)
+            # utility.fail2ban-cloudflare = {
+            #     enable = true;
+            #     apiKeyFile = "/etc/nixos/secrets/cloudflare-firewall.key";
+            #     zoneId = "9c26b00054e2c3c833cd6ded804ef076";  # Your actual Zone ID
+            # };
+        };
 
     };
 
