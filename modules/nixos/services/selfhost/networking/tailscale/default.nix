@@ -9,13 +9,22 @@ with lib;
 with lib.${namespace};
 let
   cfg = config.${namespace}.services.selfhost.networking.tailscale;
+  selfhostCfg = config.${namespace}.services.selfhost;
 in
 {
   options.${namespace}.services.selfhost.networking.tailscale = with types; {
-    enable = mkBoolOpt false "Whether or not to configure Tailscale";
+    enable = mkBoolOpt false "Enable Tailscale VPN (mesh network)";
+    
     autoconnect = {
       enable = mkBoolOpt false "Whether or not to enable automatic connection to Tailscale";
       key = mkOpt str "" "The authentication key to use";
+    };
+    
+    homepage = {
+      name = mkOpt str "Tailscale" "Name shown on homepage";
+      description = mkOpt str "Zero-config VPN mesh network" "Description shown on homepage";
+      icon = mkOpt str "tailscale.svg" "Icon shown on homepage";
+      category = mkOpt str "Networking" "Category on homepage";
     };
   };
 

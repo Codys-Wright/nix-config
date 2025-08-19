@@ -11,6 +11,7 @@ with lib;
 with lib.${namespace};
 let
   cfg = config.${namespace}.services.selfhost.productivity.wanderer;
+  selfhostCfg = config.${namespace}.services.selfhost;
   backend-port = 8090;
   frontend-port = 3000;
   meilisearch-port = 7700;
@@ -18,7 +19,18 @@ let
 in
 {
   options.${namespace}.services.selfhost.productivity.wanderer = with types; {
-    enable = mkBoolOpt false "Enable wanderer";
+    enable = mkBoolOpt false "Enable Wanderer (hiking trail planner)";
+    
+    url = mkOpt str "wanderer.${selfhostCfg.baseDomain}" "URL for Wanderer service";
+    
+    dataDir = mkOpt str "/mnt/data/wanderer" "Data directory for Wanderer";
+    
+    homepage = {
+      name = mkOpt str "Wanderer" "Name shown on homepage";
+      description = mkOpt str "Self-hosted trail database and hiking planner" "Description shown on homepage";
+      icon = mkOpt str "wanderer.svg" "Icon shown on homepage";
+      category = mkOpt str "Productivity" "Category on homepage";
+    };
   };
 
   config = mkIf cfg.enable {
@@ -32,7 +44,7 @@ in
       ]
     );
     environment.variables = {
-      "MEILI_DB_PATH" = "/mnt/data/wanderer/data";
+      "MEILI_DB_PATH" = "${cfg.dataDir}/data";
     };
     services.meilisearch = {
       enable = true;
@@ -47,7 +59,7 @@ in
         wantedBy = [ "multi-user.target" ];
 
         serviceConfig = {
-          ExecStart = "${lib.getExe pkgs.zeus.wanderer-db} serve --http=0.0.0.0:${toString backend-port} --dir=/var/lib/wanderer-db/pb_data";
+          ExecStart = "${lib.getExe pkgs.zeus.wanderer-db} serve --http=127.0.0.1:${toString backend-port} --dir=/var/lib/wanderer-db/pb_data";
           DynamicUser = true;
           StateDirectory = [
             "wanderer-db"
@@ -81,10 +93,12 @@ in
           ExecStart = lib.getExe pkgs.zeus.wanderer-web;
           EnvironmentFile = secrets_location; # config.sops.secrets.meili-master-key.path;
           Environment = [
-            "ORIGIN=http://apollo:${toString frontend-port}"
+            "ORIGIN=https://${cfg.url}"
             "MEILI_URL=http://127.0.0.1:${toString meilisearch-port}"
             "BODY_SIZE_LIMIT=Infinity"
-            "PUBLIC_POCKETBASE_URL=http://apollo:${toString backend-port}"
+            "PUBLIC_POCKETBASE_URL=https://${cfg.url}/api"
+            "PORT=${toString frontend-port}"
+            "HOST=127.0.0.1"
             #"PUBLIC_DISABLE_SIGNUP=true"
             #"PUBLIC_PRIVATE_INSTANCE=true" # dont allow visitors from viewing trails
             "PUBLIC_VALHALLA_URL=https://valhalla1.openstreetmap.de"
@@ -92,6 +106,19 @@ in
           ];
         };
       };
+    };
+    
+    # Caddy reverse proxy
+    services.caddy.virtualHosts."${cfg.url}" = mkIf (selfhostCfg.baseDomain != "") {
+      useACMEHost = selfhostCfg.baseDomain;
+      extraConfig = ''
+        handle /api/* {
+          reverse_proxy http://127.0.0.1:${toString backend-port}
+        }
+        handle {
+          reverse_proxy http://127.0.0.1:${toString frontend-port}
+        }
+      '';
     };
   };
 }
