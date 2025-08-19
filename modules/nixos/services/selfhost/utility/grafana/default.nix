@@ -10,10 +10,20 @@ with lib;
 with lib.${namespace};
 let
   cfg = config.${namespace}.services.selfhost.utility.grafana;
+  selfhostCfg = config.${namespace}.services.selfhost;
 in
 {
   options.${namespace}.services.selfhost.utility.grafana = with types; {
-    enable = mkBoolOpt false "Enable grafana";
+    enable = mkBoolOpt false "Enable Grafana (monitoring and analytics)";
+    
+    url = mkOpt str "grafana.${selfhostCfg.baseDomain}" "URL for Grafana service";
+    
+    homepage = {
+      name = mkOpt str "Grafana" "Name shown on homepage";
+      description = mkOpt str "Monitoring and analytics platform" "Description shown on homepage";
+      icon = mkOpt str "grafana.svg" "Icon shown on homepage";
+      category = mkOpt str "Utility" "Category on homepage";
+    };
   };
 
   config = mkIf cfg.enable {
@@ -27,8 +37,10 @@ in
       enable = true;
       settings = {
         server = {
-          http_addr = "0.0.0.0";
+          http_addr = "127.0.0.1";
           http_port = 3030;
+          domain = cfg.url;
+          root_url = "https://${cfg.url}";
         };
       };
       provision = {
@@ -95,6 +107,14 @@ in
           bind-address = ":8086";
         };
       };
+    };
+    
+    # Caddy reverse proxy
+    services.caddy.virtualHosts."${cfg.url}" = mkIf (selfhostCfg.baseDomain != "") {
+      useACMEHost = selfhostCfg.baseDomain;
+      extraConfig = ''
+        reverse_proxy http://127.0.0.1:3030
+      '';
     };
   };
 }
