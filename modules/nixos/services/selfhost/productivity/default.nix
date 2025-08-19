@@ -20,11 +20,11 @@ in
     ${namespace}.services.selfhost.productivity = {
       mealie.enable = mkDefault true;
       calibre.enable = mkDefault true;
-      firefly-iii.enable = mkDefault true;
-      wanderer.enable = mkDefault true;
-      vaultwarden.enable = mkDefault true;
-      paperless-ngx.enable = mkDefault true;
-      miniflux.enable = mkDefault true;
+      firefly-iii.enable = mkDefault false;
+      wanderer.enable = mkDefault false;
+      vaultwarden.enable = mkDefault false;
+      paperless-ngx.enable = mkDefault false;
+      miniflux.enable = mkDefault false;
       radicale.enable = mkDefault true;
     };
   };

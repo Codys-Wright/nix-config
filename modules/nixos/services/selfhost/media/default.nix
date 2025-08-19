@@ -19,7 +19,7 @@ in
   config = mkIf cfg.enable {
     ${namespace}.services.selfhost.media = {
       jellyfin.enable = mkDefault true;
-      navidrome.enable = mkDefault true;
+      navidrome.enable = mkDefault false;
       audiobookshelf.enable = mkDefault true;
     };
   };

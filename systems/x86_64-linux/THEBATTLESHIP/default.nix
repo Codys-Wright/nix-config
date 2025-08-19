@@ -134,6 +134,9 @@ with lib.${namespace};
             acme.email = "acodywright@gmail.com";
             cloudflare.dnsCredentialsFile = "/etc/nixos/secrets/cloudflare-dns.env";
             
+            # Enable network access for local devices
+            networkAccess.enable = true;
+            
             # Storage configuration
             mounts = {
                 fast = "/mnt/cache";     # Fast storage (SSD)
@@ -142,10 +145,17 @@ with lib.${namespace};
                 merged = "/mnt/user";    # Merged storage view
             };
             
-            # Minimal service selection for initial setup
+            # Enable service categories gradually to find working ones
             networking.enable = true;      # Tailscale, Syncthing, etc.
             dashboard.enable = true;       # Homepage dashboard
-            media.jellyfin.enable = true;  # Media server (easy to test)
+            media.enable = true;           # Jellyfin, Navidrome, etc.
+            arr.enable = true;             # Sonarr, Radarr, Prowlarr, etc.
+            productivity.enable = true;    # Vaultwarden, Miniflux, Paperless, etc.
+            cloud.enable = true;           # Immich, Nextcloud, etc.
+            utility.enable = true;         # Uptime Kuma, etc.
+            downloads.enable = true;       # Deluge, etc.
+            backup.enable = true;          # Backup services
+            smarthome.enable = true;       # Home Assistant, etc.
             
             # 🛡️ Fail2Ban + Cloudflare Protection (optional but recommended)
             # utility.fail2ban-cloudflare = {
@@ -155,26 +165,26 @@ with lib.${namespace};
             # };
         };
 
-        # 🌐 Cloudflare Tunnel Configuration (Declarative!)
-        services.selfhost.networking.cloudflare-tunnel = {
-            enable = true;
-            tunnelId = "06ec96ae-5cd0-4c7c-8a5c-5cba53f764e8";
-            tunnelToken = "eyJhIjoiZDliZWE2ODdmNWE2YTE5YTNjNzZhMTk1NWZiNzU5NTIiLCJ0IjoiMDZlYzk2YWUtNWNkMC00YzdjLThhNWMtNWNiYTUzZjc2NGU4IiwicyI6IlpqY3lNekF6TldVdE5XTTRNeTAwTkRRMExXRmpOVFl0T0Rrek5HTTRPRFZsT0dNMyJ9";
+        # # 🌐 Cloudflare Tunnel Configuration (Declarative!)
+        # services.selfhost.networking.cloudflare-tunnel = {
+        #     enable = true;
+        #     tunnelId = "06ec96ae-5cd0-4c7c-8a5c-5cba53f764e8";
+        #     tunnelToken = "eyJhIjoiZDliZWE2ODdmNWE2YTE5YTNjNzZhMTk1NWZiNzU5NTIiLCJ0IjoiMDZlYzk2YWUtNWNkMC00YzdjLThhNWMtNWNiYTUzZjc2NGU4IiwicyI6IlpqY3lNekF6TldVdE5XTTRNeTAwTkRRMExXRmpOVFl0T0Rrek5HTTRPRFZsT0dNMyJ9";
             
-            ingress = {
-                # Homepage dashboard on root domain
-                "starcommand.live" = "http://127.0.0.1:3000";
+        #     ingress = {
+        #         # Homepage dashboard on root domain
+        #         "starcommand.live" = "http://127.0.0.1:8082";
                 
-                # Individual services
-                "jellyfin.starcommand.live" = "http://127.0.0.1:8096";
-                "syncthing.starcommand.live" = "http://127.0.0.1:8384";
+        #         # Individual services
+        #         "jellyfin.starcommand.live" = "http://127.0.0.1:8096";
+        #         "syncthing.starcommand.live" = "http://127.0.0.1:8384";
                 
-                # Future services (uncomment as you enable them)
-                # "photos.starcommand.live" = "http://127.0.0.1:3001";     # Immich
-                # "music.starcommand.live" = "http://127.0.0.1:4533";      # Navidrome
-                # "grafana.starcommand.live" = "http://127.0.0.1:3030";    # Grafana
-            };
-        };
+        #         # Future services (uncomment as you enable them)
+        #         # "photos.starcommand.live" = "http://127.0.0.1:3001";     # Immich
+        #         # "music.starcommand.live" = "http://127.0.0.1:4533";      # Navidrome
+        #         # "grafana.starcommand.live" = "http://127.0.0.1:3030";    # Grafana
+        #     };
+        # };
        
     };
 

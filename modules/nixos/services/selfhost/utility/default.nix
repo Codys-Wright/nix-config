@@ -18,12 +18,12 @@ in
 
   config = mkIf cfg.enable {
     ${namespace}.services.selfhost.utility = {
-      grafana.enable = mkDefault true;
-      ollama.enable = mkDefault true;
+      grafana.enable = mkDefault false;
+      ollama.enable = mkDefault false;
       stirling-pdf.enable = mkDefault true;
       uptime-kuma.enable = mkDefault true;
       microbin.enable = mkDefault true;
-      keycloak.enable = mkDefault true;
+      keycloak.enable = mkDefault false;
       fail2ban-cloudflare.enable = mkDefault true;
     };
   };

@@ -122,68 +122,128 @@ in
         hideVersion = "true";
       };
       
-      services = [
-        # Misc services
-        { Misc = cfg.misc; }
-        
-        # Glances monitoring widgets
-        {
-          Glances = 
+      services = 
+        let
+          # Homepage categories that should appear
+          homepageCategories = [
+            "Arr"
+            "Downloads" 
+            "Media"
+            "Cloud"
+            "Productivity"
+            "Utility"
+            "Networking"
+            "Smart Home"
+          ];
+          
+          # Manually traverse known service categories to avoid infinite recursion
+          selfhostServices = config.${namespace}.services.selfhost;
+          
+          # Helper to safely get services from a category
+          getServicesFromCategory = categoryPath:
             let
-              port = toString config.services.glances.port;
+              categoryAttrs = lib.attrByPath categoryPath {} selfhostServices;
             in
-            [
-              {
-                Info = {
-                  widget = {
-                    type = "glances";
-                    url = "http://localhost:${port}";
-                    metric = "info";
-                    chart = false;
-                    version = 4;
+            lib.flatten (lib.mapAttrsToList (name: value:
+              if lib.isAttrs value && value ? enable && value.enable && value ? homepage && value ? url then
+                [{
+                  serviceName = name;
+                  serviceConfig = value;
+                }]
+              else []
+            ) categoryAttrs);
+          
+          # Get services from known categories
+          allEnabledServices = lib.flatten [
+            (getServicesFromCategory ["media"])
+            (getServicesFromCategory ["arr"])
+            (getServicesFromCategory ["downloads"])
+            (getServicesFromCategory ["cloud"])
+            (getServicesFromCategory ["productivity"])
+            (getServicesFromCategory ["utility"])
+            (getServicesFromCategory ["networking"])
+            (getServicesFromCategory ["smarthome"])
+            (getServicesFromCategory ["dashboard"])
+          ];
+          
+          # Group services by category
+          getServicesForCategory = category:
+            let
+              servicesInCategory = lib.filter (service: 
+                service.serviceConfig.homepage.category == category
+              ) allEnabledServices;
+            in
+            map (service: {
+              "${service.serviceConfig.homepage.name}" = {
+                icon = service.serviceConfig.homepage.icon;
+                description = service.serviceConfig.homepage.description;
+                href = "https://${service.serviceConfig.url}";
+                siteMonitor = "https://${service.serviceConfig.url}";
+              };
+            }) servicesInCategory;
+        in
+        # Generate service categories dynamically
+        (map (category: {
+          "${category}" = getServicesForCategory category;
+        }) homepageCategories)
+        ++ [
+          # Misc services
+          { Misc = cfg.misc; }
+          
+          # Glances monitoring widgets
+          {
+            Glances = 
+              let
+                port = toString config.services.glances.port;
+              in
+              [
+                {
+                  Info = {
+                    widget = {
+                      type = "glances";
+                      url = "http://localhost:${port}";
+                      metric = "info";
+                      chart = false;
+                      version = 4;
+                    };
                   };
-                };
-              }
-              {
-                "CPU Temp" = {
-                  widget = {
-                    type = "glances";
-                    url = "http://localhost:${port}";
-                    metric = "sensor:Package id 0";
-                    chart = false;
-                    version = 4;
+                }
+                {
+                  "CPU Temp" = {
+                    widget = {
+                      type = "glances";
+                      url = "http://localhost:${port}";
+                      metric = "sensor:Package id 0";
+                      chart = false;
+                      version = 4;
+                    };
                   };
-                };
-              }
-              {
-                Processes = {
-                  widget = {
-                    type = "glances";
-                    url = "http://localhost:${port}";
-                    metric = "process";
-                    chart = false;
-                    version = 4;
+                }
+                {
+                  Processes = {
+                    widget = {
+                      type = "glances";
+                      url = "http://localhost:${port}";
+                      metric = "process";
+                      chart = false;
+                      version = 4;
+                    };
                   };
-                };
-              }
-              {
-                Network = {
-                  widget = {
-                    type = "glances";
-                    url = "http://localhost:${port}";
-                    metric = "network:enp2s0";
-                    chart = false;
-                    version = 4;
+                }
+                {
+                  Network = {
+                    widget = {
+                      type = "glances";
+                      url = "http://localhost:${port}";
+                      metric = "network:enp2s0";
+                      chart = false;
+                      version = 4;
+                    };
                   };
-                };
-              }
-            ];
-        }
-        
-        # TODO: Auto-discovery of services will be implemented here
-        # This will scan through all enabled selfhost services and automatically
-        # add them to appropriate categories based on their homepage metadata
-      ];
+                }
+              ];
+          }
+        ];
     };
     
     # Serve homepage on the root domain

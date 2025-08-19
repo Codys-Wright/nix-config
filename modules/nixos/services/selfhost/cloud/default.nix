@@ -19,7 +19,7 @@ in
   config = mkIf cfg.enable {
     ${namespace}.services.selfhost.cloud = {
       immich.enable = mkDefault true;
-      nextcloud.enable = mkDefault true;
+      nextcloud.enable = mkDefault false;
       ocis.enable = mkDefault true;
     };
   };

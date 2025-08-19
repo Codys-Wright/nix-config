@@ -18,7 +18,7 @@ in
 
   config = mkIf cfg.enable {
     ${namespace}.services.selfhost.backup = {
-      restic.enable = mkDefault true;
+      restic.enable = mkDefault false;
     };
   };
 } 

@@ -62,6 +62,12 @@ in
     timeZone = mkOpt str "UTC" ''
       Time zone to be used for the selfhost services
     '';
+    
+    # Network access configuration
+    networkAccess = {
+      enable = mkBoolOpt false "Enable access from local network (not just localhost)";
+      allowedNetworks = mkOpt (listOf str) [ "192.168.0.0/16" "10.0.0.0/8" "172.16.0.0/12" ] "Allowed network ranges for local access";
+    };
   };
 
 
