@@ -39,11 +39,15 @@ in
     };
     
     # Caddy reverse proxy
-    services.caddy.virtualHosts."${cfg.url}" = mkIf (selfhostCfg.baseDomain != "") {
-      useACMEHost = selfhostCfg.baseDomain;
-      extraConfig = ''
-        reverse_proxy http://127.0.0.1:8384
-      '';
-    };
+    services.caddy.virtualHosts."${cfg.url}" = mkIf (selfhostCfg.baseDomain != "") (mkMerge [
+      {
+        extraConfig = ''
+          reverse_proxy http://127.0.0.1:8384
+        '';
+      }
+      (mkIf (selfhostCfg.cloudflare.dnsCredentialsFile != null && selfhostCfg.acme.email != "") {
+        useACMEHost = selfhostCfg.baseDomain;
+      })
+    ]);
   };
 }

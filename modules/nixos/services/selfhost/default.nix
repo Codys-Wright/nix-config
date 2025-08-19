@@ -23,7 +23,7 @@ in
     
     # Cloudflare integration for SSL certificates
     cloudflare = {
-      dnsCredentialsFile = mkOpt path "" ''
+      dnsCredentialsFile = mkOpt (nullOr path) null ''
         Path to file containing Cloudflare DNS API credentials for ACME SSL certificates.
         File should contain: CF_DNS_API_TOKEN=your_token_here
       '';
@@ -85,8 +85,10 @@ in
       443  # HTTPS
     ];
 
-    # SSL certificate management via ACME + Cloudflare
-    security.acme = mkIf (cfg.baseDomain != "" && cfg.cloudflare.dnsCredentialsFile != "") {
+
+
+    # SSL certificate management via ACME + Cloudflare (only when DNS credentials provided)
+    security.acme = mkIf (cfg.baseDomain != "" && cfg.cloudflare.dnsCredentialsFile != null && cfg.acme.email != "") {
       acceptTerms = true;
       defaults.email = cfg.acme.email;
       certs.${cfg.baseDomain} = {
@@ -104,24 +106,30 @@ in
     # Caddy reverse proxy configuration
     services.caddy = mkIf (cfg.baseDomain != "") {
       enable = true;
-      globalConfig = ''
+      user = cfg.user;
+      group = cfg.group;
+      globalConfig = mkIf (cfg.cloudflare.dnsCredentialsFile == null || cfg.acme.email == "") ''
         auto_https off
       '';
-      virtualHosts = {
-        # HTTP to HTTPS redirect for base domain
-        "http://${cfg.baseDomain}" = {
-          extraConfig = ''
-            redir https://{host}{uri}
-          '';
-        };
-        # HTTP to HTTPS redirect for all subdomains
-        "http://*.${cfg.baseDomain}" = {
-          extraConfig = ''
-            redir https://{host}{uri}
-          '';
-        };
-      };
+      # Individual services will add their own virtualHosts
     };
+
+    # Automatically add all configured Caddy virtual hosts to /etc/hosts for local access
+    networking.hosts = mkIf (cfg.baseDomain != "") (
+      let
+        # Extract all virtual hosts from Caddy configuration
+        caddyHosts = lib.attrNames config.services.caddy.virtualHosts;
+        # Filter out any protocol prefixes and get clean domain names
+        domainNames = map (host: 
+          if lib.hasPrefix "http://" host then lib.removePrefix "http://" host
+          else if lib.hasPrefix "https://" host then lib.removePrefix "https://" host
+          else host
+        ) caddyHosts;
+      in
+      {
+        "127.0.0.1" = domainNames;
+      }
+    );
 
     # Container infrastructure
     virtualisation.podman = {

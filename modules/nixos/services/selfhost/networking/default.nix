@@ -22,6 +22,7 @@ in
       rustdesk-server.enable = mkDefault true;
       syncthing.enable = mkDefault true;
       wireguard-netns.enable = mkDefault true;
+      cloudflare-tunnel.enable = mkDefault false;  # Manual enable due to token requirement
     };
   };
 } 

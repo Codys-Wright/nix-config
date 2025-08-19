@@ -129,8 +129,9 @@ with lib.${namespace};
         # 🏠 Selfhost Configuration
         services.selfhost = {
             enable = true;
-            baseDomain = "starcommand.live";  # REPLACE WITH YOUR ACTUAL DOMAIN
-            acme.email = "acodywright@gmail.com";  # REPLACE WITH YOUR EMAIL
+            baseDomain = "starcommand.live";
+            # Enable ACME for local SSL certificates
+            acme.email = "acodywright@gmail.com";
             cloudflare.dnsCredentialsFile = "/etc/nixos/secrets/cloudflare-dns.env";
             
             # Storage configuration
@@ -152,6 +153,27 @@ with lib.${namespace};
             #     apiKeyFile = "/etc/nixos/secrets/cloudflare-firewall.key";
             #     zoneId = "9c26b00054e2c3c833cd6ded804ef076";  # Your actual Zone ID
             # };
+        };
+
+        # 🌐 Cloudflare Tunnel Configuration (Declarative!)
+        services.selfhost.networking.cloudflare-tunnel = {
+            enable = true;
+            tunnelId = "06ec96ae-5cd0-4c7c-8a5c-5cba53f764e8";
+            tunnelToken = "eyJhIjoiZDliZWE2ODdmNWE2YTE5YTNjNzZhMTk1NWZiNzU5NTIiLCJ0IjoiMDZlYzk2YWUtNWNkMC00YzdjLThhNWMtNWNiYTUzZjc2NGU4IiwicyI6IlpqY3lNekF6TldVdE5XTTRNeTAwTkRRMExXRmpOVFl0T0Rrek5HTTRPRFZsT0dNMyJ9";
+            
+            ingress = {
+                # Homepage dashboard on root domain
+                "starcommand.live" = "http://127.0.0.1:3000";
+                
+                # Individual services
+                "jellyfin.starcommand.live" = "http://127.0.0.1:8096";
+                "syncthing.starcommand.live" = "http://127.0.0.1:8384";
+                
+                # Future services (uncomment as you enable them)
+                # "photos.starcommand.live" = "http://127.0.0.1:3001";     # Immich
+                # "music.starcommand.live" = "http://127.0.0.1:4533";      # Navidrome
+                # "grafana.starcommand.live" = "http://127.0.0.1:3030";    # Grafana
+            };
         };
        
     };

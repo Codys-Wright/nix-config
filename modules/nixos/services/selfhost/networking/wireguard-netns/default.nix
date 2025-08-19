@@ -18,14 +18,14 @@ in
     
     namespace = mkOpt str "wg_client" "Network namespace name";
     
-    configFile = mkOpt path "" "Path to Wireguard config file (not wg-quick format)";
+    configFile = mkOpt (nullOr path) null "Path to Wireguard config file (not wg-quick format)";
     
     privateIP = mkOpt str "" "Private IP address for the Wireguard interface";
     
     dnsIP = mkOpt str "1.1.1.1" "DNS server IP for the namespace";
   };
 
-  config = mkIf cfg.enable {
+  config = mkIf (cfg.enable && cfg.configFile != null) {
     # Generic network namespace service
     systemd.services."netns@" = {
       description = "%I network namespace";

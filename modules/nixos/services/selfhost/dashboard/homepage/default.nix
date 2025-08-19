@@ -187,11 +187,16 @@ in
     };
     
     # Serve homepage on the root domain
-    services.caddy.virtualHosts."${selfhostCfg.baseDomain}" = mkIf (selfhostCfg.baseDomain != "") {
-      useACMEHost = selfhostCfg.baseDomain;
-      extraConfig = ''
-        reverse_proxy http://127.0.0.1:${toString config.services.homepage-dashboard.listenPort}
-      '';
-    };
+    services.caddy.virtualHosts."${selfhostCfg.baseDomain}" = mkIf (selfhostCfg.baseDomain != "") (mkMerge [
+      {
+        extraConfig = ''
+          reverse_proxy http://127.0.0.1:${toString config.services.homepage-dashboard.listenPort}
+        '';
+      }
+      (mkIf (selfhostCfg.cloudflare.dnsCredentialsFile != null && selfhostCfg.acme.email != "") {
+        useACMEHost = selfhostCfg.baseDomain;
+      })
+    ]);
+
   };
 } 
