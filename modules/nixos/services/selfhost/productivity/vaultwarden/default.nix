@@ -66,13 +66,9 @@ in
     };
     
     # Optional fail2ban integration
-    services.fail2ban-cloudflare = mkIf config.services.fail2ban-cloudflare.enable {
-      jails = {
-        vaultwarden = {
-          serviceName = "vaultwarden";
-          failRegex = "^.*Username or password is incorrect. Try again. IP: <HOST>. Username: <F-USER>.*</F-USER>.$";
-        };
-      };
+    ${namespace}.services.selfhost.utility.fail2ban-cloudflare.jails.vaultwarden = mkIf cfg.cloudflared.fail2ban {
+      serviceName = "vaultwarden";
+      failRegex = "^.*Username or password is incorrect. Try again. IP: <HOST>. Username: <F-USER>.*</F-USER>.$";
     };
   };
 } 

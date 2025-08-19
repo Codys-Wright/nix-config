@@ -20,7 +20,7 @@ in
     
     port = mkOpt port 5055 "Port for Jellyseerr service";
     
-    package = mkPackageOpt pkgs "jellyseerr" "Jellyseerr package to use";
+    package = mkOpt types.package pkgs.jellyseerr "Jellyseerr package to use";
     
     homepage = {
       name = mkOpt str "Jellyseerr" "Name shown on homepage";

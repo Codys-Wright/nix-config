@@ -32,7 +32,7 @@ in
 
   config = mkIf cfg.enable {
     # Optional SOPS secrets for Last.fm integration
-    sops.secrets = mkIf config.sops.secrets ? last-fm-key {
+    sops.secrets = mkIf (config.sops.secrets ? last-fm-key) {
       last-fm-key = {
         owner = "navidrome";
       };

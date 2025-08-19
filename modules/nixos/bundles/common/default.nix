@@ -42,7 +42,7 @@ in
       services = {
         printing = enabled;
         ssh = enabled;
-        selfhost.tailscale = enabled;
+        selfhost.networking.tailscale = enabled;
       };
 
       system = {

@@ -31,7 +31,7 @@ in
 
   config = mkIf cfg.enable {
     # Optional SOPS secrets for app key
-    sops.secrets.firefly-key = mkIf config.sops.secrets ? firefly-key {
+    sops.secrets.firefly-key = mkIf (config.sops.secrets ? firefly-key) {
       owner = "firefly-iii";
     };
 
@@ -39,7 +39,7 @@ in
       enable = true;
       settings = {
         APP_ENV = "production";
-        APP_KEY_FILE = if config.sops.secrets ? firefly-key then config.sops.secrets.firefly-key.path else "/dev/null";
+        APP_KEY_FILE = if (config.sops.secrets ? firefly-key) then config.sops.secrets.firefly-key.path else "/dev/null";
         APP_URL = "https://${cfg.url}";
         
         DB_CONNECTION = "sqlite";

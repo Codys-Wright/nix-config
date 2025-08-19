@@ -24,6 +24,7 @@ in
       uptime-kuma.enable = mkDefault true;
       microbin.enable = mkDefault true;
       keycloak.enable = mkDefault true;
+      fail2ban-cloudflare.enable = mkDefault true;
     };
   };
 } 

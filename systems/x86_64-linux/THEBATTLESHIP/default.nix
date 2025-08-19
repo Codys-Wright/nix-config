@@ -126,6 +126,33 @@ with lib.${namespace};
             enableAppleEmoji = true;
         };
         
+        # 🏠 Selfhost Configuration
+        services.selfhost = {
+            enable = true;
+            baseDomain = "starcommand.live";  # REPLACE WITH YOUR ACTUAL DOMAIN
+            acme.email = "acodywright@gmail.com";  # REPLACE WITH YOUR EMAIL
+            cloudflare.dnsCredentialsFile = "/etc/nixos/secrets/cloudflare-dns.env";
+            
+            # Storage configuration
+            mounts = {
+                fast = "/mnt/cache";     # Fast storage (SSD)
+                slow = "/mnt/storage";   # Slow storage (HDD)
+                config = "/persist/opt/services";  # Service configs
+                merged = "/mnt/user";    # Merged storage view
+            };
+            
+            # Minimal service selection for initial setup
+            networking.enable = true;      # Tailscale, Syncthing, etc.
+            dashboard.enable = true;       # Homepage dashboard
+            media.jellyfin.enable = true;  # Media server (easy to test)
+            
+            # 🛡️ Fail2Ban + Cloudflare Protection (optional but recommended)
+            # utility.fail2ban-cloudflare = {
+            #     enable = true;
+            #     apiKeyFile = "/etc/nixos/secrets/cloudflare-firewall.key";
+            #     zoneId = "9c26b00054e2c3c833cd6ded804ef076";  # Your actual Zone ID
+            # };
+        };
        
     };
 
