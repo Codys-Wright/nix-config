@@ -81,6 +81,8 @@ in
       # Package management
       nix-index
       nix-tree
+
+      just
     ];
 
     ${namespace} = {

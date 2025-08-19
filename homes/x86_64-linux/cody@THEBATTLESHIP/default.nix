@@ -49,6 +49,12 @@ with lib.${namespace};
       };
     };
 
+app = {
+        misc = {
+            rustdesk-client.enable = true;
+        };
+    };
+
     config.user = {
       enable = true;
       name = "cody";
