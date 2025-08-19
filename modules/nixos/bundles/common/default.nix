@@ -42,13 +42,14 @@ in
       services = {
         printing = enabled;
         ssh = enabled;
-        tailscale = enabled;
+        selfhost.tailscale = enabled;
       };
 
       system = {
         fonts = enabled;
         locale = enabled;
         phoenix = enabled;
+        kernel = enabled;
       };
     };
   };

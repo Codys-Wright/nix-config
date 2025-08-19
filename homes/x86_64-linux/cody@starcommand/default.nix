@@ -23,6 +23,12 @@ with lib.${namespace};
       # music-production = enabled; # Disabled - using system-level music production
     };
 
+    app = {
+        misc = {
+            rustdesk-client.enable = true;
+        };
+    };
+
     coding.tools = {
       git = enabled;
       lazygit = enabled;
@@ -99,9 +105,9 @@ with lib.${namespace};
     chawan
 
     ];
- 
+
   programs.chawan.enable = true;
- 
+
   # Configure fontconfig for Apple Color Emoji
   fonts.fontconfig.enable = true;
 

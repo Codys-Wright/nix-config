@@ -35,11 +35,11 @@ with lib.${namespace};
       type = "btrfs-impermanence";
       device = "/dev/nvme0n1";
     };
-    
+
     # Bootloader configuration
     FTS-FLEET.system.boot.systemd-boot = enabled;
 
-   
+
 
     # Configure the cody user with Home Manager
     snowfallorg.users.cody = {
@@ -65,7 +65,23 @@ with lib.${namespace};
         bundles.cli = enabled;
         desktop.type = "gnome";  # Primary desktop environment
         desktop.environments = ["kde" "gnome"];  # Available desktop environments for theming
-        
+
+        services.selfhost = {
+            homepage-dashboard.enable = true;
+            rustdesk-server.enable = true;
+            immich.enable = true;
+            # firefly-iii.enable = true;
+            # grafana.enable = true;
+            jellyfin.enable = true;
+            # ollama.enable = true;
+            syncthing.enable = true;
+            # wanderer.enable = true;
+            mealie.enable = true;
+            audiobookshelf.enable = true;
+            # navidrome.enable = true;
+            stirling-pdf.enable = true;
+        };
+
         # system.themes.stylix = enabled;
         services.ssh = {
             enable = true;
@@ -74,15 +90,16 @@ with lib.${namespace};
                 "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKXs4YKtweDc2OcDDE6LoENPqQc8W79QQczfK9XErG4z CodyWright@THEBATTLESHIP"
             ];
         };
-        
+
         # Enable fonts with Apple Color Emoji
         system.fonts = {
             enable = true;
             enableAppleEmoji = true;
         };
-        
-       
+
+
     };
+
 
     # Additional system packages (GUI and specific tools)
     environment.systemPackages = with pkgs; [
@@ -90,8 +107,14 @@ with lib.${namespace};
         vscode
         snowfallorg.frost
         whitesur-wallpapers
+        just
     ];
 
+    services.minecraft-server = {
+        enable = true;
+        eula = true;
+        openFirewall = true;
+    };
     # Add overlay to make custom packages available
     nixpkgs.overlays = [
         (final: prev: {
@@ -100,4 +123,4 @@ with lib.${namespace};
       ];
 
     system.stateVersion = "24.05";
-} 
+}
