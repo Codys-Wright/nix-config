@@ -123,16 +123,16 @@ with lib.${namespace};
             productivity.calibre.enable = false;        # Missing library directory
             productivity.radicale.enable = false;       # Missing htpasswd file
             
-            # Enable Cloudflare Tunnel for external access
-            networking.cloudflare-tunnel = {
-              enable = true;
-              tunnelId = config.sops.secrets."cloudflare/tunnel_id".path;
-              tunnelToken = config.sops.secrets."cloudflare/tunnel_token".path;
-              ingress = {
-                "starcommand.live" = "http://127.0.0.1:443";
-                "*.starcommand.live" = "http://127.0.0.1:443";
-              };
-            };
+            # Enable Cloudflare Tunnel for external access (temporarily disabled)
+            # networking.cloudflare-tunnel = {
+            #   enable = true;
+            #   tunnelId = "your-tunnel-id";  # Will be read from credentials file
+            #   credentialsFile = "/run/secrets/cloudflare-tunnel-credentials";
+            #   ingress = {
+            #     "starcommand.live" = "http://127.0.0.1:443";
+            #     "*.starcommand.live" = "http://127.0.0.1:443";
+            #   };
+            # };
             
             # 🛡️ Fail2Ban + Cloudflare Protection (optional but recommended)
             # utility.fail2ban-cloudflare = {

@@ -71,35 +71,63 @@ in
                           group = "root";
                           mode = "0600";
                         };
-                        # Cloudflare Tunnel credentials
-                        "cloudflare/tunnel_id" = {
-                          sopsFile = ./../../../../secrets/sops/shared.yaml;
-                          owner = "root";
-                          group = "root";
-                          mode = "0600";
-                        };
-                        "cloudflare/tunnel_token" = {
-                          sopsFile = ./../../../../secrets/sops/shared.yaml;
-                          owner = "root";
-                          group = "root";
-                          mode = "0600";
-                        };
+                                            # Cloudflare Tunnel credentials
+                    "cloudflare/tunnel_id" = {
+                      sopsFile = ./../../../../secrets/sops/shared.yaml;
+                      owner = "root";
+                      group = "root";
+                      mode = "0600";
+                    };
+                    "cloudflare/tunnel_token" = {
+                      sopsFile = ./../../../../secrets/sops/shared.yaml;
+                      owner = "root";
+                      group = "root";
+                      mode = "0600";
+                    };
       }
       # only reference borg password if host is using backup
       
     ];
-    # The containing folders are created as root and if this is the first ~/.config/ entry,
-    # the ownership is busted and home-manager can't target because it can't write into .config...
-    # FIXME(sops): We might not need this depending on how https://github.com/Mic92/sops-nix/issues/381 is fixed
-    system.activationScripts.sopsSetAgeKeyOwnership =
-      let
-        ageFolder = "/home/cody/.config/sops/age";
-        user = "cody";
-        group = "users";
-      in
-      ''
-        mkdir -p ${ageFolder} || true
-        chown -R ${user}:${group} /home/cody/.config
-      '';
+                    # Create Cloudflare tunnel credentials file from token
+                systemd.services.create-cloudflare-tunnel-credentials = mkIf (builtins.hasAttr "cloudflare/tunnel_token" config.sops.secrets) {
+                  description = "Create Cloudflare tunnel credentials file from token";
+                  wantedBy = [ "multi-user.target" ];
+                  before = [ "cloudflared.service" ];
+                  serviceConfig = {
+                    Type = "oneshot";
+                    RemainAfterExit = true;
+                  };
+                  script = ''
+                    # Only create the file if it doesn't exist or is empty
+                    if [ ! -f /run/secrets/cloudflare-tunnel-credentials ] || [ ! -s /run/secrets/cloudflare-tunnel-credentials ]; then
+                      echo "Creating Cloudflare tunnel credentials file..."
+                      
+                      # The tunnel token is base64-encoded JSON credentials
+                      TOKEN=$(cat ${config.sops.secrets."cloudflare/tunnel_token".path})
+                      
+                      # Decode the base64 token to get the credentials JSON
+                      echo "$TOKEN" | ${pkgs.coreutils}/bin/base64 -d > /run/secrets/cloudflare-tunnel-credentials
+                      chmod 600 /run/secrets/cloudflare-tunnel-credentials
+                      
+                      echo "Cloudflare tunnel credentials file created successfully."
+                    else
+                      echo "Cloudflare tunnel credentials file already exists, skipping creation."
+                    fi
+                  '';
+                };
+
+                # The containing folders are created as root and if this is the first ~/.config/ entry,
+                # the ownership is busted and home-manager can't target because it can't write into .config...
+                # FIXME(sops): We might not need this depending on how https://github.com/Mic92/sops-nix/issues/381 is fixed
+                system.activationScripts.sopsSetAgeKeyOwnership =
+                  let
+                    ageFolder = "/home/cody/.config/sops/age";
+                    user = "cody";
+                    group = "users";
+                  in
+                  ''
+                    mkdir -p ${ageFolder} || true
+                    chown -R ${user}:${group} /home/cody/.config
+                  '';
   };
 } 
