@@ -107,7 +107,25 @@ in
         dnsResolver = "1.1.1.1:53";
         dnsPropagationCheck = true;
         group = config.services.caddy.group;
-        environmentFile = config.sops.secrets."cloudflare/api_token".path;
+        environmentFile = "/run/secrets/cloudflare-credentials";
+      };
+    };
+
+    # Create Cloudflare credentials file from SOPS secrets
+    systemd.services.create-cloudflare-credentials = mkIf (cfg.baseDomain != "" && cfg.acme.email != "") {
+      description = "Create Cloudflare credentials file from SOPS secrets";
+      wantedBy = [ "multi-user.target" ];
+      before = [ "acme-${cfg.baseDomain}.service" ];
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        ExecStart = pkgs.writeShellScript "create-cloudflare-credentials" ''
+          cat > /run/secrets/cloudflare-credentials << EOF
+          CLOUDFLARE_DNS_API_TOKEN=$(cat ${config.sops.secrets."cloudflare/api_token".path})
+          CLOUDFLARE_ZONE_ID=$(cat ${config.sops.secrets."cloudflare/zone_id".path})
+          EOF
+          chmod 600 /run/secrets/cloudflare-credentials
+        '';
       };
     };
 
