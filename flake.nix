@@ -79,24 +79,7 @@
       default = inputs.self.packages.${system}.docs;  # Default to docs package
     });
 
-    # Apps for nix run support
-    apps = forAllSystems (system: let
-      pkgs = inputs.nixpkgs.legacyPackages.${system};
-    in {
-      default = inputs.self.apps.${system}.deploy;
 
-      install = {
-        type = "app";
-        program = "${pkgs.writeShellScriptBin "install" "exec bash ${./scripts/install.sh} \"$@\""}/bin/install";
-      };
-
-      deploy = {
-        type = "app";
-        program = "${pkgs.writeShellScriptBin "deploy" "exec bash ${./scripts/deploy.sh} \"$@\""}/bin/deploy";
-      };
-
-
-    });
 
     # Deploy-rs checks for deployment validation
     checks = builtins.mapAttrs (system: deployLib: deployLib.deployChecks inputs.self.deploy) inputs.deploy-rs.lib;

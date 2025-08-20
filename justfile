@@ -124,49 +124,7 @@ sops-add-creation-rules USER HOST:
 
 # Add a new host to existing SOPS setup
 add-sops-host HOST_NAME HOST_IP:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    
-    echo "🔐 Adding new host {{HOST_NAME}} to SOPS setup..."
-    
-    # Get host age key from SSH
-    echo "🔑 Getting host age key from {{HOST_NAME}} ({{HOST_IP}})..."
-    HOST_AGE_KEY=$(ssh root@{{HOST_IP}} "cat /etc/ssh/ssh_host_ed25519_key.pub" | nix-shell -p ssh-to-age --run "ssh-to-age")
-    
-    # Update .sops.yaml to add the new host
-    echo "📄 Updating .sops.yaml with new host..."
-    
-    # Add host key to .sops.yaml (this would need yq to be more robust)
-    echo "  - &{{HOST_NAME}} ${HOST_AGE_KEY}" >> secrets/.sops.yaml
-    
-    # Create host-specific secrets file
-    echo "📋 Creating host-specific secrets file..."
-    cat > secrets/sops/{{HOST_NAME}}.yaml << EOF
-    # Host-specific secrets for {{HOST_NAME}}
-    # This file contains secrets specific to this host
-    
-    # SSH keys and other host-specific secrets
-    keys:
-      age: "placeholder-will-be-set-by-nixos-module"
-    
-    # Host-specific passwords or other secrets
-    # Example:
-    # passwords:
-    #   root: "encrypted-root-password-here"
-    EOF
-    
-    # Encrypt the new host file
-    echo "🔒 Encrypting host-specific secrets file..."
-    cd secrets
-    nix-shell -p sops --run "sops -e sops/{{HOST_NAME}}.yaml > sops/{{HOST_NAME}}.yaml.enc && mv sops/{{HOST_NAME}}.yaml.enc sops/{{HOST_NAME}}.yaml"
-    cd ..
-    
-    # Update existing secrets with new key
-    echo "🔄 Updating existing secrets with new host key..."
-    just rekey
-    
-    echo "✅ Host {{HOST_NAME}} added to SOPS setup!"
-    echo "📋 Host age key: ${HOST_AGE_KEY}"
+    @scripts/add-sops-host.sh {{HOST_NAME}} {{HOST_IP}}
 
 # Reset SOPS setup (cleans up for fresh start)
 reset-sops:

@@ -72,12 +72,12 @@ function sops_update_age_key() {
 		exit 1
 	fi
 
-	if [[ -n $(yq ".keys.${field}[] | select(anchor == \"$keyname\")" "${SOPS_FILE}") ]]; then
+	if [[ -n $(yq ".keys.${field}[] | select(. == \"*\") | select(. == \"&$keyname\")" "${SOPS_FILE}") ]]; then
 		green "Updating existing ${keyname} key"
-		yq -i "(.keys.${field}[] | select(anchor == \"$keyname\")) = \"$key\"" "$SOPS_FILE"
+		yq -i "(.keys.${field}[] | select(. == \"*\") | select(. == \"&$keyname\")) = \"&$keyname $key\"" "$SOPS_FILE"
 	else
 		green "Adding new ${keyname} key"
-		yq -i ".keys.$field += [\"$key\"] | .keys.${field}[-1] anchor = \"$keyname\"" "$SOPS_FILE"
+		yq -i ".keys.$field += [\"&$keyname $key\"]" "$SOPS_FILE"
 	fi
 }
 
