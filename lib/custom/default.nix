@@ -53,4 +53,13 @@
       };
 
   randomBackupExt = inputs: "backup_${toString (builtins.hashString "sha256" (toString inputs.nixpkgs))}";
+
+  # SOPS secrets management
+  sops = {
+    # Get the path to a SOPS secret file
+    getSecretFile = secretPath: "${builtins.toString ./../secrets/sops}/${secretPath}";
+    
+    # Get the path to a decrypted secret (for use in environment variables, etc.)
+    getSecretPath = secretName: "/run/secrets/${secretName}";
+  };
 }

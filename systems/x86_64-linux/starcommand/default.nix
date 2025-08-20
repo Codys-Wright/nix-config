@@ -83,13 +83,16 @@ with lib.${namespace};
             enable = true;
             enableAppleEmoji = true;
         };
+
+        # Enable SOPS for secrets management
+        programs.sops = enabled;
 # 🏠 Selfhost Configuration
         services.selfhost = {
             enable = true;
             baseDomain = "starcommand.live";
             # Enable ACME for local SSL certificates
             acme.email = "acodywright@gmail.com";
-            cloudflare.dnsCredentialsFile = "/etc/nixos/secrets/cloudflare-dns.env";
+            # Cloudflare DNS credentials are now managed via SOPS
             
             # Enable network access for local devices
             networkAccess.enable = true;

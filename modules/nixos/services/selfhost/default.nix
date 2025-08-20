@@ -93,8 +93,10 @@ in
 
 
 
-    # SSL certificate management via ACME + Cloudflare (only when DNS credentials provided)
-    security.acme = mkIf (cfg.baseDomain != "" && cfg.cloudflare.dnsCredentialsFile != null && cfg.acme.email != "") {
+
+
+    # SSL certificate management via ACME + Cloudflare using SOPS secrets
+    security.acme = mkIf (cfg.baseDomain != "" && cfg.acme.email != "") {
       acceptTerms = true;
       defaults.email = cfg.acme.email;
       certs.${cfg.baseDomain} = {
@@ -105,7 +107,7 @@ in
         dnsResolver = "1.1.1.1:53";
         dnsPropagationCheck = true;
         group = config.services.caddy.group;
-        environmentFile = cfg.cloudflare.dnsCredentialsFile;
+        environmentFile = config.sops.secrets."cloudflare/api_token".path;
       };
     };
 
@@ -114,7 +116,7 @@ in
       enable = true;
       user = cfg.user;
       group = cfg.group;
-      globalConfig = mkIf (cfg.cloudflare.dnsCredentialsFile == null || cfg.acme.email == "") ''
+      globalConfig = mkIf (cfg.acme.email == "") ''
         auto_https off
       '';
       # Individual services will add their own virtualHosts

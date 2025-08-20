@@ -25,7 +25,7 @@ in
       # This is the location of the host specific age-key and will have been extracted to this location via the nixos sops module
       age.keyFile = "${homeDirectory}/.config/sops/age/keys.txt";
 
-      defaultSopsFile = "${sopsFolder}/shared.yaml";
+      defaultSopsFile = ./../../../../secrets/sops/shared.yaml;
       validateSopsFiles = false;
 
       secrets = {
