@@ -66,7 +66,8 @@ with lib.${namespace};
         desktop.type = "gnome";  # Primary desktop environment
         desktop.environments = ["kde" "gnome"];  # Available desktop environments for theming
 
-       
+        
+        
         # system.themes.stylix = enabled;
         services.ssh = {
             enable = true;
