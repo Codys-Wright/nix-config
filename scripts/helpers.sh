@@ -93,9 +93,9 @@ function sops_add_shared_creation_rules() {
 		if [[ -z $(yq "$shared_selector.key_groups[].age[] | select(alias == $h)" "${SOPS_FILE}") ]]; then
 			green "Adding $u and $h to shared.yaml rule"
 			# NOTE: Split on purpose to avoid weird file corruption
-			yq -i "($shared_selector).key_groups[].age += [$u, $h]" "$SOPS_FILE"
-			yq -i "($shared_selector).key_groups[].age[-2] alias = $u" "$SOPS_FILE"
-			yq -i "($shared_selector).key_groups[].age[-1] alias = $h" "$SOPS_FILE"
+			yq -i -y "($shared_selector).key_groups[].age += [$u, $h]" "$SOPS_FILE"
+			yq -i -y "($shared_selector).key_groups[].age[-2] alias = $u" "$SOPS_FILE"
+			yq -i -y "($shared_selector).key_groups[].age[-1] alias = $h" "$SOPS_FILE"
 		fi
 	else
 		red "shared.yaml rule not found"
@@ -110,15 +110,15 @@ function sops_add_host_creation_rules() {
 	w="\"$(whoami)_$(hostname)\"" # quoted whoami_hostname for yaml
 	n="\"$(hostname)\""           # quoted hostname for yaml
 
-	host_selector=".creation_rules[] | select(.path_regex | contains(\"${host}\.yaml\"))"
+	host_selector=".creation_rules[] | select(.path_regex | contains(\"${host}.yaml\"))"
 	if [[ -z $(yq "$host_selector" "${SOPS_FILE}") ]]; then
 		green "Adding new host file creation rule"
-		yq -i ".creation_rules += {\"path_regex\": \"${host}\\.yaml$\", \"key_groups\": [{\"age\": [$u, $h]}]}" "$SOPS_FILE"
+		yq -i -y ".creation_rules += {\"path_regex\": \"${host}.yaml$\", \"key_groups\": [{\"age\": [$u, $h]}]}" "$SOPS_FILE"
 		# Add aliases one by one
-		yq -i "($host_selector).key_groups[].age[0] alias = $u" "$SOPS_FILE"
-		yq -i "($host_selector).key_groups[].age[1] alias = $h" "$SOPS_FILE"
-		yq -i "($host_selector).key_groups[].age[2] alias = $w" "$SOPS_FILE"
-		yq -i "($host_selector).key_groups[].age[3] alias = $n" "$SOPS_FILE"
+		yq -i -y "($host_selector).key_groups[].age[0] alias = $u" "$SOPS_FILE"
+		yq -i -y "($host_selector).key_groups[].age[1] alias = $h" "$SOPS_FILE"
+		yq -i -y "($host_selector).key_groups[].age[2] alias = $w" "$SOPS_FILE"
+		yq -i -y "($host_selector).key_groups[].age[3] alias = $n" "$SOPS_FILE"
 	fi
 }
 

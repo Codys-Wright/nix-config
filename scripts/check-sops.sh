@@ -10,7 +10,8 @@ if [ "$os" == "Darwin" ]; then
 else # If the sops-nix service wasn't started at all, we don't need to check if it failed
 	sops_running=$(journalctl --no-pager --no-hostname --since "10 minutes ago" | rg "Starting sops-nix activation")
 	if [ -z "$sops_running" ]; then
-		exit 0
+		echo "✅ SOPS is working correctly!"
+	exit 0
 	fi
 
 	# Also this is HM specific atm, need a way to test the NixOS version too
@@ -26,6 +27,8 @@ else # If the sops-nix service wasn't started at all, we don't need to check if 
 		echo "ERROR: $sops_result"
 		exit 1
 	fi
+	fi
 fi
 
+echo "✅ SOPS is working correctly!"
 exit 0
