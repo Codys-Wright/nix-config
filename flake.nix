@@ -42,21 +42,7 @@
     # Deploy-rs configuration for managing deployments
     deploy = {
       nodes = {
-        # VM deployment using nixos-anywhere
-        vm = {
-          hostname = "192.168.122.218"; # Update this IP when VM IP changes
-          sshOpts = [ "-o" "StrictHostKeyChecking=no" ];
-          fastConnection = true;
-          interactiveSudo = false; # root user, no sudo needed
-          # Shorter timeouts to prevent hanging
-          profiles = {
-            system = {
-              sshUser = "root";
-              user = "root";
-              path = inputs.deploy-rs.lib.x86_64-linux.activate.nixos inputs.self.nixosConfigurations.vm;
-            };
-          };
-        };
+     
 
         # Starcommand deployment
         starcommand = {

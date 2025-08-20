@@ -21,12 +21,9 @@ with lib.${namespace};
       # desktop.hyprland = enabled; # Disabled - using KDE
       office = enabled;
       music = enabled;
-      music-production = enabled;
     };
 
-    programs = {
-      git = enabled;
-    };
+   
 
     
     config.user = {
