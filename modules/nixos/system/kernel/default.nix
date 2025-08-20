@@ -14,7 +14,7 @@ in
 {
   options.${namespace}.system.kernel = with types; {
     enable = mkBoolOpt false "Enable kernel configuration";
-    version = mkDefault "6_16";
+    version = mkOpt str "6_16" "Kernel version to use";
   };
 
   config = mkIf cfg.enable {
