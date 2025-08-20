@@ -1,6 +1,9 @@
 # NixOS Configuration Management
 # Usage: just <command>
 
+# Define path to helpers
+export HELPERS_PATH := justfile_directory() + "/scripts/helpers.sh"
+
 # Default target
 default:
     @just --list
@@ -67,3 +70,49 @@ fmt:
 # Check syntax
 check:
     @nix flake check
+
+# Secrets management commands
+# Generate a new age key
+age-key:
+    nix-shell -p age --run "age-keygen"
+
+# Check if sops-nix activated successfully
+check-sops:
+    scripts/check-sops.sh
+
+# Update all keys in sops/*.yaml files to match the creation rules keys
+rekey:
+    cd secrets && for file in $(ls sops/*.yaml); do \
+        sops updatekeys -y $file; \
+    done
+
+# Update an age key anchor or add a new one
+sops-update-age-key FIELD KEYNAME KEY:
+    #!/usr/bin/env bash
+    source {{HELPERS_PATH}}
+    sops_update_age_key {{FIELD}} {{KEYNAME}} {{KEY}}
+
+# Update an existing user age key anchor or add a new one
+sops-update-user-age-key USER HOST KEY:
+    just sops-update-age-key users {{USER}}_{{HOST}} {{KEY}}
+
+# Update an existing host age key anchor or add a new one
+sops-update-host-age-key HOST KEY:
+    just sops-update-age-key hosts {{HOST}} {{KEY}}
+
+# Automatically create creation rules entries for a <host>.yaml file for host-specific secrets
+sops-add-host-creation-rules USER HOST:
+    #!/usr/bin/env bash
+    source {{HELPERS_PATH}}
+    sops_add_host_creation_rules "{{USER}}" "{{HOST}}"
+
+# Automatically create creation rules entries for a shared.yaml file for shared secrets
+sops-add-shared-creation-rules USER HOST:
+    #!/usr/bin/env bash
+    source {{HELPERS_PATH}}
+    sops_add_shared_creation_rules "{{USER}}" "{{HOST}}"
+
+# Automatically add the host and user keys to creation rules for shared.yaml and <host>.yaml
+sops-add-creation-rules USER HOST:
+    just sops-add-host-creation-rules {{USER}} {{HOST}} && \
+    just sops-add-shared-creation-rules {{USER}} {{HOST}}
