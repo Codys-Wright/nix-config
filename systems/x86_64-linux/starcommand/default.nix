@@ -66,13 +66,14 @@ with lib.${namespace};
         desktop.type = "gnome";  # Primary desktop environment
         desktop.environments = ["kde" "gnome"];  # Available desktop environments for theming
 
-        
+       
         # system.themes.stylix = enabled;
         services.ssh = {
             enable = true;
             allowRootLogin = true;
             rootKeys = [
                 "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKXs4YKtweDc2OcDDE6LoENPqQc8W79QQczfK9XErG4z CodyWright@THEBATTLESHIP"
+                "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAg2dGkiERNUOR9gA9BfUwvFARY+tlL/8dcZFeoMKJu7 cody@THEBATTLESHIP"
             ];
         };
 

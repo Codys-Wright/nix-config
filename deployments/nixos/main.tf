@@ -56,11 +56,6 @@ module "deploy" {
   # build the closure on the remote machine instead of locally
   build_on_remote        = true
   
-  # Extra environment variables for SSH password
-  extra_environment = {
-    SSHPASS = each.value.install_password
-  }
-  
   # script is below
   # extra_files_script     = "${path.module}/decrypt-ssh-secrets.sh"
   # disk_encryption_key_scripts = [{
