@@ -120,11 +120,18 @@ in
         Type = "oneshot";
         RemainAfterExit = true;
         ExecStart = pkgs.writeShellScript "create-cloudflare-credentials" ''
-          cat > /run/secrets/cloudflare-credentials << EOF
+          # Only create the file if it doesn't exist or is empty
+          if [ ! -f /run/secrets/cloudflare-credentials ] || [ ! -s /run/secrets/cloudflare-credentials ]; then
+            echo "Creating Cloudflare credentials file..."
+            cat > /run/secrets/cloudflare-credentials << EOF
           CLOUDFLARE_DNS_API_TOKEN=$(cat ${config.sops.secrets."cloudflare/api_token".path})
           CLOUDFLARE_ZONE_ID=$(cat ${config.sops.secrets."cloudflare/zone_id".path})
           EOF
-          chmod 600 /run/secrets/cloudflare-credentials
+            chmod 600 /run/secrets/cloudflare-credentials
+            echo "Cloudflare credentials file created successfully."
+          else
+            echo "Cloudflare credentials file already exists, skipping creation."
+          fi
         '';
       };
     };

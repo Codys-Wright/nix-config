@@ -65,12 +65,25 @@ in
           group = "root";
           mode = "0600";
         };
-        "cloudflare/zone_id" = {
-          sopsFile = ./../../../../secrets/sops/shared.yaml;
-          owner = "root";
-          group = "root";
-          mode = "0600";
-        };
+                                "cloudflare/zone_id" = {
+                          sopsFile = ./../../../../secrets/sops/shared.yaml;
+                          owner = "root";
+                          group = "root";
+                          mode = "0600";
+                        };
+                        # Cloudflare Tunnel credentials
+                        "cloudflare/tunnel_id" = {
+                          sopsFile = ./../../../../secrets/sops/shared.yaml;
+                          owner = "root";
+                          group = "root";
+                          mode = "0600";
+                        };
+                        "cloudflare/tunnel_token" = {
+                          sopsFile = ./../../../../secrets/sops/shared.yaml;
+                          owner = "root";
+                          group = "root";
+                          mode = "0600";
+                        };
       }
       # only reference borg password if host is using backup
       

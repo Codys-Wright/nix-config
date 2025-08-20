@@ -117,6 +117,23 @@ with lib.${namespace};
             backup.enable = true;          # Backup services
             smarthome.enable = true;       # Home Assistant, etc.
             
+            # Disable specific failing services
+            networking.syncthing.enable = false;        # Missing /mnt/data/syncthing
+            networking.rustdesk-server.enable = false;  # Missing relay server config
+            productivity.calibre.enable = false;        # Missing library directory
+            productivity.radicale.enable = false;       # Missing htpasswd file
+            
+            # Enable Cloudflare Tunnel for external access
+            networking.cloudflare-tunnel = {
+              enable = true;
+              tunnelId = config.sops.secrets."cloudflare/tunnel_id".path;
+              tunnelToken = config.sops.secrets."cloudflare/tunnel_token".path;
+              ingress = {
+                "starcommand.live" = "http://127.0.0.1:443";
+                "*.starcommand.live" = "http://127.0.0.1:443";
+              };
+            };
+            
             # 🛡️ Fail2Ban + Cloudflare Protection (optional but recommended)
             # utility.fail2ban-cloudflare = {
             #     enable = true;
