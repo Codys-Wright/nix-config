@@ -46,10 +46,15 @@ rebuild:
     @echo "Rebuilding current system using phoenix sync..."
     @phoenix sync
 
-# Deploy specific target using terraform
+# Deploy specific target using deploy-rs
 deploy target:
-    @echo "Deploying {{target}} using terraform..."
-    @cd deployments/nixos && terraform apply -var="target_host={{target}}" -auto-approve
+    @echo "Deploying {{target}} using deploy-rs..."
+    @nix run github:serokell/deploy-rs .#{{target}}
+
+# Deploy all targets using deploy-rs
+deploy-all:
+    @echo "Deploying all targets using deploy-rs..."
+    @nix run github:serokell/deploy-rs .
 
 # Build the configuration
 build-config:

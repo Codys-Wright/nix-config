@@ -57,6 +57,21 @@
             };
           };
         };
+
+        # Starcommand deployment
+        starcommand = {
+          hostname = "192.168.1.46";
+          sshOpts = [ "-o" "StrictHostKeyChecking=no" ];
+          fastConnection = true;
+          interactiveSudo = false; # root user, no sudo needed
+          profiles = {
+            system = {
+              sshUser = "root";
+              user = "root";
+              path = inputs.deploy-rs.lib.x86_64-linux.activate.nixos inputs.self.nixosConfigurations.starcommand;
+            };
+          };
+        };
       };
     };
 
