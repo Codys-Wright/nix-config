@@ -80,6 +80,9 @@ with lib.${namespace};
         # Programs
         programs.nh = enabled;
         
+        # Development
+        development = enabled;
+        
         # GPU configuration
         gpu = {
           enable = true;
@@ -111,7 +114,7 @@ with lib.${namespace};
             raysession = enabled;
         };
         
-        system.themes.stylix = enabled;
+        system.themes.stylix = disabled;
         services.ssh = {
             enable = true;
             allowRootLogin = true;

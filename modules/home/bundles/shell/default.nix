@@ -20,13 +20,6 @@ in
     home.packages = with pkgs; [ yazi ];
     ${namespace} = {
       coding = {
-        cli = {
-          atuin = enabled;
-          eza = enabled;
-          fzf = enabled;
-          zoxide = enabled;
-          btop = enabled;
-        };
         shell = {
           powerlevel10k = enabled;
           starship = enabled;

@@ -3,6 +3,74 @@ with lib;
 with lib.${namespace};
 let
   cfg = config.${namespace}.coding.editor.nvim.modules.ui;
+  icons = {
+    misc = {
+      dots = "󰇘";
+    };
+    ft = {
+      octo = "";
+    };
+    dap = {
+      Stopped = [ "󰁕 " "DiagnosticWarn" "DapStoppedLine" ];
+      Breakpoint = " ";
+      BreakpointCondition = " ";
+      BreakpointRejected = [ " " "DiagnosticError" ];
+      LogPoint = ".>";
+    };
+    diagnostics = {
+      Error = " ";
+      Warn  = " ";
+      Hint  = " ";
+      Info  = " ";
+    };
+    git = {
+      added    = " ";
+      modified = " ";
+      removed  = " ";
+    };
+    kinds = {
+      Array         = " ";
+      Boolean       = "󰨙 ";
+      Class         = " ";
+      Codeium       = "󰘦 ";
+      Color         = " ";
+      Control       = " ";
+      Collapsed     = " ";
+      Constant      = "󰏿 ";
+      Constructor   = " ";
+      Copilot       = " ";
+      Enum          = " ";
+      EnumMember    = " ";
+      Event         = " ";
+      Field         = " ";
+      File          = " ";
+      Folder        = " ";
+      Function      = "󰊕 ";
+      Interface     = " ";
+      Key           = " ";
+      Keyword       = " ";
+      Method        = "󰊕 ";
+      Module        = " ";
+      Namespace     = "󰦮 ";
+      Null          = " ";
+      Number        = "󰎠 ";
+      Object        = " ";
+      Operator      = " ";
+      Package       = " ";
+      Property      = " ";
+      Reference     = " ";
+      Snippet       = "󱄽 ";
+      String        = " ";
+      Struct        = "󰆼 ";
+      Supermaven    = " ";
+      TabNine       = "󰏚 ";
+      Text          = " ";
+      TypeParameter = " ";
+      Unit          = " ";
+      Value         = " ";
+      Variable      = "󰀫 ";
+    };
+  };
 in
 {
   options.${namespace}.coding.editor.nvim.modules.ui = with types; {
@@ -169,35 +237,10 @@ in
         };
       };
 
-
-      
-
-      # Bufferline for enhanced buffer management
-      tabline.nvimBufferline = {
+      tabline.nvimBufferline = { 
         enable = true;
-        setupOpts = {
-          options = {
-            close_command = "Snacks.bufdelete";
-            right_mouse_command = "Snacks.bufdelete";
-            diagnostics = "nvim_lsp";
-            always_show_bufferline = false;
-            # diagnostics_indicator = "function(_, _, diag) local icons = LazyVim.config.icons.diagnostics local ret = (diag.error and icons.Error .. diag.error .. ' ' or '') .. (diag.warning and icons.Warn .. diag.warning or '') return vim.trim(ret) end";
-            offsets = [
-              {
-                filetype = "neo-tree";
-                text = "Neo-tree";
-                highlight = "Directory";
-                text_align = "left";
-              }
-              {
-                filetype = "snacks_layout_box";
-              }
-            ];
-            # get_element_icon = "function(opts) return LazyVim.config.icons.ft[opts.filetype] end";
-          };
-        };
       };
-
+    
       # Bufferline keybindings
       binds.whichKey.register = {
         "<leader>bp" = "Toggle Pin";

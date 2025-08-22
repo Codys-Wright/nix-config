@@ -22,7 +22,7 @@ in
     home-manager = {
       useUserPackages = true;
       useGlobalPkgs = true;
-      backupFileExtension = "bk2";
+      backupFileExtension = "bk4";
     };
   };
 }

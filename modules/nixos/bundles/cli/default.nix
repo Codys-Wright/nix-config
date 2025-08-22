@@ -67,6 +67,9 @@ in
       git-crypt
       git-lfs
       gh
+
+      direnv
+      devenv
       
       # Shell utilities
       zsh

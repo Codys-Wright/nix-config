@@ -15,7 +15,6 @@ with lib.${namespace};
   FTS-FLEET = {
     bundles = {
       common = enabled;
-      shell = enabled;
       browsers = enabled;
       # desktop.hyprland = enabled; # Disabled - using KDE
       office = enabled;
@@ -23,31 +22,16 @@ with lib.${namespace};
       # music-production = enabled; # Disabled - using system-level music production
     };
 
-    coding.tools = {
-      git = enabled;
-      lazygit = enabled;
-    };
-
     coding = {
       enable = true;
-      languages = true;
-      editors = true;
+      lang = enabled;
+      editor = enabled;
+      cli = enabled;
+      shell = enabled;
+      tools = enabled;
     };
 
-    coding.editor = {
-      zed-editor = enabled;
-      nvim = enabled;
-    };
-
-    coding.lang = {
-      typescript = {
-        enable = true;
-      };
-      rust = {
-        enable = true;
-        useFenix = true;
-      };
-    };
+   
 
 app = {
         misc = {
@@ -101,10 +85,8 @@ app = {
   # Add Apple Color Emoji font to home packages
   home.packages = with pkgs; [
     inputs.apple-emoji-linux.packages.x86_64-linux.default
-    gh
     chawan
-
-    ];
+  ];
  
   programs.chawan.enable = true;
  

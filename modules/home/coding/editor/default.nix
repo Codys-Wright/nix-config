@@ -10,7 +10,11 @@ in
   };
 
   config = mkIf cfg.enable {
-    # Enable nvim module
-    
+    # Enable individual editors
+    ${namespace}.coding.editor = {
+      zed-editor = enabled;
+      nvim = enabled;
+      code-cursor = enabled;
+    };
   };
 } 

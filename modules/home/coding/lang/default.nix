@@ -11,5 +11,14 @@ in
 
   config = mkIf cfg.enable {
     # Add language modules here
+    ${namespace}.coding.lang = {
+      typescript = {
+        enable = true;
+      };
+      rust = {
+        enable = true;
+        useFenix = true;
+      };
+    };
   };
 }

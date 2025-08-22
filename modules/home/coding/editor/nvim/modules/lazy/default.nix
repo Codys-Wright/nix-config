@@ -3,6 +3,75 @@ with lib;
 with lib.${namespace};
 let
   cfg = config.${namespace}.coding.editor.nvim.modules.lazy;
+
+  icons = {
+    misc = {
+      dots = "󰇘";
+    };
+    ft = {
+      octo = "";
+    };
+    dap = {
+      Stopped = [ "󰁕 " "DiagnosticWarn" "DapStoppedLine" ];
+      Breakpoint = " ";
+      BreakpointCondition = " ";
+      BreakpointRejected = [ " " "DiagnosticError" ];
+      LogPoint = ".>";
+    };
+    diagnostics = {
+      Error = " ";
+      Warn  = " ";
+      Hint  = " ";
+      Info  = " ";
+    };
+    git = {
+      added    = " ";
+      modified = " ";
+      removed  = " ";
+    };
+    kinds = {
+      Array         = " ";
+      Boolean       = "󰨙 ";
+      Class         = " ";
+      Codeium       = "󰘦 ";
+      Color         = " ";
+      Control       = " ";
+      Collapsed     = " ";
+      Constant      = "󰏿 ";
+      Constructor   = " ";
+      Copilot       = " ";
+      Enum          = " ";
+      EnumMember    = " ";
+      Event         = " ";
+      Field         = " ";
+      File          = " ";
+      Folder        = " ";
+      Function      = "󰊕 ";
+      Interface     = " ";
+      Key           = " ";
+      Keyword       = " ";
+      Method        = "󰊕 ";
+      Module        = " ";
+      Namespace     = "󰦮 ";
+      Null          = " ";
+      Number        = "󰎠 ";
+      Object        = " ";
+      Operator      = " ";
+      Package       = " ";
+      Property      = " ";
+      Reference     = " ";
+      Snippet       = "󱄽 ";
+      String        = " ";
+      Struct        = "󰆼 ";
+      Supermaven    = " ";
+      TabNine       = "󰏚 ";
+      Text          = " ";
+      TypeParameter = " ";
+      Unit          = " ";
+      Value         = " ";
+      Variable      = "󰀫 ";
+    };
+  };
 in
 {
   options.${namespace}.coding.editor.nvim.modules.lazy = with types; {
@@ -10,8 +79,207 @@ in
   };
 
   config = mkIf cfg.enable {
-    # Configure nvf with LazyVim-style keymaps
+    # Configure nvf with LazyVim-style keymaps and autocmds
     programs.nvf.settings.vim = {
+      # LazyVim-style autogroups
+      augroups = [
+        {
+          name = "lazyvim_checktime";
+          clear = true;
+        }
+        {
+          name = "lazyvim_highlight_yank";
+          clear = true;
+        }
+        {
+          name = "lazyvim_resize_splits";
+          clear = true;
+        }
+        {
+          name = "lazyvim_last_loc";
+          clear = true;
+        }
+        {
+          name = "lazyvim_close_with_q";
+          clear = true;
+        }
+        {
+          name = "lazyvim_man_unlisted";
+          clear = true;
+        }
+        {
+          name = "lazyvim_wrap_spell";
+          clear = true;
+        }
+        {
+          name = "lazyvim_json_conceal";
+          clear = true;
+        }
+        {
+          name = "lazyvim_auto_create_dir";
+          clear = true;
+        }
+      ];
+
+      # LazyVim-style autocmds
+      autocmds = [
+        # Check if we need to reload the file when it changed
+        {
+          event = [ "FocusGained" "TermClose" "TermLeave" ];
+          group = "lazyvim_checktime";
+          desc = "Check for file changes";
+          callback = lib.mkLuaInline ''
+            function()
+              if vim.o.buftype ~= "nofile" then
+                vim.cmd("checktime")
+              end
+            end
+          '';
+        }
+
+        # Highlight on yank
+        {
+          event = [ "TextYankPost" ];
+          group = "lazyvim_highlight_yank";
+          desc = "Highlight on yank";
+          callback = lib.mkLuaInline ''
+            function()
+              (vim.hl or vim.highlight).on_yank()
+            end
+          '';
+        }
+
+        # resize splits if window got resized
+        {
+          event = [ "VimResized" ];
+          group = "lazyvim_resize_splits";
+          desc = "Resize splits when window is resized";
+          callback = lib.mkLuaInline ''
+            function()
+              local current_tab = vim.fn.tabpagenr()
+              vim.cmd("tabdo wincmd =")
+              vim.cmd("tabnext " .. current_tab)
+            end
+          '';
+        }
+
+        # go to last loc when opening a buffer
+        {
+          event = [ "BufReadPost" ];
+          group = "lazyvim_last_loc";
+          desc = "Go to last location when opening buffer";
+          callback = lib.mkLuaInline ''
+            function(event)
+              local exclude = { "gitcommit" }
+              local buf = event.buf
+              if vim.tbl_contains(exclude, vim.bo[buf].filetype) or vim.b[buf].lazyvim_last_loc then
+                return
+              end
+              vim.b[buf].lazyvim_last_loc = true
+              local mark = vim.api.nvim_buf_get_mark(buf, '"')
+              local lcount = vim.api.nvim_buf_line_count(buf)
+              if mark[1] > 0 and mark[1] <= lcount then
+                pcall(vim.api.nvim_win_set_cursor, 0, mark)
+              end
+            end
+          '';
+        }
+
+        # close some filetypes with <q>
+        {
+          event = [ "FileType" ];
+          pattern = [
+            "PlenaryTestPopup"
+            "checkhealth"
+            "dbout"
+            "gitsigns-blame"
+            "grug-far"
+            "help"
+            "lspinfo"
+            "neotest-output"
+            "neotest-output-panel"
+            "neotest-summary"
+            "notify"
+            "qf"
+            "spectre_panel"
+            "startuptime"
+            "tsplayground"
+          ];
+          group = "lazyvim_close_with_q";
+          desc = "Close filetypes with q";
+          callback = lib.mkLuaInline ''
+            function(event)
+              vim.bo[event.buf].buflisted = false
+              vim.schedule(function()
+                vim.keymap.set("n", "q", function()
+                  vim.cmd("close")
+                  pcall(vim.api.nvim_buf_delete, event.buf, { force = true })
+                end, {
+                  buffer = event.buf,
+                  silent = true,
+                  desc = "Quit buffer",
+                })
+              end)
+            end
+          '';
+        }
+
+        # make it easier to close man-files when opened inline
+        {
+          event = [ "FileType" ];
+          pattern = [ "man" ];
+          group = "lazyvim_man_unlisted";
+          desc = "Make man files unlisted";
+          callback = lib.mkLuaInline ''
+            function(event)
+              vim.bo[event.buf].buflisted = false
+            end
+          '';
+        }
+
+        # wrap and check for spell in text filetypes
+        {
+          event = [ "FileType" ];
+          pattern = [ "text" "plaintex" "typst" "gitcommit" "markdown" ];
+          group = "lazyvim_wrap_spell";
+          desc = "Wrap and spell check for text filetypes";
+          callback = lib.mkLuaInline ''
+            function()
+              vim.opt_local.wrap = true
+              vim.opt_local.spell = true
+            end
+          '';
+        }
+
+        # Fix conceallevel for json files
+        {
+          event = [ "FileType" ];
+          pattern = [ "json" "jsonc" "json5" ];
+          group = "lazyvim_json_conceal";
+          desc = "Fix conceallevel for JSON files";
+          callback = lib.mkLuaInline ''
+            function()
+              vim.opt_local.conceallevel = 0
+            end
+          '';
+        }
+
+        # Auto create dir when saving a file
+        {
+          event = [ "BufWritePre" ];
+          group = "lazyvim_auto_create_dir";
+          desc = "Auto create directory when saving file";
+          callback = lib.mkLuaInline ''
+            function(event)
+              if event.match:match("^%w%w+:[\\/][\\/]") then
+                return
+              end
+              local file = vim.uv.fs_realpath(event.match) or event.match
+              vim.fn.mkdir(vim.fn.fnamemodify(file, ":p:h"), "p")
+            end
+          '';
+        }
+      ];
       # LazyVim-style keymaps
       keymaps = [
         # Better up/down navigation
@@ -54,28 +322,24 @@ in
           mode = [ "n" ];
           action = "<C-w>h";
           desc = "Go to Left Window";
-          remap = true;
         }
         {
           key = "<C-j>";
           mode = [ "n" ];
           action = "<C-w>j";
           desc = "Go to Lower Window";
-          remap = true;
         }
         {
           key = "<C-k>";
           mode = [ "n" ];
           action = "<C-w>k";
           desc = "Go to Upper Window";
-          remap = true;
         }
         {
           key = "<C-l>";
           mode = [ "n" ];
           action = "<C-w>l";
           desc = "Go to Right Window";
-          remap = true;
         }
 
         # Window resizing with Ctrl+arrow keys
@@ -204,7 +468,7 @@ in
         {
           key = "<esc>";
           mode = [ "i" "n" "s" ];
-          action = "function() vim.cmd('noh') LazyVim.cmp.actions.snippet_stop() return '<esc>' end";
+          action = "function() vim.cmd('noh') if LazyVim and LazyVim.cmp and LazyVim.cmp.actions then LazyVim.cmp.actions.snippet_stop() end return '<esc>' end";
           desc = "Escape and Clear hlsearch";
           expr = true;
           lua = true;
@@ -698,21 +962,18 @@ in
           mode = [ "n" ];
           action = "<C-W>s";
           desc = "Split Window Below";
-          remap = true;
         }
         {
           key = "<leader>|";
           mode = [ "n" ];
           action = "<C-W>v";
           desc = "Split Window Right";
-          remap = true;
         }
         {
           key = "<leader>wd";
           mode = [ "n" ];
           action = "<C-W>c";
           desc = "Delete Window";
-          remap = true;
         }
         {
           key = "<leader>wm";

@@ -19,7 +19,6 @@ in
   config = mkIf cfg.enable {
     home.packages = with pkgs; [
       # Terminal
-      btop
       coreutils
       killall
       tldr
@@ -41,7 +40,6 @@ in
       nixfmt-rfc-style
     ];
     ${namespace} = {
-      bundles.shell = enabled;
       config = {
         apps = enabled;
       };

@@ -10,6 +10,12 @@ in
   };
 
   config = mkIf cfg.enable {
-    # Add shell tools here
+    home.packages = with pkgs; [ yazi ];
+    
+    ${namespace}.coding.shell = {
+      powerlevel10k = enabled;
+      starship = enabled;
+      zsh = enabled;
+    };
   };
 } 

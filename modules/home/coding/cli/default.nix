@@ -10,6 +10,16 @@ in
   };
 
   config = mkIf cfg.enable {
-    # Add CLI tools here
+
+    ${namespace}.coding.cli = {
+      direnv = enabled;
+      atuin = enabled;
+      btop = enabled;
+      eza = enabled;
+      fzf = enabled;
+      zoxide = enabled;
+    };
+
+
   };
-} 
+}

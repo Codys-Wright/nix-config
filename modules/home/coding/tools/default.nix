@@ -10,6 +10,13 @@ in
   };
 
   config = mkIf cfg.enable {
+    # Enable individual tools
+    ${namespace}.coding.tools = {
+      git = enabled;
+      docker = enabled;
+      lazygit = enabled;
+    };
+
     # Development tools packages
     home.packages = with pkgs; [
       # Version control
