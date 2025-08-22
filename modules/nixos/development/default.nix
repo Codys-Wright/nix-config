@@ -7,10 +7,15 @@ in
 {
   options.${namespace}.development = with types; {
     enable = mkBoolOpt false "Enable development environment";
-    docker = mkBoolOpt false "Enable Docker development tools";
   };
 
+
   config = mkIf cfg.enable {
-    imports = mkIf cfg.docker [ ./docker ];
+    ${namespace}.development.docker = enabled;
+
+
+    environment.systemPackages = with pkgs; [
+        zed-editor-fhs
+    ];
   };
 }

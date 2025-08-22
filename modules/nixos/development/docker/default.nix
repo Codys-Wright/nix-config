@@ -1,26 +1,37 @@
-{ pkgs, lib, userSettings, storageDriver ? null, ... }:
-
-assert lib.asserts.assertOneOf "storageDriver" storageDriver [
-  null
-  "aufs"
-  "btrfs"
-  "devicemapper"
-  "overlay"
-  "overlay2"
-  "zfs"
-];
-
+{ config, lib, pkgs, namespace, ... }:
+with lib;
+with lib.${namespace};
+let
+  cfg = config.${namespace}.development.docker;
+  userSettings = config.${namespace}.config.user;
+in
 {
-  virtualisation.docker = {
-    enable = true;
-    enableOnBoot = true;
-    storageDriver = storageDriver;
-    autoPrune.enable = true;
+  options.${namespace}.development.docker = with types; {
+    enable = mkBoolOpt false "Enable Docker development tools";
+    storageDriver = mkOpt (types.nullOr (types.enum [
+      "aufs"
+      "btrfs"
+      "devicemapper"
+      "overlay"
+      "overlay2"
+      "zfs"
+    ])) null "Docker storage driver";
   };
-  users.users.${userSettings.username}.extraGroups = [ "docker" ];
-  environment.systemPackages = with pkgs; [
-    docker
-    docker-compose
-    lazydocker
-  ];
+
+  config = mkIf cfg.enable {
+    virtualisation.docker = {
+      enable = true;
+      enableOnBoot = true;
+      storageDriver = cfg.storageDriver;
+      autoPrune.enable = true;
+    };
+    
+    users.users.${userSettings.name}.extraGroups = [ "docker" ];
+    
+    environment.systemPackages = with pkgs; [
+      docker
+      docker-compose
+      lazydocker
+    ];
+  };
 }

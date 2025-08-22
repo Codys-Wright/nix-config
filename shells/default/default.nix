@@ -20,18 +20,18 @@ mkShell {
   packages = with pkgs; [
     treefmt
     nixfmt-rfc-style
-    (python3.withPackages (ps: with ps; [
-      mdformat
-    ]))
+    # (python3.withPackages (ps: with ps; [
+    #   mdformat
+    # ]))
     shfmt
     nixd
     just
     sshpass
     
-    (terraform.withPlugins (p: with p; [
-      p.null
-      p.external
-    ]))
+    # (terraform.withPlugins (p: with p; [
+    #   p.null
+    #   p.external
+    # ]))
     
     jq
   ];

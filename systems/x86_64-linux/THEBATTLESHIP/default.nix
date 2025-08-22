@@ -192,16 +192,15 @@ with lib.${namespace};
     };
 
     # Additional system packages (GUI and specific tools)
-    environment.systemPackages = with pkgs; [
-        brave
-        vscode
-	code-cursor
-	opencode
-	gemini-cli
-        snowfallorg.frost
-        zed-editor
-        whitesur-wallpapers
-    ];
+        environment.systemPackages = with pkgs; [
+                brave
+                vscode
+                code-cursor
+                opencode
+                gemini-cli
+                snowfallorg.frost
+                whitesur-wallpapers
+        ];
 
     # Add overlay to make custom packages available
     nixpkgs.overlays = [

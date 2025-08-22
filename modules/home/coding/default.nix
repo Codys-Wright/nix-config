@@ -42,8 +42,9 @@ in
         jetbrains.pycharm-community
 
         # VS Code alternatives
-        code-cursor
         vscodium
+        # Note: code-cursor is excluded to avoid conflicts with zed-editor
+        # Use the dedicated zed-editor module instead
       ])
 
       ++ (optionals (cfg.databases || cfg.all) [
