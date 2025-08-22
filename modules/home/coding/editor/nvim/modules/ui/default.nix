@@ -13,13 +13,9 @@ in
     # Configure nvf UI settings
     programs.nvf.settings.vim = {
 
-      theme = {
-        enable = true;
-        name = "catppuccin";
-        style = "mocha";
-      };
 
-      # Statusline
+#THEME IS HANDLED BY STLIX
+            # Statusline
       statusline.lualine = {
         enable = true;
         theme = lib.mkForce "auto";

@@ -5,38 +5,15 @@ let
   cfg = config.${namespace}.coding.editor.nvim;
 in
 {
-  imports = [ inputs.nvf.homeManagerModules.default ];
+  # Import preset system
+  imports = [ ./presets ];
 
   options.${namespace}.coding.editor.nvim = with types; {
     enable = mkBoolOpt false "Enable Neovim editor";
   };
 
   config = mkIf cfg.enable {
-    programs.nvf = {
-      enable = true;
-      # Base nvf settings - sub-modules will add their own configurations
-      settings = {
-        vim = {
-          viAlias = false;
-          vimAlias = true;
-
-        };
-      };
-    };
-
-    # Enable the editor module
-    ${namespace}.coding.editor.nvim.modules = {
-      editor = disabled;
-      formatting = disabled;
-      coding = disabled;
-      ui = disabled;
-      snacks = disabled;
-    };
-
-    # Set environment variables
-    home.sessionVariables = {
-      EDITOR = "nvim";
-      VISUAL = "nvim";
-    };
+    # Preset system handles all configuration
+    # Each preset defines its own complete setup
   };
 } 
