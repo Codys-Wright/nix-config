@@ -32,9 +32,9 @@ in {
     # Preset theme selection
     preset = mkOption {
       description = "Theme preset to use";
-      type = types.enum ["whitesur" "windows" "material" "adwaita" "breeze" "stylix"];
+      type = types.enum ["whitesur" "windows" "material" "adwaita" "breeze" "stylix" "catppuccin"];
       default = "whitesur";
-      example = "windows";
+      example = "catppuccin";
     };
     
     # Desktop environment detection (derived from system config)
@@ -72,14 +72,7 @@ in {
   };
 
   config = mkIf cfg.enable (mkMerge [
-    # Enable stylix for all presets
-    {
-      ${namespace}.theme.stylix = {
-        enable = true;
-        autoEnable = true;
-        base16Scheme = ./base16/catppuccin/custom.yaml;
-        image = ./wallpapers/sports.png;
-      };
-    }
+    # Theme presets are automatically available via Snowfall Lib
+    # Each preset handles its own stylix configuration
   ]);
 } 

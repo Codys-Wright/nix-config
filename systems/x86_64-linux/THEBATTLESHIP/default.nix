@@ -111,7 +111,7 @@ with lib.${namespace};
             raysession = enabled;
         };
         
-        # system.themes.stylix = enabled;
+        system.themes.stylix = enabled;
         services.ssh = {
             enable = true;
             allowRootLogin = true;

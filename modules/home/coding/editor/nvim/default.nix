@@ -14,21 +14,23 @@ in
   config = mkIf cfg.enable {
     programs.nvf = {
       enable = true;
+      # Base nvf settings - sub-modules will add their own configurations
       settings = {
         vim = {
           viAlias = false;
           vimAlias = true;
+
         };
       };
     };
 
     # Enable the editor module
     ${namespace}.coding.editor.nvim.modules = {
-      editor = enabled;
-      formatting = enabled;
-      coding = enabled;
-      ui = enabled;
-      snacks = enabled;
+      editor = disabled;
+      formatting = disabled;
+      coding = disabled;
+      ui = disabled;
+      snacks = disabled;
     };
 
     # Set environment variables

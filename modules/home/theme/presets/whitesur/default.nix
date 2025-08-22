@@ -16,6 +16,26 @@
     else value;
 in {
   options.${namespace}.theme.whitesur = with lib.types; {
+    # Stylix configuration options
+    stylix = {
+      enable = mkOption {
+        description = "Enable stylix integration for WhiteSur theme";
+        type = bool;
+        default = true;
+      };
+      base16Scheme = mkOption {
+        description = "Base16 scheme file to use (WhiteSur colors)";
+        type = path;
+        default = ../../base16/catppuccin/custom.yaml;
+      };
+      image = mkOption {
+        description = "Wallpaper image path";
+        type = path;
+        default = "${inputs.whitesur-wallpapers}/4k/WhiteSur-dark.jpg";
+      };
+    };
+    
+    # WhiteSur-specific options
     opacity = mkOption {
       description = "Panel opacity for GNOME shell";
       type = enum ["15" "25" "35" "45" "55" "65" "75" "85"];
@@ -74,9 +94,78 @@ in {
 
   config = mkIf (cfg.preset == "whitesur") (let
     whitesurCfg = cfg.whitesur or {};
+    stylixCfg = whitesurCfg.stylix or {};
   in mkMerge [
-    # Colors
-    (mkIf cfg.targets.colors.enable {
+    # Stylix integration
+    (mkIf stylixCfg.enable {
+      stylix = {
+        enable = true;
+        autoEnable = true;
+        base16Scheme = mkForcable stylixCfg.base16Scheme;
+        image = mkForcable stylixCfg.image;
+        polarity = cfg.polarity;
+        
+        # Fonts
+        fonts = with inputs.apple-fonts.packages.${pkgs.system}; {
+          sansSerif = {
+            package = mkForcable sf-pro;
+            name = mkForcable "SF Pro";
+          };
+          serif = {
+            package = mkForcable sf-pro;
+            name = mkForcable "SF Pro";
+          };
+          monospace = {
+            package = mkForcable sf-mono-nerd;
+            name = mkForcable "SFMono Nerd Font";
+          };
+          emoji = {
+            package = mkForcable pkgs.noto-fonts-emoji;
+            name = mkForcable "Noto Color Emoji";
+          };
+          sizes = {
+            applications = if whitesurCfg.smallerFont then 10 else 13;
+            desktop = if whitesurCfg.smallerFont then 10 else 13;
+            popups = if whitesurCfg.smallerFont then 10 else 13;
+            terminal = if whitesurCfg.smallerFont then 10 else 13;
+          };
+        };
+        
+        # Cursor
+        cursor = {
+          package = mkForcable pkgs.whitesur-cursors;
+          name = mkForcable "WhiteSur-cursors";
+          size = 24;
+        };
+        
+        # Icon theme
+        iconTheme = {
+          enable = true;
+          package = mkForcable pkgs.whitesur-icon-theme;
+          light = mkForcable "WhiteSur-light";
+          dark = mkForcable "WhiteSur-dark";
+        };
+        
+        # Targets
+        targets = {
+          kitty.enable = false;
+          waybar.enable = false;
+          hyprlock.enable = false;
+          neovim.enable = false;
+          librewolf = {
+            enable = true;
+            profileNames = [ "default" ];
+          };
+          zen-browser = {
+            enable = true;
+            profileNames = [ "default" ];
+          };
+        };
+      };
+    })
+
+    # Colors (fallback if stylix is disabled)
+    (mkIf (cfg.targets.colors.enable && !stylixCfg.enable) {
       stylix.override = mkForcable {
         base00 = if cfg.polarity == "light" then "ffffff" else "242424";
         base01 = if cfg.polarity == "light" then "f5f5f5" else "333333";
@@ -97,8 +186,8 @@ in {
       };
     })
 
-    # Fonts
-    (mkIf cfg.targets.fonts.enable {
+    # Fonts (fallback if stylix is disabled)
+    (mkIf (cfg.targets.fonts.enable && !stylixCfg.enable) {
       stylix.fonts = with inputs.apple-fonts.packages.${pkgs.system}; {
         sansSerif = {
           package = mkForcable sf-pro;
@@ -125,8 +214,8 @@ in {
       };
     })
 
-    # Icons
-    (mkIf cfg.targets.icons.enable {
+    # Icons (fallback if stylix is disabled)
+    (mkIf (cfg.targets.icons.enable && !stylixCfg.enable) {
       stylix.iconTheme = {
         enable = true;
         package = mkForcable pkgs.whitesur-icon-theme;
@@ -135,8 +224,8 @@ in {
       };
     })
 
-    # Cursor
-    (mkIf cfg.targets.cursor.enable {
+    # Cursor (fallback if stylix is disabled)
+    (mkIf (cfg.targets.cursor.enable && !stylixCfg.enable) {
       stylix.cursor = {
         package = mkForcable pkgs.whitesur-cursors;
         name = mkForcable "WhiteSur-cursors";
@@ -237,8 +326,8 @@ in {
       })
     ]))
 
-    # Wallpaper
-    (mkIf cfg.targets.wallpaper.enable {
+    # Wallpaper (fallback if stylix is disabled)
+    (mkIf (cfg.targets.wallpaper.enable && !stylixCfg.enable) {
       stylix.image = mkForce "${inputs.whitesur-wallpapers}/4k/WhiteSur-${cfg.polarity}.jpg";
     })
   ]);

@@ -12,6 +12,13 @@ in
   config = mkIf cfg.enable {
     # Configure nvf UI settings
     programs.nvf.settings.vim = {
+
+      theme = {
+        enable = true;
+        name = "catppuccin";
+        style = "mocha";
+      };
+
       # Statusline
       statusline.lualine = {
         enable = true;
