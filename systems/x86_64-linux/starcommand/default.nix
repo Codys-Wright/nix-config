@@ -133,23 +133,13 @@ with lib.${namespace};
             productivity.calibre.enable = false;        # Missing library directory
             productivity.radicale.enable = false;       # Missing htpasswd file
             
-            # Enable Cloudflare Tunnel for external access (temporarily disabled)
-            # networking.cloudflare-tunnel = {
-            #   enable = true;
-            #   tunnelName = "starcommand-tunnel";
-            #   tunnelTokenFile = "/run/secrets/cloudflare-tunnel-token";
-            #   ingress = {
-            #     "starcommand.live" = "http://127.0.0.1:443";
-            #     "*.starcommand.live" = "http://127.0.0.1:443";
-            #   };
-            # };
+          
+            networking.cloudflare-tunnel = {
+              enable = true;
+              tunnelId = "deb73ad4-6c56-4a61-b404-dd41cb56d2ae";
+            };
             
-            # 🛡️ Fail2Ban + Cloudflare Protection (optional but recommended)
-            # utility.fail2ban-cloudflare = {
-            #     enable = true;
-            #     apiKeyFile = "/etc/nixos/secrets/cloudflare-firewall.key";
-            #     zoneId = "9c26b00054e2c3c833cd6ded804ef076";  # Your actual Zone ID
-            # };
+           
         };
 
     };

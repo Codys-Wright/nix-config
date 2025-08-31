@@ -161,52 +161,6 @@ in
       };
     };
 
-    # Create Cloudflare credentials file from SOPS secrets
-    systemd.services.create-cloudflare-credentials = mkIf (cfg.baseDomain != "" && cfg.acme.email != "") {
-      description = "Create Cloudflare credentials file from SOPS secrets";
-      wantedBy = [ "multi-user.target" ];
-      before = [ "acme-${cfg.baseDomain}.service" ];
-      serviceConfig = {
-        Type = "oneshot";
-        RemainAfterExit = true;
-        ExecStart = pkgs.writeShellScript "create-cloudflare-credentials" ''
-          # Only create the file if it doesn't exist or is empty
-          if [ ! -f /run/secrets/cloudflare-credentials ] || [ ! -s /run/secrets/cloudflare-credentials ]; then
-            echo "Creating Cloudflare credentials file..."
-            cat > /run/secrets/cloudflare-credentials << EOF
-          CLOUDFLARE_DNS_API_TOKEN=$(cat ${config.sops.secrets."cloudflare/api_token".path})
-          CLOUDFLARE_ZONE_ID=$(cat ${config.sops.secrets."cloudflare/zone_id".path})
-          EOF
-            chmod 600 /run/secrets/cloudflare-credentials
-            echo "Cloudflare credentials file created successfully."
-          else
-            echo "Cloudflare credentials file already exists, skipping creation."
-          fi
-        '';
-      };
-    };
-
-    # Create Cloudflare tunnel token file from SOPS secrets (disabled)
-    # systemd.services.create-cloudflare-tunnel-token = mkIf (cfg.baseDomain != "") {
-    #   description = "Create Cloudflare tunnel token file from SOPS secrets";
-    #   wantedBy = [ "multi-user.target" ];
-    #   before = [ "cloudflared-tunnel-starcommand-tunnel.service" ];
-    #   serviceConfig = {
-    #     Type = "oneshot";
-    #     RemainAfterExit = true;
-    #     ExecStart = pkgs.writeShellScript "create-cloudflare-tunnel-token" ''
-    #       # Only create the file if it doesn't exist or is empty
-    #       if [ ! -f /run/secrets/cloudflare-tunnel-token ] || [ ! -s /run/secrets/cloudflare-tunnel-token ]; then
-    #         echo "Creating Cloudflare tunnel token file..."
-    #         cat ${config.sops.secrets."cloudflare/tunnel_token".path} > /run/secrets/cloudflare-tunnel-token
-    #         chmod 600 /run/secrets/cloudflare-tunnel-token
-    #         echo "Cloudflare tunnel token file created successfully."
-    #       else
-    #         echo "Cloudflare tunnel token file already exists, skipping creation."
-    #       fi
-    #     '';
-    #   };
-    # };
 
     # Caddy reverse proxy configuration
     services.caddy = mkIf (cfg.baseDomain != "") {

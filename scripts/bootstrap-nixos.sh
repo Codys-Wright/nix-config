@@ -14,7 +14,7 @@ ssh_key=${BOOTSTRAP_SSH_KEY-}
 persist_dir=""
 luks_passphrase="passphrase"
 luks_secondary_drive_labels=""
-nix_src_path="src/nix/" # path relative to /home/${target_user} where nix-config and nix-secrets are written in the users home
+nix_src_path="nix-config/" # path relative to /home/${target_user} where nix-config and nix-secrets are written in the users home
 git_root=$(git rev-parse --show-toplevel)
 nix_secrets_dir=${NIX_SECRETS_DIR:-"${git_root}"/../nix-secrets}
 
@@ -219,7 +219,7 @@ function sops_generate_host_age_key() {
 		exit 1
 	fi
 
-	green "Updating secrets/.sops.yaml"
+	green "Updating .sops.yaml"
 	sops_update_age_key "hosts" "$target_hostname" "$host_age_key"
 }
 
@@ -258,7 +258,7 @@ if yes_or_no "Generate user age key?"; then
 	# This may end up creating the host.yaml file, so add creation rules in advance
 	sops_setup_user_age_key "$target_user" "$target_hostname"
 	# We need to add the new file before we rekey later
-	git add "${nix_secrets_dir}/sops/${target_hostname}.yaml"
+	git add "${nix_secrets_dir}/${target_hostname}.yaml"
 	updated_age_keys=1
 fi
 
@@ -276,18 +276,24 @@ if [[ $updated_age_keys == 1 ]]; then
 	fi
 fi
 
-if yes_or_no "Do you want to copy your nix-config and secrets to $target_hostname?"; then
-	green "Adding ssh host fingerprint at $target_destination to ~/.ssh/known_hosts"
-	ssh-keyscan -p "$ssh_port" "$target_destination" 2>/dev/null | grep -v '^#' >>~/.ssh/known_hosts || true
-	green "Copying full nix-config to $target_hostname"
+# Add SSH host key to known_hosts (only once)
+green "Adding ssh host fingerprint at $target_destination to ~/.ssh/known_hosts"
+ssh-keyscan -p "$ssh_port" "$target_destination" 2>/dev/null | grep -v '^#' >>~/.ssh/known_hosts || true
+
+if yes_or_no "Do you want to copy nix-config to $target_hostname (~/${nix_src_path})?"; then
+	green "Copying nix-config to $target_hostname at ~/${nix_src_path}"
 	sync "$target_user" "${git_root}"
-	green "Copying secrets to $target_hostname"
+fi
+
+if yes_or_no "Do you want to copy secrets to $target_hostname (~/${nix_src_path}secrets/)?"; then
+	green "Copying secrets to $target_hostname at ~/${nix_src_path}secrets/"
 	sync "$target_user" "${git_root}/secrets"
+fi
 
 	# FIXME(bootstrap): Add some sort of key access from the target to download the config (if it's a cloud system)
 	if yes_or_no "Do you want to rebuild immediately?"; then
 		green "Rebuilding nix-config on $target_hostname"
-		$ssh_cmd "cd ${nix_src_path}nix-config && sudo nixos-rebuild --impure --show-trace --flake .#$target_hostname switch"
+		$ssh_cmd "cd ${nix_src_path} && sudo nixos-rebuild --impure --show-trace --flake .#$target_hostname switch"
 	fi
 else
 	echo

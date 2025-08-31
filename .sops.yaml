@@ -1,32 +1,29 @@
-# pub keys
 keys:
   users:
-    - &cody_THEBATTLESHIP age1cgeyxkppwmrcnppgdqsewft5pg7cfgjjhhtg6tt7q6lq66fvqqgqrx6ynv
-    - &cody_starcommand age1dd0fw5j8rzpjl3wg04zl775uy0v7ngrwh4e8uzvsk7rxsgv9gvssx72jve
-   
-  hosts: # nix-shell -p ssh-to-age --run 'cat /etc/ssh/ssh_host_ed25519_key.pub | ssh-to-age'
-    - &THEBATTLESHIP age1aw6c95pvpe0slyeupr5apr3f3er7guy4n6ng0a3ypsnxaxuzydys075n94
-    - &starcommand age1x8u57848fnn4l0xum3cvy8p699cjht9gdk75xfwann5qpjfx8d0qgpqw5h
-
-
+    - age1cgeyxkppwmrcnppgdqsewft5pg7cfgjjhhtg6tt7q6lq66fvqqgqrx6ynv
+    - age1dd0fw5j8rzpjl3wg04zl775uy0v7ngrwh4e8uzvsk7rxsgv9gvssx72jve
+    - '&cody_starcommand age1j8u83f3ny4fe77fwgw6qjvd73snpyp8eg449pvsfryvana4hf4eqru76ln'
+  hosts:
+    - age1aw6c95pvpe0slyeupr5apr3f3er7guy4n6ng0a3ypsnxaxuzydys075n94
+    - '&starcommand age1x8u57848fnn4l0xum3cvy8p699cjht9gdk75xfwann5qpjfx8d0qgpqw5h'
 creation_rules:
-  #path should be relative to location of this file (.sops.yaml)
   - path_regex: secrets/shared\.yaml$
     key_groups:
       - age:
-          - *cody_THEBATTLESHIP
-          - *THEBATTLESHIP
-          - *cody_starcommand
-          - *starcommand
+          - age1cgeyxkppwmrcnppgdqsewft5pg7cfgjjhhtg6tt7q6lq66fvqqgqrx6ynv
+          - age1aw6c95pvpe0slyeupr5apr3f3er7guy4n6ng0a3ypsnxaxuzydys075n94
+          - age1dd0fw5j8rzpjl3wg04zl775uy0v7ngrwh4e8uzvsk7rxsgv9gvssx72jve
+          - age1x8u57848fnn4l0xum3cvy8p699cjht9gdk75xfwann5qpjfx8d0qgpqw5h
   - path_regex: secrets/THEBATTLESHIP\.yaml$
     key_groups:
       - age:
-          - *cody_THEBATTLESHIP
-          - *THEBATTLESHIP
+          - age1cgeyxkppwmrcnppgdqsewft5pg7cfgjjhhtg6tt7q6lq66fvqqgqrx6ynv
+          - age1aw6c95pvpe0slyeupr5apr3f3er7guy4n6ng0a3ypsnxaxuzydys075n94
   - path_regex: secrets/starcommand\.yaml$
     key_groups:
       - age:
-          - *cody_THEBATTLESHIP
-          - *THEBATTLESHIP
-          - *cody_starcommand
-          - *starcommand
+          - age1cgeyxkppwmrcnppgdqsewft5pg7cfgjjhhtg6tt7q6lq66fvqqgqrx6ynv
+          - age1aw6c95pvpe0slyeupr5apr3f3er7guy4n6ng0a3ypsnxaxuzydys075n94
+          - age1dd0fw5j8rzpjl3wg04zl775uy0v7ngrwh4e8uzvsk7rxsgv9gvssx72jve
+          - age1x8u57848fnn4l0xum3cvy8p699cjht9gdk75xfwann5qpjfx8d0qgpqw5h
+s

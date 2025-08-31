@@ -124,7 +124,7 @@ sops-add-creation-rules USER HOST:
 
 # Bootstrap a NixOS system with SOPS setup (without full install)
 bootstrap HOST_NAME HOST_IP SSH_KEY:
-    @NIX_SECRETS_DIR=$(pwd)/secrets nix-shell -p age ssh-to-age sops --run "scripts/bootstrap-nixos.sh -n {{HOST_NAME}} -d {{HOST_IP}} -k {{SSH_KEY}}"
+    @NIX_SECRETS_DIR=$(pwd)/secrets SOPS_CONFIG_DIR=$(pwd) GIT_ROOT=$(pwd) nix-shell -p age ssh-to-age sops --run "scripts/bootstrap-nixos.sh -n {{HOST_NAME}} -d {{HOST_IP}} -k {{SSH_KEY}}"
 
 # Add a new host to existing SOPS setup
 add-sops-host HOST_NAME HOST_IP SSH_KEY:

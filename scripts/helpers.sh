@@ -59,8 +59,9 @@ function no_or_yes() {
 }
 
 ### SOPS helpers
-nix_secrets_dir=${NIX_SECRETS_DIR:-"$(dirname "${BASH_SOURCE[0]}")/../secrets"}
-SOPS_FILE="${nix_secrets_dir}/.sops.yaml"
+git_root=${GIT_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || dirname "${BASH_SOURCE[0]}")/..}
+nix_secrets_dir=${NIX_SECRETS_DIR:-"${git_root}/secrets"}
+SOPS_FILE="${SOPS_CONFIG_DIR:-${git_root}}/.sops.yaml"
 
 # Paths configured for SOPS operations
 
@@ -75,9 +76,11 @@ function sops_update_age_key() {
 		exit 1
 	fi
 
-	if [[ -n $(yq ".keys.${field}[] | select(. == \"*\") | select(. == \"&$keyname\")" "${SOPS_FILE}" 2>/dev/null) ]]; then
-		green "Updating existing ${keyname} key"
-		yq -i -y "(.keys.${field}[] | select(. == \"*\") | select(. == \"&$keyname\")) = \"&$keyname $key\"" "$SOPS_FILE"
+	# Check if key with this anchor already exists
+	if yq -e ".keys.${field}[] | select(has(\"&$keyname\"))" "${SOPS_FILE}" >/dev/null 2>&1; then
+		green "Updating existing ${keyname} key (removing old entries first)"
+		# Remove all entries with this anchor name and clean up null values
+		yq -i -y ".keys.$field = (.keys.$field | map(select(. != null and (has(\"&$keyname\") | not)))) + [\"&$keyname $key\"]" "$SOPS_FILE"
 	else
 		green "Adding new ${keyname} key"
 		yq -i -y ".keys.$field += [\"&$keyname $key\"]" "$SOPS_FILE"
@@ -150,8 +153,8 @@ function sops_setup_user_age_key() {
 	target_user="$1"
 	target_hostname="$2"
 
-	secret_file="${nix_secrets_dir}/sops/${target_hostname}.yaml"
-	config="${nix_secrets_dir}/.sops.yaml"
+	secret_file="${nix_secrets_dir}/${target_hostname}.yaml"
+	config="${git_root}/.sops.yaml"
 	# If the secret file doesn't exist, it means we're generating a new user key as well
 	if [ ! -f "$secret_file" ]; then
 		green "Host secret file does not exist. Creating $secret_file"
