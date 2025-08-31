@@ -1,7 +1,7 @@
 # pub keys
 keys:
   users:
-    - &cody_THEBATTLESHIP age18nrs3xvekux4qnw4n952dadvldxchxguxpwquktehtyrj9tfy3zsgpxaat
+    - &cody_THEBATTLESHIP age1cgeyxkppwmrcnppgdqsewft5pg7cfgjjhhtg6tt7q6lq66fvqqgqrx6ynv
     - &cody_starcommand age1dd0fw5j8rzpjl3wg04zl775uy0v7ngrwh4e8uzvsk7rxsgv9gvssx72jve
    
   hosts: # nix-shell -p ssh-to-age --run 'cat /etc/ssh/ssh_host_ed25519_key.pub | ssh-to-age'
