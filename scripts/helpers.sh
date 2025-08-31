@@ -1,3 +1,4 @@
+
 #!/usr/bin/env bash
 set -eo pipefail
 
@@ -61,6 +62,8 @@ function no_or_yes() {
 nix_secrets_dir=${NIX_SECRETS_DIR:-"$(dirname "${BASH_SOURCE[0]}")/../secrets"}
 SOPS_FILE="${nix_secrets_dir}/.sops.yaml"
 
+# Paths configured for SOPS operations
+
 # Updates the .sops.yaml file with a new host or user age key.
 function sops_update_age_key() {
 	field="$1"
@@ -72,53 +75,44 @@ function sops_update_age_key() {
 		exit 1
 	fi
 
-	if [[ -n $(yq ".keys.${field}[] | select(. == \"*\") | select(. == \"&$keyname\")" "${SOPS_FILE}") ]]; then
+	if [[ -n $(yq ".keys.${field}[] | select(. == \"*\") | select(. == \"&$keyname\")" "${SOPS_FILE}" 2>/dev/null) ]]; then
 		green "Updating existing ${keyname} key"
-		yq -i "(.keys.${field}[] | select(. == \"*\") | select(. == \"&$keyname\")) = \"&$keyname $key\"" "$SOPS_FILE"
+		yq -i -y "(.keys.${field}[] | select(. == \"*\") | select(. == \"&$keyname\")) = \"&$keyname $key\"" "$SOPS_FILE"
 	else
 		green "Adding new ${keyname} key"
-		yq -i ".keys.$field += [\"&$keyname $key\"]" "$SOPS_FILE"
+		yq -i -y ".keys.$field += [\"&$keyname $key\"]" "$SOPS_FILE"
 	fi
 }
 
 # Adds the user and host to the shared.yaml creation rules
 function sops_add_shared_creation_rules() {
-	u="\"$1_$2\"" # quoted user_host for yaml
-	h="\"$2\""    # quoted hostname for yaml
+	user="$1"
+	host="$2"
 
-	shared_selector='.creation_rules[] | select(.path_regex == "shared\.yaml$")'
-	if [[ -n $(yq "$shared_selector" "${SOPS_FILE}") ]]; then
-		echo "BEFORE"
-		cat "${SOPS_FILE}"
-		if [[ -z $(yq "$shared_selector.key_groups[].age[] | select(alias == $h)" "${SOPS_FILE}") ]]; then
-			green "Adding $u and $h to shared.yaml rule"
-			# NOTE: Split on purpose to avoid weird file corruption
-			yq -i -y "($shared_selector).key_groups[].age += [$u, $h]" "$SOPS_FILE"
-			yq -i -y "($shared_selector).key_groups[].age[-2] alias = $u" "$SOPS_FILE"
-			yq -i -y "($shared_selector).key_groups[].age[-1] alias = $h" "$SOPS_FILE"
-		fi
+	green "Checking shared.yaml creation rules for $user and $host"
+
+	# The .sops.yaml should already have the shared.yaml rule with proper anchors
+	# Just verify it exists
+	if yq -e '.creation_rules[] | select(.path_regex == "shared\\.yaml$")' "${SOPS_FILE}" >/dev/null 2>&1; then
+		green "shared.yaml rule exists - no changes needed"
 	else
-		red "shared.yaml rule not found"
+		green "shared.yaml rule not found - this may cause issues"
 	fi
 }
 
 # Adds the user and host to the host.yaml creation rules
 function sops_add_host_creation_rules() {
-	host="$2"                     # hostname for selector
-	h="\"$2\""                    # quoted hostname for yaml
-	u="\"$1_$2\""                 # quoted user_host for yaml
-	w="\"$(whoami)_$(hostname)\"" # quoted whoami_hostname for yaml
-	n="\"$(hostname)\""           # quoted hostname for yaml
+	user="$1"
+	host="$2"
 
-	host_selector=".creation_rules[] | select(.path_regex | contains(\"${host}.yaml\"))"
-	if [[ -z $(yq "$host_selector" "${SOPS_FILE}") ]]; then
-		green "Adding new host file creation rule"
-		yq -i -y ".creation_rules += {\"path_regex\": \"${host}.yaml$\", \"key_groups\": [{\"age\": [$u, $h]}]}" "$SOPS_FILE"
-		# Add aliases one by one
-		yq -i -y "($host_selector).key_groups[].age[0] alias = $u" "$SOPS_FILE"
-		yq -i -y "($host_selector).key_groups[].age[1] alias = $h" "$SOPS_FILE"
-		yq -i -y "($host_selector).key_groups[].age[2] alias = $w" "$SOPS_FILE"
-		yq -i -y "($host_selector).key_groups[].age[3] alias = $n" "$SOPS_FILE"
+	green "Checking ${host}.yaml creation rules"
+
+	# The .sops.yaml should already have the host.yaml rule with proper anchors
+	# Just verify it exists
+	if yq -e ".creation_rules[] | select(.path_regex == \"${host}\\\\.yaml$\")" "${SOPS_FILE}" >/dev/null 2>&1; then
+		green "${host}.yaml rule exists - no changes needed"
+	else
+		green "${host}.yaml rule not found - this may cause issues"
 	fi
 }
 

@@ -9,6 +9,7 @@
 with lib;
 with lib.${namespace};
 let
+  inherit (lib) optionalString;
   cfg = config.${namespace}.services.selfhost;
 in
 {
@@ -68,6 +69,13 @@ in
       enable = mkBoolOpt false "Enable access from local network (not just localhost)";
       allowedNetworks = mkOpt (listOf str) [ "192.168.0.0/16" "10.0.0.0/8" "172.16.0.0/12" ] "Allowed network ranges for local access";
     };
+
+    # mDNS/Bonjour configuration for local network discovery
+    mdns = {
+      enable = mkBoolOpt true "Enable mDNS (Avahi) for local network discovery";
+      domain = mkOpt str "local" "Domain suffix for mDNS resolution (typically .local for mDNS/Bonjour)";
+      services = mkOpt (listOf str) ["_http._tcp" "_https._tcp"] "mDNS service types to advertise";
+    };
   };
 
 
@@ -90,6 +98,48 @@ in
       80   # HTTP
       443  # HTTPS
     ];
+
+    # mDNS configuration for local network discovery
+    services.avahi = mkIf cfg.mdns.enable {
+      enable = true;
+      nssmdns4 = true;
+      publish = {
+        enable = true;
+        addresses = true;
+        domain = true;
+        workstation = true;
+      };
+
+      # Configure domain handling
+      extraConfig = ''
+        [server]
+        # domain-name=${cfg.mdns.domain}
+        # browse-domains=${cfg.mdns.domain}
+
+        [wide-area]
+        enable-wide-area=no
+
+        [publish]
+        publish-workstation=yes
+        publish-addresses=yes
+        publish-hinfo=yes
+      '';
+
+      # Add service advertisements for the base domain
+      extraServiceFiles.starcommand = ''
+        <?xml version="1.0" standalone='no'?><!--*-nxml-*-->
+        <!DOCTYPE service-group SYSTEM "avahi-service.dtd">
+        <service-group>
+          <name replace-wildcards="yes">Starcommand Server</name>
+          ${concatStringsSep "\n" (map (serviceType: ''
+          <service>
+            <type>${serviceType}</type>
+            <port>443</port>
+            <txt-record>path=/</txt-record>
+          </service>'') cfg.mdns.services)}
+        </service-group>
+      '';
+    };
 
 
 
@@ -135,6 +185,28 @@ in
         '';
       };
     };
+
+    # Create Cloudflare tunnel token file from SOPS secrets (disabled)
+    # systemd.services.create-cloudflare-tunnel-token = mkIf (cfg.baseDomain != "") {
+    #   description = "Create Cloudflare tunnel token file from SOPS secrets";
+    #   wantedBy = [ "multi-user.target" ];
+    #   before = [ "cloudflared-tunnel-starcommand-tunnel.service" ];
+    #   serviceConfig = {
+    #     Type = "oneshot";
+    #     RemainAfterExit = true;
+    #     ExecStart = pkgs.writeShellScript "create-cloudflare-tunnel-token" ''
+    #       # Only create the file if it doesn't exist or is empty
+    #       if [ ! -f /run/secrets/cloudflare-tunnel-token ] || [ ! -s /run/secrets/cloudflare-tunnel-token ]; then
+    #         echo "Creating Cloudflare tunnel token file..."
+    #         cat ${config.sops.secrets."cloudflare/tunnel_token".path} > /run/secrets/cloudflare-tunnel-token
+    #         chmod 600 /run/secrets/cloudflare-tunnel-token
+    #         echo "Cloudflare tunnel token file created successfully."
+    #       else
+    #         echo "Cloudflare tunnel token file already exists, skipping creation."
+    #       fi
+    #     '';
+    #   };
+    # };
 
     # Caddy reverse proxy configuration
     services.caddy = mkIf (cfg.baseDomain != "") {

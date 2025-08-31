@@ -322,7 +322,7 @@ in
         };
 
         # UI and theme settings
-        icon_theme = "Catppuccin Mocha";
+        icon_theme = "Material Icon Theme";
         notification_panel = {
           enabled = false;
           button = false;
@@ -424,15 +424,18 @@ in
               "basedpyright.analysis" = {
                 diagnosticMode = "workspace";
                 inlayHints = {
-                  callArgumentNames = false;
+                  callArgumentNames = true;
+                  functionReturnTypes = true;
+                  variableTypes = true;
+                  parameterTypes = true;
                 };
               };
             };
           };
           gopls = {
-            gofumpt = true;
+            gofumpt = "on";
             initialization_options = {
-              gofumpt = true;
+              gofumpt = "on";
             };
           };
           "yaml-language-server" = {
@@ -536,6 +539,15 @@ in
         vim_mode = true;
         relative_line_numbers = true;
 
+        # Inlay hints and diagnostics
+        inlay_hints = {
+          enabled = true;
+          parameter_names = true;
+          type_annotations = true;
+          function_return_types = true;
+          variable_types = true;
+        };
+
         # UI components
         scrollbar = {
           show = "never";
@@ -616,7 +628,7 @@ in
 
         # Panel configurations
         project_panel = {
-          button = false;
+          button = true;
           default_width = 300;
           dock = "left";
           file_icons = true;
@@ -627,12 +639,12 @@ in
           };
         };
         outline_panel = {
-          dock = "right";
-          button = false;
+          dock = "left";
+          button = true;
         };
         collaboration_panel = {
           dock = "left";
-          button = false;
+          button = true;
         };
         chat_panel = {
           dock = "right";
@@ -648,8 +660,8 @@ in
         autosave = "on_focus_change";
         theme = {
           mode = "dark";
-          light = "One Light";
-          dark = "Catppuccin Mocha";
+          light = "Catppuccin Latte (Blur)";
+          dark = "Catppuccin Espresso (Blur) [Heavy]";
         };
 
         # Search settings

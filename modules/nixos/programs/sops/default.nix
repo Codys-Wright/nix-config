@@ -11,7 +11,7 @@ with lib;
 with lib.${namespace};
 let
   cfg = config.${namespace}.programs.sops;
-  sopsFolder = ./../../../../secrets/sops;
+  sopsFolder = ./../../../../secrets;
 in
 {
   imports = [ inputs.sops-nix.nixosModules.sops ];
@@ -35,99 +35,12 @@ in
       # because they will be output to /run/secrets-for-users and only when the user is assigned to a host.
     };
 
+    environment.systemPackages = with pkgs; [ sops yq age ];
+
     # For home-manager a separate age key is used to decrypt secrets and must be placed onto the host. This is because
     # the user doesn't have read permission for the ssh service private key. However, we can bootstrap the age key from
     # the secrets decrypted by the host key, which allows home-manager secrets to work without manually copying over
     # the age key.
-    sops.secrets = lib.mkMerge [
-      {
-        # These age keys are are unique for the user on each host and are generated on their own (i.e. they are not derived
-        # from an ssh key).
-
-        "keys/age" = {
-          owner = "cody";
-          group = "users";
-          # We need to ensure the entire directory structure is that of the user...
-          path = "/home/cody/.config/sops/age/keys.txt";
-        };
-        # extract password/username to /run/secrets-for-users/ so it can be used to create the user
-        "passwords/cody" = {
-          sopsFile = ./../../../../secrets/sops/shared.yaml;
-          neededForUsers = true;
-        };
-        "passwords/msmtp" = {
-          sopsFile = ./../../../../secrets/sops/shared.yaml;
-        };
-        # Cloudflare DNS credentials for ACME
-        "cloudflare/api_token" = {
-          sopsFile = ./../../../../secrets/sops/shared.yaml;
-          owner = "root";
-          group = "root";
-          mode = "0600";
-        };
-                                "cloudflare/zone_id" = {
-                          sopsFile = ./../../../../secrets/sops/shared.yaml;
-                          owner = "root";
-                          group = "root";
-                          mode = "0600";
-                        };
-                                            # Cloudflare Tunnel credentials
-                    "cloudflare/tunnel_id" = {
-                      sopsFile = ./../../../../secrets/sops/shared.yaml;
-                      owner = "root";
-                      group = "root";
-                      mode = "0600";
-                    };
-                    "cloudflare/tunnel_token" = {
-                      sopsFile = ./../../../../secrets/sops/shared.yaml;
-                      owner = "root";
-                      group = "root";
-                      mode = "0600";
-                    };
-      }
-      # only reference borg password if host is using backup
-      
-    ];
-                    # Create Cloudflare tunnel credentials file from token
-                systemd.services.create-cloudflare-tunnel-credentials = mkIf (builtins.hasAttr "cloudflare/tunnel_token" config.sops.secrets) {
-                  description = "Create Cloudflare tunnel credentials file from token";
-                  wantedBy = [ "multi-user.target" ];
-                  before = [ "cloudflared.service" ];
-                  serviceConfig = {
-                    Type = "oneshot";
-                    RemainAfterExit = true;
-                  };
-                  script = ''
-                    # Only create the file if it doesn't exist or is empty
-                    if [ ! -f /run/secrets/cloudflare-tunnel-credentials ] || [ ! -s /run/secrets/cloudflare-tunnel-credentials ]; then
-                      echo "Creating Cloudflare tunnel credentials file..."
-                      
-                      # The tunnel token is base64-encoded JSON credentials
-                      TOKEN=$(cat ${config.sops.secrets."cloudflare/tunnel_token".path})
-                      
-                      # Decode the base64 token to get the credentials JSON
-                      echo "$TOKEN" | ${pkgs.coreutils}/bin/base64 -d > /run/secrets/cloudflare-tunnel-credentials
-                      chmod 600 /run/secrets/cloudflare-tunnel-credentials
-                      
-                      echo "Cloudflare tunnel credentials file created successfully."
-                    else
-                      echo "Cloudflare tunnel credentials file already exists, skipping creation."
-                    fi
-                  '';
-                };
-
-                # The containing folders are created as root and if this is the first ~/.config/ entry,
-                # the ownership is busted and home-manager can't target because it can't write into .config...
-                # FIXME(sops): We might not need this depending on how https://github.com/Mic92/sops-nix/issues/381 is fixed
-                system.activationScripts.sopsSetAgeKeyOwnership =
-                  let
-                    ageFolder = "/home/cody/.config/sops/age";
-                    user = "cody";
-                    group = "users";
-                  in
-                  ''
-                    mkdir -p ${ageFolder} || true
-                    chown -R ${user}:${group} /home/cody/.config
-                  '';
+   
   };
 } 

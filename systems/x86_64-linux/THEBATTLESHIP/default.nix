@@ -72,11 +72,14 @@ with lib.${namespace};
     FTS-FLEET = {
         bundles.common = enabled;
         bundles.cli = enabled;
+
+        # Enable SOPS for secrets management
+        programs.sops = enabled;
         music.production = enabled;
         # gaming = enabled;  # Disabled to allow custom NVIDIA driver version
         desktop.type = "gnome";  # Primary desktop environment
         desktop.environments = ["kde" "gnome"];  # Available desktop environments for theming
-        
+       gaming = enabled;
         # Programs
         programs.nh = enabled;
         

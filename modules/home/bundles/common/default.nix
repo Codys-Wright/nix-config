@@ -63,6 +63,9 @@ in
           kitty = enabled;
           tmux = enabled;
         };
+        cli = {
+          yazi = enabled;
+        };
       };
     };
   };

@@ -72,7 +72,7 @@ with lib.${namespace};
     # Unified theme system
     theme = {
       enable = true;
-      preset = "whitesur";
+      preset = "stylix";
       polarity = "dark";
       # WhiteSur-specific options
       whitesur = {

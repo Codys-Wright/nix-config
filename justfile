@@ -50,9 +50,9 @@ rebuild:
     @phoenix sync
 
 # Deploy specific target using deploy-rs
-deploy target:
+deploy target *FLAGS:
     @echo "Deploying {{target}} using deploy-rs..."
-    @nix run github:serokell/deploy-rs .#{{target}}
+    @nix run github:serokell/deploy-rs -- {{FLAGS}} .#{{target}}
 
 # Deploy all targets using deploy-rs
 deploy-all:
@@ -122,9 +122,13 @@ sops-add-creation-rules USER HOST:
     just sops-add-host-creation-rules {{USER}} {{HOST}} && \
     just sops-add-shared-creation-rules {{USER}} {{HOST}}
 
+# Bootstrap a NixOS system with SOPS setup (without full install)
+bootstrap HOST_NAME HOST_IP SSH_KEY:
+    @NIX_SECRETS_DIR=$(pwd)/secrets nix-shell -p age ssh-to-age sops --run "scripts/bootstrap-nixos.sh -n {{HOST_NAME}} -d {{HOST_IP}} -k {{SSH_KEY}}"
+
 # Add a new host to existing SOPS setup
-add-sops-host HOST_NAME HOST_IP:
-    @scripts/add-sops-host.sh {{HOST_NAME}} {{HOST_IP}}
+add-sops-host HOST_NAME HOST_IP SSH_KEY:
+    @scripts/add-sops-host.sh {{HOST_NAME}} {{HOST_IP}} {{SSH_KEY}}
 
 # Reset SOPS setup (cleans up for fresh start)
 reset-sops:

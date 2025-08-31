@@ -18,6 +18,7 @@ in
       eza = enabled;
       fzf = enabled;
       zoxide = enabled;
+      yazi = enabled;
     };
 
 

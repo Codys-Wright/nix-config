@@ -63,12 +63,12 @@ with lib.${namespace};
     FTS-FLEET = {
         bundles.common = enabled;
         bundles.cli = enabled;
-        desktop.type = "gnome";  # Primary desktop environment
+        desktop.type = "kde";  # Primary desktop environment
         desktop.environments = ["kde" "gnome"];  # Available desktop environments for theming
 
         
         
-        # system.themes.stylix = enabled;
+        system.themes.stylix = enabled;
         services.ssh = {
             enable = true;
             allowRootLogin = true;
@@ -77,6 +77,8 @@ with lib.${namespace};
                 "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAg2dGkiERNUOR9gA9BfUwvFARY+tlL/8dcZFeoMKJu7 cody@THEBATTLESHIP"
             ];
         };
+
+
 
         # Enable fonts with Apple Color Emoji
         system.fonts = {
@@ -96,6 +98,14 @@ with lib.${namespace};
             
             # Enable network access for local devices
             networkAccess.enable = true;
+
+            # Configure mDNS for local network discovery
+            mdns = {
+                enable = true;
+                domain = "local";
+                services = ["_http._tcp" "_https._tcp"];
+            };
+
             
             # Storage configuration
             mounts = {
@@ -111,7 +121,7 @@ with lib.${namespace};
             media.enable = true;           # Jellyfin, Navidrome, etc.
             arr.enable = true;             # Sonarr, Radarr, Prowlarr, etc.
             productivity.enable = true;    # Vaultwarden, Miniflux, Paperless, etc.
-            cloud.enable = true;           # Immich, Nextcloud, etc.
+            cloud.enable = false;           # Immich, Nextcloud, etc.
             utility.enable = true;         # Uptime Kuma, etc.
             downloads.enable = true;       # Deluge, etc.
             backup.enable = true;          # Backup services
@@ -126,8 +136,8 @@ with lib.${namespace};
             # Enable Cloudflare Tunnel for external access (temporarily disabled)
             # networking.cloudflare-tunnel = {
             #   enable = true;
-            #   tunnelId = "your-tunnel-id";  # Will be read from credentials file
-            #   credentialsFile = "/run/secrets/cloudflare-tunnel-credentials";
+            #   tunnelName = "starcommand-tunnel";
+            #   tunnelTokenFile = "/run/secrets/cloudflare-tunnel-token";
             #   ingress = {
             #     "starcommand.live" = "http://127.0.0.1:443";
             #     "*.starcommand.live" = "http://127.0.0.1:443";

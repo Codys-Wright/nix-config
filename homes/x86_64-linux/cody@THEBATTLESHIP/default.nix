@@ -22,6 +22,8 @@ with lib.${namespace};
       # music-production = enabled; # Disabled - using system-level music production
     };
 
+    
+
     coding = {
       enable = true;
       lang = enabled;
