@@ -16,9 +16,10 @@ in
 {
   options.${namespace}.services.selfhost.networking.rustdesk-server = with types; {
     enable = mkBoolOpt false "Enable RustDesk Server (remote desktop)";
-    
-    relayIP = mkOpt str "" "Public IP for the relay server (leave empty for auto-detect)";
-    
+
+    publicKey = mkOpt str "" "Public key for RustDesk server authentication";
+    privateKey = mkOpt str "" "Private key for RustDesk server authentication";
+
     homepage = {
       name = mkOpt str "RustDesk" "Name shown on homepage";
       description = mkOpt str "Self-hosted remote desktop server" "Description shown on homepage";
@@ -35,7 +36,9 @@ in
     services.rustdesk-server = {
       enable = true;
       openFirewall = true;
-      relayIP = mkIf (cfg.relayIP != "") cfg.relayIP;
+      signal.enable = true;
+      relay.enable = true;
+      signal.relayHosts = if selfhostCfg.systemIp != "" then [ selfhostCfg.systemIp ] else [ "127.0.0.1" ];
     };
 
     # Create directory for rustdesk data

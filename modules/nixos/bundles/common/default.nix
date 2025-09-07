@@ -36,6 +36,7 @@ in
 
       programs = {
         nix-ld = enabled;
+        bottles = enabled;
       };
 
       services = {

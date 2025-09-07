@@ -92,6 +92,7 @@ with lib.${namespace};
         services.selfhost = {
             enable = true;
             baseDomain = "starcommand.live";
+            systemIp = "192.168.1.46";
             # Enable ACME for local SSL certificates
             acme.email = "acodywright@gmail.com";
             # Cloudflare DNS credentials are now managed via SOPS
@@ -117,6 +118,9 @@ with lib.${namespace};
             
             # Enable service categories gradually to find working ones
             networking.enable = true;      # Tailscale, Syncthing, etc.
+            networking.rustdesk-server = {
+                enable = true;
+            };
             dashboard.enable = true;       # Homepage dashboard
             media.enable = true;           # Jellyfin, Navidrome, etc.
             arr.enable = true;             # Sonarr, Radarr, Prowlarr, etc.
@@ -129,7 +133,6 @@ with lib.${namespace};
             
             # Disable specific failing services
             networking.syncthing.enable = false;        # Missing /mnt/data/syncthing
-            networking.rustdesk-server.enable = false;  # Missing relay server config
             productivity.calibre.enable = false;        # Missing library directory
             productivity.radicale.enable = false;       # Missing htpasswd file
             
@@ -140,6 +143,30 @@ with lib.${namespace};
             };
             
            
+        };
+
+        hardware.storage.nas = {
+            enable = true;
+            mergerfs = {
+                enable = true;
+            };
+        };
+
+        services.samba = {
+            enable = true;
+            shares = {
+                storage = {
+                    path = "/mnt/storage";
+                    comment = "NAS Storage Pool";
+                    browseable = "yes";
+                    writable = "yes";
+                    "read only" = "no";
+                    "guest ok" = "no";
+                    "create mask" = "0644";
+                    "directory mask" = "0755";
+                    "valid users" = "cody";
+                };
+            };
         };
 
     };

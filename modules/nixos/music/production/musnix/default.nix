@@ -63,5 +63,45 @@ in
       '';
       deps = [ "users" ];
     };
+
+    # System activation script to create plugin symlinks in user home directories
+    system.activationScripts.symlinkUserPluginDirectories = {
+      text = ''
+        # Create plugin symlinks in user home directories for all users
+        for user_home in /home/*; do
+          if [ -d "$user_home" ]; then
+            username=$(basename "$user_home")
+            
+            plugin_types=("dssi" "ladspa" "lv2" "lxvst" "vst" "vst3")
+            for plugintype in "''${plugin_types[@]}"; do
+              # Create user plugin directory if it doesn't exist
+              user_plugin_dir="$user_home/.$plugintype"
+              mkdir -p "$user_plugin_dir"
+              chown "$username" "$user_plugin_dir"
+              
+              # Check if the source directory exists in system profile
+              if [[ -d "/run/current-system/sw/lib/$plugintype" ]]; then
+                # Create symlinks for each plugin in the system directory
+                for plugin in /run/current-system/sw/lib/$plugintype/*; do
+                  if [[ -d "$plugin" ]]; then
+                    plugin_name=$(basename "$plugin")
+                    user_plugin_link="$user_plugin_dir/$plugin_name"
+                    
+                    # Only create symlink if it doesn't exist or is broken
+                    if [[ ! -e "$user_plugin_link" ]] || [[ ! -L "$user_plugin_link" ]] || [[ ! -e "$user_plugin_link" ]]; then
+                      ln -sf "$plugin" "$user_plugin_link"
+                      chown -h "$username" "$user_plugin_link"
+                    fi
+                  fi
+                done
+              else
+                echo "Warning: /run/current-system/sw/lib/$plugintype does not exist, skipping user symlinks for $username"
+              fi
+            done
+          fi
+        done
+      '';
+      deps = [ "users" ];
+    };
   };
 } 

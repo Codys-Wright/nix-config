@@ -27,11 +27,14 @@ in
       ```
     '';
     
-    winePrefix = mkOpt str "$HOME/.wine" ''
-      Wine prefix directory for Windows plugins.
-      
-      This is where Windows plugins will be installed and managed.
-    '';
+    # Wine configuration
+    winePrefix = mkOpt str "$HOME/.wine" "Wine prefix directory for Windows plugins";
+    wineArch = mkOpt str "win64" "Wine architecture (win32 or win64)";
+    enableFsync = mkBoolOpt true "Enable fsync for better performance";
+    
+    # Plugin management
+    autoSync = mkBoolOpt true "Automatically sync yabridge after plugin installation";
+    createPluginGroups = mkBoolOpt true "Create plugin groups for related plugins";
     
     # Plugin directories to manage
     vst2Directories = mkOpt (listOf str) [
@@ -60,17 +63,7 @@ in
     '';
     
     # Configuration options
-    enableFsync = mkBoolOpt true ''
-      Enable fsync for better performance with compatible Wine versions.
-      
-      Requires Wine compiled with fsync patches and Linux kernel 5.16+.
-    '';
-    
-    enableRealtime = mkBoolOpt true ''
-      Enable realtime scheduling for better performance.
-      
-      Requires realtime privileges to be set up for the user.
-    '';
+    enableRealtime = mkBoolOpt true "Enable realtime scheduling for better performance";
   };
 
   config = mkIf cfg.enable {
@@ -78,6 +71,7 @@ in
     users.groups.audio.members = [ "cody" ];
     users.groups.realtime.members = [ "cody" ];
     
+    # Core packages for Windows plugin support
     environment.systemPackages = with pkgs; [
       yabridge
       yabridgectl
@@ -88,15 +82,15 @@ in
     # Set up Wine environment variables for all users
     environment.variables = {
       WINEPREFIX = cfg.winePrefix;
-      WINEARCH = "win64";
+      WINEARCH = cfg.wineArch;
     } // lib.optionalAttrs cfg.enableFsync {
       WINEFSYNC = "1";
     };
     
-    # System activation script to set up yabridge for all users
-    system.activationScripts.setupYabridgeForAllUsers = {
+    # System activation script to set up yabridge infrastructure for all users
+    system.activationScripts.setupYabridgeInfrastructure = {
       text = ''
-        # Set up yabridge for all users
+        # Set up yabridge infrastructure for all users
         for user_home in /home/*; do
           if [ -d "$user_home" ]; then
             username=$(basename "$user_home")
@@ -116,18 +110,24 @@ in
               chown "$username" "$wine_prefix"
             fi
             
-            # Add VST2 directories to yabridgectl (run as user)
+            # Create Wine drive structure
+            mkdir -p "$wine_prefix/drive_c/Program Files"
+            mkdir -p "$wine_prefix/drive_c/Program Files/Common Files"
+            mkdir -p "$wine_prefix/drive_c/Program Files/Steinberg"
+            chown -R "$username" "$wine_prefix/drive_c"
+            
+            # Add configured VST2 directories to yabridgectl (run as user)
             if [ -x "$(command -v yabridgectl)" ]; then
               ${lib.concatStringsSep "\n" (map (dir: ''
                 sudo -u "$username" yabridgectl add "${dir}" 2>/dev/null || echo "Warning: Could not add VST2 directory ${dir} for $username"
               '') cfg.vst2Directories)}
               
-              # Add VST3 directories to yabridgectl (run as user)
+              # Add configured VST3 directories to yabridgectl (run as user)
               ${lib.concatStringsSep "\n" (map (dir: ''
                 sudo -u "$username" yabridgectl add "${dir}" 2>/dev/null || echo "Warning: Could not add VST3 directory ${dir} for $username"
               '') cfg.vst3Directories)}
               
-              # Add CLAP directories to yabridgectl (run as user)
+              # Add configured CLAP directories to yabridgectl (run as user)
               ${lib.concatStringsSep "\n" (map (dir: ''
                 sudo -u "$username" yabridgectl add "${dir}" 2>/dev/null || echo "Warning: Could not add CLAP directory ${dir} for $username"
               '') cfg.clapDirectories)}

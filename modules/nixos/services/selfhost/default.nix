@@ -70,6 +70,9 @@ in
       allowedNetworks = mkOpt (listOf str) [ "192.168.0.0/16" "10.0.0.0/8" "172.16.0.0/12" ] "Allowed network ranges for local access";
     };
 
+    # System IP address for services that need to advertise their network location
+    systemIp = mkOpt str "" "System IP address for network services (leave empty for auto-detection)";
+
     # mDNS/Bonjour configuration for local network discovery
     mdns = {
       enable = mkBoolOpt true "Enable mDNS (Avahi) for local network discovery";

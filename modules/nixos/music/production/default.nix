@@ -29,6 +29,7 @@ in
           lsp = enabled;
           fabfilter = enabled;
           yabridge = enabled;
+          vital = enabled;
         };
       };
     };

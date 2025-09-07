@@ -1,0 +1,39 @@
+{ config, lib, namespace, pkgs, ... }:
+with lib;
+with lib.${namespace};
+let
+  cfg = config.${namespace}.hardware.storage.nas.mergerfs;
+in
+{
+  options.${namespace}.hardware.storage.nas.mergerfs = with types; {
+    enable = mkBoolOpt false "Enable MergerFS functionality";
+  };
+
+  config = mkIf cfg.enable {
+    # NAS configuration will go here
+    environment.systemPackages = with pkgs; [
+      mergerfs
+      ntfs3g
+    ];
+
+    # Mount individual disks
+    fileSystems."/mnt/disks/sda" = {
+      device = "/dev/sda2";
+      fsType = "ntfs-3g";
+      options = ["rw" "uid=1000" "gid=100" "umask=0007" "nofail"];
+    };
+
+    fileSystems."/mnt/disks/sdb" = {
+      device = "/dev/sdb2";
+      fsType = "ntfs-3g";
+      options = ["rw" "uid=1000" "gid=100" "umask=0007" "nofail"];
+    };
+
+    # MergerFS mount combining all disks
+    fileSystems."/mnt/storage" = {
+      fsType = "fuse.mergerfs";
+      device = "/mnt/disks/*";
+      options = ["cache.files=partial" "dropcacheonclose=true" "category.create=mfs" "nofail"];
+    };
+  };
+}
