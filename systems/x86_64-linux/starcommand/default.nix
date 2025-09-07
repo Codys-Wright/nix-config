@@ -27,8 +27,12 @@ with lib.${namespace};
         inputs.stylix.nixosModules.stylix
         inputs.home-manager.nixosModules.home-manager
         inputs.nixos-facter-modules.nixosModules.facter
+        
+        # Testing modules
+        ./modules/nixos/testing/mkwindowsapp
     ];
 
+    
     # Disk configuration
     FTS-FLEET.system.disk = {
       enable = true;
@@ -88,6 +92,11 @@ with lib.${namespace};
 
         # Enable SOPS for secrets management
         programs.sops = enabled;
+ # Remote Desktop Services
+        services.remote-desktop = {
+            moonlight.enable = true;
+            sunshine.enable = true;
+        };
 # 🏠 Selfhost Configuration
         services.selfhost = {
             enable = true;

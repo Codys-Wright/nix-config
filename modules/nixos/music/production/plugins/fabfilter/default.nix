@@ -4,6 +4,7 @@
   lib,
   pkgs,
   namespace,
+  inputs,
   ...
 }:
 with lib;
@@ -29,7 +30,7 @@ in
 
   config = mkIf cfg.enable {
     environment.systemPackages = with pkgs; [
-      fabfilter-total-bundle
+      inputs.self.packages.${pkgs.system}.fabfilter-total-bundle
     ];
   };
-} 
+}

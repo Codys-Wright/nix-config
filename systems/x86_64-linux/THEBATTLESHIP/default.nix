@@ -28,8 +28,13 @@ with lib.${namespace};
         inputs.home-manager.nixosModules.home-manager
         inputs.nixos-facter-modules.nixosModules.facter
 	./hardware-configuration.nix
+        
+  
     ];
 
+    # Testing configuration
+    # testing.mkwindowsapp.enable = true;
+    
     # Disk configuration
     FTS-FLEET.system.disk = {
       enable = true;
@@ -96,6 +101,14 @@ with lib.${namespace};
         system.kernel = enabled;
         
         hardware.cuda = disabled;
+
+        services.airplay = enabled;
+
+        # Remote Desktop Services
+        services.remote-desktop = {
+            moonlight.enable = true;
+            sunshine.enable = true;
+        };
 
 
         # Audio device configuration

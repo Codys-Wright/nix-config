@@ -32,9 +32,6 @@
     # Add Frost overlay
     overlays = with inputs; [
       snowfall-frost.overlays.default
-      (final: prev: {
-        fabfilter-total-bundle = final.callPackage ./packages/fabfilter-total-bundle { };
-      })
     ];
 
 
@@ -76,6 +73,7 @@
     packages = forAllSystems (system: {
       docs = inputs.nixdoc.packages.${system}.nixdoc;
       frost = inputs.snowfall-frost.packages.${system}.frost;
+      fabfilter-total-bundle = inputs.nixpkgs.legacyPackages.${system}.callPackage ./packages/fabfilter-total-bundle {};
       default = inputs.self.packages.${system}.docs;  # Default to docs package
     });
 
@@ -193,6 +191,12 @@
 
     musnix = {
       url = "github:musnix/musnix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # erosanix for mkWindowsApp functionality
+    erosanix = {
+      url = "github:emmanuelrosa/erosanix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };

@@ -40,6 +40,7 @@ in
       };
 
       services = {
+        flatpak = enabled;
         printing = enabled;
         ssh = enabled;
         selfhost.networking.tailscale = enabled;
