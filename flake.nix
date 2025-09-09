@@ -29,9 +29,10 @@
       permittedInsecurePackages = [ ];
     };
 
-    # Add Frost overlay
+    # Add Frost and Flake overlays
     overlays = with inputs; [
       snowfall-frost.overlays.default
+      snowfall-flake.overlays.default
     ];
 
 
@@ -73,7 +74,6 @@
     packages = forAllSystems (system: {
       docs = inputs.nixdoc.packages.${system}.nixdoc;
       frost = inputs.snowfall-frost.packages.${system}.frost;
-      fabfilter-total-bundle = inputs.nixpkgs.legacyPackages.${system}.callPackage ./packages/fabfilter-total-bundle {};
       default = inputs.self.packages.${system}.docs;  # Default to docs package
     });
 
@@ -105,6 +105,10 @@
     };
     snowfall-frost = {
       url = "github:snowfallorg/frost";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    snowfall-flake = {
+      url = "github:snowfallorg/flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

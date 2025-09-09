@@ -19,6 +19,8 @@ in
   config = mkIf cfg.enable {
     ${namespace}.services.selfhost.downloads = {
       deluge.enable = mkDefault true;
+      jdownloader.enable = mkDefault true;  # Re-enabled with Flatpak instead of containers
+      qbittorrent-enhanced.enable = mkDefault true;
       sabnzbd.enable = mkDefault true;
       slskd.enable = mkDefault true;
     };

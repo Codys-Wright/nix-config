@@ -27,9 +27,6 @@ with lib.${namespace};
         inputs.stylix.nixosModules.stylix
         inputs.home-manager.nixosModules.home-manager
         inputs.nixos-facter-modules.nixosModules.facter
-        
-        # Testing modules
-        ./modules/nixos/testing/mkwindowsapp
     ];
 
     
@@ -92,6 +89,32 @@ with lib.${namespace};
 
         # Enable SOPS for secrets management
         programs.sops = enabled;
+        
+        # Programs
+        programs.wireguard = enabled;
+
+        # WireGuard VPN
+        services.networking.wireguard-vpn = {
+            enable = true;
+            interface = "wg0";
+            privateKeyFile = "/etc/wireguard/wg0.key";
+            address = [ "10.2.0.2/32" ];
+            dns = [ "10.2.0.1" ];
+            peers = [{
+                publicKey = "3UovAm+ES1DXOEjkBiCOEnOHaicDmaVHXmym6oPE7C8=";
+                allowedIPs = [ "0.0.0.0/0" "::/0" ];
+                endpoint = "146.70.195.82:51820";
+                persistentKeepalive = 25;
+            }];
+            killswitch = {
+                enable = true;
+                allowedSubnets = [ "192.168.0.0/16" "10.0.0.0/8" ];
+            };
+            firewall = {
+                enable = true;
+                listenPort = 51820;
+            };
+        };
  # Remote Desktop Services
         services.remote-desktop = {
             moonlight.enable = true;
@@ -129,6 +152,11 @@ with lib.${namespace};
             networking.enable = true;      # Tailscale, Syncthing, etc.
             networking.rustdesk-server = {
                 enable = true;
+            };
+            
+            # WireGuard VPN namespace for secure torrenting (disabled - using main VPN instead)
+            networking.wireguard-netns = {
+                enable = false;
             };
             dashboard.enable = true;       # Homepage dashboard
             media.enable = true;           # Jellyfin, Navidrome, etc.

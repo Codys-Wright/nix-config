@@ -87,6 +87,32 @@ with lib.${namespace};
        gaming = enabled;
         # Programs
         programs.nh = enabled;
+        programs.snowfall-flake = enabled;
+        programs.protonvpn-gui = enabled;
+        programs.wireguard = enabled;
+
+        # WireGuard VPN
+        services.networking.wireguard-vpn = {
+            enable = true;
+            interface = "wg0";
+            privateKeyFile = "/etc/wireguard/wg0.key";
+            address = [ "10.2.0.2/32" ];
+            dns = [ "10.2.0.1" ];
+            peers = [{
+                publicKey = "3UovAm+ES1DXOEjkBiCOEnOHaicDmaVHXmym6oPE7C8=";
+                allowedIPs = [ "0.0.0.0/0" "::/0" ];
+                endpoint = "146.70.195.82:51820";
+                persistentKeepalive = 25;
+            }];
+            killswitch = {
+                enable = true;
+                allowedSubnets = [ "192.168.0.0/16" "10.0.0.0/8" ];
+            };
+            firewall = {
+                enable = true;
+                listenPort = 51820;
+            };
+        };
         
         # Development
         development = enabled;
@@ -103,6 +129,7 @@ with lib.${namespace};
         hardware.cuda = disabled;
 
         services.airplay = enabled;
+
 
         # Remote Desktop Services
         services.remote-desktop = {
@@ -143,6 +170,34 @@ with lib.${namespace};
         system.fonts = {
             enable = true;
             enableAppleEmoji = true;
+        };
+        
+        # Local hosts for accessing starcommand services
+        services.selfhost.networking.local-hosts = {
+            enable = true;
+            targetIP = "192.168.1.46";  # starcommand IP
+            domains = [
+                "starcommand.live"
+                "jdownloader.starcommand.live"
+                "jellyfin.starcommand.live"
+                "deluge.starcommand.live"
+                "qbittorrent.starcommand.live"
+                "sabnzbd.starcommand.live"
+                "slskd.starcommand.live"
+                "home.starcommand.live"
+                "bin.starcommand.live"
+                "audiobooks.starcommand.live"
+                "bazarr.starcommand.live"
+                "jellyseerr.starcommand.live"
+                "lidarr.starcommand.live"
+                "mealie.starcommand.live"
+                "nextcloud.starcommand.live"
+                "prowlarr.starcommand.live"
+                "radarr.starcommand.live"
+                "readarr.starcommand.live"
+                "sonarr.starcommand.live"
+                "syncthing.starcommand.live"
+            ];
         };
         
     };

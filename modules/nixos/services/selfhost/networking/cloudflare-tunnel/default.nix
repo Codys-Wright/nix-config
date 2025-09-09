@@ -31,8 +31,14 @@ let
       rawDestination = if reverseProxyMatch != null then builtins.head reverseProxyMatch else "http://localhost";
       # Replace 127.0.0.1 with localhost for cleaner configuration
       destination = builtins.replaceStrings ["127.0.0.1"] ["localhost"] rawDestination;
+      # Check if this domain should be excluded from tunnel
+      shouldExclude = 
+        # Check if it's a JDownloader domain and cloudflare-tunnel is disabled
+        (lib.hasInfix "jdownloader" (lib.toLower domain) && 
+         config.${namespace}.services.selfhost.downloads.jdownloader.enable &&
+         !config.${namespace}.services.selfhost.downloads.jdownloader.cloudflare-tunnel);
     in
-    acc // {
+    if shouldExclude then acc else acc // {
       "${domain}" = destination;
     }
   ) {} domainNames;
