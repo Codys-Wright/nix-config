@@ -159,7 +159,7 @@ with lib.${namespace};
                 enable = false;
             };
             dashboard.enable = true;       # Homepage dashboard
-            media.enable = true;           # Jellyfin, Navidrome, etc.
+            media.enable = false;          # Jellyfin, Navidrome, etc. - temporarily disabled due to mergerfs permissions
             arr.enable = true;             # Sonarr, Radarr, Prowlarr, etc.
             productivity.enable = true;    # Vaultwarden, Miniflux, Paperless, etc.
             cloud.enable = false;           # Immich, Nextcloud, etc.
@@ -202,6 +202,8 @@ with lib.${namespace};
                     "create mask" = "0644";
                     "directory mask" = "0755";
                     "valid users" = "cody";
+                    "follow symlinks" = "yes";
+                    "wide links" = "yes";
                 };
             };
         };
@@ -217,6 +219,9 @@ with lib.${namespace};
         whitesur-wallpapers
         just
     ];
+
+    # Enable built-in atlantic driver for TP-Link TX401 10Gb Ethernet
+    boot.kernelModules = [ "atlantic" ];
 
     services.minecraft-server = {
         enable = true;

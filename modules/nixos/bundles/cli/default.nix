@@ -44,6 +44,13 @@ in
       mtr
       iftop
       iotop
+      ethtool
+      pciutils
+      usbutils
+      iproute2
+      bridge-utils
+      iperf3
+      speedtest-cli
       
       # System monitoring
       lsof

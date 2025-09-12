@@ -203,5 +203,11 @@
       url = "github:emmanuelrosa/erosanix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # Audio Haven - Local development (change to URL when ready for production)
+    audiohaven = {
+      url = "path:/home/cody/audiohaven";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 }

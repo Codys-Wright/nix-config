@@ -24,6 +24,8 @@ in
           "create mask" = mkOpt str "0644" "Create mask for new files";
           "directory mask" = mkOpt str "0755" "Create mask for new directories";
           "valid users" = mkOpt str "cody" "Valid users for this share";
+          "follow symlinks" = mkOpt str "yes" "Whether to follow symbolic links";
+          "wide links" = mkOpt str "yes" "Whether to allow wide links";
           comment = mkOpt str "" "Share description";
         };
       });
@@ -43,32 +45,39 @@ in
     services.samba = {
       enable = true;
       openFirewall = true;
-      settings = {
-        global = mkMerge [
-          {
-            workgroup = cfg.workgroup;
-            "server string" = config.networking.hostName;
-            "netbios name" = config.networking.hostName;
-            security = cfg.security;
-            "invalid users" = [ "root" ];
-            "guest account" = "nobody";
-            "map to guest" = "bad user";
-            "passdb backend" = "tdbsam";
-            "preserve case" = "yes";
-            "short preserve case" = "yes";
-            "fruit:aapl" = "yes";
-            "vfs objects" = "catia fruit streams_xattr";
-          }
-          cfg.extraGlobalConfig
-        ];
-      } // mapAttrs (name: shareCfg: {
-        inherit (shareCfg) path browseable writable comment;
-        "read only" = shareCfg."read only";
-        "guest ok" = shareCfg."guest ok";
-        "create mask" = shareCfg."create mask";
-        "directory mask" = shareCfg."directory mask";
-        "valid users" = shareCfg."valid users";
-      }) cfg.shares;
+      settings = mkMerge [
+        {
+          global = mkMerge [
+            {
+              workgroup = cfg.workgroup;
+              "server string" = config.networking.hostName;
+              "netbios name" = config.networking.hostName;
+              security = cfg.security;
+              "invalid users" = [ "root" ];
+              "guest account" = "nobody";
+              "map to guest" = "bad user";
+              "passdb backend" = "tdbsam";
+              "preserve case" = "yes";
+              "short preserve case" = "yes";
+              "fruit:aapl" = "yes";
+              "vfs objects" = "catia fruit streams_xattr";
+              "allow insecure wide links" = "yes";
+              "unix extensions" = "no";
+            }
+            cfg.extraGlobalConfig
+          ];
+        }
+        (mapAttrs (name: shareCfg: {
+          inherit (shareCfg) path browseable writable comment;
+          "read only" = shareCfg."read only";
+          "guest ok" = shareCfg."guest ok";
+          "create mask" = shareCfg."create mask";
+          "directory mask" = shareCfg."directory mask";
+          "valid users" = shareCfg."valid users";
+          "follow symlinks" = shareCfg."follow symlinks";
+          "wide links" = shareCfg."wide links";
+        }) cfg.shares)
+      ];
     };
 
     # Enable Avahi for service discovery

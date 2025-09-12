@@ -18,7 +18,7 @@ in
 
   config = mkIf cfg.enable {
     environment.systemPackages = with pkgs; [
-      bottles
+      (bottles.override { removeWarningPopup = true; })
     ];
   };
 }

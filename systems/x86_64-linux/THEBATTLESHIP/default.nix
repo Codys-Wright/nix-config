@@ -27,6 +27,8 @@ with lib.${namespace};
         inputs.stylix.nixosModules.stylix
         inputs.home-manager.nixosModules.home-manager
         inputs.nixos-facter-modules.nixosModules.facter
+        # AudioHaven - imports all modules
+        inputs.audiohaven.nixosModules.audiohaven
 	./hardware-configuration.nix
         
   
@@ -43,6 +45,7 @@ with lib.${namespace};
       withSwap = true;
       swapSize = "205";  # 205GB swap partition for full hibernation
     };
+
     
     # Bootloader configuration
     # Alternative: Use systemd-boot instead of GRUB (often more reliable)
@@ -126,7 +129,11 @@ with lib.${namespace};
         # System kernel configuration
         system.kernel = enabled;
         
+        # Hardware storage configuration for udisks2 auto-mounting
+        hardware.storage = enabled;
+        
         hardware.cuda = disabled;
+
 
         services.airplay = enabled;
 
@@ -211,14 +218,25 @@ with lib.${namespace};
                 gemini-cli
                 snowfallorg.frost
                 whitesur-wallpapers
+                ntfs3g  # For NTFS support
+                
+                # Audio Haven packages for testing
+                inputs.audiohaven.packages.${pkgs.system}.YabridgeSystemSetup
         ];
+
+    # Audio Haven configuration
+    audiohaven.plugins.effects.fabfilter = {
+        enable = true;
+        installerPath = "/home/cody/Documents/AudioHaven Software/fabfilter";
+        enableYabridge = true;
+    };
 
     # Add overlay to make custom packages available
     nixpkgs.overlays = [
         (final: prev: {
           whitesur-wallpapers = inputs.self.packages.${prev.system}.whitesur-wallpapers;
         })
-      ];
+    ];
 
     # Nix configuration to allow deployment
     nix.settings.trusted-users = ["root" "@wheel"];
