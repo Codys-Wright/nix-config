@@ -223,6 +223,14 @@ with lib.${namespace};
     # Enable built-in atlantic driver for TP-Link TX401 10Gb Ethernet
     boot.kernelModules = [ "atlantic" ];
 
+    # 10Gb network configuration for direct connection to THEBATTLESHIP
+    networking.interfaces.enp33s0 = {
+        ipv4.addresses = [{
+            address = "10.0.0.2";
+            prefixLength = 24;
+        }];
+    };
+
     services.minecraft-server = {
         enable = true;
         eula = true;

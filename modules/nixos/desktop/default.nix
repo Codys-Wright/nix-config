@@ -76,7 +76,7 @@ in
         displayManager.gdm.settings = {
           daemon = {
             AutomaticLogin = cfg.autoLogin.user;
-            AutomaticLoginEnable = true;
+            AutomaticLoginEnable = false;
           };
         };
       })

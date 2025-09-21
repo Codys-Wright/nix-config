@@ -26,7 +26,7 @@ in
         daw.reaper = enabled;
 
         plugins = {
-          lsp = enabled;
+           lsp = disabled;  # Temporarily disabled
           fabfilter = enabled;
           yabridge = enabled;
           vital = enabled;

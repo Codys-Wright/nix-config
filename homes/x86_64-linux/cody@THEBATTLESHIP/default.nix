@@ -55,6 +55,11 @@ app = {
       };
     };
 
+    # Recording tools and OBS Studio
+    recording = {
+      enable = true;
+    };
+
     # Unified theme system
     theme = {
       enable = true;
@@ -94,6 +99,7 @@ app = {
  
   # Configure fontconfig for Apple Color Emoji
   fonts.fontconfig.enable = true;
+
 
   # This value determines the Home Manager release that your
   # configuration is compatible with. This helps avoid breakage

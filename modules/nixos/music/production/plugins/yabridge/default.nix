@@ -75,7 +75,6 @@ in
     environment.systemPackages = with pkgs; [
       yabridge
       yabridgectl
-      wineWowPackages.stable  # Support both 32-bit and 64-bit applications
       wineWowPackages.yabridge # Yabridge-optimized Wine for audio plugins
       winePackages.fonts      # Microsoft fonts for better GUI compatibility
       winetricks

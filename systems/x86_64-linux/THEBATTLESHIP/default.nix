@@ -206,6 +206,7 @@ with lib.${namespace};
                 "syncthing.starcommand.live"
             ];
         };
+
         
     };
 
@@ -217,18 +218,60 @@ with lib.${namespace};
                 opencode
                 gemini-cli
                 snowfallorg.frost
+                wineWowPackages.yabridge
                 whitesur-wallpapers
                 ntfs3g  # For NTFS support
+                gvfs
+                inputs.self.packages.${system}.lyp  # LilyPond package manager
+                lilypond-with-fonts  # LilyPond music typesetting system
+                gnome.gvfs
+                cifs-utils
+                carla
+                auto-patchelf
+                gtk3
+                gtk4
+                zathura
+                
+                # Reaper (with GTK3 fix via overlay)
+                reaper
+                
+                # LilyPond package manager
+                inputs.self.packages.${pkgs.system}.lyp
                 
                 # Audio Haven packages for testing
                 inputs.audiohaven.packages.${pkgs.system}.YabridgeSystemSetup
+                inputs.audiohaven.packages.${pkgs.system}.algonaut-atlas
+                # inputs.audiohaven.packages.${pkgs.system}.omnisphere
         ];
 
     # Audio Haven configuration
     audiohaven.plugins.effects.fabfilter = {
         enable = true;
-        installerPath = "/home/cody/Documents/AudioHaven Software/fabfilter";
         enableYabridge = true;
+    };
+
+    audiohaven.plugins.effects.seventhheaven = {
+        enable = true;
+        enableYabridge = true;
+    };
+
+    audiohaven.plugins.instruments.omnisphere = {
+        enable = true;
+        enableYabridge = true;
+        steamPath = "/run/media/cody/AUDIO HAVEN/SAMPLE LIBRARIES - INSTRUMENTS/Spectrasonics/STEAM";
+    };
+
+    audiohaven.plugins.instruments.algonaut-atlas = {
+        enable = true;
+        enableYabridge = true;
+        atlasPath = "/run/media/cody/AUDIO HAVEN/SAMPLE LIBRARIES - INSTRUMENTS/Algonaut/Atlas";
+        installerPath = "/home/cody/Documents/AudioHaven Software/algonaut-atlas";
+    };
+
+    audiohaven.plugins.instruments.addictive-drums = {
+        enable = true;
+        enableYabridge = true;
+        installerPath = "/home/cody/Documents/AudioHaven Software/INSTRUMENTS/Drums/XLN Audio - Addictive Drums 2 Complete v2.5.2.1";
     };
 
     # Add overlay to make custom packages available
@@ -237,6 +280,24 @@ with lib.${namespace};
           whitesur-wallpapers = inputs.self.packages.${prev.system}.whitesur-wallpapers;
         })
     ];
+
+    # 10Gb network configuration for direct connection to starcommand
+    networking.interfaces.enp12s0 = {
+        ipv4.addresses = [{
+            address = "10.0.0.1";
+            prefixLength = 24;
+        }];
+    };
+
+    # SMB client configuration for accessing starcommand shares
+    services.samba = {
+        enable = true;
+        package = pkgs.samba;
+    };
+
+    # Configure GVFS for network share discovery
+    services.gvfs.enable = true;
+
 
     # Nix configuration to allow deployment
     nix.settings.trusted-users = ["root" "@wheel"];

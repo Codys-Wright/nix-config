@@ -74,6 +74,10 @@
     packages = forAllSystems (system: {
       docs = inputs.nixdoc.packages.${system}.nixdoc;
       frost = inputs.snowfall-frost.packages.${system}.frost;
+      lyp = import ./packages/lyp { 
+        pkgs = inputs.nixpkgs.legacyPackages.${system}; 
+        inputs = inputs;
+      };
       default = inputs.self.packages.${system}.docs;  # Default to docs package
     });
 
@@ -85,6 +89,8 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    nixpkgs-ruby.url = "github:bobvanderlinden/nixpkgs-ruby";
+    nixpkgs-ruby.inputs.nixpkgs.follows = "nixpkgs";
     disko.url = "github:nix-community/disko";
     disko.inputs.nixpkgs.follows = "nixpkgs";
 

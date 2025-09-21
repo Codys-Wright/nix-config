@@ -8,7 +8,7 @@ let
   inherit (lib) makeBinPath;
 in
 { is64bits ? false
-, wine ? if is64bits then pkgs.wineWowPackages.stable else pkgs.wine
+, wine ? if is64bits then pkgs.wineWowPackages.yabridge else pkgs.wineWowPackages.yabridge
 , wineFlags ? ""
 , executable
 , chdir ? null
