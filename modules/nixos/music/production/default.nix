@@ -28,7 +28,7 @@ in
         plugins = {
            lsp = disabled;  # Temporarily disabled
           fabfilter = enabled;
-          yabridge = enabled;
+          yabridge = disabled;
           vital = enabled;
         };
       };

@@ -24,10 +24,10 @@
     platforms = [];
     source = {
       remotes = ["http://rubygems.org"];
-      sha256 = "4b645958e494b2f86c2f8a2f304c959baa273a310e77a2931ddb986d83e498c8";
+      sha256 = "4810fde6d10ad56a57f2ef4e2820b5605efaa215a11d949927197dbeebe301f8";
       type = "gem";
     };
-    version = "2.9.0";
+    version = "2.7.1";
   };
   lyp = {
     dependencies = ["directory_watcher" "httpclient" "ruby-progressbar" "rugged" "thor"];
@@ -109,10 +109,10 @@
     platforms = [];
     source = {
       remotes = ["http://rubygems.org"];
-      sha256 = "7faaa912c5888d6e348d20fa31209b6409f1574346b1b80e309dbc7e8d63efac";
+      sha256 = "362631de8dc6f1074242f21e01148ac70b7fe8cdb17f85eee91d4ea83457cb04";
       type = "gem";
     };
-    version = "1.9.0";
+    version = "1.6.3";
   };
   thor = {
     groups = ["default"];

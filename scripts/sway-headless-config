@@ -1,0 +1,34 @@
+# Minimal Sway config for headless operation
+
+### Variables
+set $mod Mod1
+set $term alacritty
+
+### Output configuration for headless
+output HEADLESS-1 {
+    resolution 1024x768
+    bg #000000 solid_color
+}
+
+### Basic key bindings (minimal set)
+# Start a terminal
+bindsym $mod+Return exec $term
+
+# Kill focused window
+bindsym $mod+Shift+q kill
+
+# Exit sway
+bindsym $mod+Shift+e exec swaymsg exit
+
+# Basic window management
+bindsym $mod+h focus left
+bindsym $mod+j focus down
+bindsym $mod+k focus up
+bindsym $mod+l focus right
+
+# Make windows fullscreen
+bindsym $mod+f fullscreen
+
+# Toggle floating
+bindsym $mod+Shift+space floating toggle
+

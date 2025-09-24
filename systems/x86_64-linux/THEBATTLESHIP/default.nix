@@ -173,10 +173,10 @@ with lib.${namespace};
             ];
         };
         
-        # Enable fonts with Apple Color Emoji
+        # Enable fonts (Apple Emoji disabled due to fontconfig issues)
         system.fonts = {
             enable = true;
-            enableAppleEmoji = true;
+            enableAppleEmoji = false;
         };
         
         # Local hosts for accessing starcommand services
@@ -210,16 +210,52 @@ with lib.${namespace};
         
     };
 
+    programs.hyprland.enable = true;
+
+    # Virtualization
+    virtualisation.containers.enable = true;
+    virtualisation.podman = {
+        enable = true;
+        defaultNetwork.settings.dns_enabled = true;
+    };
+
     # Additional system packages (GUI and specific tools)
         environment.systemPackages = with pkgs; [
+            dive
+            podman-tui
+            docker-compose
                 brave
                 vscode
+                wtype
+                openbox
                 code-cursor
+                slurp
+                grim
+                sway
+                wayvnc
+                fluxbox
+                wvkbd
+                waybox
                 opencode
                 gemini-cli
                 snowfallorg.frost
-                wineWowPackages.yabridge
-                whitesur-wallpapers
+                wineWowPackages.waylandFull  # Wine 64-bit wayland for better compatibility
+                winetricks  # Wine tricks for installing Windows components
+                dotool  # Wayland automation tool for automating GUI interactions
+                xdotool
+                ydotool  # Advanced Wayland automation with window detection and element finding
+                xvfb-run  # Virtual X11 framebuffer for headless GUI automation
+                weston  # Wayland compositor with headless backend for modern GUI automation
+                python313Packages.pyvirtualdisplay  # Python virtual display for automated GUI testing
+xorg.xclock # X11 clock for testing xvfb-run
+  xorg.xvfb
+  x11vnc
+  whitesur-wallpapers
+  tigervnc
+  wtype
+  wev
+  python314
+
                 ntfs3g  # For NTFS support
                 gvfs
                 inputs.self.packages.${system}.lyp  # LilyPond package manager
@@ -241,6 +277,10 @@ with lib.${namespace};
                 # Audio Haven packages for testing
                 inputs.audiohaven.packages.${pkgs.system}.YabridgeSystemSetup
                 inputs.audiohaven.packages.${pkgs.system}.algonaut-atlas
+                inputs.audiohaven.packages.${pkgs.system}.kontakt7
+                inputs.audiohaven.packages.${pkgs.system}.kontakt8-portable
+                inputs.audiohaven.packages.${pkgs.system}.kontakt-manager
+                inputs.audiohaven.packages.${pkgs.system}.wine-testing
                 # inputs.audiohaven.packages.${pkgs.system}.omnisphere
         ];
 
@@ -273,6 +313,28 @@ with lib.${namespace};
         enableYabridge = true;
         installerPath = "/home/cody/Documents/AudioHaven Software/INSTRUMENTS/Drums/XLN Audio - Addictive Drums 2 Complete v2.5.2.1";
     };
+
+    # Enable Native Access for Native Instruments plugins
+    audiohaven.plugins.misc.native-access.enable = true;
+    audiohaven.plugins.misc.yabridge-nightly.enable = true;
+    
+    # Enable Kontakt 7, Kontakt 8, and Kontakt Manager
+    audiohaven.plugins.instruments.kontakt7 = {
+      enable = true;
+      installerPath = "/home/cody/Documents/AudioHaven Software/INSTRUMENTS/kontakt/Kontakt_7.10.9_Full_Options";
+    };
+    
+    audiohaven.plugins.instruments.kontakt8-portable = {
+      enable = true;
+      installerPath = "/home/cody/Documents/AudioHaven Software/INSTRUMENTS/kontakt/Kontakt_8_Portable";
+    };
+    
+    audiohaven.plugins.misc.kontakt-manager = {
+      enable = true;
+      installerPath = "/home/cody/Documents/AudioHaven Software/INSTRUMENTS/kontakt/pwf7iv7-teamrk1115";
+    };
+    
+    audiohaven.plugins.misc.wine-testing.enable = true;
 
     # Add overlay to make custom packages available
     nixpkgs.overlays = [

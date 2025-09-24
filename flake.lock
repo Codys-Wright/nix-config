@@ -148,8 +148,8 @@
         "snowfall-lib": "snowfall-lib"
       },
       "locked": {
-        "lastModified": 1757813115,
-        "narHash": "sha256-08W3G29B1ZZgTJbI5RRRrhQoQLhhmV8ugqmrbutX4Jg=",
+        "lastModified": 1758444652,
+        "narHash": "sha256-f1rry24CRajM0/97Ew8EWGetZaMqH8oROSk1VLqXyW0=",
         "path": "/home/cody/audiohaven",
         "type": "path"
       },

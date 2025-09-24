@@ -7,10 +7,8 @@
  require 'httpclient'
 @@ -369,7 +370,7 @@ module Lyp
      def lyp_index
-       @lyp_index ||= begin
-         index_url = "https://raw.githubusercontent.com/lyp-packages/index/master/index.yaml"
--        open(index_url) do |f|
-+        URI.open(index_url) do |f|
-           YAML.load(f.read)
-         end
-       end
+       req_ext 'yaml'
+       req_ext 'open-uri'
+-      @lyp_index ||= YAML.load(open(LYP_INDEX_URL))
++      @lyp_index ||= YAML.load(URI.open(LYP_INDEX_URL))
+     end
