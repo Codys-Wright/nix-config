@@ -25,7 +25,7 @@ in
           "$mod,K, exec, ${pkgs.bitwarden}/bin/bitwarden" # Bitwarden
           "$mod,L, exec, ${pkgs.hyprlock}/bin/hyprlock" # Lock
           "$mod,X, exec, power-menu" # Powermenu
-          "$mod,D, exec, launcher" # Launcher
+          "$mod,SPACE, exec, caelestia shell drawers toggle launcher " # Launcher
           "$shiftMod,SPACE, exec, hyprfocus-toggle" # Toggle HyprFocus
 
           "$mod,Q, killactive," # Close window

@@ -99,9 +99,16 @@ app = {
   home.packages = with pkgs; [
     inputs.apple-emoji-linux.packages.x86_64-linux.default
     chawan
+                mpvpaper
   ];
  
   programs.chawan.enable = true;
+
+programs.mpvpaper = {
+enable = true;
+        };
+
+
  
   # Configure fontconfig for Apple Color Emoji
   fonts.fontconfig.enable = true;

@@ -76,6 +76,12 @@ with lib.${namespace};
         initialPassword = "";
     };
 
+    # Kanata keyboard remapper
+    FTS-FLEET.keyboard.kanata = {
+        enable = true;
+        configFile = ../../modules/nixos/keyboard/kanata/FTS-Kanata-Config.kbd;
+    };
+
     # FTS-FLEET namespace configuration
     FTS-FLEET = {
         bundles.common = enabled;
@@ -213,6 +219,8 @@ with lib.${namespace};
 
     programs.hyprland.enable = true;
 
+     
+
     # Virtualization
     virtualisation.containers.enable = true;
     virtualisation.podman = {
@@ -230,6 +238,7 @@ with lib.${namespace};
                 wtype
                 openbox
                 code-cursor
+                localsend
                 slurp
                 grim
                 sway

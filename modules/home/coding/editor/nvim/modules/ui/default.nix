@@ -192,7 +192,7 @@ in
       mini = {
         colors.enable = true;
         icons.enable = true;
-        indentscope.enable = true;
+        # indentscope.enable = true;
         trailspace.enable = true;
         icons.setupOpts = {
           file = {
