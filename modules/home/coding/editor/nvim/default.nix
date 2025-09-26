@@ -14,6 +14,7 @@ in
   config = mkIf cfg.enable {
     programs.nvf = {
       enable = true;
+                        enableManpages = true;
       # Base nvf settings - sub-modules will add their own configurations
       settings = {
         vim = {

@@ -178,6 +178,7 @@ with lib.${namespace};
             enable = true;
             enableAppleEmoji = false;
         };
+
         
         # Local hosts for accessing starcommand services
         services.selfhost.networking.local-hosts = {
@@ -252,6 +253,7 @@ xorg.xclock # X11 clock for testing xvfb-run
   x11vnc
   whitesur-wallpapers
   tigervnc
+  xwayland-satellite
   wtype
   wev
   python314
@@ -274,6 +276,10 @@ xorg.xclock # X11 clock for testing xvfb-run
                 # LilyPond package manager
                 inputs.self.packages.${pkgs.system}.lyp
                 
+                # Nix search tools
+                inputs.nix-search-cli.packages.${pkgs.system}.default
+                inputs.nix-search-tv.packages.${pkgs.system}.default
+                
                 # Audio Haven packages for testing
                 inputs.audiohaven.packages.${pkgs.system}.YabridgeSystemSetup
                 inputs.audiohaven.packages.${pkgs.system}.algonaut-atlas
@@ -288,6 +294,7 @@ xorg.xclock # X11 clock for testing xvfb-run
     audiohaven.plugins.effects.fabfilter = {
         enable = true;
         enableYabridge = true;
+        installerPath = "/home/cody/Documents/AudioHaven Software/EFFECTS/fabfilter";
     };
 
     audiohaven.plugins.effects.seventhheaven = {

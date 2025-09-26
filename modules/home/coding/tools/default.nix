@@ -15,6 +15,7 @@ in
       git = enabled;
       docker = enabled;
       lazygit = enabled;
+      opencode = enabled;
     };
 
     # Development tools packages

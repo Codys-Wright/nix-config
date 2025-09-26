@@ -16,10 +16,16 @@ with lib.${namespace};
     bundles = {
       common = enabled;
       browsers = enabled;
-      # desktop.hyprland = enabled; # Disabled - using KDE
+      # desktop.hyprland = enabled; # Disabled - using desktop module
       office = enabled;
       music = enabled;
       # music-production = enabled; # Disabled - using system-level music production
+    };
+
+    # Desktop configuration - using individual modules
+    desktop = {
+      hyprland = enabled; # Enable Hyprland desktop environment
+      caelestia = enabled; # Uncomment to use Caelestia instead
     };
 
     
@@ -99,6 +105,26 @@ app = {
  
   # Configure fontconfig for Apple Color Emoji
   fonts.fontconfig.enable = true;
+
+  # Hyprland monitor configuration
+  wayland.windowManager.hyprland.settings.monitor = [
+    "DP-3,2560x1440@180.00,0x0,1.00"
+    "DP-4,2560x1440@180.00,2560x0,1.00"
+    "DP-5,2560x1440@143.91,5120x0,1.00"
+  ];
+
+  # Shell aliases for nix search tools
+  programs.bash.shellAliases = {
+    ns = "nix-search-tv print | fzf --preview 'nix-search-tv preview {}' --scheme history --preview-window=up:50%";
+  };
+
+  programs.zsh.shellAliases = {
+    ns = "nix-search-tv print | fzf --preview 'nix-search-tv preview {}' --scheme history --preview-window=up:50%";
+  };
+
+  programs.fish.shellAliases = {
+    ns = "nix-search-tv print | fzf --preview 'nix-search-tv preview {}' --scheme history --preview-window=up:50%";
+  };
 
 
   # This value determines the Home Manager release that your

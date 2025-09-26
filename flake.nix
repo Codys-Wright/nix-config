@@ -215,5 +215,23 @@
       url = "path:/home/cody/audiohaven";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # Caelestia Shell - Modern Wayland shell with Qt6
+    caelestia-shell = {
+      url = "github:caelestia-dots/shell";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # Nix search CLI tool
+    nix-search-cli = {
+      url = "github:peterldowns/nix-search-cli";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # Nix search TV - fuzzy search for Nix packages
+    nix-search-tv = {
+      url = "github:3timeslazy/nix-search-tv";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 }
