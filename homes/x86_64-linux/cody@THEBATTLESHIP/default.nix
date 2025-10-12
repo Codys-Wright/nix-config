@@ -73,6 +73,7 @@ app = {
       polarity = "dark";
       # WhiteSur-specific options
       whitesur = {
+        stylix.enable = true; # Enable stylix for theming
         opacity = "25"; # Panel opacity: 15, 25, 35, 45, 55, 65, 75, 85
         panelHeight = "40"; # Panel height: 32, 40, 48, 56, 64
         activitiesIcon = "colorful"; # Activities icon: standard, colorful, white, ubuntu
@@ -95,6 +96,12 @@ app = {
     };
   };
 
+  # Stylix configuration - enable theming without wallpaper management
+  stylix = {
+    enable = true;
+    # Don't set stylix.image to avoid conflicts with mpvpaper
+  };
+
   # Add Apple Color Emoji font to home packages
   home.packages = with pkgs; [
     inputs.apple-emoji-linux.packages.x86_64-linux.default
@@ -104,9 +111,31 @@ app = {
  
   programs.chawan.enable = true;
 
+# mpvpaper animated wallpaper
 programs.mpvpaper = {
-enable = true;
-        };
+  enable = true;
+  pauseList = "";
+  stopList = "";
+};
+
+# Custom systemd service for mpvpaper with specific video
+systemd.user.services.mpvpaper-custom = {
+  Unit = {
+    Description = "mpvpaper animated wallpaper";
+    After = [ "graphical-session.target" ];
+    ConditionEnvironment = "WAYLAND_DISPLAY";
+  };
+  Service = {
+    Type = "simple";
+    ExecStart = "${pkgs.mpvpaper}/bin/mpvpaper -o \"no-audio --loop\" ALL /home/cody/Images/midnight-glow-over-peaks.3840x2160.mp4";
+    Restart = "always";
+    RestartSec = 3;
+    Slice = "session.slice";
+  };
+  Install = {
+    WantedBy = [ "graphical-session.target" ];
+  };
+};
 
 
  
@@ -123,14 +152,17 @@ enable = true;
   # Shell aliases for nix search tools
   programs.bash.shellAliases = {
     ns = "nix-search-tv print | fzf --preview 'nix-search-tv preview {}' --scheme history --preview-window=up:50%";
+    voyager = "ssh cody@100.96.79.26";
   };
 
   programs.zsh.shellAliases = {
     ns = "nix-search-tv print | fzf --preview 'nix-search-tv preview {}' --scheme history --preview-window=up:50%";
+    voyager = "ssh cody@100.96.79.26";
   };
 
   programs.fish.shellAliases = {
     ns = "nix-search-tv print | fzf --preview 'nix-search-tv preview {}' --scheme history --preview-window=up:50%";
+    voyager = "ssh cody@100.96.79.26";
   };
 
 

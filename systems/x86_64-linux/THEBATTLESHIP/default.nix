@@ -79,8 +79,35 @@ with lib.${namespace};
     # Kanata keyboard remapper
     FTS-FLEET.keyboard.kanata = {
         enable = true;
-        configFile = ../../modules/nixos/keyboard/kanata/FTS-Kanata-Config.kbd;
+        configFile = ../../../modules/nixos/keyboard/kanata/kanata.kbd;
+        devices = [
+            "/dev/input/by-path/pci-0000:0e:00.0-usb-0:5.1.1.1.3:1.0-event-kbd"
+            "/dev/input/by-path/pci-0000:0e:00.0-usb-0:5.1.1.2.1:1.0-event-kbd"
+            "/dev/input/by-path/pci-0000:0e:00.0-usb-0:5.2.2:1.2-event-kbd"
+        ];
+
     };
+
+
+    # Enable uinput module for Kanata and disable USB autosuspend
+    boot.kernelModules = [ "uinput" ];
+    boot.kernelParams = [ "usbcore.autosuspend=-1" ];
+
+    # Enable uinput hardware support
+    hardware.uinput.enable = true;
+
+    # Set up udev rules for uinput and USB power management
+    services.udev.extraRules = ''
+        # Kanata uinput rules
+        KERNEL=="uinput", MODE="0660", GROUP="uinput", OPTIONS+="static_node=uinput"
+        
+        # Disable USB autosuspend for all USB devices to prevent peripheral inactivity
+        ACTION=="add", SUBSYSTEM=="usb", ATTR{power/autosuspend}="-1"
+        ACTION=="add", SUBSYSTEM=="usb", ATTR{power/control}="on"
+    '';
+
+    # Ensure the uinput group exists
+    users.groups.uinput = { };
 
     # FTS-FLEET namespace configuration
     FTS-FLEET = {
@@ -170,7 +197,7 @@ with lib.${namespace};
             raysession = enabled;
         };
         
-        system.themes.stylix = disabled;
+        system.themes.stylix = enabled;
         services.ssh = {
             enable = true;
             allowRootLogin = true;
@@ -214,12 +241,19 @@ with lib.${namespace};
             ];
         };
 
+        # Tailscale VPN mesh network
+        services.selfhost.networking.tailscale = {
+            enable = true;
+           
+        };
+
         
     };
 
     programs.hyprland.enable = true;
 
-     
+
+
 
     # Virtualization
     virtualisation.containers.enable = true;
@@ -240,8 +274,12 @@ with lib.${namespace};
                 code-cursor
                 localsend
                 slurp
+                yt-dlp
                 grim
                 sway
+                guitarix
+                gxplugins-lv2
+                surge-XT
                 wayvnc
                 fluxbox
                 wvkbd
@@ -288,6 +326,9 @@ xorg.xclock # X11 clock for testing xvfb-run
                 # Nix search tools
                 inputs.nix-search-cli.packages.${pkgs.system}.default
                 inputs.nix-search-tv.packages.${pkgs.system}.default
+                
+                # Keyboard remapping
+                kanata-with-cmd
                 
                 # Audio Haven packages for testing
                 inputs.audiohaven.packages.${pkgs.system}.YabridgeSystemSetup

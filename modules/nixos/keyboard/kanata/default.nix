@@ -49,7 +49,16 @@ in
         extraArgs = cfg.extraArgs;
         devices = cfg.devices;
         port = cfg.port;
+        extraDefCfg = "process-unmapped-keys yes";
       };
+    };
+
+    # Add the Kanata service user to necessary groups
+    systemd.services.kanata-fts-kanata.serviceConfig = {
+      SupplementaryGroups = [
+        "input"
+        "uinput"
+      ];
     };
   };
 }

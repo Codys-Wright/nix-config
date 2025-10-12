@@ -19,6 +19,7 @@ in
       fzf = enabled;
       zoxide = enabled;
       yazi = enabled;
+      sesh = enabled;
     };
 
 

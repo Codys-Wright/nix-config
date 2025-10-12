@@ -102,7 +102,7 @@ in {
         enable = true;
         autoEnable = true;
         base16Scheme = mkForcable stylixCfg.base16Scheme;
-        image = mkForcable stylixCfg.image;
+        # Don't set image to avoid conflicts with mpvpaper
         polarity = cfg.polarity;
         
         # Fonts

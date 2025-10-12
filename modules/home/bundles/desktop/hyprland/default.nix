@@ -41,7 +41,7 @@ in
           hypridle = enabled;
           hyprlock = enabled;
           hyprpanel = enabled;
-          hyprpaper = enabled;
+          hyprpaper = disabled;  # Disabled in favor of mpvpaper
           rofi = enabled;
           ags = enabled;
           # waybar = disabled;

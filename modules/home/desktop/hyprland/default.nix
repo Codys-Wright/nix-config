@@ -27,6 +27,7 @@ in
     ${namespace}.desktop.hyprland = {
       animations = enabled;
       keybindings = enabled;
+      modules.rofi = enabled;
     };
     home.packages = with pkgs; [
       qt5.qtwayland
@@ -60,9 +61,9 @@ in
         "$mod" = "SUPER";
         "$shiftMod" = "SUPER_SHIFT";
 
-        cursor = {
-          no_hardware_cursors = true;
-        };
+        # cursor = {
+        #   no_hardware_cursors = true;
+        # };
 
         general = {
           resize_on_border = true;

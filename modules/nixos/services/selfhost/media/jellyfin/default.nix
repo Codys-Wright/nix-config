@@ -36,6 +36,15 @@ in
       group = selfhostCfg.group;
     };
     
+    # Ensure Jellyfin waits for storage mounts to be ready
+    systemd.services.jellyfin = {
+      after = [ "mnt-disks-sda.mount" "mnt-disks-sdb.mount" "mnt-storage.mount" ];
+      requires = [ "mnt-storage.mount" ];
+      unitConfig = {
+        RequiresMountsFor = cfg.dataDir;
+      };
+    };
+    
         # Caddy reverse proxy
     services.caddy.virtualHosts."${cfg.url}" = mkIf (selfhostCfg.baseDomain != "") (mkMerge [
       {

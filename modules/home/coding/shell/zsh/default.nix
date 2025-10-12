@@ -46,7 +46,6 @@ in
         vim = "nvim";
         vi = "nvim";
         v = "nvim";
-        z = "cd";
         ls = "eza --icons=always --no-quotes";
         tree = "eza --icons=always --tree --no-quotes";
 

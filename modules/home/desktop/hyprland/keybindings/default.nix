@@ -25,21 +25,28 @@ in
           "$mod,K, exec, ${pkgs.bitwarden}/bin/bitwarden" # Bitwarden
           "$mod,L, exec, ${pkgs.hyprlock}/bin/hyprlock" # Lock
           "$mod,X, exec, power-menu" # Powermenu
-          "$mod,SPACE, exec, caelestia shell drawers toggle launcher " # Launcher
+          "$mod,SPACE, exec, launcher" # Launcher
           "$shiftMod,SPACE, exec, hyprfocus-toggle" # Toggle HyprFocus
 
           "$mod,Q, killactive," # Close window
           "$mod,T, togglefloating," # Toggle Floating
           "$mod,F, fullscreen" # Toggle Fullscreen
+
+
+          "$mod,h, movefocus, l" # Move focus left
+          "$mod,l, movefocus, r" # Move focus Right
+          "$mod,k, movefocus, u" # Move focus Up
+          "$mod,j, movefocus, d" # Move focus Down
+
           "$mod,left, movefocus, l" # Move focus left
           "$mod,right, movefocus, r" # Move focus Right
           "$mod,up, movefocus, u" # Move focus Up
           "$mod,down, movefocus, d" # Move focus Down
+
           "$shiftMod,up, focusmonitor, -1" # Focus previous monitor
           "$shiftMod,down, focusmonitor, 1" # Focus next monitor
           "$shiftMod,left, layoutmsg, addmaster" # Add to master
           "$shiftMod,right, layoutmsg, removemaster" # Remove from master
-
           "$mod,PRINT, exec, screenshot window" # Screenshot window
           ",PRINT, exec, screenshot monitor" # Screenshot monitor
           "$shiftMod,PRINT, exec, screenshot region" # Screenshot region
@@ -64,18 +71,18 @@ in
 
       bindm = [
         "$mod,mouse:272, movewindow" # Move Window (mouse)
-        "$mod,R, resizewindow" # Resize Window (mouse)
+        "$mod,mouse:273, resizewindow" # Resize Window (mouse)
       ];
 
       bindl = [
-        ",XF86AudioMute, exec, sound-toggle" # Toggle Mute
+        ",XF86AudioMute, exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle" # Toggle Mute
         ",switch:on:Lid Switch, exec, hyprctl keyword monitor 'eDP-1, disable'"
         ",switch:off:Lid Switch, exec, hyprctl keyword monitor 'eDP-1, prefered, auto, auto'"
       ];
 
       bindle = [
-        ",XF86AudioRaiseVolume, exec, sound-up" # Sound Up
-        ",XF86AudioLowerVolume, exec, sound-down" # Sound Down
+        ",XF86AudioRaiseVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+ --limit 1.0" # Sound Up
+        ",XF86AudioLowerVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-" # Sound Down
         ",XF86MonBrightnessUp, exec, brightness-up" # Brightness Up
         ",XF86MonBrightnessDown, exec, brightness-down" # Brightness Down
       ];

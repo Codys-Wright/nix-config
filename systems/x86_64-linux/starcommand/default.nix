@@ -60,6 +60,9 @@ with lib.${namespace};
         initialPassword = "password";
     };
 
+    # Add cody user to selfhost group for storage access
+    users.users.cody.extraGroups = [ "selfhost" ];
+
     # FTS-FLEET namespace configuration
     FTS-FLEET = {
         bundles.common = enabled;

@@ -6,14 +6,27 @@
   process-unmapped-keys yes
 )
 
-;; Define all keyboard keys for new layout
+
+
+;; Define keyboard keys in logical categories
 (defsrc
-  esc   f1    f2    f3    f4    f5    f6    f7    f8    f9    f10   f11   f12   prtsc del    lights
+  ;; Function keys
+  esc   f1    f2    f3    f4    f5    f6    f7    f8    f9    f10   f11   f12   prtsc del
+  
+  ;; Number row
   grv   1     2     3     4     5     6     7     8     9     0     -     =     bspc  pgup
+  
+  ;; QWERTY row
   tab   q     w     e     r     t     y     u     i     o     p     [     ]     \     pgdn
+  
+  ;; ASDF row
   caps  a     s     d     f     g     h     j     k     l     ;     '     ret   home
+  
+  ;; ZXCV row
   lsft  z     x     c     v     b     n     m     ,     .     /     rsft  up    end
-  lctl  lalt  lmet  spc   rmet  fn    rctl  left  down  right
+  
+  ;; Modifier row
+  lctl  lalt  lmet  spc   rmet  rctl  left  down  right
 )
 
 (defvar
@@ -56,21 +69,18 @@
 (defalias
   to-base (layer-switch base)
   to-nohrm (layer-switch nohrm)
-  l_config (layer-while-held config)
-  l_fn (layer-while-held fn)
   grv_key (tap-dance 200 
-    ((tap-hold-press $tap-time $hold-time grv @l_config)  ;; single tap/hold: normal
-     (fork (multi @to-nohrm) (tap-hold-press $tap-time $hold-time grv @l_config) (rsft))  ;; single tap with right shift: switch to nohrm
-     (fork (multi @to-base) (tap-hold-press $tap-time $hold-time grv @l_config) (rsft))))  ;; single tap with right shift: switch back to base
+    ((tap-hold-press $tap-time $hold-time grv grv)  ;; single tap/hold: normal
+     (fork (multi @to-nohrm) (tap-hold-press $tap-time $hold-time grv grv) (rsft))  ;; single tap with right shift: switch to nohrm
+     (fork (multi @to-base) (tap-hold-press $tap-time $hold-time grv grv) (rsft))))  ;; single tap with right shift: switch back to base
   rmet_key (one-shot-press 500 (layer-while-held symbols))
-  fn_key (tap-hold-press $tap-time $hold-time fn @l_fn)
   caps_key (multi esc)
   meh (multi lsft lctl lalt)
-  space_key (tap-hold-release $space-tap-time $space-hold-time spc @meh)
+  space_key spc
 
   tap (multi
     (layer-switch nomods)
-    (on-idle-fakekey to-base tap 20)
+    (on-idle-fakekey to-base tap 80)
   )
   
   ;; Magic shift functionality
@@ -97,7 +107,7 @@
   (      f) (tap-hold-release-keys $tap-time-fast $hold-time (multi f @tap) lsft $left-hand-keys)
 
   ;; Right hand single key presses
-  (         j) (tap-hold-release-keys $tap-time-fast $hold-time-fast (multi j @tap) rsft $right-hand-keys)
+  (        j) (tap-hold-release-keys $tap-time-fast $hold-time-fast (multi j @tap) rsft $right-hand-keys)
   (         k) (tap-hold-release-keys $tap-time $hold-time (multi k @tap) rctl $right-hand-keys)
   (         l) (tap-hold-release-keys $tap-time $hold-time (multi l @tap) ralt $right-hand-keys)
   (         ;) (tap-hold-release-keys $tap-time-fast $hold-time-fast (multi ; @tap) rmet $right-hand-keys)
@@ -139,69 +149,77 @@
 
 ;; Default layer - passthrough all keys
 (deflayer base
-  esc   f1    f2    f3    f4    f5    f6    f7    f8    f9    f10   f11   f12   prtsc del    lights
+  esc   f1    f2    f3    f4    f5    f6    f7    f8    f9    f10   f11   f12   prtsc del
   @grv_key 1    2    3    4    5    6    7    8    9    0    -    =    bspc  pgup
   tab  q    w    e    r    t    y    u    i    o    p    [    ]    \    pgdn
   @caps_key @a    @s    @d    @f    g    h    @j    @k    @l    @;    '    ret   home
   @magic_lshift z    x    c    v    b    n    m    ,    .    /    @magic_rshift up    end
-  lctl lalt lmet @space_key @rmet_key @fn_key rctl left  down  right
-)
-
-;; Layer for configuration management
-(deflayer config
-  _    _    _    _    _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    _    _    _    _    _    _    _    _    _
+  lctl lalt lmet @space_key @rmet_key rctl left  down  right
 )
 
 ;; Symbol layer - activated by holding right command
 (deflayer symbols
-  _     _     _     _     _     _     _     _     _     _     _     _     _     _     _     _    
-  _     [     S-9   S-0   ]     .     S-5   S-6   S-7   S-8   S-9   S-0   S--   S-=   _     
-  S-1   ,     S-[   S-]   ;     S-/   _     _     _     _     _     _     _     _     _     
-  S-3   S-6   =     S--   S-4   S-8   _     '     S-'   S-=   S-;   S-;   S-'   _     
-  S-`   S-,   S-\   -     S-.   \     S-5   S-;   S-7    S-,   S-.   S-/   _     _     
-  _     _     _     _     _     S-3   _     _     _     _     _
+  ;; Function keys - passthrough
+  _     _     _     _     _     _     _     _     _     _     _     _     _     _     _    
+  
+  ;; Number row - symbols and numbers
+  _     [     S-9   S-0   ]     .     S-5   S-6   S-7   S-8   S-9   S-0   S--   S-=   _
+  
+  ;; QWERTY row - symbols and punctuation
+  S-1   ,     S-[   S-]   ;     S-/   _     _     _     _     _     _     _     _     _
+  
+  ;; ASDF row - symbols and punctuation
+  S-3   S-6   =     S--   S-4   S-8   _     '     S-'   S-=   S-;   S-;   S-'   _
+  
+  ;; ZXCV row - symbols and punctuation
+  S-`   S-,   S-\   -     S-.   \     S-5   S-;   S-7    S-,   S-.   S-/   _     _
+  
+  ;; Modifier row - passthrough
+  _     _     _     _     _     S-3   _     _     _     
 )
 
 
 (deflayer nomods
-  _    _    _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  ;; Function keys - passthrough
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  
+  ;; Number row - passthrough
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  
+  ;; QWERTY row - passthrough
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  
+  ;; ASDF row - homerow mods disabled
+  @caps_key    a    s    d    f    g    h    j    k    l    ;    '    ret   home
+  
+  ;; ZXCV row - passthrough
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    _    _    _    _    _    _    _    _    _    _    _    _
-  @caps_key    a    s    d    f    _    _    j    k    l    ;    _    _    _
-  _    _    _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    _    _    _    @rmet_key _    _    _    _    _
+  
+  ;; Modifier row - right command for symbols
+  _    _    _    _    _    @rmet_key _    _    _
 )
 
-;; Function key layer - activated by holding fn
-(deflayer fn
-  esc   🔅    🔆    @mc   @sls  @dtn  @dnd  ◀◀    ▶⏸    ▶▶    🔇    🔉    🔊    _     _     _
-  _     _     _     _     _     _     _     _     _     _     _     _     _     _
-  _     _     _     _     _     _     _     _     _     _     _     _     _     _
-  _     _     _     _     _     _     _     _     _     _     _     _     _
-  _     _     _     _     _     _     _     _     _     _     _     _     _     _
-  _     _     _     _     _     _     _     _     _     _     _
-)
 
-(defalias
-  mc C-up ;; Mission Control
-  sls M-spc ;; Spotlight Search
-  dtn S-C-A-M-f5 ;; Dictation
-  dnd S-C-A-M-f6 ;; Do Not Disturb
-)
 
 ;; Layer without home row mods
 (deflayer nohrm
-  esc   f1    f2    f3    f4    f5    f6    f7    f8    f9    f10   f11   f12   prtsc del    lights
+  ;; Function keys - passthrough
+  esc   f1    f2    f3    f4    f5    f6    f7    f8    f9    f10   f11   f12   prtsc del
+  
+  ;; Number row - with grave key special
   @grv_key 1    2    3    4    5    6    7    8    9    0    -    =    bspc  pgup
+  
+  ;; QWERTY row - passthrough
   tab  q    w    e    r    t    y    u    i    o    p    [    ]    \    pgdn
+  
+  ;; ASDF row - homerow mods disabled
   @caps_key a    s    d    f    g    h    j    k    l    ;    '    ret   home
+  
+  ;; ZXCV row - with magic shift
   @magic_lshift z    x    c    v    b    n    m    ,    .    /    @magic_rshift up    end
-  lctl lalt lmet @space_key @rmet_key @fn_key rctl left  down  right
+  
+  ;; Modifier row - with space key special
+  lctl lalt lmet @space_key @rmet_key rctl left  down  right
 )
 
 

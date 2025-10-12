@@ -20,20 +20,20 @@ in
     fileSystems."/mnt/disks/sda" = {
       device = "/dev/sda2";
       fsType = "ntfs-3g";
-      options = ["rw" "uid=1000" "gid=100" "umask=0007" "nofail"];
+      options = ["rw" "uid=0" "gid=993" "umask=0007" "nofail"];  # Mount as root:selfhost
     };
 
     fileSystems."/mnt/disks/sdb" = {
       device = "/dev/sdb2";
       fsType = "ntfs-3g";
-      options = ["rw" "uid=1000" "gid=100" "umask=0007" "nofail"];
+      options = ["rw" "uid=0" "gid=993" "umask=0007" "nofail"];  # Mount as root:selfhost
     };
 
     # MergerFS mount combining all disks
     fileSystems."/mnt/storage" = {
       fsType = "fuse.mergerfs";
       device = "/mnt/disks/*";
-      options = ["cache.files=partial" "dropcacheonclose=true" "category.create=mfs" "nofail"];
+      options = ["cache.files=partial" "dropcacheonclose=true" "category.create=mfs" "allow_other" "nofail"];
     };
   };
 }

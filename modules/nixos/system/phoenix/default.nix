@@ -208,11 +208,10 @@ let
       fnott &> /dev/null & disown
     fi
 
-    # Restart hyprpaper to apply new background
+    # Stop hyprpaper if running (we use mpvpaper instead)
     if pgrep hyprpaper &> /dev/null; then
-      echo "🖼️ Restarting hyprpaper..."
+      echo "🖼️ Stopping hyprpaper (using mpvpaper instead)..."
       killall hyprpaper &> /dev/null
-      hyprpaper &> /dev/null & disown
     fi
 
     # Restart dunst if running (for notifications)
