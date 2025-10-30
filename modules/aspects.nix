@@ -22,6 +22,15 @@
       # Include coding aspects for all homes
       den.aspects.cli-tools
       den.aspects.shell-tools
+      # Include language support
+      den.aspects.rust
+      den.aspects.typescript
+      # Include development tools
+      den.aspects.git
+      den.aspects.docker
+      den.aspects.lazygit
+      den.aspects.opencode
+      den.aspects.dev-tools
     ];
     
   };
