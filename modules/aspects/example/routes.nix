@@ -15,12 +15,12 @@
 #
 { den, ... }:
 {
-  # Usage: `den.default.includes [ vm.routes ]`
-  vm.routes =
+  # Usage: `den.default.includes [ den.aspects.example._.routes ]`
+  den.aspects.example.provides.routes =
     let
       inherit (den.lib) parametric;
 
-      # vm, `<user>._.<host>` and `<host>._.<user>`
+      # example, `<user>._.<host>` and `<host>._.<user>`
       mutual = from: to: den.aspects.${from.aspect}._.${to.aspect} or { };
 
       routes =

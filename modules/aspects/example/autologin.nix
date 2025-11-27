@@ -2,7 +2,7 @@
   # autologin is context-aware, parametric aspect.
   # it applies only if the context has at least { user }
   # meaning that has access to user data
-  vm.autologin =
+  den.aspects.example.provides.autologin =
     { user, ... }:
     {
       nixos =

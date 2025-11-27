@@ -1,5 +1,5 @@
 {
-  vm.xfce-desktop.nixos =
+  den.aspects.example.provides.xfce-desktop.nixos =
     { lib, ... }:
     {
       # https://gist.github.com/nat-418/1101881371c9a7b419ba5f944a7118b0

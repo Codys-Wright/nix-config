@@ -1,7 +1,7 @@
-{ ... }:
+{ den, ... }:
 {
   # Base VM aspect - enables virtualisation.vmVariant to create system.build.vm
-  vm.vm = {
+  den.aspects.example.provides.vm = {
     nixos = {
       virtualisation.vmVariant = {
         virtualisation = {
@@ -13,16 +13,16 @@
   };
 
   # VM providers for GUI and TUI variants
-  vm.vm.provides = {
+  den.aspects.example.provides.vm.provides = {
     gui.includes = [
-      vm.vm
-      vm.vm-bootable._.gui
-      vm.xfce-desktop
+      den.aspects.example._.vm
+      den.aspects.example._.vm-bootable._.gui
+      den.aspects.example._.xfce-desktop
     ];
 
     tui.includes = [
-      vm.vm
-      vm.vm-bootable._.tui
+      den.aspects.example._.vm
+      den.aspects.example._.vm-bootable._.tui
     ];
   };
 }

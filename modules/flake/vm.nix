@@ -1,29 +1,30 @@
 # Enables VM packages for NixOS hosts
 # Usage: nix run .#vm-dave
-# This creates runnable VMs from your NixOS configurations
-# Very useful for testing configurations without rebooting
+# It is very useful to have a VM you can edit your config and launch the VM to test stuff
+# instead of having to reboot each time.
 { inputs, ... }:
 {
   perSystem =
-    { pkgs, system, self', ... }:
+    { pkgs, system, lib, ... }:
     let
       # Get all NixOS configurations for this system
       nixosConfigs = inputs.self.nixosConfigurations or { };
       
       # Filter configurations for the current system
-      systemConfigs = builtins.filterAttrs
+      systemConfigs = lib.filterAttrs
         (name: config: config.pkgs.system == system)
         nixosConfigs;
       
       # Create VM packages for each configuration that has vm available
-      vmPackages = builtins.mapAttrs
+      # Package keys are prefixed with "vm-" so they can be run as: nix run .#vm-dave
+      vmPackages = lib.mapAttrs
         (name: config:
           # Check if vm is available (only if virtualisation.vmVariant is enabled)
           if config.config.system.build ? vm then
             pkgs.writeShellApplication {
               name = "vm-${name}";
               text = ''
-                ${config.config.system.build.vm}/bin/run-${name}-vm "$@"
+                ${config.config.system.build.vm}/bin/run-nixos-vm "$@"
               '';
             }
           else
@@ -38,39 +39,12 @@
         )
         systemConfigs;
       
-      # Create a default "vm" package that runs the first available VM (or dave if it exists)
-      defaultVm = 
-        if systemConfigs ? dave && systemConfigs.dave.config.system.build ? vm then
-          pkgs.writeShellApplication {
-            name = "vm";
-            text = ''
-              ${systemConfigs.dave.config.system.build.vm}/bin/run-dave-vm "$@"
-            '';
-          }
-        else
-          # Find the first available VM
-          let
-            availableVms = builtins.filterAttrs
-              (name: config: config.config.system.build ? vm)
-              systemConfigs;
-            firstVm = builtins.head (builtins.attrNames availableVms);
-          in
-          if availableVms != {} then
-            pkgs.writeShellApplication {
-              name = "vm";
-              text = ''
-                ${availableVms.${firstVm}.config.system.build.vm}/bin/run-${firstVm}-vm "$@"
-              '';
-            }
-          else
-            pkgs.writeTextFile {
-              name = "vm-unavailable";
-              text = ''
-                No VMs available. Enable virtualisation.vmVariant in a host configuration.
-              '';
-            };
+      # Prefix package keys with "vm-" for easier access
+      prefixedPackages = lib.mapAttrs'
+        (name: pkg: lib.nameValuePair "vm-${name}" pkg)
+        vmPackages;
     in
     {
-      packages = vmPackages // { vm = defaultVm; };
+      packages = prefixedPackages;
     };
 }
