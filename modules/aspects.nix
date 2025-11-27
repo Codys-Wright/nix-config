@@ -15,6 +15,9 @@
     host.includes = [
       den.aspects.example._.host
       den.aspects.nh
+      # System aspects
+      den.aspects.fonts
+      den.aspects.phoenix
     ];
     user.includes = [ den.aspects.example._.user ];
     home.includes = [
@@ -31,14 +34,16 @@
       den.aspects.lazygit
       den.aspects.opencode
       den.aspects.dev-tools
+      # Include desktop environment (for Linux systems)
+      den.aspects.desktop-keybinds
     ];
-    
+
   };
 
   # aspects for our example host/user/home definitions.
   # on a real setup you will split these over into multiple dendritic files.
   den.aspects = {
-  
+
     developer = {
       description = "aspect for bob's standalone home-manager";
       homeManager = { };
@@ -47,7 +52,7 @@
     developer._.home.includes = [ den.aspects.example._.home ];
 
 
-   
+
     # subtree of aspects for demo purposes.
     example.provides = {
 

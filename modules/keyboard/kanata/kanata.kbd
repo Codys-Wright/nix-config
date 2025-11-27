@@ -1,0 +1,168 @@
+(defcfg
+;; You can set the value below to no if you only use the keys defined in defsrc.
+  process-unmapped-keys yes
+)
+
+(defsrc
+  q w e r t y u i o p
+  a s d f g h j k l ;
+  z x c v b n m , . /
+         spc
+)
+
+(defvar
+  streak-count 3
+  streak-time 325
+  tap-timeout 200
+  hold-timeout 500
+  chord-timeout 10
+)
+
+(deftemplate charmod (char mod)
+  (switch 
+    ((key-timing $streak-count less-than $streak-time)) $char break
+    () (tap-hold-release-timeout $tap-timeout $hold-timeout $char $mod $char) break
+  )
+)
+
+
+
+(defvirtualkeys
+  shift (multi (layer-switch main) lsft)
+  clear (multi (layer-switch main) (on-press release-virtualkey shift))
+)
+
+(defchords mtl $chord-timeout
+  (w  ) w
+  (  e) e
+  (w e) esc
+)
+
+(defchords mtr $chord-timeout
+  (i  ) i
+  (  o) o
+  (i o) bspc
+)
+
+(defchords mbl $chord-timeout
+  (x  ) (t! charmod x ralt)
+  (  c) c
+  (x c) tab
+)
+
+(defchords mbr $chord-timeout
+  (,  ) ,
+  (  .) (t! charmod . ralt)
+  (, .) ret
+)
+
+(deflayermap (main)
+  w (chord mtl w)
+  e (chord mtl e)
+  i (chord mtr i)
+  o (chord mtr o)
+  a (t! charmod a lmet)
+  s (t! charmod s lalt)
+  d (t! charmod d lctl)
+  f (t! charmod f lsft)
+  j (t! charmod j rshft)
+  k (t! charmod k lctl)
+  l (t! charmod l lalt)
+  ; (t! charmod ; rmet)
+  z (t! charmod z lctl) 
+  x (chord mbl x)
+  c (chord mbl c)
+  v (t! charmod v (layer-while-held fumbol))
+  m (t! charmod m (layer-while-held fumbol))
+  , (chord mbr ,)
+  . (chord mbr .)
+  / (t! charmod / rctl)
+  spc (t! charmod spc (multi (layer-switch extend) (on-release tap-virtualkey clear)))
+)
+
+(deflayermap (extend)
+  e (layer-switch fumbol)
+  r (on-press press-virtualkey shift)
+  y ins
+  u home
+  i up
+  o end
+  p pgup
+  a lmet
+  s lalt
+  d lsft
+  f lctl
+  g comp ;; Enable if not MacOS.
+  h esc
+  j left
+  k down
+  l rght
+  ; pgdn
+  z mute
+  x vold
+  c volu
+  v pp
+  n tab
+  m bspc
+  , spc
+  . del
+  / ret
+)
+
+
+(defchords ftl $chord-timeout
+  (w  ) f2
+  (  e) f3
+  (w e) esc
+)
+
+(defchords ftr $chord-timeout
+  (i  ) f8
+  (  o) f9
+  (i o) bspc
+)
+
+(defchords fbl $chord-timeout
+  (x  ) (t! charmod ` ralt)
+  (  c) -
+  (x c) tab
+)
+
+(defchords fbr $chord-timeout
+  (,  ) [
+  (  .) (t! charmod ] ralt)
+  (, .) ret
+)
+
+(deflayermap (fumbol)
+  q f1
+  w (chord ftl w)
+  e (chord ftl e)
+  r f4
+  t f5
+  y f6
+  u f7
+  i (chord ftr i)
+  o (chord ftr o)
+  p f10
+  a (t! charmod 1 lmet)
+  s (t! charmod 2 lalt)
+  d (t! charmod 3 lsft)
+  f (t! charmod 4 lctl)
+  g 5
+  h 6
+  j (t! charmod 7 rctl)
+  k (t! charmod 8 rsft)
+  l (t! charmod 9 lalt)
+  ; (t! charmod 0 rmet)
+  z (t! charmod lsgt lctl)
+  x (chord fbl x)
+  c (chord fbl c)
+  v =
+  b f11
+  n f12
+  m '
+  , (chord fbr ,)
+  . (chord fbr .)
+  / (t! charmod \ lctl)
+)
