@@ -33,4 +33,3 @@ show:
 # Enter development shell
 dev:
     nix develop
-

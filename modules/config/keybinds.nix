@@ -72,13 +72,13 @@
               description = "Key to bind for file manager";
             };
             package = lib.mkOption {
-              type = package;
-              default = pkgs.nautilus;
+              type = lib.types.nullOr package;
+              default = if pkgs.stdenv.isDarwin then null else pkgs.nautilus;
               description = "File manager package";
             };
             command = lib.mkOption {
               type = str;
-              default = "${config.desktop.keybinds.apps.files.package}/bin/nautilus";
+              default = if pkgs.stdenv.isDarwin then "open -a Finder" else "${config.desktop.keybinds.apps.files.package}/bin/nautilus";
               description = "Command to launch file manager";
             };
           };
@@ -163,7 +163,7 @@
             };
             package = lib.mkOption {
               type = package;
-              default = pkgs.bitwarden;
+              default = pkgs.bitwarden-desktop;
               description = "Password manager package";
             };
             command = lib.mkOption {
@@ -180,14 +180,14 @@
               description = "Key to bind for launcher";
             };
             package = lib.mkOption {
-              type = package;
-              default = pkgs.rofi-wayland;
+              type = lib.types.nullOr package;
+              default = if pkgs.stdenv.isDarwin then null else pkgs.rofi;
               description = "Application launcher package";
             };
             command = lib.mkOption {
               type = str;
-              default = "launcher"; # Custom script
-              description = "Command to launch app launcher";
+              default = if pkgs.stdenv.isDarwin then "open -a 'Raycast'" else "${config.desktop.keybinds.apps.launcher.package}/bin/rofi -show drun";
+              description = "Command to launch application launcher";
             };
           };
         };
@@ -351,7 +351,7 @@
 
       # Install the defined application packages
       config = {
-        home.packages = with config.desktop.keybinds.apps; [
+        home.packages = with config.desktop.keybinds.apps; lib.filter (pkg: pkg != null) [
           terminal.package
           browser.package
           files.package
