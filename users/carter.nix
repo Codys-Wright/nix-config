@@ -1,7 +1,14 @@
 { ... }:
 {
-  den.homes.aarch64-darwin.cody = {
+  # Darwin (macOS) home configuration
+  den.homes.aarch64-darwin.carter = {
     userName = "electric";
+    aspect = "developer";
+  };
+
+  # NixOS home configuration
+  den.homes.x86_64-linux.carter = {
+    userName = "carter";
     aspect = "developer";
   };
 

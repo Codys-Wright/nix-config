@@ -1,0 +1,7 @@
+# Terraform
+deployments/nixos/.terraform/
+deployments/nixos/.terraform.lock.hcl
+deployments/nixos/terraform.tfstate
+deployments/nixos/terraform.tfstate.backup
+deployments/nixos/*.tfvars
+

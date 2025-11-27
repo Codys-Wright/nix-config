@@ -1,7 +1,14 @@
 { ... }:
 {
+  # Darwin (macOS) home configuration
   den.homes.aarch64-darwin.cody = {
     userName = "CodyWright";
+    aspect = "developer";
+  };
+
+  # NixOS home configuration
+  den.homes.x86_64-linux.cody = {
+    userName = "cody";
     aspect = "developer";
   };
 

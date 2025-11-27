@@ -36,6 +36,8 @@
       den.aspects.dev-tools
       # Include desktop environment (for Linux systems)
       den.aspects.desktop-keybinds
+      # Enable Hyprland desktop environment
+      den.aspects.hyprland-keybinds
     ];
 
   };
