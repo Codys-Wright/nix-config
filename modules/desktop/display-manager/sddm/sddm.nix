@@ -9,16 +9,11 @@
   den.aspects.sddm = {
     description = "SDDM display manager";
 
-    nixos = { pkgs, lib, ... }: {
+    nixos = {
       # Enable SDDM display manager
       services.displayManager.sddm = {
         enable = true;
       };
-
-      # Install SDDM configuration tools
-      environment.systemPackages = with pkgs; [
-        kdePackages.sddm-kcm # Configuration module for SDDM
-      ];
     };
   };
 
@@ -27,11 +22,13 @@
   den.aspects.sddm.wayland = {
     description = "SDDM display manager with Wayland support";
 
-    includes = [ den.aspects.sddm ];
-
-    nixos = { pkgs, lib, ... }: {
-      # Enable Wayland support in SDDM
-      services.displayManager.sddm.wayland.enable = true;
+    nixos = {
+      # Enable SDDM display manager
+      services.displayManager.sddm = {
+        enable = true;
+        # Enable Wayland support in SDDM
+        wayland.enable = true;
+      };
     };
   };
 }

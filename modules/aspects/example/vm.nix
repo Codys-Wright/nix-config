@@ -17,7 +17,7 @@
     gui.includes = [
       den.aspects.example._.vm
       den.aspects.example._.vm-bootable._.gui
-      den.aspects.example._.xfce-desktop
+      den.aspects.xfce-desktop
     ];
 
     tui.includes = [

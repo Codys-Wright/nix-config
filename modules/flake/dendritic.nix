@@ -1,8 +1,11 @@
 { inputs, lib, ... }:
 {
   flake-file.inputs.flake-file.url = lib.mkDefault "github:vic/flake-file";
+  flake-file.inputs.flake-aspects.url = lib.mkDefault "github:vic/flake-aspects";
+  
   imports = [
-    inputs.flake-file.flakeModules.dendritic
+    (inputs.flake-file.flakeModules.dendritic)
+    (inputs.den.flakeModules.dendritic)
   ];
 
   flake-file = {

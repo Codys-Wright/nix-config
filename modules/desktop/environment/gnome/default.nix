@@ -3,6 +3,7 @@
 # Note: Display manager should be configured separately (e.g., den.aspects.gdm)
 {
   den,
+  lib,
   ...
 }:
 {
@@ -10,32 +11,9 @@
   den.aspects.gnome-desktop = {
     description = "GNOME desktop environment";
 
-    nixos = { pkgs, lib, ... }: {
+    nixos = {
       # Enable GNOME desktop manager
       services.desktopManager.gnome.enable = true;
-
-      # Install common GNOME utilities and applications
-      environment.systemPackages = with pkgs; [
-        # GNOME power user tools
-        gnome.gnome-tweaks # Advanced GNOME settings
-        gnome.gnome-shell-extensions # Extension manager
-        # Common utilities
-        gnome.nautilus # File manager
-        gnome.gnome-terminal # Terminal
-        gnome.gnome-calculator # Calculator
-        gnome.gnome-system-monitor # System monitor
-        gnome.gnome-disk-utility # Disk utility
-        gnome.gnome-font-viewer # Font viewer
-        gnome.gnome-screenshot # Screenshot tool
-        # Optional: Additional GNOME applications
-        gnome.gnome-weather # Weather app
-        gnome.gnome-maps # Maps application
-        gnome.gnome-clocks # Clocks and timers
-        gnome.gnome-contacts # Contacts manager
-        gnome.gnome-characters # Character map
-        # System tools
-        sysprof # Profiling tool (must be system package)
-      ];
 
       # Enable sysprof service for profiling
       services.sysprof.enable = true;
@@ -49,6 +27,9 @@
         platformTheme = "gnome";
         style = "adwaita-dark";
       };
+      
+      # Don't set SSH askPassword (override default from gnome module)
+      programs.ssh.askPassword = lib.mkForce "";
     };
   };
 
@@ -107,7 +88,7 @@
 
     includes = [ den.aspects.gnome-desktop ];
 
-    nixos = { pkgs, lib, ... }: {
+    nixos = {
       # Enable experimental GNOME features
       programs.dconf.profiles.user.databases = [
         {
