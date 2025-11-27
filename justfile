@@ -1,13 +1,27 @@
 # Switch to a specific host configuration
-# For Darwin (macOS) systems
+# Automatically detects NixOS or Darwin and uses the appropriate command
 switch host:
-    nh darwin switch 'path:.#' -H {{host}}
+    @if command -v nixos-rebuild >/dev/null 2>&1 || [ -f /etc/nixos/configuration.nix ]; then \
+        echo "Switching to NixOS configuration: {{host}}"; \
+        sudo nixos-rebuild switch --flake .#{{host}}; \
+    elif command -v darwin-rebuild >/dev/null 2>&1 || [ "$(uname -s)" = "Darwin" ]; then \
+        echo "Switching to Darwin configuration: {{host}}"; \
+        nh darwin switch 'path:.#' -H {{host}}; \
+    else \
+        echo "Error: Could not detect NixOS or Darwin system"; \
+        exit 1; \
+    fi
 
-# Switch to a NixOS host configuration
+# Switch to a NixOS host configuration (explicit)
 # Usage: just switch-nixos dave
 switch-nixos host:
     @echo "Switching to NixOS configuration: {{host}}"
     sudo nixos-rebuild switch --flake .#{{host}}
+
+# Switch to a Darwin host configuration (explicit)
+switch-darwin host:
+    @echo "Switching to Darwin configuration: {{host}}"
+    nh darwin switch 'path:.#' -H {{host}}
 
 # Build a host configuration without switching
 build host:
