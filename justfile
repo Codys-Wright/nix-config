@@ -24,13 +24,28 @@ switch-darwin host:
     nh darwin switch 'path:.#' -H {{host}}
 
 # Build a host configuration without switching
+# Automatically detects NixOS or Darwin and uses the appropriate command
 build host:
-    nh darwin build 'path:.#' -H {{host}}
+    @if command -v nixos-rebuild >/dev/null 2>&1 || [ -f /etc/nixos/configuration.nix ]; then \
+        echo "Building NixOS configuration: {{host}}"; \
+        sudo nixos-rebuild build --flake .#{{host}}; \
+    elif command -v darwin-rebuild >/dev/null 2>&1 || [ "$(uname -s)" = "Darwin" ]; then \
+        echo "Building Darwin configuration: {{host}}"; \
+        nh darwin build 'path:.#' -H {{host}}; \
+    else \
+        echo "Error: Could not detect NixOS or Darwin system"; \
+        exit 1; \
+    fi
 
-# Build a NixOS configuration without switching
+# Build a NixOS configuration without switching (explicit)
 build-nixos host:
     @echo "Building NixOS configuration: {{host}}"
     sudo nixos-rebuild build --flake .#{{host}}
+
+# Build a Darwin configuration without switching (explicit)
+build-darwin host:
+    @echo "Building Darwin configuration: {{host}}"
+    nh darwin build 'path:.#' -H {{host}}
 
 # Show available hosts
 hosts:
