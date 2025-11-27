@@ -16,6 +16,7 @@ den.hosts.x86_64-linux = {
     includes = [
       den.aspects.developer
       den.aspects.example._.vm
+      vm.vm._.gui  # Enable GUI VM support (includes vmVariant automatically)
     ];
   };
 

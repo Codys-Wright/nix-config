@@ -18,23 +18,6 @@
         };
     };
 
-    # VM configuration aspect - provides fileSystems and boot loader for VMs
-    vm = {
-      nixos = {
-        # Basic file system for VM
-        fileSystems."/" = {
-          device = "/dev/vda";
-          fsType = "ext4";
-        };
-        
-        # Enable grub boot loader for VM
-        boot.loader.grub = {
-          enable = true;
-          device = "/dev/vda";
-        };
-      };
-    };
-
     # parametric providers.
     host =
       { host }:

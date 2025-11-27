@@ -26,6 +26,30 @@ build host:
         exit 1; \
     fi
 
+# Build an ISO image for a NixOS host
+# Usage: just iso dave
+iso host:
+    @echo "Building ISO image for {{host}}..."
+    @nix build .#nixosConfigurations.{{host}}.config.system.build.isoImage
+    @echo "ISO image built successfully!"
+    @if [ -L result ]; then \
+        echo "ISO location: $(readlink -f result)/iso/nixos.iso"; \
+    else \
+        echo "Build result: result/"; \
+    fi
+
+# Run a VM for a NixOS host
+# Usage: just vm dave
+# This launches a QEMU/KVM VM with your NixOS configuration
+vm host:
+    @echo "Launching VM for {{host}}..."
+    @nix run .#vm-{{host}}
+
+# Run the default VM (dave if available)
+vm-default:
+    @echo "Launching default VM..."
+    @nix run .#vm
+
 # Show available hosts
 hosts:
     nix eval ".#darwinConfigurations" --apply "builtins.attrNames" --json
@@ -53,6 +77,11 @@ update:
 # Show flake structure
 show:
     nix flake show
+
+# Run flake checks/tests
+test:
+    @echo "Running flake checks..."
+    nix flake check
 
 # Enter default development shell
 dev:
