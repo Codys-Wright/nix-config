@@ -1,14 +1,30 @@
 # Switch to a specific host configuration
+# For Darwin (macOS) systems
 switch host:
     nh darwin switch 'path:.#' -H {{host}}
+
+# Switch to a NixOS host configuration
+# Usage: just switch-nixos dave
+switch-nixos host:
+    @echo "Switching to NixOS configuration: {{host}}"
+    sudo nixos-rebuild switch --flake .#{{host}}
 
 # Build a host configuration without switching
 build host:
     nh darwin build 'path:.#' -H {{host}}
 
+# Build a NixOS configuration without switching
+build-nixos host:
+    @echo "Building NixOS configuration: {{host}}"
+    sudo nixos-rebuild build --flake .#{{host}}
+
 # Show available hosts
 hosts:
     nix eval ".#darwinConfigurations" --apply "builtins.attrNames" --json
+
+# Show available NixOS hosts
+hosts-nixos:
+    nix eval ".#nixosConfigurations" --apply "builtins.attrNames" --json
 
 # Show available home configurations
 homes:
