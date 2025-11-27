@@ -23,7 +23,7 @@
       nixos = {
         # Basic file system for VM
         fileSystems."/" = {
-          device = "/dev/disk/by-label/nixos";
+          device = "/dev/vda";
           fsType = "ext4";
         };
         
