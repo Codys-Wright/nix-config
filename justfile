@@ -3,7 +3,7 @@
 switch host:
     @if command -v nixos-rebuild >/dev/null 2>&1 || [ -f /etc/nixos/configuration.nix ]; then \
         echo "Switching to NixOS configuration: {{host}}"; \
-        sudo nixos-rebuild switch --flake .#{{host}}; \
+        nh os switch 'path:.#' -H {{host}}; \
     elif command -v darwin-rebuild >/dev/null 2>&1 || [ "$(uname -s)" = "Darwin" ]; then \
         echo "Switching to Darwin configuration: {{host}}"; \
         nh darwin switch 'path:.#' -H {{host}}; \
@@ -12,23 +12,12 @@ switch host:
         exit 1; \
     fi
 
-# Switch to a NixOS host configuration (explicit)
-# Usage: just switch-nixos dave
-switch-nixos host:
-    @echo "Switching to NixOS configuration: {{host}}"
-    sudo nixos-rebuild switch --flake .#{{host}}
-
-# Switch to a Darwin host configuration (explicit)
-switch-darwin host:
-    @echo "Switching to Darwin configuration: {{host}}"
-    nh darwin switch 'path:.#' -H {{host}}
-
 # Build a host configuration without switching
 # Automatically detects NixOS or Darwin and uses the appropriate command
 build host:
     @if command -v nixos-rebuild >/dev/null 2>&1 || [ -f /etc/nixos/configuration.nix ]; then \
         echo "Building NixOS configuration: {{host}}"; \
-        sudo nixos-rebuild build --flake .#{{host}}; \
+        nh os build 'path:.#' -H {{host}}; \
     elif command -v darwin-rebuild >/dev/null 2>&1 || [ "$(uname -s)" = "Darwin" ]; then \
         echo "Building Darwin configuration: {{host}}"; \
         nh darwin build 'path:.#' -H {{host}}; \
@@ -36,16 +25,6 @@ build host:
         echo "Error: Could not detect NixOS or Darwin system"; \
         exit 1; \
     fi
-
-# Build a NixOS configuration without switching (explicit)
-build-nixos host:
-    @echo "Building NixOS configuration: {{host}}"
-    sudo nixos-rebuild build --flake .#{{host}}
-
-# Build a Darwin configuration without switching (explicit)
-build-darwin host:
-    @echo "Building Darwin configuration: {{host}}"
-    nh darwin build 'path:.#' -H {{host}}
 
 # Show available hosts
 hosts:
@@ -75,9 +54,13 @@ update:
 show:
     nix flake show
 
-# Enter development shell
+# Enter default development shell
 dev:
     nix develop
+
+# Enter deploy development shell (with Terraform)
+dev-deploy:
+    nix develop .#deploy
 
 # Terraform deployment commands
 # Note: Terraform runs from project root to access the flake, using -chdir for config

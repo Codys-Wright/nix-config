@@ -177,6 +177,14 @@
                 )\""
               '';
             };
+
           };
+
+    # NixOS system packages
+    nixos = { pkgs, ... }: {
+      environment.systemPackages = with pkgs; [
+        just
+      ];
+    };
   };
 }
