@@ -1,5 +1,5 @@
 # Default aspect configuration
-# see also: aspects/developer.nix, aspects/example.nix
+# see also: aspects/developer.nix, aspects/example/
 {
   inputs,
   den,

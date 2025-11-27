@@ -45,11 +45,6 @@ vm host:
     @echo "Launching VM for {{host}}..."
     @nix run .#vm-{{host}}
 
-# Run the default VM (dave if available)
-vm-default:
-    @echo "Launching default VM..."
-    @nix run .#vm
-
 # Show available hosts
 hosts:
     nix eval ".#darwinConfigurations" --apply "builtins.attrNames" --json
