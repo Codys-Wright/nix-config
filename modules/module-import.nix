@@ -16,8 +16,6 @@
 
     (inputs.import-tree ./system)
 
-    (inputs.import-tree ./system/boot)
-
     (inputs.import-tree ./keyboard)
 
     (inputs.import-tree ./aspects)

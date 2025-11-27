@@ -17,6 +17,8 @@ den.hosts.x86_64-linux = {
       den.aspects.developer
       den.aspects.example._.vm
       den.aspects.example._.vm._.gui  # Enable GUI VM support (includes vmVariant automatically)
+      den.aspects.minecraft
+      den.aspects.desktop
     ];
   };
 
