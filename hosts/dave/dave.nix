@@ -30,8 +30,8 @@ den.hosts.x86_64-linux = {
           device = "/dev/vda";
         })
 
-        FTS.minesddm
-        FTS.hyprland
+        FTS.sddm
+        FTS.kde
         FTS.minegrub
         # (FTS.desktop {
         #   environment = "hyprland";
@@ -62,14 +62,14 @@ den.hosts.x86_64-linux = {
         # Enable sudo for wheel group
         security.sudo.wheelNeedsPassword = false;
 
-  # # https://gist.github.com/nat-418/1101881371c9a7b419ba5f944a7118b0
-  #     services.xserver = {
-  #       enable = true;
-  #       desktopManager = {
-  #         xterm.enable = false;
-  #         xfce.enable = true;
-  #       };
-  #     };
+  # https://gist.github.com/nat-418/1101881371c9a7b419ba5f944a7118b0
+      services.xserver = {
+        enable = true;
+        desktopManager = {
+          xterm.enable = false;
+          xfce.enable = true;
+        };
+      };
 
   #     services.displayManager = {
   #       defaultSession = lib.mkDefault "xfce";

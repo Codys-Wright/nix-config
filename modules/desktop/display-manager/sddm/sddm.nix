@@ -14,20 +14,7 @@
       # Enable SDDM display manager
       services.displayManager.sddm = {
         enable = true;
-      };
-    };
-  };
 
-  # SDDM with Wayland support
-  # Usage: FTS.sddm.wayland
-  FTS.sddm.wayland = {
-    description = "SDDM display manager with Wayland support";
-
-    nixos = {
-      # Enable SDDM display manager
-      services.displayManager.sddm = {
-        enable = true;
-        # Enable Wayland support in SDDM
         wayland.enable = true;
       };
     };
