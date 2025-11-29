@@ -1,7 +1,8 @@
 # Fish shell aspect with custom configuration
-{ ... }:
 {
-  den.aspects.fish = {
+  FTS, ... }:
+{
+  FTS.fish = {
     description = "Fish shell with custom configuration and optimizations";
 
     homeManager = { config, pkgs, lib, ... }: {

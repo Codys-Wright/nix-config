@@ -2,10 +2,11 @@
 # GNOME Display Manager - commonly used with GNOME desktop
 {
   den,
+  FTS,
   ...
 }:
 {
-  den.aspects.gdm = {
+  FTS.gdm = {
     description = "GNOME Display Manager (GDM)";
 
     nixos = { pkgs, lib, ... }: {

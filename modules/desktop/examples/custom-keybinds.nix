@@ -1,8 +1,9 @@
 # Example: Custom Keybind Configurations
 # This shows how to customize the desktop keybind abstractions for specific needs
-{ ... }:
 {
-  den.aspects.custom-keybinds = {
+  FTS, ... }:
+{
+  FTS.custom-keybinds = {
     description = "Example custom keybind configurations";
 
     homeManager = { config, pkgs, lib, ... }: {
@@ -150,7 +151,7 @@
   };
 
   # Example of profile-specific keybinds
-  den.aspects.developer-keybinds = {
+  FTS.developer-keybinds = {
     description = "Developer-focused keybind overrides";
 
     homeManager = { config, pkgs, lib, ... }: {
@@ -178,7 +179,7 @@
   };
 
   # Example of gaming-focused keybinds
-  den.aspects.gaming-keybinds = {
+  FTS.gaming-keybinds = {
     description = "Gaming-focused keybind overrides";
 
     homeManager = { config, pkgs, lib, ... }: {

@@ -1,7 +1,8 @@
 # Tmux terminal multiplexer aspect
-{ ... }:
 {
-  den.aspects.tmux = {
+  FTS, ... }:
+{
+  FTS.tmux = {
     description = "Tmux terminal multiplexer with custom configuration and plugins";
 
     homeManager = { config, pkgs, lib, ... }: {

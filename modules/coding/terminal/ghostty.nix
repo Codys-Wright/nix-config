@@ -1,7 +1,8 @@
 # Ghostty terminal emulator aspect
-{ ... }:
 {
-  den.aspects.ghostty = {
+  FTS, ... }:
+{
+  FTS.ghostty = {
     description = "Ghostty terminal emulator";
 
     nixos = { pkgs, ... }: {

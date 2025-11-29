@@ -1,7 +1,8 @@
 # Shell configuration aspect for CodyWright's development environment
-{ ... }:
 {
-  den.aspects.shell-tools = {
+  FTS, ... }:
+{
+  FTS.shell-tools = {
     description = "Shell configuration and tools";
 
     homeManager =

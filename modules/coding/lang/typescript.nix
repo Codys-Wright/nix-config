@@ -1,7 +1,8 @@
 # TypeScript development environment aspect
-{ ... }:
 {
-  den.aspects.typescript = {
+  FTS, ... }:
+{
+  FTS.typescript = {
     description = "TypeScript and Node.js development environment";
 
     homeManager =

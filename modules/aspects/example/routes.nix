@@ -13,15 +13,16 @@
 # Be sure to read: https://vic.github.io/den/dependencies.html
 # See usage at: defaults.nix, alice.nix, igloo.nix
 #
-{ den, ... }:
+{ den,
+  FTS, ... }:
 {
-  # Usage: `den.default.includes [ den.aspects.example._.routes ]`
-  den.aspects.example.provides.routes =
+  # Usage: `den.default.includes [ FTS.example._.routes ]`
+  FTS.example.provides.routes =
     let
       inherit (den.lib) parametric;
 
       # example, `<user>._.<host>` and `<host>._.<user>`
-      mutual = from: to: den.aspects.${from.aspect}._.${to.aspect} or { };
+      mutual = from: to: FTS.${from.aspect}._.${to.aspect} or { };
 
       routes =
         { host, user, ... }@ctx:

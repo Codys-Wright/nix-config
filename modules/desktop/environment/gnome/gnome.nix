@@ -1,14 +1,15 @@
 # GNOME Desktop Environment
 # Provides NixOS configuration for GNOME
-# Note: Display manager should be configured separately (e.g., den.aspects.gdm)
+# Note: Display manager should be configured separately (e.g., FTS.gdm)
 {
   den,
   lib,
+  FTS,
   ...
 }:
 {
   # Base GNOME desktop environment
-  den.aspects.gnome-desktop = {
+  FTS.gnome = {
     description = "GNOME desktop environment";
 
     nixos = {
@@ -34,11 +35,11 @@
   };
 
   # GNOME with popular extensions
-  # Usage: den.aspects.gnome-desktop.with-extensions
-  den.aspects.gnome-desktop.with-extensions = {
+  # Usage: FTS.gnome-desktop.with-extensions
+  FTS.gnome.with-extensions = {
     description = "GNOME desktop with popular extensions enabled";
 
-    includes = [ den.aspects.gnome-desktop ];
+    includes = [ FTS.gnome ];
 
     homeManager = { pkgs, lib, ... }: {
       # Enable dconf for GNOME configuration
@@ -82,11 +83,11 @@
   };
 
   # GNOME with experimental features enabled
-  # Usage: den.aspects.gnome-desktop.experimental
-  den.aspects.gnome-desktop.experimental = {
+  # Usage: FTS.gnome-desktop.experimental
+  FTS.gnome-desktop.experimental = {
     description = "GNOME desktop with experimental features enabled";
 
-    includes = [ den.aspects.gnome-desktop ];
+    includes = [ FTS.gnome ];
 
     nixos = {
       # Enable experimental GNOME features

@@ -1,7 +1,8 @@
 # Docker tools aspect
-{ ... }:
 {
-  den.aspects.docker = {
+  FTS, ... }:
+{
+  FTS.docker = {
     description = "Docker and container tools";
 
     homeManager =

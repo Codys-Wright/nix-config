@@ -1,14 +1,15 @@
 # KDE Plasma 6 Desktop Environment
 # Provides NixOS configuration for KDE Plasma 6
-# Note: Display manager should be configured separately (e.g., den.aspects.sddm.wayland)
+# Note: Display manager should be configured separately (e.g., FTS.sddm.wayland)
 {
   den,
   lib,
+  FTS,
   ...
 }:
 {
   # Base KDE Plasma 6 desktop environment
-  den.aspects.kde-desktop = {
+  FTS.kde = {
     description = "KDE Plasma 6 desktop environment";
 
     nixos = {
@@ -22,11 +23,11 @@
 
   # KDE with RDP support (X11-based remote desktop)
   # Note: RDP requires X11 instead of Wayland
-  # Usage: den.aspects.kde-desktop.rdp
-  den.aspects.kde-desktop.rdp = {
+  # Usage: FTS.kde-desktop.rdp
+  FTS.kde.rdp = {
     description = "KDE Plasma 6 with RDP remote desktop support (X11)";
 
-    includes = [ den.aspects.kde-desktop ];
+    includes = [ FTS.kde-desktop ];
 
     nixos = {
       # Enable X11 for RDP support

@@ -4,16 +4,17 @@
 {
   inputs,
   den,
+  FTS,
   ...
 }:
 {
   # MineGrub double menu aspect
-  den.aspects.grub.minegrub-double-menu = {
+  FTS.grub.minegrub-double-menu = {
     description = "GRUB bootloader with MineGrub double menu (main menu + world selection)";
 
     includes = [
-      den.aspects.grub.minegrub
-      den.aspects.grub.minegrub-world-sel
+      FTS.grub.minegrub
+      FTS.grub.minegrub-world-sel
     ];
 
     nixos = {

@@ -1,7 +1,8 @@
 # Kitty terminal emulator aspect
-{ ... }:
 {
-  den.aspects.kitty = {
+  FTS, ... }:
+{
+  FTS.kitty = {
     description = "Kitty terminal emulator with custom configuration";
 
     homeManager = { config, pkgs, lib, ... }: {

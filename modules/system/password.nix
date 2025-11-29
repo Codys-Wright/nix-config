@@ -3,6 +3,7 @@
 {
   den,
   lib,
+  FTS,
   ...
 }:
 let
@@ -12,7 +13,7 @@ let
     Can be used to set passwords for users defined in den.hosts.*.users.* = { };
 
     Example usage:
-      den.aspects.password { method = "initial"; value = "changeme"; }
+      FTS.password { method = "initial"; value = "changeme"; }
       # Sets initial password for all users on the host
 
     Methods:

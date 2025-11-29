@@ -2,16 +2,17 @@
   inputs,
   den,
   lib,
+  FTS,
   ...
 }:
 {
-  den.aspects.phoenix = {
+  FTS.phoenix = {
     description = "Phoenix system management tool for cross-platform Nix configurations";
 
     nixos = { config, pkgs, lib, ... }:
     let
       inherit (lib) mkIf mkEnableOption mkOption types optionalString;
-      cfg = config.den.aspects.phoenix;
+      cfg = config.FTS.phoenix;
 
       # Helper function to create scripts with proper runtime dependencies
       createScript = name: script: pkgs.writeShellApplication {
@@ -219,7 +220,7 @@
       '';
     in
     {
-      options.den.aspects.phoenix = {
+      options.FTS.phoenix = {
         enable = mkEnableOption "Phoenix system management tool";
 
         dotfilesDir = mkOption {
@@ -257,7 +258,7 @@
     darwin = { config, pkgs, lib, ... }:
     let
       inherit (lib) mkIf mkEnableOption mkOption types;
-      cfg = config.den.aspects.phoenix;
+      cfg = config.FTS.phoenix;
 
       # Helper function to create scripts with proper runtime dependencies
       createScript = name: script: pkgs.writeShellApplication {
@@ -460,7 +461,7 @@
       '';
     in
     {
-      options.den.aspects.phoenix = {
+      options.FTS.phoenix = {
         enable = mkEnableOption "Phoenix system management tool";
 
         dotfilesDir = mkOption {

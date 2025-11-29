@@ -1,7 +1,8 @@
 # General development tools aspect
-{ ... }:
 {
-  den.aspects.dev-tools = {
+  FTS, ... }:
+{
+  FTS.dev-tools = {
     description = "General development tools and utilities";
 
     homeManager =

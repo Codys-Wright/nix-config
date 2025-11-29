@@ -1,15 +1,16 @@
 # parametric providers for host
 {
   den,
+  FTS,
   ...
 }:
 {
-  den.aspects.example.provides.host =
+  FTS.example.provides.host =
     { host }:
     { class, ... }:
     {
       # `_` is a shorthand alias for `provides`
-      includes = [ den.aspects.example._.vm-bootable ];
+      includes = [ FTS.example._.vm-bootable ];
       ${class}.networking.hostName = host.hostName;
     };
 }

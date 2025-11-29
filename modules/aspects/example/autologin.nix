@@ -2,8 +2,9 @@
   # autologin is context-aware, parametric aspect.
   # it applies only if the context has at least { user }
   # meaning that has access to user data
-  den.aspects.example.provides.autologin =
-    { user, ... }:
+  FTS.example.provides.autologin =
+    { user,
+  FTS, ... }:
     {
       nixos =
         { config, lib, ... }:

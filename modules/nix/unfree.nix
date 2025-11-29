@@ -1,4 +1,5 @@
-{ lib, den, ... }:
+{ lib, den,
+  FTS, ... }:
 {
   den.provides.unfree.description = ''
     A class generic aspect that enables unfree packages by name or all unfree packages.
@@ -8,10 +9,10 @@
     ## Usage
 
       # Allow specific unfree packages by name
-      den.aspects.my-laptop.includes = [ (den._.unfree [ "code" "steam" ]) ];
+      FTS.my-laptop.includes = [ (den._.unfree [ "code" "steam" ]) ];
 
       # Allow all unfree packages
-      den.aspects.my-laptop.includes = [ (den._.unfree true) ];
+      FTS.my-laptop.includes = [ (den._.unfree true) ];
 
     It will dynamically provide a module for each class when accessed.
   '';

@@ -1,7 +1,8 @@
 # Starship shell prompt aspect
-{ ... }:
 {
-  den.aspects.starship = {
+  FTS, ... }:
+{
+  FTS.starship = {
     description = "Starship shell prompt with custom configuration";
 
     homeManager = { config, pkgs, lib, ... }: {

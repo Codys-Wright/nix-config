@@ -3,6 +3,7 @@
 {
   den,
   lib,
+  FTS,
   ...
 }:
 let
@@ -10,16 +11,16 @@ let
     Unified system configuration aspect combining user, password, and system settings.
 
     Can optionally take parameters for complete system setup:
-      den.aspects.config {
+      FTS.config {
         user = { username = "alice"; isNormalUser = true; };
         password = { method = "initial"; value = "changeme"; };
         system = { hostname = "myhost"; timezone = "America/New_York"; };
       }
 
     Or use individual components:
-      den.aspects.config { user = { username = "bob"; }; }
-      den.aspects.config { password = { method = "hashed"; value = "$6$..."; }; }
-      den.aspects.config { system = { hostname = "server"; }; }
+      FTS.config { user = { username = "bob"; }; }
+      FTS.config { password = { method = "hashed"; value = "$6$..."; }; }
+      FTS.config { system = { hostname = "server"; }; }
 
     Provides a convenient way to configure all basic system settings.
   '';
@@ -42,7 +43,7 @@ let
       throw "config: argument must be an attribute set";
 in
 {
-  den.aspects.config = den.lib.parametric {
+  FTS.config = den.lib.parametric {
     inherit description;
     includes = [
       ({ nixos, ... }: arg:
@@ -52,15 +53,15 @@ in
         [
           # Include user configuration if specified
           (lib.optional (config.user != null)
-            ({ nixos, ... }: (den.aspects.user config.user).includes nixos))
+            ({ nixos, ... }: (FTS.user config.user).includes nixos))
 
           # Include password configuration if specified
           (lib.optional (config.password != null)
-            ({ nixos, ... }: (den.aspects.password config.password).includes nixos))
+            ({ nixos, ... }: (FTS.password config.password).includes nixos))
 
           # Include system configuration if specified
           (lib.optional (config.system != null)
-            ({ nixos, ... }: (den.aspects.system config.system).includes nixos))
+            ({ nixos, ... }: (FTS.system config.system).includes nixos))
         ]
       )
     ];

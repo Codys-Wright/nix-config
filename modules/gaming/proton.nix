@@ -1,7 +1,8 @@
 # Proton compatibility tools aspect
-{ ... }:
 {
-  den.aspects.proton = {
+  FTS, ... }:
+{
+  FTS.proton = {
     description = "Proton compatibility tools for running Windows games on Linux";
 
     nixos = { config, pkgs, lib, ... }: {

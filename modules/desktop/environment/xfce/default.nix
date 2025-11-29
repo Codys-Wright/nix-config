@@ -3,11 +3,12 @@
 # Note: Display manager should be configured separately
 {
   den,
+  FTS,
   ...
 }:
 {
   # Base XFCE desktop environment
-  den.aspects.xfce-desktop = {
+  FTS.xfce-desktop = {
     description = "XFCE desktop environment";
 
     nixos = {

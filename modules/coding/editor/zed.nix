@@ -1,7 +1,8 @@
 # Zed editor aspect with comprehensive configuration
-{ ... }:
 {
-  den.aspects.zed = {
+  FTS, ... }:
+{
+  FTS.zed = {
     description = "Zed editor with comprehensive configuration and vim keybindings";
 
     homeManager = { config, pkgs, lib, ... }: {

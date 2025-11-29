@@ -1,4 +1,5 @@
-{ den, ... }:
+{ den,
+  FTS, ... }:
 let
 
   description = ''
@@ -6,7 +7,7 @@ let
 
     Usage:
 
-      den.aspects.vic.includes = [
+      FTS.vic.includes = [
         # will always love red snappers.
         (den._.user-shell "fish")
       ];

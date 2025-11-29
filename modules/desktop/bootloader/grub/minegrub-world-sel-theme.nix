@@ -3,6 +3,7 @@
 {
   inputs,
   den,
+  FTS,
   ...
 }:
 {
@@ -12,7 +13,7 @@
   };
 
   # MineGrub World Selection theme aspect
-  den.aspects.grub.minegrub-world-sel = {
+  FTS.grub.minegrub-world-sel = {
     description = "GRUB bootloader with MineGrub World Selection theme";
 
     nixos = {

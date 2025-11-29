@@ -1,8 +1,9 @@
 # Desktop Keybind Abstractions
 # Define keybinds and their associated applications independent of desktop environment
-{ lib, ... }:
+{ lib,
+  FTS, ... }:
 {
-  den.aspects.desktop-keybinds = {
+  FTS.desktop-keybinds = {
     description = "Desktop keybind abstractions with application mapping";
 
     homeManager = { config, pkgs, lib, ... }: {

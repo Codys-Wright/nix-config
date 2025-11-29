@@ -1,11 +1,12 @@
 # Terminals meta-aspect - includes all terminal modules
 # Can optionally take a parameter to set the default terminal via user-terminal
-{ den, lib, ... }:
+{ den, lib,
+  FTS, ... }:
 let
   baseIncludes = [
-    den.aspects.ghostty
-    den.aspects.kitty
-    den.aspects.tmux
+    FTS.ghostty
+    FTS.kitty
+    FTS.tmux
   ];
   
   # Extract terminal name from attribute set
@@ -18,15 +19,15 @@ let
       throw "terminals: argument must be an attribute set with 'default' or 'terminal' field";
 in
 {
-  den.aspects.terminals = {
+  FTS.terminals = {
     description = ''
       All terminal modules (ghostty, kitty, tmux).
       
       Can optionally take a terminal name to set as default:
-        den.aspects.dave.includes = [ (den.aspects.terminals { default = "ghostty"; }) ];
+        FTS.dave.includes = [ (FTS.terminals { default = "ghostty"; }) ];
       
       Or use without parameter to just include all terminals:
-        den.aspects.dave.includes = [ den.aspects.terminals ];
+        FTS.dave.includes = [ FTS.terminals ];
     '';
 
     includes = baseIncludes;

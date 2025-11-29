@@ -1,8 +1,10 @@
 # Disk/filesystem configuration aspect
 # Parametric wrapper that includes filesystem-specific modules based on configuration
 {
+  inputs,
   den,
   lib,
+  FTS,
   ...
 }:
 let
@@ -10,9 +12,9 @@ let
     Disk and filesystem configuration aspect with support for different filesystem types.
 
     Can optionally take parameters for filesystem configuration:
-      den.aspects.disk
-      den.aspects.disk { type = "btrfs"; impermanence = true; }
-      den.aspects.disk {
+      FTS.disk
+      FTS.disk { type = "btrfs"; impermanence = true; }
+      FTS.disk {
         type = "ext4";
         swapsize = "8G";
         device = "/dev/sda";
@@ -48,13 +50,13 @@ let
   # Get the appropriate filesystem aspect based on type
   getFilesystemAspect = config:
     if config.type == "btrfs" then
-      (den.aspects.disk.btrfs {
+      (FTS.disk.btrfs {
         swapSize = config.swapsize;
         device = config.device;
         # TODO: Pass encrypted parameter when encryption support is implemented
       })
     else if config.type == "ext4" then
-      (den.aspects.disk.ext4 {
+      (FTS.disk.ext4 {
         device = config.device;
         # TODO: Pass encrypted parameter when encryption support is implemented
       })
@@ -90,7 +92,7 @@ let
       nixos;
 in
 {
-  den.aspects.disk = den.lib.parametric {
+  FTS.disk = den.lib.parametric {
     inherit description;
     includes = [
       ({ nixos, ... }: arg:

@@ -3,6 +3,7 @@
 {
   inputs,
   den,
+  FTS,
   ...
 }:
 {
@@ -12,10 +13,15 @@
   };
 
   # MineGrub theme aspect
-  den.aspects.grub.minegrub = {
+  FTS.minegrub = {
     description = "GRUB bootloader with MineGrub theme";
 
     nixos = {
+      # Import the minegrub theme nixos module
+      imports = [
+        inputs.minegrub-theme.nixosModules.default
+      ];
+
       boot.loader.grub = {
         enable = true;
         minegrub-theme = {
