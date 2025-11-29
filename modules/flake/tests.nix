@@ -18,11 +18,11 @@
       darwinConfigs = inputs.self.darwinConfigurations or { };
       
       # Filter configs for current system
-      systemNixosConfigs = builtins.filterAttrs
+      systemNixosConfigs = lib.filterAttrs
         (name: config: config.pkgs.system == system)
         nixosConfigs;
       
-      systemDarwinConfigs = builtins.filterAttrs
+      systemDarwinConfigs = lib.filterAttrs
         (name: config: config.pkgs.system == system)
         darwinConfigs;
       
