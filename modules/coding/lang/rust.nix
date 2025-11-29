@@ -1,7 +1,8 @@
 # Rust development environment aspect
-{ ... }:
 {
-  den.aspects.rust = {
+  FTS, ... }:
+{
+  FTS.rust = {
     description = "Rust development environment with cargo tools and toolchain";
 
     homeManager =

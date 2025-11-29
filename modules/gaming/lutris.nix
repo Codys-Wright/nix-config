@@ -1,7 +1,8 @@
 # Lutris gaming platform aspect
-{ ... }:
 {
-  den.aspects.lutris = {
+  FTS, ... }:
+{
+  FTS.lutris = {
     description = "Lutris gaming platform for managing Windows games on Linux";
 
     nixos = { config, pkgs, lib, ... }: {

@@ -1,11 +1,11 @@
 # Browsers meta-aspect - includes all browser modules
 # Can optionally take a parameter to set the default browser via user-browser
-{ den, lib, ... }:
+{ den, lib, FTS, ... }:
 let
   baseIncludes = [
-    den.aspects.zen-browser
-    den.aspects.brave
-    den.aspects.firefox
+    FTS.zen-browser
+    FTS.brave
+    FTS.firefox
   ];
   
   # Extract browser name from attribute set
@@ -18,15 +18,15 @@ let
       throw "browsers: argument must be an attribute set with 'default' or 'browser' field";
 in
 {
-  den.aspects.browsers = {
+  FTS.browsers = {
     description = ''
       All browser modules (zen, brave, firefox).
       
       Can optionally take a browser name to set as default:
-        den.aspects.dave.includes = [ (den.aspects.browsers { default = "firefox"; }) ];
+        FTS.dave.includes = [ (FTS.browsers { default = "firefox"; }) ];
       
       Or use without parameter to just include all browsers:
-        den.aspects.dave.includes = [ den.aspects.browsers ];
+        FTS.dave.includes = [ FTS.browsers ];
     '';
 
     includes = baseIncludes;

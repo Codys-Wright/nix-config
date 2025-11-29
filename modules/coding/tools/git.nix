@@ -1,7 +1,8 @@
 # Git configuration aspect
-{ ... }:
 {
-  den.aspects.git = {
+  FTS, ... }:
+{
+  FTS.git = {
     description = "Git version control with delta and LFS support";
 
     homeManager =

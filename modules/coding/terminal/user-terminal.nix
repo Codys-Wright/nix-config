@@ -1,4 +1,5 @@
-{ lib, den, ... }:
+{ lib, den,
+  FTS, ... }:
 let
   # Map common terminal names to their TERM values
   defaultTermMap = {
@@ -37,7 +38,7 @@ in
 
     ## Usage
 
-      den.aspects.vic.includes = [
+      FTS.vic.includes = [
         (den._.user-terminal "kitty")
         # or with custom TERM value
         (den._.user-terminal { terminal = "kitty"; term = "xterm-kitty"; })

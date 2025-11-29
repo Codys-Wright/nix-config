@@ -1,7 +1,8 @@
 # CLI tools aspect for CodyWright's development environment
-{ ... }:
 {
-  den.aspects.cli-tools = {
+  FTS, ... }:
+{
+  FTS.cli-tools = {
     description = "Essential CLI tools for development";
 
     homeManager =

@@ -1,7 +1,8 @@
 # Neovim editor aspect with nvf configuration
-{ ... }:
 {
-  den.aspects.neovim = {
+  FTS, ... }:
+{
+  FTS.neovim = {
     description = "Neovim editor with comprehensive configuration using nvf";
 
     homeManager = { config, pkgs, lib, inputs, ... }: {

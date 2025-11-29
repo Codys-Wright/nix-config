@@ -3,6 +3,7 @@
 {
   den,
   lib,
+  FTS,
   ...
 }:
 let
@@ -10,8 +11,8 @@ let
     General system configuration for basic OS settings.
 
     Can optionally take parameters for system configuration:
-      den.aspects.system { hostname = "myhost"; timezone = "America/New_York"; }
-      den.aspects.system {
+      FTS.system { hostname = "myhost"; timezone = "America/New_York"; }
+      FTS.system {
         hostname = "server";
         timezone = "UTC";
         locale = "en_US.UTF-8";
@@ -66,7 +67,7 @@ let
   ];
 in
 {
-  den.aspects.system = den.lib.parametric {
+  FTS.system = den.lib.parametric {
     inherit description;
     includes = [
       ({ nixos, ... }: arg:

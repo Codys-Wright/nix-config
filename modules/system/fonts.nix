@@ -2,19 +2,20 @@
   inputs,
   den,
   lib,
+  FTS,
   ...
 }:
 {
-  den.aspects.fonts = {
+  FTS.fonts = {
     description = "Fonts configuration for both NixOS and Darwin";
 
     nixos = { config, pkgs, lib, ... }:
     let
       inherit (lib) mkIf mkEnableOption mkOption types;
-      cfg = config.den.aspects.fonts;
+      cfg = config.FTS.fonts;
     in
     {
-      options.den.aspects.fonts = {
+      options.FTS.fonts = {
         enable = mkEnableOption "fonts configuration";
 
         enableAppleEmoji = mkOption {
@@ -109,10 +110,10 @@
     darwin = { config, pkgs, lib, ... }:
     let
       inherit (lib) mkIf mkEnableOption mkOption types;
-      cfg = config.den.aspects.fonts;
+      cfg = config.FTS.fonts;
     in
     {
-      options.den.aspects.fonts = {
+      options.FTS.fonts = {
         enable = mkEnableOption "fonts configuration";
 
         enableAppleEmoji = mkOption {

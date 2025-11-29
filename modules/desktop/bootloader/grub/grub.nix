@@ -3,19 +3,20 @@
   inputs,
   den,
   lib,
+  FTS,
   ...
 }:
 {
-  den.aspects.grub = {
+  FTS.grub = {
     description = "GRUB boot loader configuration for NixOS";
 
     nixos = { config, pkgs, lib, ... }:
     let
       inherit (lib) mkIf mkEnableOption mkOption types;
-      cfg = config.den.aspects.grub;
+      cfg = config.FTS.grub;
     in
     {
-      options.den.aspects.grub = {
+      options.FTS.grub = {
         enable = mkEnableOption "GRUB boot loader";
 
         device = mkOption {

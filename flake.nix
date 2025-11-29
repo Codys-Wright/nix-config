@@ -19,6 +19,10 @@
       url = "github:nix-darwin/nix-darwin";
     };
     den.url = "github:vic/den";
+    disko = {
+      inputs.nixpkgs.follows = "nixpkgs";
+      url = "github:nix-community/disko";
+    };
     flake-aspects.url = "github:vic/flake-aspects";
     flake-file.url = "github:vic/flake-file";
     flake-parts = {
@@ -35,6 +39,10 @@
     minesddm = {
       inputs.nixpkgs.follows = "nixpkgs";
       url = "github:Davi-S/sddm-theme-minesddm";
+    };
+    nixos-generators = {
+      inputs.nixpkgs.follows = "nixpkgs";
+      url = "github:nix-community/nixos-generators";
     };
     nixos-wsl = {
       inputs = {

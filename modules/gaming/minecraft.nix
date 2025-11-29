@@ -1,7 +1,8 @@
 # Minecraft gaming aspect
-{ ... }:
 {
-  den.aspects.minecraft = {
+  FTS, ... }:
+{
+  FTS.minecraft = {
     description = "Minecraft with PrismLauncher";
 
     nixos = { config, pkgs, lib, ... }: {

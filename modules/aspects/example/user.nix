@@ -1,10 +1,11 @@
 # parametric providers for user
 {
   den,
+  FTS,
   ...
 }:
 {
-  den.aspects.example.provides.user =
+  FTS.example.provides.user =
     { user, host }:
     let
       by-class.nixos.users.users.${user.userName}.isNormalUser = true;

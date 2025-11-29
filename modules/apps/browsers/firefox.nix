@@ -1,7 +1,8 @@
 # Firefox Browser aspect
-{ ... }:
 {
-  den.aspects.firefox = {
+  FTS, ... }:
+{
+  FTS.firefox = {
     description = "Firefox Browser";
 
     nixos = { pkgs, ... }: {

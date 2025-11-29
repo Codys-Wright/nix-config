@@ -2,6 +2,8 @@
 {
   flake-file.inputs.flake-file.url = lib.mkDefault "github:vic/flake-file";
   flake-file.inputs.flake-aspects.url = lib.mkDefault "github:vic/flake-aspects";
+  flake-file.inputs.nixos-generators.url = lib.mkDefault "github:nix-community/nixos-generators";
+  flake-file.inputs.nixos-generators.inputs.nixpkgs.follows = "nixpkgs";
   
   imports = [
     (inputs.flake-file.flakeModules.dendritic)

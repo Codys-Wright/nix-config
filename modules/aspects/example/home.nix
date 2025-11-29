@@ -2,10 +2,11 @@
 {
   den,
   lib,
+  FTS,
   ...
 }:
 {
-  den.aspects.example.provides.home =
+  FTS.example.provides.home =
     { home }:
     { class, ... }:
     let

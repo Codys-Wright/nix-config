@@ -1,7 +1,8 @@
 # OpenCode AI terminal assistant aspect
-{ ... }:
 {
-  den.aspects.opencode = {
+  FTS, ... }:
+{
+  FTS.opencode = {
     description = "OpenCode AI terminal assistant";
 
     homeManager =

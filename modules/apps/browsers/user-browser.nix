@@ -1,4 +1,5 @@
-{ lib, den, ... }:
+{ lib, den,
+  FTS, ... }:
 let
   # Map common browser names to their executable names
   browserMap = {
@@ -32,7 +33,7 @@ in
 
     ## Usage
 
-      den.aspects.vic.includes = [
+      FTS.vic.includes = [
         (den._.user-browser "firefox")
         # or with custom browser name
         (den._.user-browser { browser = "zen-browser"; })

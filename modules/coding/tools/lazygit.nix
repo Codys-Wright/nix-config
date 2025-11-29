@@ -1,7 +1,8 @@
 # LazyGit configuration aspect
-{ ... }:
 {
-  den.aspects.lazygit = {
+  FTS, ... }:
+{
+  FTS.lazygit = {
     description = "LazyGit terminal UI for git";
 
     homeManager =

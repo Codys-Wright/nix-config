@@ -1,16 +1,17 @@
 # EXT4 filesystem configuration aspect
 # Provides EXT4-specific configuration
+{ inputs, den, lib, FTS, device ? "/dev/vda", ... }:
 {
-  den,
-  lib,
-  device ? "/dev/vda",
-  ...
-}:
-{
-  den.aspects.disk.ext4 = { device ? "/dev/vda" }: {
+  flake-file.inputs.disko.url = "github:nix-community/disko";
+  flake-file.inputs.disko.inputs.nixpkgs.follows = "nixpkgs";
+
+  FTS.disk.ext4 = { device ? "/dev/vda" }: {
     description = "EXT4 filesystem configuration with optional encryption support";
 
-    nixos = {
+    nixos = { ... }: {
+      # Import disko module to generate fileSystems from disko.devices
+      imports = [ inputs.disko.nixosModules.disko ];
+
       # Enable EXT4 support
       boot.supportedFilesystems = [ "ext4" ];
 

@@ -1,7 +1,8 @@
 # Code Cursor editor aspect
-{ ... }:
 {
-  den.aspects.code-cursor = {
+  FTS, ... }:
+{
+  FTS.code-cursor = {
     description = "Code Cursor AI-powered editor";
 
     homeManager = { config, pkgs, lib, ... }: {

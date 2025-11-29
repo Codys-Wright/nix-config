@@ -1,7 +1,8 @@
 # Brave Browser aspect
-{ ... }:
 {
-  den.aspects.brave = {
+  FTS, ... }:
+{
+  FTS.brave = {
     description = "Brave Browser";
 
     nixos = { pkgs, ... }: {

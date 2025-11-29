@@ -1,7 +1,8 @@
 # Zsh shell aspect with custom configuration
-{ ... }:
 {
-  den.aspects.zsh = {
+  FTS, ... }:
+{
+  FTS.zsh = {
     description = "Zsh shell with custom configuration and optimizations";
 
     homeManager = { config, pkgs, lib, ... }:

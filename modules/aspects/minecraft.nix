@@ -5,10 +5,11 @@
   inputs,
   den,
   lib,
+  FTS,
   ...
 }:
 {
-  den.aspects.minecraft = {
+  FTS.minecraft = {
     description = "Minecraft-themed boot and display manager configuration - GRUB double menu + SDDM theme";
 
     nixos = {

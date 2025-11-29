@@ -1,8 +1,9 @@
 # Hyprland Keybind Implementation
 # Consumes the desktop keybind abstractions and generates Hyprland-specific bindings
-{ ... }:
 {
-  den.aspects.hyprland-keybinds = {
+  FTS, ... }:
+{
+  FTS.hyprland-keybinds = {
     description = "Hyprland desktop environment with abstracted keybind support";
 
     homeManager = { config, pkgs, lib, ... }:

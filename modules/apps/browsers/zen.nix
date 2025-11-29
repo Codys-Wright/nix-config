@@ -1,12 +1,13 @@
 # Zen Browser aspect
-{ inputs, lib, ... }:
+{ inputs, lib,
+  FTS, ... }:
 {
   flake-file.inputs.zen-browser = {
     url = "github:0xc000022070/zen-browser-flake";
     inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  den.aspects.zen-browser = {
+  FTS.zen-browser = {
     description = "Zen Browser with custom configuration";
 
     homeManager = { config, pkgs, lib, ... }: {

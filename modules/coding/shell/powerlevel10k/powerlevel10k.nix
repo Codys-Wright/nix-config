@@ -1,7 +1,8 @@
 # Powerlevel10k shell prompt aspect
-{ ... }:
 {
-  den.aspects.powerlevel10k = {
+  FTS, ... }:
+{
+  FTS.powerlevel10k = {
     description = "Powerlevel10k shell prompt with custom configuration";
 
     homeManager = { config, pkgs, lib, ... }: {

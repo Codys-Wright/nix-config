@@ -1,26 +1,27 @@
 # Shell meta-aspect - includes all shell modules
 # Can optionally take a parameter to set the default shell via user-shell
-{ den, lib, ... }:
+{ den, lib,
+  FTS, ... }:
 let
   description = ''
     All shell modules (zsh, fish, starship, powerlevel10k).
 
     Can optionally take a shell name to set as default:
-      den.aspects.dave.includes = [ (den.aspects.shell { default = "zsh"; }) ];
+      FTS.dave.includes = [ (FTS.shell { default = "zsh"; }) ];
 
     Or use without parameter to just include all shell modules:
-      den.aspects.dave.includes = [ den.aspects.shell ];
+      FTS.dave.includes = [ FTS.shell ];
   '';
 
   baseIncludes = [
-    den.aspects.zsh
-    den.aspects.fish
-    den.aspects.starship
-    den.aspects.powerlevel10k
+    FTS.zsh
+    FTS.fish
+    FTS.starship
+    FTS.powerlevel10k
   ];
 in
 {
-  den.aspects.shell = den.lib.parametric {
+  FTS.shell = den.lib.parametric {
     inherit description;
     includes = baseIncludes ++ [
       ({ user, home, ... }: arg:

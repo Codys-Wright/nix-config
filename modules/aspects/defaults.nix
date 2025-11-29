@@ -4,6 +4,7 @@
   inputs,
   den,
   lib,
+  FTS,
   ...
 }:
 {
@@ -12,33 +13,28 @@
     # parametric defaults for host/user/home. see aspects/dependencies.nix
     # `_` is shorthand alias for `provides`.
     host.includes = [
-      den.aspects.example._.host
-      den.aspects.nh
+      FTS.nh
       # System aspects
-      den.aspects.fonts
-      den.aspects.phoenix
+      FTS.fonts
+      FTS.phoenix
       # Boot loader - disabled by default, enable per-host as needed
-      # den.aspects.grub
+      # FTS.grub
     ];
-    user.includes = [ den.aspects.example._.user ];
+    user.includes = [ FTS.example._.user ];
     home.includes = [
-      den.aspects.example._.home
+      FTS.example._.home
       # Include coding aspects for all homes
-      den.aspects.cli-tools
-      den.aspects.shell-tools
+      FTS.cli-tools
+      FTS.shell-tools
       # Include language support
-      den.aspects.rust
-      den.aspects.typescript
+      FTS.rust
+      FTS.typescript
       # Include development tools
-      den.aspects.git
-      den.aspects.docker
-      den.aspects.lazygit
-      den.aspects.opencode
-      den.aspects.dev-tools
-      # Include desktop environment (for Linux systems)
-      den.aspects.desktop-keybinds
-      # Enable Hyprland desktop environment
-      den.aspects.hyprland-keybinds
+      FTS.git
+      FTS.docker
+      FTS.lazygit
+      FTS.opencode
+      FTS.dev-tools
     ];
   };
 }

@@ -1,16 +1,17 @@
-{ inputs, lib, den, ... }:
+{ inputs, lib, den,
+  FTS, ... }:
 
 {
-  den.aspects.kanata = {
+  FTS.kanata = {
     description = "Kanata keyboard remapper for both NixOS and Darwin";
 
     nixos = { config, pkgs, lib, ... }:
     let
-      cfg = config.den.aspects.kanata;
+      cfg = config.FTS.kanata;
       inherit (lib) mkIf mkEnableOption mkOption types;
     in
     {
-      options.den.aspects.kanata = {
+      options.FTS.kanata = {
         enable = mkEnableOption "Kanata keyboard remapper";
 
         package = mkOption {
@@ -69,11 +70,11 @@
 
     darwin = { config, pkgs, lib, ... }:
     let
-      cfg = config.den.aspects.kanata;
+      cfg = config.FTS.kanata;
       inherit (lib) mkIf mkEnableOption mkOption types;
     in
     {
-      options.den.aspects.kanata = {
+      options.FTS.kanata = {
         enable = mkEnableOption "Kanata keyboard remapper";
 
         package = mkOption {

@@ -1,4 +1,4 @@
-{ ... }:
+{ FTS, ... }:
 {
   # Darwin (macOS) home configuration
   den.homes.aarch64-darwin.carter = {
@@ -12,9 +12,8 @@
     aspect = "developer";
   };
 
-  den.aspects = {
   # aspect for each host that includes the user carter.
-      carter.provides.hostUser =
+  FTS.carter.provides.hostUser =
         { user, ... }:
         {
           # administrator in all nixos hosts
@@ -27,12 +26,25 @@
         };
 
       # Password configuration for carter
-      carter.provides.password =
+  FTS.carter.provides.password =
         { user, ... }:
         {
           nixos.users.users.${user.userName} = {
             initialPassword = "password"; # TODO: Change this to a hashed password in production
           };
+        };
+
+      # Autologin configuration for carter (useful for VM testing)
+  FTS.carter.provides.autologin =
+        { user, ... }:
+        {
+          nixos =
+            { config, lib, ... }:
+            lib.mkIf config.services.displayManager.enable {
+              services.displayManager.autoLogin = {
+                enable = true;
+                user = user.userName;
+            };
         };
   };
 

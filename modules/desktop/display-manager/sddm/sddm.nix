@@ -2,11 +2,12 @@
 # Simple Desktop Display Manager - commonly used with KDE Plasma
 {
   den,
+  FTS,
   ...
 }:
 {
   # Base SDDM display manager
-  den.aspects.sddm = {
+  FTS.sddm = {
     description = "SDDM display manager";
 
     nixos = {
@@ -18,8 +19,8 @@
   };
 
   # SDDM with Wayland support
-  # Usage: den.aspects.sddm.wayland
-  den.aspects.sddm.wayland = {
+  # Usage: FTS.sddm.wayland
+  FTS.sddm.wayland = {
     description = "SDDM display manager with Wayland support";
 
     nixos = {

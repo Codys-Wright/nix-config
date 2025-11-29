@@ -1,17 +1,17 @@
 # Btrfs filesystem configuration aspect
 # Provides Btrfs-specific configuration including auto-scrub and impermanence support
+{ inputs, den, lib, FTS, swapSize ? "4G", device ? "/dev/vda", ... }:
 {
-  den,
-  lib,
-  swapSize ? "4G",
-  device ? "/dev/vda",
-  ...
-}:
-{
-  den.aspects.disk.btrfs = { swapSize ? "4G", encrypted ? false }: {
+  flake-file.inputs.disko.url = "github:nix-community/disko";
+  flake-file.inputs.disko.inputs.nixpkgs.follows = "nixpkgs";
+
+  FTS.disk.btrfs = { swapSize ? "4G", encrypted ? false, device ? "/dev/vda" }: {
     description = "Btrfs filesystem configuration with auto-scrub, impermanence, and optional encryption support";
 
-    nixos = { config, ... }: {
+    nixos = { config, lib, ... }: {
+      # Import disko module to generate fileSystems from disko.devices
+      imports = [ inputs.disko.nixosModules.disko ];
+
       # Enable Btrfs support
       boot.supportedFilesystems = [ "btrfs" ];
 

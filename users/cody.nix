@@ -1,4 +1,4 @@
-{ ... }:
+{ FTS, ... }:
 {
   # Darwin (macOS) home configuration
   den.homes.aarch64-darwin.cody = {
@@ -12,9 +12,8 @@
     aspect = "developer";
   };
 
-  den.aspects = {
   # aspect for each host that includes the user cody.
-      cody.provides.hostUser =
+  FTS.cody.provides.hostUser =
         { user, ... }:
         {
           # administrator in all nixos hosts
@@ -24,7 +23,6 @@
           };
           # darwin configuration
           darwin.system.primaryUser = user.userName;
-        };
   };
     
 }

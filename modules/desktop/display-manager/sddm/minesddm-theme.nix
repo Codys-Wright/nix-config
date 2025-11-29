@@ -3,6 +3,7 @@
 {
   inputs,
   den,
+  FTS,
   ...
 }:
 {
@@ -13,10 +14,15 @@
   };
 
   # MineSDDM theme aspect
-  den.aspects.sddm.minesddm = {
+  FTS.minesddm = {
     description = "SDDM display manager with MineSDDM theme";
 
     nixos = {
+      # Import the minesddm theme nixos module
+      imports = [
+        inputs.minesddm.nixosModules.default
+      ];
+
       services.displayManager.sddm = {
         enable = true;
         theme = "minesddm";
