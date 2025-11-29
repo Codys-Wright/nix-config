@@ -4,6 +4,7 @@
   inputs,
   den,
   FTS,
+  pkgs,
   ...
 }:
 {
@@ -21,6 +22,10 @@
       # Import the minesddm theme nixos module
       imports = [
         inputs.minesddm.nixosModules.default
+      ];
+
+      environment.systemPackages = with pkgs; [
+        libsForQt5.layer-shell-qt
       ];
 
       services.displayManager.sddm = {
