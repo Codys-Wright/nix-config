@@ -25,6 +25,15 @@
           # darwin configuration
           darwin.system.primaryUser = user.userName;
         };
+
+      # Password configuration for carter
+      carter.provides.password =
+        { user, ... }:
+        {
+          nixos.users.users.${user.userName} = {
+            initialPassword = "password"; # TODO: Change this to a hashed password in production
+          };
+        };
   };
 
 }
