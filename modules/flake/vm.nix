@@ -1,50 +1,57 @@
-# Enables VM packages for NixOS hosts
+# Enables VM packages for NixOS hosts using nixos-generators
 # Usage: nix run .#vm-dave
-# It is very useful to have a VM you can edit your config and launch the VM to test stuff
-# instead of having to reboot each time.
+# Creates proper VM images with all configurations included
 { inputs, ... }:
 {
   perSystem =
-    { pkgs, system, lib, ... }:
+    { system, lib, ... }:
     let
       # Get all NixOS configurations for this system
       nixosConfigs = inputs.self.nixosConfigurations or { };
-      
+
       # Filter configurations for the current system
       systemConfigs = lib.filterAttrs
         (name: config: config.pkgs.system == system)
         nixosConfigs;
-      
-      # Create VM packages for each configuration that has vm available
-      # Package keys are prefixed with "vm-" so they can be run as: nix run .#vm-dave
-      vmPackages = lib.mapAttrs
-        (name: config:
-          # Check if vm is available (only if virtualisation.vmVariant is enabled)
-          if config.config.system.build ? vm then
-            pkgs.writeShellApplication {
-              name = "vm-${name}";
-              text = ''
-                ${config.config.system.build.vm}/bin/run-nixos-vm "$@"
-              '';
-            }
-          else
-            # Return a dummy package that explains the issue
-            pkgs.writeTextFile {
-              name = "vm-${name}-unavailable";
-              text = ''
-                VM not available for ${name}.
-                Enable virtualisation.vmVariant in the host configuration to use VMs.
-              '';
-            }
+
+      # Create VM packages using nixos-generators based on existing nixosConfigurations
+      vmPackages = lib.mapAttrs'
+        (name: config: lib.nameValuePair "vm-${name}"
+          (inputs.nixos-generators.nixosGenerate {
+            inherit system;
+
+            # Use the same modules as the nixosConfiguration but add VM overrides
+            modules = config._module.args.modules ++ [
+              # VM-specific overrides for the image
+              ({ config, ... }: {
+                # VM services
+                services.openssh.enable = true;
+                services.spice-vdagentd.enable = true;
+                services.qemuGuest.enable = true;
+
+                # VM networking
+                networking.hostName = "${name}-vm";
+
+                # VM display settings
+                services.xserver = {
+                  enable = true;
+                  videoDrivers = [ "qxl" ];
+                };
+
+                # VM-specific environment
+                environment.sessionVariables = {
+                  WLR_NO_HARDWARE_CURSORS = "1";
+                  NIXOS_OZONE_WL = "1";
+                };
+              })
+            ];
+
+            format = "qcow"; # Create QEMU qcow2 image
+          })
         )
         systemConfigs;
-      
-      # Prefix package keys with "vm-" for easier access
-      prefixedPackages = lib.mapAttrs'
-        (name: pkg: lib.nameValuePair "vm-${name}" pkg)
-        vmPackages;
     in
     {
-      packages = prefixedPackages;
+      packages = vmPackages;
     };
 }
