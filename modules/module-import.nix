@@ -17,9 +17,10 @@
     (inputs.import-tree ./system)
 
     (inputs.import-tree ./keyboard)
-    (inputs.import-tree ./local)
 
     (inputs.import-tree ./aspects)
+
+    (inputs.import-tree ./hardware)
 
      ];
 }

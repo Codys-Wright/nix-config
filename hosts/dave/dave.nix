@@ -21,8 +21,9 @@ den.hosts.x86_64-linux = {
         FTS.minegrub
 
         (FTS.browsers { default = "brave"; })  # All browser modules with brave as default
-        (den._.unfree true)  # Allow unfree packages (add more package names as needed)
-        FTS.package-test  # Test packages: cowsay, hello, vim
+        FTS.kernel  
+        
+        FTS.hardware
       ];
 
       # Manually set fileSystems and bootloader for now

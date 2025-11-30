@@ -27,6 +27,8 @@
       # System aspects
       FTS.fonts
       FTS.phoenix
+      # Allow unfree packages
+      (den._.unfree true)
       # Boot loader - disabled by default, enable per-host as needed
       # FTS.grub
     ];
