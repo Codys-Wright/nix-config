@@ -7,7 +7,7 @@
 
     nixos = { config, pkgs, lib, ... }: {
       environment.systemPackages = with pkgs; [
-        protonup
+        protonup-ng
       ];
 
       # AFTER THIS OPTION IS SET, RUN PROTONUP
