@@ -45,6 +45,15 @@ vm host:
     @echo "Launching VM for {{host}}..."
     @nix run .#vm-{{host}}
 
+# Check VM CPU cores and memory (run this inside the VM)
+# Usage: Inside the VM, run: nproc, lscpu, or free -h
+vm-info:
+    @echo "To check VM resources, run these commands inside the VM:"
+    @echo "  nproc              # Show number of CPU cores"
+    @echo "  lscpu              # Show detailed CPU information"
+    @echo "  free -h            # Show memory usage"
+    @echo "  cat /proc/cpuinfo  # Show detailed CPU info"
+
 # Show available hosts
 hosts:
     nix eval ".#darwinConfigurations" --apply "builtins.attrNames" --json

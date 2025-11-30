@@ -7,7 +7,7 @@
 
     homeManager =
       { pkgs, lib, ... }:
-      lib.mkIf pkgs.stdenvNoCC.isDarwin {
+      {
         programs.lazygit = {
           enable = true;
           settings = lib.mkForce {

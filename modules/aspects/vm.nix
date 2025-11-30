@@ -8,15 +8,22 @@ top@{ inputs, den, lib, ... }:
   den.provides.vm =
     { ... }:
     {
-      # nixos-generators.nixosGenerate handles VM configuration automatically
-      # No nixos module needed - perSystem generates the VM packages directly
+      nixos =
+        { lib, ... }:
+        {
+          # VM resources are configured in perSystem when calling nixos-generators
+          # Disable services that don't make sense in a VM
+          virtualisation.vmVariant = {
+            services.btrfs.autoScrub.enable = lib.mkForce false;
+          };
+        };
     };
 
   perSystem =
-    { system, inputs', ... }:
+    { system, inputs', pkgs, ... }:
     let
       # Get nixosConfigurations for this system
-      # Access top-level inputs via top.inputs
+      # Access top-level inputs via top.inputs (captured in closure)
       nixosConfigs = top.inputs.self.nixosConfigurations or {};
       systemConfigs = lib.filterAttrs
         (name: config: config.pkgs.system == system)
@@ -29,11 +36,32 @@ top@{ inputs, den, lib, ... }:
       
       # Generate VM packages using nixos-generators.nixosGenerate
       # This uses the flake-based approach instead of the NixOS module approach
+      # We add a module to configure VM resources (cores, memory) directly
       vmPackages = lib.mapAttrs'
         (name: config: lib.nameValuePair "${name}-vm"
           (top.inputs.nixos-generators.nixosGenerate {
             system = builtins.currentSystem or system;
-            modules = config._module.args.modules;
+            modules = config._module.args.modules ++ [
+              # Add VM resource configuration directly
+              ({ lib, ... }: {
+                virtualisation = {
+                  # Number of CPU cores (default: 1)
+                  cores = 16;
+                  # Memory size in MB (default: 1024)
+                  memorySize = 1024 * 8; # 8GB
+                  # QEMU options for better performance and networking
+                  # Using user networking with SSH port forwarding
+                  # Host port 2222 forwards to guest port 22 (SSH)
+                  # Access VM via: ssh -p 2222 root@localhost
+                  qemu.options = [
+                    "-cpu" "host"
+                    # User networking with SSH port forwarding
+                    "-netdev" "user,id=net0,hostfwd=tcp::2222-:22"
+                    "-device" "virtio-net-pci,netdev=net0"
+                  ];
+                };
+              })
+            ];
             format = "vm-bootloader";
           })
         )
@@ -43,15 +71,20 @@ top@{ inputs, den, lib, ... }:
       packages = vmPackages;
       
       # Add apps so we can run VMs with `nix run .#dave-vm`
-      # Use the same name as the package (e.g., "dave-vm")
-      # The format output has run-nixos-vm in the bin/ directory
+      # The generated script already has the correct cores and memory from the modules we passed
       apps = lib.mapAttrs'
-        (packageName: vmPackage: lib.nameValuePair packageName
+        (name: config:
+          let
+            packageName = "${name}-vm";
+            vmPackage = vmPackages.${packageName};
+          in
+          lib.nameValuePair packageName
           {
             type = "app";
-            program = "${vmPackage}/bin/run-nixos-vm";
+            # Use the generated script directly - it already has our cores/memory configuration
+            program = "${vmPackage}/bin/run-${name}-vm";
           }
         )
-        vmPackages;
+        vmConfigs;
     };
 }

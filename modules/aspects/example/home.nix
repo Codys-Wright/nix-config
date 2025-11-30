@@ -6,8 +6,8 @@
   ...
 }:
 {
-  FTS.example.provides.home =
-    { home }:
+  den.aspects.example.provides.home =
+    { home, ... }:
     { class, ... }:
     let
       homeDir = if lib.hasSuffix "darwin" home.system then "/Users" else "/home";

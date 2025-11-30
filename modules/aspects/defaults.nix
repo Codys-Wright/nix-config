@@ -12,6 +12,16 @@
   den.default = {
     # parametric defaults for host/user/home. see aspects/dependencies.nix
     # `_` is shorthand alias for `provides`.
+    includes = [
+      den._.home-manager
+      den.aspects.hm-backup
+      den.aspects.example._.routes
+      den.aspects.example._.user
+      den.aspects.example._.host
+      den.aspects.example._.home
+      den._.vm  # Enable VM bootable support
+      den._.iso  # Enable ISO image generation
+    ];
     host.includes = [
       FTS.nh
       # System aspects
@@ -23,18 +33,8 @@
     user.includes = [ FTS.example._.user ];
     home.includes = [
       FTS.example._.home
-      # Include coding aspects for all homes
-      FTS.cli-tools
-      FTS.shell-tools
-      # Include language support
-      FTS.rust
-      FTS.typescript
-      # Include development tools
-      FTS.git
-      FTS.docker
-      FTS.lazygit
-      FTS.opencode
-      FTS.dev-tools
+      den.aspects.nix-index
+      den.aspects.nix-registry
     ];
   };
 }
