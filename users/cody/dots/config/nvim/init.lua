@@ -1,7 +1,1 @@
-if vim.g.vscode then
-	-- VSCode extension
-else
-	require("prelude")
-	require("lazy-bootstrap")
-	require("lazy").setup("plugins")
-end
+/nix/store/4mklad064n972wd4hdz3jv289z2445mw-home-manager-files/.config/nvim/init.lua

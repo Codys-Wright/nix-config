@@ -16,6 +16,7 @@
   den.aspects.cody = {
     description = "Cody user configuration";
     includes = [
+      FTS.browsers
       FTS.coding
       cody.dots
       cody.fish

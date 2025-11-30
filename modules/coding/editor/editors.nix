@@ -7,10 +7,8 @@
 
     includes = [
       FTS.code-cursor
-      FTS.neovim
-      FTS.nvf
+      # FTS.nvf
       FTS.lazyvim
-      FTS.astrovim
       FTS.zed
       # FTS.doom-btw
     ];

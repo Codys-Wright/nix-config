@@ -13,8 +13,8 @@
       # Build custom neovim package using nvf
       configModule = {
         config.vim = {
-          viAlias = true;
-          vimAlias = true;
+          viAlias = false;
+          vimAlias = false;
         };
       };
       customNeovim = inputs.nvf.lib.neovimConfiguration {
