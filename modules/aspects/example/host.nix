@@ -5,13 +5,15 @@
   ...
 }:
 {
-  FTS.example.provides.host =
-    { host }:
+  den.aspects.example.provides.host =
+    { host, ... }:
     { class, ... }:
     {
-      # `_` is a shorthand alias for `provides`
-      includes = [ FTS.example._.vm-bootable ];
-      ${class}.networking.hostName = host.hostName;
+      # # `_` is a shorthand alias for `provides`
+      # includes = [ FTS.example._.vm-bootable ];
+      # Only set hostName for OS classes (nixos/darwin), not homeManager
+      nixos.networking.hostName = host.hostName;
+      darwin.networking.hostName = host.hostName;
     };
 }
 

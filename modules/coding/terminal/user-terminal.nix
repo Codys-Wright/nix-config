@@ -29,29 +29,10 @@ let
       }
     else
       throw "user-terminal: argument must be a string or an attribute set";
-in
-{
-  den.provides.user-terminal.description = ''
-    Sets a user's preferred terminal and TERM environment variable.
 
-    Works for any class (nixos/darwin/homeManager,etc) on any host/user/home context.
-
-    ## Usage
-
-      FTS.vic.includes = [
-        (den._.user-terminal "kitty")
-        # or with custom TERM value
-        (den._.user-terminal { terminal = "kitty"; term = "xterm-kitty"; })
-      ];
-
-    It will dynamically provide a module for each class when accessed.
-  '';
-
-  den.provides.user-terminal.__functor =
-    _self: arg:
-    { class, aspect-chain }:
+  # Configure terminal for a user or home
+  userTerminal = terminalConfig: from:
     let
-      terminalConfig = parseTerminal arg;
       terminal = terminalConfig.terminal;
       term = terminalConfig.term;
       
@@ -61,17 +42,48 @@ in
         TERM = term;
       };
       
-      config = if class == "nixos" then
-        { environment.sessionVariables = envVars; }
-      else if class == "darwin" then
-        { environment.variables = envVars; }
-      else if class == "homeManager" then
-        { home.sessionVariables = envVars; }
-      else
-        { };
+      nixos =
+        { ... }:
+        {
+          environment.sessionVariables = envVars;
+        };
+      darwin = nixos;
+      homeManager =
+        { ... }:
+        {
+          home.sessionVariables = envVars;
+        };
     in
-    den.lib.take.unused aspect-chain {
-      ${class} = config;
+    {
+      inherit nixos darwin homeManager;
+      includes = [ ];  # Ensure includes is always present
+    };
+
+  description = ''
+    Sets a user's preferred terminal and TERM environment variable.
+
+    Works for any class (nixos/darwin/homeManager,etc) on any host/user/home context.
+
+    ## Usage
+
+      den.aspects.vic.includes = [
+        (den._.user-terminal "kitty")
+        # or with custom TERM value
+        (den._.user-terminal { terminal = "kitty"; term = "xterm-kitty"; })
+      ];
+
+    It will dynamically provide a module for each class when accessed.
+  '';
+in
+{
+  den.provides.user-terminal =
+    arg:
+    den.lib.parametric {
+      inherit description;
+      includes = [
+        ({ user, ... }: userTerminal (parseTerminal arg) user)
+        ({ home, ... }: userTerminal (parseTerminal arg) home)
+      ];
     };
 }
 

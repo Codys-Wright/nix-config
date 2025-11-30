@@ -5,9 +5,25 @@
   FTS.dev-tools = {
     description = "General development tools and utilities";
 
+    # NixOS-specific tools (Linux-only)
+    nixos = { pkgs, ... }: {
+      environment.systemPackages = with pkgs; [
+        # Linux-only debugging tools
+        valgrind
+        # Linux-only performance tools
+        perf-tools
+      ];
+    };
+
+    # Darwin-specific tools (macOS-only)
+    darwin = { pkgs, ... }: {
+      # Add Darwin-specific tools here if needed
+    };
+
+    # Cross-platform tools via Home Manager
     homeManager =
       { pkgs, lib, ... }:
-      lib.mkIf pkgs.stdenvNoCC.isDarwin {
+      {
         home.packages = with pkgs; [
           # Build tools
           gnumake
@@ -16,14 +32,12 @@
           ninja
           pkg-config
 
-          # Debugging tools
+          # Debugging tools (cross-platform)
           gdb
           lldb
-          # Note: valgrind is Linux-only and not available on macOS/Darwin
 
           # Performance tools
           hyperfine
-          # Note: perf-tools is Linux-only and not available on macOS/Darwin
 
           # Documentation
           pandoc

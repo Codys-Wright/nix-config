@@ -7,7 +7,7 @@
 
     homeManager =
       { pkgs, lib, ... }:
-      lib.mkIf pkgs.stdenvNoCC.isDarwin {
+      {
         programs.git = {
           enable = true;
           settings = {

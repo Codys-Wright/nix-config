@@ -17,7 +17,7 @@
   FTS, ... }:
 {
   # Usage: `den.default.includes [ FTS.example._.routes ]`
-  FTS.example.provides.routes =
+  den.aspects.example.provides.routes =
     let
       inherit (den.lib) parametric;
 

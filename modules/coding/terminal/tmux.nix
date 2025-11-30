@@ -5,6 +5,23 @@
   FTS.tmux = {
     description = "Tmux terminal multiplexer with custom configuration and plugins";
 
+    # Darwin-specific configuration
+    darwin = { config, pkgs, lib, ... }: {
+      # Darwin system-level configurations can go here if needed
+      # Tmux configuration is handled via Home Manager on both platforms
+      # Note: pbcopy is a macOS system utility, available by default
+    };
+
+    # NixOS-specific configuration
+    nixos = { config, pkgs, lib, ... }: {
+      # Linux-specific clipboard utilities for tmux
+      environment.systemPackages = with pkgs; [
+        wl-clipboard # Wayland
+        xclip # X11
+      ];
+    };
+
+    # Home Manager configuration (works on both Darwin and Linux)
     homeManager = { config, pkgs, lib, ... }: {
       programs.tmux = {
         enable = true;
@@ -15,10 +32,9 @@
         keyMode = "vi";
         baseIndex = 1;
 
-        # Automatically renumber windows when one is closed
-        renumberWindows = true;
-
         extraConfig = ''
+          # Automatically renumber windows when one is closed
+          set -g renumber-windows on
           # Set true color support
           set-option -sa terminal-features ',kitty:RGB'
           set-option -ga terminal-overrides ',kitty:Tc'
@@ -146,15 +162,12 @@
         ];
       };
 
-      # Additional tmux utilities
+      # Additional tmux utilities (cross-platform)
+      # Note: tmuxinator completion is provided by zsh-completions (FTS.zsh)
+      # If you need tmuxinator, install it separately or add it conditionally
       home.packages = with pkgs; [
         tmux
-        tmuxinator
-
-        # Clipboard utilities for tmux
-        pbcopy # macOS
-        wl-clipboard # Wayland
-        xclip # X11
+        # tmuxinator  # Removed to avoid conflict with zsh-completions
       ];
 
       # Shell aliases for tmux

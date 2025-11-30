@@ -14,6 +14,7 @@
     };
 
   inputs = {
+    SPC.url = "github:vic/SPC";
     darwin = {
       inputs.nixpkgs.follows = "nixpkgs";
       url = "github:nix-darwin/nix-darwin";
@@ -22,6 +23,10 @@
     disko = {
       inputs.nixpkgs.follows = "nixpkgs";
       url = "github:nix-community/disko";
+    };
+    doom-emacs = {
+      flake = false;
+      url = "github:doomemacs/doomemacs";
     };
     flake-aspects.url = "github:vic/flake-aspects";
     flake-file.url = "github:vic/flake-file";
@@ -40,6 +45,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
       url = "github:Davi-S/sddm-theme-minesddm";
     };
+    nix-index-database.url = "github:nix-community/nix-index-database";
     nixos-generators = {
       inputs.nixpkgs.follows = "nixpkgs";
       url = "github:nix-community/nixos-generators";
@@ -54,6 +60,10 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     nixpkgs-lib.follows = "nixpkgs";
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.05";
+    nvf = {
+      inputs.nixpkgs.follows = "nixpkgs";
+      url = "github:notashelf/nvf";
+    };
     systems.url = "github:nix-systems/default";
     zen-browser = {
       inputs.nixpkgs.follows = "nixpkgs";

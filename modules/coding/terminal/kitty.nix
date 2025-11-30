@@ -5,13 +5,10 @@
   FTS.kitty = {
     description = "Kitty terminal emulator with custom configuration";
 
+
     homeManager = { config, pkgs, lib, ... }: {
-      programs.kitty = {
+      programs.kitty = lib.mkDefault {
         enable = true;
-        font = {
-          name = "MesloLGS NF";
-          package = pkgs.meslo-lgs-nf;
-        };
         themeFile = "Catppuccin-Mocha";
         shellIntegration = {
           mode = "enabled";

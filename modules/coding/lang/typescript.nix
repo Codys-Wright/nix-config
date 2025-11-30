@@ -7,17 +7,17 @@
 
     homeManager =
       { pkgs, lib, ... }:
-      lib.mkIf pkgs.stdenvNoCC.isDarwin {
+      {
         home.packages = with pkgs; [
           # Node.js and package managers
-          nodejs_20
+          nodejs_24
           pnpm
           yarn
 
           # TypeScript core
           typescript
           typescript-language-server
-          nodePackages.ts-node
+          # Note: ts-node was removed - NodeJS 22.6.0+ has built-in TypeScript support
           tsx
 
           # Essential development tools
@@ -34,7 +34,7 @@
           nodePackages.stylelint
 
           # Development servers
-          nodePackages.live-server
+          # Note: live-server was removed - use alternatives like 'serve' or 'http-server'
         ];
 
         # Configure pnpm and npm

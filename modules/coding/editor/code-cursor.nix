@@ -51,12 +51,6 @@
         cursor = "code-cursor";
         cc = "code-cursor";
       };
-
-      # Environment variables
-      home.sessionVariables = {
-        # Set Code Cursor as an alternative editor
-        VISUAL_ALT = "code-cursor";
-      };
     };
   };
 }

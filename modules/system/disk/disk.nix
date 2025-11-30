@@ -99,10 +99,13 @@ in
         let
           config = getDiskConfig arg;
           filesystemAspect = getFilesystemAspect config;
+          # Extract the nixos module from the filesystem aspect
+          filesystemModule = filesystemAspect.nixos or { };
         in
-        [ filesystemAspect ] ++ [
-          ({ nixos, ... }: configureSwap config nixos)
-          ({ nixos, ... }: configureImpermanence config nixos)
+        lib.mkMerge [
+          filesystemModule
+          (configureSwap config nixos)
+          (configureImpermanence config nixos)
         ]
       )
     ];

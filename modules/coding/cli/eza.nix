@@ -1,0 +1,22 @@
+# Eza - modern ls replacement
+{
+  FTS, ... }:
+{
+  FTS.eza = {
+    description = "Eza modern ls replacement";
+
+    homeManager = { pkgs, lib, ... }: {
+      programs.eza = {
+        enable = true;
+        icons = "auto";
+        extraOptions = [
+          "--group-directories-first"
+          "--no-quotes"
+          "--git-ignore"
+          "--icons=always"
+        ];
+      };
+    };
+  };
+}
+
