@@ -1,6 +1,5 @@
 # Lutris gaming platform aspect
-{
-  FTS, ... }:
+{  FTS, ... }:
 {
   FTS.lutris = {
     description = "Lutris gaming platform for managing Windows games on Linux";

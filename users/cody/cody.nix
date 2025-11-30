@@ -17,6 +17,7 @@
     description = "Cody user configuration";
     includes = [
       FTS.browsers
+      FTS.gaming
       FTS.coding
       cody.dots
       cody.fish
