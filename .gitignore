@@ -5,3 +5,7 @@ deployments/nixos/terraform.tfstate
 deployments/nixos/terraform.tfstate.backup
 deployments/nixos/*.tfvars
 
+# VM image files
+*.qcow
+*.qcow2
+
