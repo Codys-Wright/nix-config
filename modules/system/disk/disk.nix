@@ -1,5 +1,5 @@
-# Disk/filesystem configuration aspect
-# Parametric wrapper that includes filesystem-specific modules based on configuration
+# Disk/filesystem configuration wrapper aspect
+# Provides a unified interface for different disk configuration types
 {
   inputs,
   den,
@@ -8,106 +8,156 @@
   ...
 }:
 let
+  inherit (lib) mkIf mkEnableOption mkOption types;
+  
   description = ''
-    Disk and filesystem configuration aspect with support for different filesystem types.
+    Disk and filesystem configuration wrapper with support for different filesystem types.
 
-    Can optionally take parameters for filesystem configuration:
-      FTS.disk
-      FTS.disk { type = "btrfs"; impermanence = true; }
-      FTS.disk {
-        type = "ext4";
-        swapsize = "8G";
-        device = "/dev/sda";
-        encrypted = false; # TODO: Implement encryption support in the future
-      }
+    Configure via options in nixos config:
+      FTS.disk = {
+        enable = true;
+        type = "btrfs-impermanence";
+        device = "/dev/nvme2n1";
+        swapSize = "205";
+        withSwap = true;
+        persistFolder = "/persist";
+      };
 
-    Available filesystem types: btrfs, ext4
-    Options vary by filesystem type.
-    Note: Encryption support is planned for future implementation.
+    Available filesystem types: btrfs-impermanence
+    More types can be added as needed.
   '';
-
-  # Extract disk configuration from arguments
-  getDiskConfig = arg:
-    if arg == null || arg == { } then
-      {
-        type = "btrfs";
-        impermanence = true;
-        encrypted = false; # TODO: Implement encryption support in the future
-        swapsize = "4G";
-        device = "/dev/vda";
-      }
-    else if lib.isAttrs arg then
-      {
-        type = arg.type or "btrfs";
-        impermanence = arg.impermanence or (arg.type or "btrfs" == "btrfs");
-        encrypted = arg.encrypted or false; # TODO: Implement encryption support in the future
-        swapsize = arg.swapsize or "4G";
-        device = arg.device or "/dev/vda";
-      }
-    else
-      throw "disk: argument must be an attribute set";
-
-  # Get the appropriate filesystem aspect based on type
-  getFilesystemAspect = config:
-    if config.type == "btrfs" then
-      (FTS.disk.btrfs {
-        swapSize = config.swapsize;
-        device = config.device;
-        # TODO: Pass encrypted parameter when encryption support is implemented
-      })
-    else if config.type == "ext4" then
-      (FTS.disk.ext4 {
-        device = config.device;
-        # TODO: Pass encrypted parameter when encryption support is implemented
-      })
-    else
-      throw "disk: unsupported filesystem type '${config.type}'";
-
-  # Configure swap based on swapsize - now handled by disko in filesystem modules
-  configureSwap = config: nixos: nixos;
-
-  # Configure impermanence if requested (filesystem-specific)
-  configureImpermanence = config: nixos:
-    if config.impermanence && config.type == "btrfs" then
-      lib.mkMerge [
-        {
-          # Enable impermanence for Btrfs
-          boot.initrd.postDeviceCommands = lib.mkBefore ''
-            mkdir -p /mnt
-            mount -o subvol=/ /dev/disk/by-label/nixos /mnt
-
-            # Create snapshot if it doesn't exist
-            if ! btrfs subvolume show /mnt/root-blank >/dev/null 2>&1; then
-              btrfs subvolume snapshot /mnt/empty /mnt/root-blank 2>/dev/null || true
-            fi
-
-            # Delete and recreate root subvolume
-            btrfs subvolume delete /mnt/root 2>/dev/null || true
-            btrfs subvolume snapshot /mnt/root-blank /mnt/root 2>/dev/null || true
-          '';
-        }
-        nixos
-      ]
-    else
-      nixos;
 in
 {
-  FTS.disk = den.lib.parametric {
+  flake-file.inputs.disko.url = "github:nix-community/disko";
+  flake-file.inputs.disko.inputs.nixpkgs.follows = "nixpkgs";
+
+  FTS.disk = {
     inherit description;
-    includes = [
-      ({ nixos, ... }: arg:
-        let
-          config = getDiskConfig arg;
-          filesystemAspect = getFilesystemAspect config;
-          # Extract the nixos module from the filesystem aspect
-          filesystemModule = filesystemAspect.nixos or { };
-        in
-        lib.mkMerge [
-          filesystemModule
-          (configureSwap config nixos)
-          (configureImpermanence config nixos)
-        ]
-      )
-    ];
+
+    nixos = { config, pkgs, lib, ... }:
+    let
+      inherit (lib) mkIf mkEnableOption mkOption types;
+      cfg = config.FTS.disk;
+    in
+    {
+      # Import disko module to generate fileSystems from disko.devices
+      imports = [ inputs.disko.nixosModules.disko ];
+
+      options.FTS.disk = {
+        enable = mkEnableOption "disk and filesystem configuration";
+
+        type = mkOption {
+          type = types.enum [ "btrfs-impermanence" ];
+          default = "btrfs-impermanence";
+          description = "Type of disk configuration to use";
+        };
+
+        device = mkOption {
+          type = types.str;
+          default = "/dev/vda";
+          description = "Device to use for the filesystem (e.g., /dev/sda, /dev/nvme0n1)";
+        };
+
+        withSwap = mkOption {
+          type = types.bool;
+          default = false;
+          description = "Enable swap partition";
+        };
+
+        swapSize = mkOption {
+          type = types.str;
+          default = "8";
+          description = "Swap size in GB (without the 'G' suffix)";
+        };
+
+        persistFolder = mkOption {
+          type = types.str;
+          default = "/persist";
+          description = "Folder to persist data for impermanence configurations";
+        };
+      };
+
+      config = mkIf (cfg.enable && cfg.type == "btrfs-impermanence") {
+        # Enable Btrfs support
+        boot.supportedFilesystems = [ "btrfs" ];
+
+        # Disko configuration for Btrfs partitioning with impermanence
+        disko.devices = {
+          disk = {
+            disk0 = {
+              type = "disk";
+              device = cfg.device;
+              content = {
+                type = "gpt";
+                partitions = {
+                  ESP = {
+                    priority = 1;
+                    name = "ESP";
+                    start = "1M";
+                    end = "512M";
+                    type = "EF00";
+                    content = {
+                      type = "filesystem";
+                      format = "vfat";
+                      mountpoint = "/boot";
+                      mountOptions = [ "defaults" ];
+                    };
+                  };
+                  bios = {
+                    name = "BIOS";
+                    size = "1M";
+                    type = "EF02";
+                  };
+                  root = {
+                    size = "100%";
+                    content = {
+                      type = "btrfs";
+                      extraArgs = [ "-f" ]; # Override existing partition
+                      # Subvolumes must set a mountpoint in order to be mounted,
+                      # unless their parent is mounted
+                      subvolumes = {
+                        "@root" = {
+                          mountpoint = "/";
+                          mountOptions = [
+                            "compress=zstd"
+                            "noatime"
+                          ];
+                        };
+                        "@persist" = {
+                          mountpoint = cfg.persistFolder;
+                          mountOptions = [
+                            "compress=zstd"
+                            "noatime"
+                          ];
+                        };
+                        "@nix" = {
+                          mountpoint = "/nix";
+                          mountOptions = [
+                            "compress=zstd"
+                            "noatime"
+                          ];
+                        };
+                        "@swap" = lib.mkIf cfg.withSwap {
+                          mountpoint = "/.swapvol";
+                          swap.swapfile.size = "${cfg.swapSize}G";
+                        };
+                      };
+                    };
+                  };
+                };
+              };
+            };
+          };
+        };
+
+        # Btrfs maintenance services
+        services.btrfs.autoScrub = {
+          enable = true;
+          interval = "weekly";
+          fileSystems = [ "/" ];
+        };
+      };
+    };
   };
 }
+
