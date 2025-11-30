@@ -4,7 +4,7 @@
   ...
 }:
 {
-  FTS.hardware.audio._.raysession = {
+  FTS.raysession = {
     description = "RaySession audio session manager";
 
     nixos = { pkgs, ... }: {

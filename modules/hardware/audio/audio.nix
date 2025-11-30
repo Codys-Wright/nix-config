@@ -5,11 +5,11 @@
   ...
 }:
 {
-  FTS.hardware.audio = {
+  FTS.audio = {
     description = "Audio system with PipeWire and device management";
     includes = [
-      FTS.hardware.audio._.pipewire
-      FTS.hardware.audio._.wireguard
+      FTS.pipewire
+      FTS.wireguard
     ];
   };
 }
