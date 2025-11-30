@@ -16,6 +16,13 @@
       FTS.sesh
       FTS.just
     ];
+    # NixOS system packages
+    nixos = { pkgs, ... }: {
+      environment.systemPackages = with pkgs; [
+        gcc
+      ];
+    };
+    
   };
 }
 

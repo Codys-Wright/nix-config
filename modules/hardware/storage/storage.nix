@@ -4,7 +4,7 @@
   ...
 }:
 {
-  FTS.hardware.storage = {
+  FTS.storage = {
     description = "Automatic storage mounting support";
 
     nixos = { ... }: {
