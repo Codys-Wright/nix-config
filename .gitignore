@@ -9,3 +9,8 @@ deployments/nixos/*.tfvars
 *.qcow
 *.qcow2
 
+# Nix build results
+result/
+result
+result-*
+
