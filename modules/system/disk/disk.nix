@@ -84,7 +84,7 @@ in
         # Disko configuration for Btrfs partitioning with impermanence
         disko.devices = {
           disk = {
-            disk0 = {
+            system = {
               type = "disk";
               device = cfg.device;
               content = {

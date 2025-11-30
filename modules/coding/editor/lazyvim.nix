@@ -1,30 +1,48 @@
 # LazyVim Neovim configuration wrapper
+{ FTS, inputs, pkgs, ... }:
 {
-  FTS, ... }:
-{
+  flake-file.inputs.lazyvim.url = "github:pfassina/lazyvim-nix";
+
   FTS.lazyvim = {
     description = "LazyVim Neovim distribution wrapper";
 
-    homeManager = { pkgs, config, ... }:
-    let
-      # Create wrapper script for lazyvim variant
-      # Uses standard neovim from home-manager or nixpkgs
-      lazyvimWrapper = pkgs.writeShellApplication {
-        name = "lazyvim";
-        runtimeEnv = {
-          NVIM_APPNAME = "lazyvim";
-        };
-        runtimeInputs = [
-          # Use neovim from home-manager if available, otherwise from nixpkgs
-          (config.programs.neovim.package or pkgs.neovim)
+    homeManager = { config, pkgs, lib, ... }: {
+        imports = [
+                inputs.lazyvim.homeManagerModules.default
         ];
-        text = ''exec nvim "$@"'';
-      };
-    in
-    {
-      home.packages = [
-        lazyvimWrapper
-      ];
+
+        programs.lazyvim = {
+        enable = true;
+         pluginSource = "latest";
+
+         extras = {
+           lang.nix.enable = true;
+           lang.python = {
+             enable = true;
+             installDependencies = true;        # Install ruff
+               installRuntimeDependencies = true; # Install python3
+           };
+           lang.go = {
+             enable = true;
+             installDependencies = true;        # Install gopls, gofumpt, etc.
+               installRuntimeDependencies = true; # Install go compiler
+           };
+         };
+# Additional packages (optional)
+  extraPackages = with pkgs; [
+    nixd       # Nix LSP
+    alejandra  # Nix formatter
+  ];
+
+ # Only needed for languages not covered by LazyVim
+  treesitterParsers = with pkgs.vimPlugins.nvim-treesitter.grammarPlugins; [
+    wgsl      # WebGPU Shading Language
+    templ     # Go templ files
+  ];
+
+
+
+        };
     };
   };
 }

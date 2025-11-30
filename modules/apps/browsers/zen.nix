@@ -7,7 +7,7 @@
     inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  FTS.zen-browser = {
+  FTS.zen = {
     description = "Zen Browser with custom configuration";
 
     homeManager = { config, pkgs, lib, ... }: {

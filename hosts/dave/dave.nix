@@ -20,7 +20,6 @@ den.hosts.x86_64-linux = {
         FTS.gnome
         FTS.minegrub
 
-        (FTS.browsers { default = "brave"; })  # All browser modules with brave as default
         FTS.kernel  
         
         FTS.hardware

@@ -46,6 +46,10 @@ den.hosts.x86_64-linux = {
         };
       };
 
+      programs.nh.enable = true;
+
+      nix.settings.experimental-features = ["nix-command" "flakes"];
+
   #     services.displayManager = {
   #       defaultSession = lib.mkDefault "xfce";
   #       enable = true;
