@@ -25,7 +25,6 @@
       cody.autologin  # Autologin configuration (enabled when display manager is present)
       cody.display-session  # Default desktop session (gnome)
       cody.default-shell  # Set fish as default shell
-      cody.oh-my-posh  # Oh My Posh prompt theme
     ];
   };
     
