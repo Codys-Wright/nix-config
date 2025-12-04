@@ -10,34 +10,18 @@
 
     homeManager = { pkgs, ... }:
     let
-      # Build custom neovim package using nvf
-      configModule = {
-        config.vim = {
-          viAlias = false;
-          vimAlias = false;
-        };
-      };
       customNeovim = inputs.nvf.lib.neovimConfiguration {
         inherit pkgs;
-        modules = [ configModule ];
-      };
-      nvfNeovim = customNeovim.neovim;
-
-      # Create wrapper script for nvf variant
-      nvfWrapper = pkgs.writeShellApplication {
-        name = "nvf";
-        runtimeEnv = {
-          NVIM_APPNAME = "nvf";
-        };
-        runtimeInputs = [ nvfNeovim ];
-        text = ''exec nvim "$@"'';
+        modules = [{
+          config.vim = {
+            viAlias = false;
+            vimAlias = false;
+          };
+        }];
       };
     in
     {
-      home.packages = [
-        nvfNeovim
-        nvfWrapper
-      ];
+      home.packages = [ customNeovim.neovim ];
     };
   };
 }

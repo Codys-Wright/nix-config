@@ -8,8 +8,9 @@
     includes = [
       FTS.zsh
       FTS.fish
-      FTS.starship
+      # FTS.starship
       FTS.nushell
+      FTS.oh-my-posh
     ];
   };
 }

@@ -53,7 +53,7 @@
 
         home.file.".config/niri".source = dotsLink "config/niri";
         # home.file.".config/nvim".source = dotsLink "config/nvim";
-        home.file.".config/astrovim".source = dotsLink "config/astrovim";
+        # home.file.".config/astrovim".source = dotsLink "config/astrovim";
         
         home.file.".config/vscode-vim".source = dotsLink "config/vscode-vim";
         home.file.".config/doom".source = dotsLink "config/doom";
