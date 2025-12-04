@@ -7,11 +7,13 @@
 
     includes = [
       FTS.code-cursor
-      # FTS.nvf
+      FTS.nvf
       FTS.lazyvim
       FTS.zed
       # FTS.doom-btw
     ];
+
   };
 }
+
 

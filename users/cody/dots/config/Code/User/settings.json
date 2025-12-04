@@ -4,7 +4,12 @@
   "chat.tools.autoApprove": true,
   "cursor.cmdk.useThemedDiffBackground": true,
   "cursor.composer.shouldChimeAfterChatFinishes": true,
-  "cursor.cpp.disabledLanguages": ["plaintext", "markdown", "scminput", "rust"],
+  "cursor.cpp.disabledLanguages": [
+    "plaintext",
+    "markdown",
+    "scminput",
+    "rust"
+  ],
   "debug.closeReadonlyTabsOnEnd": true,
   "debug.gutterMiddleClickAction": "none",
   "debug.openExplorerOnEnd": true,
@@ -296,7 +301,6 @@
   "workbench.list.smoothScrolling": true,
   "workbench.panel.defaultLocation": "top",
   "workbench.panel.showLabels": false,
-  "workbench.preferredDarkColorTheme": "Default Light+",
   "workbench.preferredHighContrastColorTheme": "Visual Studio Light",
   "workbench.view.showQuietly": {
     "workbench.panel.output": false
@@ -326,5 +330,6 @@
   "remote.SSH.configFile": "/home/vic/.ssh/config.local",
   "file-browser.labelIgnoredFiles": true,
   "file-browser.hideDotfiles": false,
-  "workbench.preferredLightColorTheme": "Tomorrow Night Blue"
+  "workbench.preferredLightColorTheme": "Tomorrow Night Blue",
+  "window.commandCenter": true
 }

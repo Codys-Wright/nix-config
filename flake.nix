@@ -3,8 +3,9 @@
 {
   description = "A flake for Cody's Entire Computing World";
 
-  outputs = inputs:
-    inputs.flake-parts.lib.mkFlake {inherit inputs;} {
+  outputs =
+    inputs:
+    inputs.flake-parts.lib.mkFlake { inherit inputs; } {
       imports = [
         (inputs.import-tree ./modules)
         (inputs.import-tree ./hosts)
@@ -38,7 +39,7 @@
       url = "github:nix-community/home-manager";
     };
     import-tree.url = "github:vic/import-tree";
-    lazyvim.url = "github:pfassina/lazyvim-nix";
+    lazyvim.url = "github:Codys-Wright/lazyvim-nix";
     minegrub-theme.url = "github:Lxtharia/minegrub-theme";
     minegrub-world-sel-theme.url = "github:Lxtharia/minegrub-world-sel-theme";
     minesddm = {
@@ -70,4 +71,5 @@
       url = "github:0xc000022070/zen-browser-flake";
     };
   };
+
 }
