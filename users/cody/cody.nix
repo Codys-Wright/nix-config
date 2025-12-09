@@ -1,4 +1,4 @@
-{ FTS, cody, ... }:
+{ FTS, cody, __findFile, ... }:
 {
   # Darwin (macOS) home configuration
   den.homes.aarch64-darwin.cody = {
@@ -26,6 +26,7 @@
       cody.admin  # Admin privileges and user configuration
       cody.autologin  # Autologin configuration (enabled when display manager is present)
       cody.display-session  # Default desktop session (gnome)
+      (FTS.test { hello = true; cowsay = true; })  # Test module with both packages
       cody.default-shell  # Set fish as default shell
     ];
   };

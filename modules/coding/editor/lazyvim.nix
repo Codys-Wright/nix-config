@@ -77,7 +77,6 @@
         treesitterParsers = with pkgs.tree-sitter-grammars; [
           tree-sitter-css
           tree-sitter-latex
-          tree-sitter-norg
           tree-sitter-scss
           tree-sitter-svelte
           tree-sitter-typst

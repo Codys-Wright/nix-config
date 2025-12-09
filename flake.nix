@@ -15,6 +15,7 @@
 
   inputs = {
     SPC.url = "github:vic/SPC";
+    apple-fonts.url = "github:Lyndeno/apple-fonts.nix";
     darwin = {
       inputs.nixpkgs.follows = "nixpkgs";
       url = "github:nix-darwin/nix-darwin";
@@ -65,6 +66,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
       url = "github:notashelf/nvf";
     };
+    stylix.url = "github:danth/stylix";
     systems.url = "github:nix-systems/default";
     zen-browser = {
       inputs.nixpkgs.follows = "nixpkgs";
