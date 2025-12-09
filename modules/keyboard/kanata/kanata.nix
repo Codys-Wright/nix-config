@@ -6,134 +6,58 @@
     description = "Kanata keyboard remapper for both NixOS and Darwin";
 
     nixos = { config, pkgs, lib, ... }:
-    let
-      cfg = config.FTS.kanata;
-      inherit (lib) mkIf mkEnableOption mkOption types;
-    in
     {
-      options.FTS.kanata = {
-        enable = mkEnableOption "Kanata keyboard remapper";
 
-        package = mkOption {
-          type = types.package;
-          default = pkgs.kanata;
-          description = "Kanata package to use";
-        };
-
-        configFile = mkOption {
-          type = types.path;
-          default = ./kanata.kbd;
-          description = "Path to the Kanata configuration file";
-        };
-
-        extraArgs = mkOption {
-          type = types.listOf types.str;
-          default = [ ];
-          description = "Extra arguments to pass to Kanata";
-        };
-
-        devices = mkOption {
-          type = types.listOf types.str;
-          default = [ ];
-          description = "Specific devices to target (empty means all devices)";
-        };
-
-        port = mkOption {
-          type = types.nullOr types.int;
-          default = null;
-          description = "Port number for Kanata daemon";
+      services.kanata = {
+        enable = true;
+        package = pkgs.kanata;
+        keyboards.fts-kanata = {
+          configFile = ./kanata.kbd;
+          extraArgs = [ ];
+          devices = [
+            "/dev/input/by-path/pci-0000:0e:00.0-usb-0:5.1.1.2.1:1.0-event-kbd"  # Keychron K2 HE
+            "/dev/input/by-path/pci-0000:0e:00.0-usb-0:5.2.4:1.2-event-kbd"       # Keychron Link
+            "/dev/input/by-path/pci-0000:0e:00.0-usb-0:5.1.1.1.3:1.0-event-kbd"  # Logitech USB Receiver (keyboard 1)
+            "/dev/input/by-path/pci-0000:0e:00.0-usb-0:5.2.2:1.2-event-kbd"      # Logitech USB Receiver (keyboard 2)
+          ];
+          port = null;
+          extraDefCfg = "process-unmapped-keys yes";
         };
       };
 
-      config = mkIf cfg.enable {
-        services.kanata = {
-          enable = true;
-          package = cfg.package;
-          keyboards.fts-kanata = {
-            configFile = cfg.configFile;
-            extraArgs = cfg.extraArgs;
-            devices = cfg.devices;
-            port = cfg.port;
-            extraDefCfg = "process-unmapped-keys yes";
-          };
-        };
-
-        # Add the Kanata service user to necessary groups for input devices
-        systemd.services.kanata-fts-kanata.serviceConfig = {
-          SupplementaryGroups = [
-            "input"
-            "uinput"
-          ];
-        };
+      # Add the Kanata service user to necessary groups for input devices
+      systemd.services.kanata-fts-kanata.serviceConfig = {
+        SupplementaryGroups = [
+          "input"
+          "uinput"
+        ];
       };
     };
 
     darwin = { config, pkgs, lib, ... }:
-    let
-      cfg = config.FTS.kanata;
-      inherit (lib) mkIf mkEnableOption mkOption types;
-    in
     {
-      options.FTS.kanata = {
-        enable = mkEnableOption "Kanata keyboard remapper";
+      # Install Kanata package
+      environment.systemPackages = [ pkgs.kanata ];
 
-        package = mkOption {
-          type = types.package;
-          default = pkgs.kanata;
-          description = "Kanata package to use";
-        };
+      # Create launchd service for Kanata on Darwin
+      launchd.user.agents.kanata = {
+        serviceConfig = {
+          ProgramArguments = [
+            "${pkgs.kanata}/bin/kanata"
+            "--cfg" "${./kanata.kbd}"
+          ];
 
-        configFile = mkOption {
-          type = types.path;
-          default = ./kanata.kbd;
-          description = "Path to the Kanata configuration file";
-        };
+          RunAtLoad = true;
+          KeepAlive = true;
 
-        extraArgs = mkOption {
-          type = types.listOf types.str;
-          default = [ ];
-          description = "Extra arguments to pass to Kanata";
-        };
-
-        devices = mkOption {
-          type = types.listOf types.str;
-          default = [ ];
-          description = "Specific devices to target (empty means all devices)";
-        };
-
-        port = mkOption {
-          type = types.nullOr types.int;
-          default = null;
-          description = "Port number for Kanata daemon";
+          StandardOutPath = "/tmp/kanata.log";
+          StandardErrorPath = "/tmp/kanata.log";
         };
       };
 
-      config = mkIf cfg.enable {
-        # Install Kanata package
-        environment.systemPackages = [ cfg.package ];
-
-        # Create launchd service for Kanata on Darwin
-        launchd.user.agents.kanata = {
-          serviceConfig = {
-            ProgramArguments = [
-              "${cfg.package}/bin/kanata"
-              "--cfg" "${cfg.configFile}"
-            ] ++ lib.optionals (cfg.devices != []) (lib.flatten (map (d: ["--device" d]) cfg.devices))
-              ++ lib.optionals (cfg.port != null) ["--port" (toString cfg.port)]
-              ++ cfg.extraArgs;
-
-            RunAtLoad = true;
-            KeepAlive = true;
-
-            StandardOutPath = "/tmp/kanata.log";
-            StandardErrorPath = "/tmp/kanata.log";
-          };
-        };
-
-        # Grant necessary permissions for input access on macOS
-        # Note: Users may need to grant Accessibility permissions manually
-        # in System Preferences > Security & Privacy > Privacy > Accessibility
-      };
+      # Grant necessary permissions for input access on macOS
+      # Note: Users may need to grant Accessibility permissions manually
+      # in System Preferences > Security & Privacy > Privacy > Accessibility
     };
   };
 }

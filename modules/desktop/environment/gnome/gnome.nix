@@ -12,6 +12,8 @@
   FTS.gnome = {
     description = "GNOME desktop environment";
 
+    # includes = [ FTS.gnome-macos ];
+
     nixos = {
       # Enable GNOME desktop manager
       services.desktopManager.gnome.enable = true;
@@ -25,8 +27,8 @@
       # Qt integration for better GNOME look
       qt = {
         enable = true;
-        platformTheme = "gnome";
-        style = "adwaita-dark";
+        platformTheme = lib.mkDefault "gnome";
+        style = lib.mkDefault "adwaita-dark"; # Required when platformTheme is "gnome"
       };
       
       # Don't set SSH askPassword (override default from gnome module)
@@ -72,11 +74,6 @@
         "org/gnome/shell/extensions/blur-my-shell" = {
           brightness = 0.75;
           noise-amount = 0;
-        };
-
-        # Set dark mode as default
-        "org/gnome/desktop/interface" = {
-          color-scheme = "prefer-dark";
         };
       };
     };

@@ -8,6 +8,8 @@
         extraGroups = [
           "wheel"
           "networkmanager"
+          "uinput"
+          "input"
         ];
         initialPassword = "password";
         description = "Cody";
