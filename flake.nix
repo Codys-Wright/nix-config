@@ -39,7 +39,7 @@
       url = "github:nix-community/home-manager";
     };
     import-tree.url = "github:vic/import-tree";
-    lazyvim.url = "github:Codys-Wright/lazyvim-nix";
+    lazyvim.url = "github:pfassina/lazyvim-nix/fix/treesitter-grammar-suffix";
     minegrub-theme.url = "github:Lxtharia/minegrub-theme";
     minegrub-world-sel-theme.url = "github:Lxtharia/minegrub-world-sel-theme";
     minesddm = {

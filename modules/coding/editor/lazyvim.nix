@@ -1,7 +1,7 @@
 # LazyVim Neovim configuration
 { FTS, inputs, pkgs, ... }:
 {
-  flake-file.inputs.lazyvim.url = "github:Codys-Wright/lazyvim-nix";
+  flake-file.inputs.lazyvim.url = "github:pfassina/lazyvim-nix/fix/treesitter-grammar-suffix";
 
   FTS.lazyvim = {
     description = "LazyVim Neovim distribution";
