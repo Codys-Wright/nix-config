@@ -1,7 +1,7 @@
 # LazyVim Neovim configuration
 { FTS, inputs, pkgs, ... }:
 {
-  flake-file.inputs.lazyvim.url = "github:pfassina/lazyvim-nix/fix/treesitter-grammar-suffix";
+  flake-file.inputs.lazyvim.url = "github:Codys-Wright/lazyvim-nix";
 
   FTS.lazyvim = {
     description = "LazyVim Neovim distribution";
@@ -16,6 +16,7 @@
         fd
         luajitPackages.luarocks-nix
         sqlite
+        tree-sitter
       ];
     };
 
@@ -64,6 +65,7 @@
 
         # Additional packages (optional)
         extraPackages = with pkgs; [
+          tree-sitter
           nixd       # Nix LSP
           alejandra  # Nix formatter
           bacon      # rust background checker
