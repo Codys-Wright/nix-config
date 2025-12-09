@@ -332,16 +332,15 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1765155840,
-        "narHash": "sha256-d6o8FGjLlMm6VMK+FA5DwKfilOrmqxVGk9DpFGQgqjI=",
-        "owner": "pfassina",
+        "lastModified": 1765310700,
+        "narHash": "sha256-w/uKlXl+mhAOvdoEK95Yq2zk8MrfVX7inzLS5AokVyQ=",
+        "owner": "Codys-Wright",
         "repo": "lazyvim-nix",
-        "rev": "a85319951175e00c833b1ec7d50a6ce7ae1ddd95",
+        "rev": "5f0002aa8ebdcbda880f47d5571eb286f020082c",
         "type": "github"
       },
       "original": {
-        "owner": "pfassina",
-        "ref": "fix/treesitter-grammar-suffix",
+        "owner": "Codys-Wright",
         "repo": "lazyvim-nix",
         "type": "github"
       }

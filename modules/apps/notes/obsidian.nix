@@ -8,6 +8,14 @@
     homeManager = { pkgs, lib, ... }: {
       programs.obsidian.enable = true;
     };
+
+    nixOs = {pkgs, lib, ...}: {
+  environment.systemPackages = [
+    pkgs.obsidian
+  ];
+
+
+      };
   };
 }
 
