@@ -28,6 +28,7 @@
       FTS.fonts
       FTS.phoenix
       FTS.experimental-features  # Enable nix-command and flakes
+      FTS.secrets  # SOPS secrets management
       # Allow unfree packages
       (den._.unfree true)
       # Boot loader - disabled by default, enable per-host as needed
@@ -38,6 +39,8 @@
       FTS.example._.home
       den.aspects.nix-index
       den.aspects.nix-registry
+      FTS.secrets  # SOPS secrets infrastructure (home-manager part)
+      FTS.user-secrets  # User secrets from SOPS with environment variables
     ];
   };
 }

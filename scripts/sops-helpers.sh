@@ -69,8 +69,8 @@ function sops_add_host_key() {
         exit 1
     fi
 
-    # Check if yq-go is available
-    if ! nix_develop yq-go --version >/dev/null 2>&1; then
+    # Check if yq-go is available (use nix shell to avoid full flake evaluation)
+    if ! nix shell nixpkgs#yq-go --command yq-go --version >/dev/null 2>&1; then
         yellow "yq-go not available via nix develop. Cannot update sops.yaml automatically."
         yellow "Please manually add the following to sops.yaml:"
         echo "  - &$hostname $age_key"

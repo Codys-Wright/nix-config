@@ -1,14 +1,34 @@
 # Rust development environment aspect
+# Uses rust-overlay for pure and reproducible Rust toolchain packaging
 {
-  FTS, ... }:
+  inputs,
+  FTS,
+  lib,
+  ...
+}:
 {
-  FTS.rust = {
-    description = "Rust development environment with cargo tools and toolchain";
+  # Add rust-overlay as a flake input
+  flake-file.inputs.rust-overlay.url = lib.mkDefault "github:oxalica/rust-overlay";
+  flake-file.inputs.rust-overlay.inputs.nixpkgs.follows = "nixpkgs";
 
-    homeManager =
-      { pkgs, lib, ... }:
+  FTS.rust = {
+    description = "Rust development environment with cargo tools and toolchain using rust-overlay";
+
+    
+
+    homeManager = { pkgs, lib, ... }:
       {
+        # Apply the rust-overlay to nixpkgs for this home-manager config
+        # This makes rust-bin.* available in pkgs
+        nixpkgs.overlays = [ inputs.rust-overlay.overlays.default ];
+
         home.packages = with pkgs; [
+          # Rust toolchain from rust-overlay
+          # Uses latest stable Rust with default profile (rustc, cargo, rustfmt, clippy, etc.)
+          # This replaces rustup with a pure, reproducible Rust toolchain
+          rust-bin.stable.latest.default
+          rust-analyzer
+
           # Common cargo utilities
           cargo-watch
           cargo-edit
@@ -25,24 +45,9 @@
           lldb
           llvmPackages.bintools
           sccache
-
-          # Rust toolchain (using rustup by default, can be overridden with fenix)
-          rustup
-          # Note: To use fenix, add fenix input to flake and use:
-          # rust-toolchain = fenix.packages.${pkgs.stdenv.hostPlatform.system}.complete.withComponents [...];
-          # rust-analyzer = fenix.packages.${pkgs.stdenv.hostPlatform.system}.rust-analyzer;
         ];
 
-        # Configure rustup/cargo paths
-        home.sessionVariables = {
-          CARGO_HOME = "$HOME/.cargo";
-          RUSTUP_HOME = "$HOME/.rustup";
-          RUSTFLAGS = lib.mkDefault "-C target-cpu=native";
-        };
 
-        home.sessionPath = [
-          "$HOME/.cargo/bin"
-        ];
       };
   };
 }

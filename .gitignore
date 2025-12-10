@@ -32,3 +32,6 @@ host_key
 # Temporary SOPS files
 .skarabox-tmp/
 
+# Development directories (personal projects, not part of the flake)
+Development/
+
