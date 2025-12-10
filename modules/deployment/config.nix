@@ -41,24 +41,33 @@ in
       in
         if users != [] then builtins.head users else "admin";
       
-      # SSH key is now stored in SOPS, referenced via sops.secrets
-      # Public keys and known_hosts are still files
+      # Public keys and known_hosts are files
       hostKeyPub = "./hosts/${hostname}/host_key.pub";
       knownHostsPath = "./hosts/${hostname}/known_hosts";
-      # Path to facter.json (relative to host file, so ./facter.json from host directory)
-      facterConfigPath = ./facter.json;
     in
     {
-      # Always import SOPS module
-      imports = [
-        inputs.sops-nix.nixosModules.default
-      ];
-
       options.deployment = {
         enable = lib.mkOption {
           type = lib.types.bool;
           default = true;  # Enabled by default when aspect is included
           description = "Enable deployment configuration for this host";
+        };
+
+        # Boot SSH configuration (used by deployment.bootssh)
+        # This option is defined here so deployment.config can reference it
+        # The actual implementation is in deployment.bootssh
+        boot = lib.mkOption {
+          type = lib.types.submodule {
+            options = {
+              authorizedKeys = lib.mkOption {
+                type = lib.types.listOf lib.types.str;
+                default = [];
+                description = "Public SSH keys authorized for initrd SSH access";
+              };
+            };
+          };
+          default = {};
+          description = "Boot SSH configuration (used by deployment.bootssh)";
         };
 
         # Connection/deployment options
@@ -165,25 +174,13 @@ in
         };
 
         password = mkOption {
-          description = "Plain password for the admin user (will be hashed in NixOS). Auto-derives from SOPS secrets at ${hostname}/system/user/password if available, otherwise can be a string or path.";
+          description = "Plain password for the admin user (will be hashed in NixOS). Can be a string or path.";
           type = lib.types.nullOr (lib.types.oneOf [ types.str types.path ]);
-          # Auto-derive from SOPS if available, otherwise null
-          default = let
-            sopsSecretPath = "${hostname}/system/user/password";
-            sopsSecrets = config.sops.secrets or {};
-            sopsSecret = sopsSecrets.${sopsSecretPath} or null;
-          in
-            if sopsSecret != null && sopsSecret ? path then sopsSecret.path else null;
-          defaultText = ''config.sops.secrets."${hostname}/system/user/password".path if SOPS is configured, else null'';
+          default = null;
           apply = v: if v == null then null else (if lib.isPath v then readAndTrim v else v);
         };
 
 
-        hostId = mkOption {
-          type = types.nullOr types.str;
-          description = "8 characters unique identifier for this server. Generate with `uuidgen | head -c 8`";
-          default = null;
-        };
 
         sshAuthorizedKey = mkOption {
           type = with types; nullOr (oneOf [ str path ]);
@@ -199,43 +196,33 @@ in
         };
       };
 
-      config = lib.mkIf cfg.enable {
-        assertions = [
-          {
-            assertion = cfg.staticNetwork == null -> (config.boot.initrd.network.udhcpc.enable or false);
-            message = ''
-              If DHCP is disabled and an IP is not set, the box will not be reachable through the network on boot.
+      config = lib.mkIf cfg.enable (lib.mkMerge [
+        {
+          # Only check this assertion if boot.initrd.network is enabled (via bootssh)
+          # If bootssh is not included, this check is not relevant
+          assertions = lib.mkIf (config.boot.initrd.network.enable or false) [
+            {
+              assertion = cfg.staticNetwork == null -> (config.boot.initrd.network.udhcpc.enable or false);
+              message = ''
+                If DHCP is disabled and an IP is not set, the box will not be reachable through the network on boot.
 
-              To fix this error, either set config.boot.initrd.network.udhcpc.enable = true or give an IP to deployment.staticNetwork.ip.
-            '';
-          }
-        ];
+                To fix this error, either set config.boot.initrd.network.udhcpc.enable = true or give an IP to deployment.staticNetwork.ip.
+              '';
+            }
+          ];
+        }
+        {
+          # Auto-configure boot SSH authorized keys from deployment.sshAuthorizedKey
+          # This allows remote unlocking during initrd boot
+          # This will be used by deployment.bootssh if it's included
+          deployment.boot.authorizedKeys = lib.mkIf (cfg.sshAuthorizedKey != null) [
+            (if lib.isPath cfg.sshAuthorizedKey then readAndTrim cfg.sshAuthorizedKey else cfg.sshAuthorizedKey)
+          ];
 
-        # Automatically configure SOPS
-        sops.defaultSopsFile = secretsYamlPath;
-        
-        # Auto-configure SOPS secret for SSH private key (stored in SOPS, decrypted to /run/secrets)
-        # The key should be stored in secrets.yaml at: <hostname>.system.sshPrivateKey
-        sops.secrets."${hostname}/system/sshPrivateKey" = {
-          format = "binary";  # SSH keys are binary
-          mode = "0600";  # Private key permissions
-          # Path defaults to /run/secrets/<hostname>/system/sshPrivateKey
-        };
+          # Note: facter.reportPath is handled by FTS.facter module (included in FTS.hardware)
+          # Note: networking.hostId removed - not needed for deployment
 
-        # Auto-configure boot SSH authorized keys from deployment.sshAuthorizedKey
-        # This allows remote unlocking during initrd boot
-        deployment.boot.authorizedKeys = lib.mkIf (cfg.sshAuthorizedKey != null) [
-          (if lib.isPath cfg.sshAuthorizedKey then readAndTrim cfg.sshAuthorizedKey else cfg.sshAuthorizedKey)
-        ];
-
-        # Use facter.json from hosts/<hostname>/facter.json if it exists
-        # Only set if the file exists (allows building before hardware is detected)
-        # Note: Path is resolved relative to the host file location
-        facter.reportPath = lib.mkIf (builtins.pathExists facterConfigPath) facterConfigPath;
-
-        networking.hostId = lib.mkIf (cfg.hostId != null) cfg.hostId;
-
-        systemd.network = lib.mkIf (!cfg.disableNetworkSetup) (
+          systemd.network = lib.mkIf (!cfg.disableNetworkSetup) (
           if cfg.staticNetwork == null then {
             enable = true;
             networks."10-lan" = {
@@ -279,7 +266,7 @@ in
         users.users.${cfg.username} = {
           isNormalUser = true;
           extraGroups = [ "wheel" ];
-          # Hash the password in NixOS if provided (from SOPS)
+          # Hash the password in NixOS if provided
           # Uses mkpasswd to hash the plain password at evaluation time
           hashedPassword = lib.mkIf (cfg.password != null) (
             lib.strings.removeSuffix "\n" (
@@ -321,7 +308,8 @@ in
           };
           ports = [ cfg.sshPort ];
         };
-      };
+        }
+      ]);
     };
   };
 }

@@ -55,4 +55,13 @@
   nixos-pkg.body = ''open "https://search.nixos.org/packages?sort=relevance&query=$argv"'';
   repology-nixpkgs.description = "Open a browser on search for nixpkgs on repology.org";
   repology-nixpkgs.body = ''open "https://repology.org/projects/?inrepo=nix_unstable&search=$argv"'';
+  
+  # Rust development aliases
+  cwe.description = "Cargo watch and run example";
+  cwe.body = ''
+    cargo watch -q -c -x "run -q --example $argv[1]"
+  '';
+
+  cw.description = "Cargo watch and run (main.rs or lib.rs)";
+  cw.body = ''cargo watch -q -c -x "run -q"'';
 }

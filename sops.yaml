@@ -1,15 +1,25 @@
 keys:
+  # User's personal age key (from sops.key)
+  # To get this: age-keygen -y sops.key
   - &me age1vaf7qpk38ddhlmjc0qj3r5l7nyz77csjtskmxp3hrl57jr8my4ws6h05ge
+  
+  # THEBATTLESHIP host's SSH-derived age key
+  # To get this: ssh-to-age < hosts/THEBATTLESHIP/host_key.pub
+  - &THEBATTLESHIP age18xrg3x02lv2flw9tg25rkxwgg87mg8faaaehlt4vdwr58pm2ky9snfzdhx
 
 creation_rules:
-  # Host-level secrets
-  - path_regex: ^hosts/.*/secrets\.yaml$
+  # Host-level secrets - encrypted with both user's key and host's key
+  # This allows: user to edit locally, host to decrypt at runtime
+  - path_regex: ^hosts/THEBATTLESHIP/secrets\.yaml$
     key_groups:
     - age:
       - *me
+      - *THEBATTLESHIP
   
-  # User-level secrets
+  # User-level secrets - encrypted with both user's key and host's key
+  # This allows: user to edit locally, home-manager on host to decrypt at runtime
   - path_regex: ^users/.*/secrets\.yaml$
     key_groups:
     - age:
       - *me
+      - *THEBATTLESHIP

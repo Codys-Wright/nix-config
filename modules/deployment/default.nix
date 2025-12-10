@@ -14,7 +14,7 @@
     # Include all deployment aspects
     includes = [
       deployment.config  
-      deployment.bootssh
+      # deployment.bootssh  # Temporarily disabled - requires /boot/host_key
       deployment.hotspot
       # deployment.beacon  # Temporarily disabled - requires isoImage which isn't available in regular NixOS configs
     ];

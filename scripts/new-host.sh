@@ -39,16 +39,31 @@ if [ ! -f "$HOST_DIR/host_key" ] || [ ! -f "$HOST_DIR/host_key.pub" ]; then
     chmod 600 "$HOST_DIR/host_key"
     green "Generated host key pair"
 else
-    blue "Host key pair already exists, skipping generation"
+    if yes_or_no "Host key pair already exists. Overwrite?"; then
+        blue "Regenerating host key pair..."
+        rm -f "$HOST_DIR/host_key" "$HOST_DIR/host_key.pub"
+        ssh-keygen -t ed25519 -N "" -f "$HOST_DIR/host_key" -C "$HOSTNAME-host"
+        chmod 600 "$HOST_DIR/host_key"
+        green "Regenerated host key pair"
+    else
+        blue "Keeping existing host key pair"
+    fi
 fi
 
 # Generate deployment SSH key pair (for connecting to the server)
 # We need to generate the key if either ssh.pub doesn't exist OR secrets.yaml doesn't exist
 if [ ! -f "$HOST_DIR/ssh.pub" ] || [ ! -f "$HOST_DIR/secrets.yaml" ]; then
-    blue "Generating deployment SSH key pair..."
+    if [ ! -f "$HOST_DIR/secrets.yaml" ] && [ -f "$HOST_DIR/ssh.pub" ]; then
+        yellow "Warning: ssh.pub exists but secrets.yaml doesn't. Regenerating deployment key to create secrets.yaml..."
+    else
+        blue "Generating deployment SSH key pair..."
+    fi
+    
     # Generate to a temp file first, then read it
     TEMP_SSH_KEY=$(mktemp)
     add_cleanup "rm -f $TEMP_SSH_KEY $TEMP_SSH_KEY.pub"
+    # Remove temp files if they exist to avoid prompts
+    rm -f "$TEMP_SSH_KEY" "$TEMP_SSH_KEY.pub"
     ssh-keygen -t ed25519 -N "" -f "$TEMP_SSH_KEY" -C "$HOSTNAME-deploy"
     chmod 600 "$TEMP_SSH_KEY"
 
@@ -66,20 +81,43 @@ if [ ! -f "$HOST_DIR/ssh.pub" ] || [ ! -f "$HOST_DIR/secrets.yaml" ]; then
     # Store the private key for secrets.yaml creation
     DEPLOYMENT_KEY_AVAILABLE=true
 else
-    blue "Deployment SSH public key already exists, skipping generation"
+    blue "Deployment SSH public key and secrets.yaml already exist, skipping generation"
     DEPLOYMENT_KEY_AVAILABLE=false
+fi
+
+# Extract age key from host key for home-manager (if host_key exists)
+AGE_KEY=""
+if [ -f "$HOST_DIR/host_key" ]; then
+    blue "Extracting age key from host_key for home-manager..."
+    AGE_KEY=$(nix_develop ssh-to-age -private-key -i "$HOST_DIR/host_key" 2>&1)
+    if [ -z "$AGE_KEY" ] || [[ ! "$AGE_KEY" =~ ^AGE-SECRET ]]; then
+        yellow "Failed to extract age key from host_key"
+        AGE_KEY=""
+    fi
 fi
 
 # Create secrets.yaml with the private key embedded (plain text first)
 if [ ! -f "$HOST_DIR/secrets.yaml" ]; then
     if [ "$DEPLOYMENT_KEY_AVAILABLE" = true ]; then
         blue "Creating secrets.yaml..."
-        cat > "$HOST_DIR/secrets.yaml" <<EOF
+        if [ -n "$AGE_KEY" ]; then
+            cat > "$HOST_DIR/secrets.yaml" <<EOF
+$HOSTNAME:
+  system:
+    sshPrivateKey: |
+$(echo "$SSH_PRIVATE_KEY" | sed 's/^/      /')
+  keys:
+    age: |
+$(echo "$AGE_KEY" | sed 's/^/      /')
+EOF
+        else
+            cat > "$HOST_DIR/secrets.yaml" <<EOF
 $HOSTNAME:
   system:
     sshPrivateKey: |
 $(echo "$SSH_PRIVATE_KEY" | sed 's/^/      /')
 EOF
+        fi
         green "Created secrets.yaml"
     else
         yellow "Cannot create secrets.yaml - deployment SSH key not available"
@@ -87,6 +125,12 @@ EOF
     fi
 else
     blue "secrets.yaml already exists, skipping creation"
+    # Check if keys/age needs to be added
+    if [ -n "$AGE_KEY" ] && ! SOPS_AGE_KEY_FILE=sops.key nix_develop sops --config sops.yaml -d "$HOST_DIR/secrets.yaml" 2>/dev/null | grep -q "keys:"; then
+        blue "Adding keys/age to existing secrets.yaml..."
+        # This would require decrypting, editing, and re-encrypting
+        yellow "Please manually add keys/age to secrets.yaml using: just edit-secrets $HOSTNAME"
+    fi
 fi
 
 # Convert host key to age key and add to sops.yaml (so host can decrypt its secrets)
@@ -177,7 +221,46 @@ if [ ! -f "$HOST_DIR/$HOSTNAME.nix" ]; then
 EOF
     green "Created host configuration file"
 else
-    blue "Host configuration file already exists, skipping creation"
+    if yes_or_no "Host configuration file already exists. Overwrite?"; then
+        blue "Overwriting host configuration file..."
+        cat > "$HOST_DIR/$HOSTNAME.nix" <<EOF
+{ inputs, den, pkgs, FTS, deployment, ... }:
+
+{
+  # Define the host
+  den.hosts.x86_64-linux = {
+    $HOSTNAME = {
+      description = "$HOSTNAME host";
+      aspect = "$HOSTNAME";
+    };
+  };
+
+  # $HOSTNAME host-specific aspect
+  den.aspects = {
+    $HOSTNAME = {
+      includes = [
+        FTS.hardware
+        deployment.default
+      ];
+
+      nixos = { config, lib, pkgs, ... }: {
+        # Hardware detection is handled by FTS.hardware (includes FTS.hardware.facter)
+        # Generate hardware config with: just generate-hardware $HOSTNAME
+        # Then uncomment the line below to use it:
+        # facter.reportPath = ./facter.json;
+
+        deployment = {
+          ip = "192.168.1.XXX";  # Update with your actual IP address
+        };
+      };
+    };
+  };
+}
+EOF
+        green "Overwritten host configuration file"
+    else
+        blue "Keeping existing host configuration file"
+    fi
 fi
 
 echo ""
