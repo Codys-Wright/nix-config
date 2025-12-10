@@ -25,6 +25,14 @@
           just
           nh
           jq
+          yq-go
+          # Note: yq in nixpkgs is Python version, we need Go version for anchors
+          # Using yq from nixpkgs (Python version) - will use manual editing fallback
+          # SOPS tools for secrets management
+          age
+          sops
+          ssh-to-age
+          openssl
         ];
       };
 
@@ -43,6 +51,12 @@
             p.external
           ]))
           jq
+          yq-go  # Go version of yq (mikefarah/yq) for YAML editing with anchor support
+          # SOPS tools for secrets management
+          age
+          sops
+          ssh-to-age
+          openssl
         ];
       };
     };

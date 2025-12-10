@@ -22,5 +22,6 @@
 
     (inputs.import-tree ./hardware)
 
+    (inputs.import-tree ./deployment)
      ];
 }

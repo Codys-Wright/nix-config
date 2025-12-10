@@ -26,7 +26,7 @@ top@{ inputs, den, lib, ... }:
       # Access top-level inputs via top.inputs (captured in closure)
       nixosConfigs = top.inputs.self.nixosConfigurations or {};
       systemConfigs = lib.filterAttrs
-        (name: config: config.pkgs.system == system)
+        (name: config: config.pkgs.stdenv.hostPlatform.system == system)
         nixosConfigs;
       
       # Generate VMs for all configs that include the VM aspect

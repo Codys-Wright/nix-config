@@ -49,7 +49,7 @@
 
           # Text processing
           jq
-          yq
+          yq-go  # Go version of yq (mikefarah/yq) for YAML editing with anchor support-go
           xmlstarlet
 
           # Network tools

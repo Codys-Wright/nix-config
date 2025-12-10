@@ -29,8 +29,8 @@
           # Rust toolchain (using rustup by default, can be overridden with fenix)
           rustup
           # Note: To use fenix, add fenix input to flake and use:
-          # rust-toolchain = fenix.packages.${pkgs.system}.complete.withComponents [...];
-          # rust-analyzer = fenix.packages.${pkgs.system}.rust-analyzer;
+          # rust-toolchain = fenix.packages.${pkgs.stdenv.hostPlatform.system}.complete.withComponents [...];
+          # rust-analyzer = fenix.packages.${pkgs.stdenv.hostPlatform.system}.rust-analyzer;
         ];
 
         # Configure rustup/cargo paths

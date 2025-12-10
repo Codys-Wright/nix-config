@@ -13,6 +13,14 @@
       # FTS.doom-btw
     ];
 
+    nixos = { pkgs, ... }: {
+      # Set nvim as the default editor at system level (testing)
+      environment.sessionVariables = {
+        EDITOR = "lazyvim";
+        VISUAL = "lazyvim";
+      };
+    };
+
   };
 }
 

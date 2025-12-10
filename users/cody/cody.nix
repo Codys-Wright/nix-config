@@ -20,7 +20,7 @@
       FTS.gaming
       FTS.coding
       FTS.notes
-      FTS.keyboard
+      # FTS.keyboard
       cody.dots
       cody.fish
       cody.admin  # Admin privileges and user configuration
