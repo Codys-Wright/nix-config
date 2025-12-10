@@ -246,6 +246,10 @@ sops-init-secrets:
 #   3. Create initial secrets.yaml
 # Usage: just sops-setup [hostname] [port]
 # Example: just sops-setup myserver.com
+# Check if sops-nix is running and activated correctly
+check-sops:
+    @./scripts/check-sops.sh
+
 sops-setup host port:
     @echo "Setting up SOPS secrets management..."
     @echo ""

@@ -27,7 +27,7 @@
         hostKeys = mkOption {
           type = types.listOf types.str;
           description = "List of host key paths for SSH during initrd";
-          default = [ "/boot/host_key" ];
+          default = [];
         };
 
         authorizedKeys = mkOption {
