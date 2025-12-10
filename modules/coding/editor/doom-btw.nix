@@ -9,18 +9,18 @@
 
   FTS.doom-btw = {
     homeManager =
-      { pkgs, ... }:
+      { pkgs, lib, ... }:
       let
         emacsPkg = pkgs.emacs30;
 
-        SPC = inputs.SPC.packages.${pkgs.system}.SPC.override { emacs = emacsPkg; };
+        SPC = inputs.SPC.packages.${pkgs.stdenv.hostPlatform.system}.SPC.override { emacs = emacsPkg; };
 
       in
       {
         programs.emacs.enable = true;
-        programs.emacs.package = emacsPkg;
+        programs.emacs.package = lib.mkForce emacsPkg;
         #services.emacs.enable = true;
-        services.emacs.package = emacsPkg;
+        services.emacs.package = lib.mkForce emacsPkg;
         services.emacs.extraOptions = [
           "--init-directory"
           "~/.config/emacs"

@@ -1,4 +1,4 @@
-{ inputs, den, pkgs, FTS, ... }:
+{ inputs, den, pkgs, FTS, deployment, ... }:
 
 {
 
@@ -22,10 +22,13 @@ den.hosts.x86_64-linux = {
         FTS.disk
         FTS.kernel  
         FTS.hardware
+        deployment.default  # Deployment configuration (includes all deployment aspects)
       ];
 
       # Manually set fileSystems and bootloader for now
       nixos = { config, lib, pkgs, ... }: {
+        # Hardware detection is handled by FTS.hardware (includes FTS.hardware.facter)
+        # The facter report path is auto-derived as hosts/THEBATTLESHIP/facter.json
 
         # Configure disk and filesystem
         FTS.disk = {
@@ -48,18 +51,18 @@ den.hosts.x86_64-linux = {
 
       programs.nh.enable = true;
 
-      nix.settings.experimental-features = ["nix-command" "flakes"];
-
-  #     services.displayManager = {
-  #       defaultSession = lib.mkDefault "xfce";
-  #       enable = true;
-  #       autoLogin = {
-  #         enable = true;
-  #         user = "cody";
-  #       };
-  #     };
+        networking.hosts = {
+          "127.0.0.1" = ["n.example.com"];
+        };
 
 
+      
+        deployment = {
+          ip = "192.168.1.XXX";  # Update with your actual IP
+         
+        };
+
+ 
       
       };
     };

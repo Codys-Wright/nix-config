@@ -16,11 +16,19 @@
   inputs = {
     SPC.url = "github:vic/SPC";
     apple-fonts.url = "github:Lyndeno/apple-fonts.nix";
+    colmena = {
+      inputs.nixpkgs.follows = "nixpkgs";
+      url = "github:zhaofengli/colmena";
+    };
     darwin = {
       inputs.nixpkgs.follows = "nixpkgs";
       url = "github:nix-darwin/nix-darwin";
     };
     den.url = "github:vic/den";
+    deploy-rs = {
+      inputs.nixpkgs.follows = "nixpkgs";
+      url = "github:serokell/deploy-rs";
+    };
     disko = {
       inputs.nixpkgs.follows = "nixpkgs";
       url = "github:nix-community/disko";
@@ -48,6 +56,11 @@
       url = "github:Davi-S/sddm-theme-minesddm";
     };
     nix-index-database.url = "github:nix-community/nix-index-database";
+    nixos-anywhere = {
+      inputs.nixpkgs.follows = "nixpkgs";
+      url = "github:nix-community/nixos-anywhere";
+    };
+    nixos-facter-modules.url = "github:numtide/nixos-facter-modules";
     nixos-generators = {
       inputs.nixpkgs.follows = "nixpkgs";
       url = "github:nix-community/nixos-generators";
@@ -65,6 +78,10 @@
     nvf = {
       inputs.nixpkgs.follows = "nixpkgs";
       url = "github:notashelf/nvf";
+    };
+    sops-nix = {
+      inputs.nixpkgs.follows = "nixpkgs";
+      url = "github:Mic92/sops-nix";
     };
     stylix.url = "github:danth/stylix";
     systems.url = "github:nix-systems/default";

@@ -27,6 +27,7 @@
       # System aspects
       FTS.fonts
       FTS.phoenix
+      FTS.experimental-features  # Enable nix-command and flakes
       # Allow unfree packages
       (den._.unfree true)
       # Boot loader - disabled by default, enable per-host as needed
