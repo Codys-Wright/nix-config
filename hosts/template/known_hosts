@@ -1,0 +1,12 @@
+<generate me>
+
+First, generate ./host_key and fill out the IP address in your host configuration.
+
+Optionally, adjust the 'deployment.sshPort' and 'deployment.boot.sshPort' in your host configuration if you want to use non-standard ports.
+
+Then, use this command to generate known_hosts:
+
+nix run .#gen-knownhosts-file
+
+Or manually:
+ssh-keyscan -t ed25519 -p <port> <ip-or-hostname> >> known_hosts

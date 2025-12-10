@@ -53,7 +53,7 @@
             corefonts
           ]
           ++ lib.optionals cfg.enableAppleEmoji [
-            inputs.apple-emoji-linux.packages.${pkgs.system}.default or pkgs.noto-fonts-emoji
+            inputs.apple-emoji-linux.packages.${pkgs.stdenv.hostPlatform.system}.default or pkgs.noto-fonts-emoji
           ]
           ++ cfg.extraFonts;
 

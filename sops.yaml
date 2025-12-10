@@ -1,0 +1,15 @@
+keys:
+  - &me age1vaf7qpk38ddhlmjc0qj3r5l7nyz77csjtskmxp3hrl57jr8my4ws6h05ge
+
+creation_rules:
+  # Host-level secrets
+  - path_regex: ^hosts/.*/secrets\.yaml$
+    key_groups:
+    - age:
+      - *me
+  
+  # User-level secrets
+  - path_regex: ^users/.*/secrets\.yaml$
+    key_groups:
+    - age:
+      - *me

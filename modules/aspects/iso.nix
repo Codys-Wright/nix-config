@@ -21,7 +21,7 @@ top@{ inputs, den, lib, ... }:
       # Access top-level inputs via top.inputs
       nixosConfigs = top.inputs.self.nixosConfigurations or {};
       systemConfigs = lib.filterAttrs
-        (name: config: config.pkgs.system == system)
+        (name: config: config.pkgs.stdenv.hostPlatform.system == system)
         nixosConfigs;
     in
     {

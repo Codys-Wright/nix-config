@@ -14,3 +14,21 @@ result/
 result
 result-*
 
+# SOPS Secrets Management
+# Main SOPS private key (NEVER commit this!)
+sops.key
+keys.txt
+*.key
+
+# Host SSH keys (generated per host)
+# Private keys are now stored in SOPS (secrets.yaml), so we only ignore host_key
+# The deployment SSH key (ssh) is stored in SOPS, not as a file
+host_key
+# Public keys and known_hosts CAN be committed (they're public information)
+# host_key.pub - public key, safe to commit
+# ssh.pub - public key, safe to commit  
+# known_hosts - public keys, safe to commit
+
+# Temporary SOPS files
+.skarabox-tmp/
+

@@ -19,11 +19,11 @@
       
       # Filter configs for current system
       systemNixosConfigs = lib.filterAttrs
-        (name: config: config.pkgs.system == system)
+        (name: config: config.pkgs.stdenv.hostPlatform.system == system)
         nixosConfigs;
       
       systemDarwinConfigs = lib.filterAttrs
-        (name: config: config.pkgs.system == system)
+        (name: config: config.pkgs.stdenv.hostPlatform.system == system)
         darwinConfigs;
       
       # Check that NixOS hosts build
