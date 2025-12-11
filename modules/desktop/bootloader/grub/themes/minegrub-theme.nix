@@ -12,9 +12,9 @@
     url = "github:Lxtharia/minegrub-theme";
   };
 
-  # MineGrub theme aspect
-  FTS.minegrub = {
-    description = "GRUB bootloader with MineGrub theme";
+  # MineGrub theme provider for GRUB
+  FTS.grub._.themes._.minegrub = {
+    description = "MineGrub theme for GRUB bootloader";
 
     nixos = {
       # Import the minegrub theme nixos module

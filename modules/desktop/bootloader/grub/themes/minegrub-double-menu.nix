@@ -8,13 +8,13 @@
   ...
 }:
 {
-  # MineGrub double menu aspect
-  FTS.grub.minegrub-double-menu = {
-    description = "GRUB bootloader with MineGrub double menu (main menu + world selection)";
+  # MineGrub double menu theme provider for GRUB
+  FTS.grub._.themes._.minegrub-double-menu = {
+    description = "MineGrub double menu theme (main menu + world selection) for GRUB bootloader";
 
     includes = [
-      FTS.grub.minegrub
-      FTS.grub.minegrub-world-sel
+      FTS.grub._.themes._.minegrub
+      FTS.grub._.themes._.minegrub-world-sel
     ];
 
     nixos = {
