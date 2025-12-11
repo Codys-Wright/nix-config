@@ -12,11 +12,16 @@
     url = "github:Lxtharia/minegrub-world-sel-theme";
   };
 
-  # MineGrub World Selection theme aspect
-  FTS.grub.minegrub-world-sel = {
-    description = "GRUB bootloader with MineGrub World Selection theme";
+  # MineGrub World Selection theme provider for GRUB
+  FTS.grub._.themes._.minegrub-world-sel = {
+    description = "MineGrub World Selection theme for GRUB bootloader";
 
     nixos = {
+      # Import the minegrub-world-sel theme nixos module
+      imports = [
+        inputs.minegrub-world-sel-theme.nixosModules.default
+      ];
+
       boot.loader.grub = {
         enable = true;
         minegrub-world-sel = {

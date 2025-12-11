@@ -1,4 +1,4 @@
-{ inputs, den, pkgs, FTS, ... }:
+{ inputs, den, pkgs, FTS, __findFile, ... }:
 
 {
 
@@ -16,13 +16,14 @@ den.hosts.x86_64-linux = {
     dave = {
       # Include role-based aspects
       includes = [
-        FTS.gdm
-        FTS.gnome
-        FTS.minegrub
+        # Complete desktop setup with GNOME
+        (FTS.desktop {
+          environment.default = "gnome";
+          displayManager.auto = true;  # Auto-selects GDM for GNOME
+        })
 
-        FTS.kernel  
-        
-        FTS.hardware
+        <FTS/kernel>
+        <FTS/hardware>
       ];
 
       # Manually set fileSystems and bootloader for now
