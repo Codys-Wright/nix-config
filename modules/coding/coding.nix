@@ -10,7 +10,7 @@
       FTS.editors
       FTS.lang
       FTS.shells
-      FTS.terminals
+      (FTS.coding._.terminals { })  # Include all terminals with ghostty as default
       FTS.tools
     ];
   };

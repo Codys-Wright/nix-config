@@ -4,7 +4,7 @@
   inputs,
   den,
   lib,
-  FTS,
+  __findFile,
   ...
 }:
 {
@@ -13,34 +13,34 @@
     # parametric defaults for host/user/home. see aspects/dependencies.nix
     # `_` is shorthand alias for `provides`.
     includes = [
-      den._.home-manager
+      <den/home-manager>  # den.provides.home-manager
       den.aspects.hm-backup
       den.aspects.example._.routes
       den.aspects.example._.user
       den.aspects.example._.host
       den.aspects.example._.home
-      den._.vm  # Enable VM bootable support
-      den._.iso  # Enable ISO image generation
+      <den/vm>   # den.provides.vm
+      <den/iso>  # den.provides.iso
     ];
     host.includes = [
-      FTS.nh
+      <FTS/nh>
       # System aspects
-      FTS.fonts
-      FTS.phoenix
-      FTS.experimental-features  # Enable nix-command and flakes
-      FTS.secrets  # SOPS secrets management
+      <FTS/fonts>
+      <FTS/phoenix>
+      <FTS/experimental-features>  # Enable nix-command and flakes
+      <FTS/secrets>  # SOPS secrets management
       # Allow unfree packages
-      (den._.unfree true)
+      (<den/unfree> true)
       # Boot loader - disabled by default, enable per-host as needed
-      # FTS.grub
+      # (<FTS/grub> { })
     ];
-    user.includes = [ FTS.example._.user ];
+    user.includes = [ <FTS/example/user> ];
     home.includes = [
-      FTS.example._.home
+      <FTS/example/home>
       den.aspects.nix-index
       den.aspects.nix-registry
-      FTS.secrets  # SOPS secrets infrastructure (home-manager part)
-      FTS.user-secrets  # User secrets from SOPS with environment variables
+      <FTS/secrets>  # SOPS secrets infrastructure (home-manager part)
+      <FTS/user-secrets>  # User secrets from SOPS with environment variables
     ];
   };
 }

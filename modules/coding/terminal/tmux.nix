@@ -2,7 +2,7 @@
 {
   FTS, ... }:
 {
-  FTS.tmux = {
+  FTS.coding._.tmux = {
     description = "Tmux terminal multiplexer with custom configuration and plugins";
 
     # Darwin-specific configuration
