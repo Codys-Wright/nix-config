@@ -1,6 +1,7 @@
 {
   FTS,
   cody,
+  __findFile,
   ...
 }:
 {
@@ -23,6 +24,9 @@
     aspects.cody = {
       description = "Cody user configuration";
       includes = [
+        # User-level theme (context-aware: only affects homeManager appearance)
+        (<FTS/theme> { default = "cody"; })
+        
         FTS.browsers
         FTS.gaming
         FTS.coding

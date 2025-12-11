@@ -1,6 +1,5 @@
-# KDE Plasma 6 Desktop Environment
-# Provides NixOS configuration for KDE Plasma 6
-# Note: Display manager should be configured separately (e.g., FTS.sddm.wayland)
+# KDE Plasma Desktop Environment
+# Provides NixOS configuration for KDE Plasma with theme support
 {
   den,
   lib,
@@ -8,44 +7,56 @@
   ...
 }:
 {
-  # Base KDE Plasma 6 desktop environment
-  FTS.kde = {
-    description = "KDE Plasma 6 desktop environment";
-
-    nixos = {
-      # Enable KDE Plasma 6 desktop manager
-      services.desktopManager.plasma6.enable = true;
+  # Base KDE desktop environment
+  # Usage: (FTS.desktop._.environment._.kde { theme = "whitesur"; })
+  FTS.desktop._.environment._.kde =
+    {
+      theme ? null,
+      ...
+    }@args:
+    { class, aspect-chain }:
+    let
+      # Available KDE themes
+      availableThemes = ["whitesur" "breeze"];
       
-      # Don't set SSH askPassword (override default from plasma6 module)
-      programs.ssh.askPassword = lib.mkForce "";
-    };
-  };
+      # Validate theme if provided
+      _ = if theme != null && !(builtins.elem theme availableThemes)
+        then throw "kde: unknown theme '${theme}'. Available: ${builtins.concatStringsSep ", " availableThemes}"
+        else null;
+      
+      # Theme includes
+      themeIncludes = if theme == "whitesur" then [ FTS.desktop._.environment._.kde._.themes._.whitesur ]
+        else if theme == "breeze" then [ FTS.desktop._.environment._.kde._.themes._.breeze ]
+        else [];
+    in
+    {
+      description = "KDE Plasma 6 desktop environment";
+      
+      includes = themeIncludes;
 
-  # KDE with RDP support (X11-based remote desktop)
-  # Note: RDP requires X11 instead of Wayland
-  # Usage: FTS.kde-desktop.rdp
-  FTS.kde.rdp = {
-    description = "KDE Plasma 6 with RDP remote desktop support (X11)";
+      nixos = {
+        # Enable KDE Plasma 6 desktop manager
+        services.desktopManager.plasma6.enable = true;
+        
+        # Don't set SSH askPassword (override default from plasma6 module)
+        programs.ssh.askPassword = lib.mkForce "";
 
-    includes = [ FTS.kde-desktop ];
+        # Enable KDE applications (optional, can be added as needed)
+        # environment.systemPackages = with pkgs; [
+        #   kdePackages.kate
+        #   kdePackages.dolphin
+        #   kdePackages.konsole
+        # ];
 
-    nixos = {
-      # Enable X11 for RDP support
-      services.xserver = {
-        enable = true;
-        xkb = {
-          layout = "us";
-          variant = "";
-        };
+        # Enable KDE Connect for phone integration
+        # programs.kdeconnect.enable = true;
+
+        # Enable Wayland support
+        programs.xwayland.enable = true;
       };
 
-      # Configure xrdp for remote desktop access
-      services.xrdp = {
-        defaultWindowManager = "startplasma-x11";
-        enable = true;
-        openFirewall = true;
+      homeManager = { pkgs, lib, ... }: {
+        # KDE-specific home-manager configuration
       };
     };
-  };
 }
-
