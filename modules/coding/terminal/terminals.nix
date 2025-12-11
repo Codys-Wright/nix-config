@@ -1,16 +1,24 @@
-# Terminals meta-aspect - includes all terminal modules
+# Terminals meta-aspect - function that includes all terminal modules
 {
-  FTS, ... }:
+  FTS,
+  lib,
+  ...
+}:
 {
-  FTS.terminals = {
-    description = "All terminal modules - includes ghostty, kitty, tmux, and wezterm";
+  # Function that produces an aspect with all terminals
+  FTS.coding._.terminals =
+    {
+      default ? "ghostty",
+      ...
+    }@args:
+    {
+      description = "Terminal modules - includes all terminals (ghostty, kitty, tmux, wezterm)";
 
-    includes = [
-      FTS.ghostty
-      FTS.kitty
-      FTS.tmux
-      FTS.wezterm
-    ];
-  };
+      includes = [
+        FTS.coding._.ghostty
+        FTS.coding._.kitty
+        FTS.coding._.tmux
+        FTS.coding._.wezterm
+      ];
+    };
 }
-

@@ -1,88 +1,72 @@
-
+# GRUB boot loader configuration aspect
+# Takes named parameters for boot configuration
 {
-  inputs,
-  den,
   lib,
   FTS,
   ...
 }:
 {
-  FTS.grub = {
-    description = "GRUB boot loader configuration for NixOS";
+  FTS.grub.description = "GRUB boot loader configuration for NixOS";
 
-    nixos = { config, pkgs, lib, ... }:
+  # Function that produces a GRUB boot loader configuration aspect
+  # Takes named parameters: { devices, uefi, useOSProber, mirroredBoots, ... }
+  # Usage: (FTS.grub { uefi = true; })
+  FTS.grub.__functor =
+    _self:
+    {
+      devices ? [],
+      uefi ? true,
+      useOSProber ? false,
+      mirroredBoots ? [],
+      ...
+    }@args:
+    { class, aspect-chain }:
     let
-      inherit (lib) mkIf mkEnableOption mkOption types;
-      cfg = config.FTS.grub;
-      # Automatically use device from FTS.disk if available, otherwise use configured device
-      grubDevice = if cfg.device != null then cfg.device
-        else if config.FTS.disk.enable or false then config.FTS.disk.device
-        else null;
-      grubDevices = if cfg.devices != [] then cfg.devices
-        else if grubDevice != null then [ grubDevice ]
-        else [];
+      inherit (lib) mkIf mkMerge optionals;
+      # Normalize devices to a list (accept string or list)
+      devicesList = if lib.isString devices then [ devices ]
+                    else if lib.isList devices then devices
+                    else [];
+      useUefi = if uefi != null then uefi
+                else if devicesList != [] && lib.elem "nodev" devicesList then true
+                else if devicesList == [] then true  # Default to UEFI if no devices specified
+                else false;
+      hasMirroredBoots = mirroredBoots != [];
+      grubDevices = devicesList;
     in
     {
-      options.FTS.grub = {
-        enable = mkOption {
-          type = types.bool;
-          default = true;  # Enabled by default when aspect is included
-          description = "Enable GRUB boot loader";
-        };
+      includes = [ ];
 
-        device = mkOption {
-          type = types.nullOr types.str;
-          default = null;
-          description = "Device to install GRUB to (e.g., /dev/sda or /dev/vda). If null and FTS.disk is enabled, will use FTS.disk.device. Set to 'nodev' for UEFI mode.";
+      nixos = { pkgs, lib, ... }:
+        {
+          boot.loader.grub = lib.mkMerge [
+            {
+              enable = true;
+              useOSProber = useOSProber;
+              efiSupport = lib.mkForce useUefi;
+            }
+            # Use mirrored boots if configured (e.g., for ZFS with mirrored root pools)
+            (lib.mkIf hasMirroredBoots {
+              mirroredBoots = lib.mkForce mirroredBoots;
+              # For mirrored boots with UEFI, use efiInstallAsRemovable (canTouchEfiVariables must be false)
+              efiInstallAsRemovable = lib.mkIf useUefi true;
+            })
+            # For UEFI without mirrored boots: use devices = ["nodev"] and canTouchEfiVariables
+            (lib.mkIf (useUefi && !hasMirroredBoots) {
+              devices = lib.mkForce [ "nodev" ];
+              efiInstallAsRemovable = false;  # Use canTouchEfiVariables instead
+            })
+            # For BIOS: use devices = list of device paths
+            (lib.mkIf (!useUefi && !hasMirroredBoots) {
+              devices = lib.mkForce grubDevices;
+            })
+          ];
+          # Enable EFI variable management for UEFI systems (only when not using efiInstallAsRemovable)
+          # efiInstallAsRemovable and canTouchEfiVariables are mutually exclusive
+          boot.loader.efi.canTouchEfiVariables = mkIf useUefi (
+            if hasMirroredBoots then (lib.mkForce false)
+            else (lib.mkForce true)
+          );
         };
-
-        devices = mkOption {
-          type = types.listOf types.str;
-          default = [];
-          description = "List of devices to install GRUB to";
-        };
-
-        uefi = mkOption {
-          type = types.nullOr types.bool;
-          default = true;  # Default to UEFI for all hosts
-          description = "Force UEFI mode (true) or BIOS mode (false). If null, auto-detect based on device setting.";
-        };
-
-        useOSProber = mkOption {
-          type = types.bool;
-          default = false;
-          description = "Enable OS prober to detect other operating systems";
-        };
-      };
-
-      config = mkIf cfg.enable (let
-        # Determine if we should use UEFI mode
-        useUefi = if cfg.uefi != null then cfg.uefi
-                  else if grubDevice == "nodev" then true
-                  else if grubDevice == null && grubDevices == [] then true
-                  else false;
-      in {
-        boot.loader.grub = lib.mkMerge [
-          {
-            enable = true;
-            useOSProber = cfg.useOSProber;
-            efiSupport = lib.mkForce useUefi;
-            efiInstallAsRemovable = false;  # Install to EFI system partition
-          }
-          # For UEFI: use devices = ["nodev"] and don't set device
-          (lib.mkIf useUefi {
-            devices = lib.mkForce [ "nodev" ];
-          })
-          # For BIOS: use device = actual device path
-          (lib.mkIf (!useUefi) {
-            device = lib.mkForce grubDevice;
-            devices = lib.mkForce grubDevices;
-          })
-        ];
-        # Enable EFI variable management for UEFI systems
-        boot.loader.efi.canTouchEfiVariables = mkIf useUefi true;
-      });
     };
-  };
 }
-

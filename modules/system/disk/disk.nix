@@ -1,163 +1,53 @@
 # Disk/filesystem configuration wrapper aspect
 # Provides a unified interface for different disk configuration types
 {
-  inputs,
-  den,
-  lib,
   FTS,
   ...
 }:
-let
-  inherit (lib) mkIf mkEnableOption mkOption types;
-  
-  description = ''
-    Disk and filesystem configuration wrapper with support for different filesystem types.
-
-    Configure via options in nixos config:
-      FTS.disk = {
-        enable = true;
-        type = "btrfs-impermanence";
-        device = "/dev/nvme2n1";
-        swapSize = "205";
-        withSwap = true;
-        persistFolder = "/persist";
-      };
-
-    Available filesystem types: btrfs-impermanence
-    More types can be added as needed.
-  '';
-in
 {
-  flake-file.inputs.disko.url = "github:nix-community/disko";
-  flake-file.inputs.disko.inputs.nixpkgs.follows = "nixpkgs";
+  # Create disk as a provider under FTS.system with description
+  FTS.system._.disk.description = ''
+    Disk and filesystem configuration with support for different filesystem types.
+    
+    Usage as router:
+      (<FTS/system/disk> { type = "btrfs-impermanence"; device = "/dev/sda"; })
+    
+    Direct access to specific types:
+      (<FTS/system/disk/btrfs> { device = "/dev/sda"; })
+      (<FTS/system/disk/zfs> { rootPool = {...}; })
+  '';
 
-  FTS.disk = {
-    inherit description;
-
-    nixos = { config, pkgs, lib, ... }:
-    let
-      inherit (lib) mkIf mkEnableOption mkOption types;
-      cfg = config.FTS.disk;
-    in
+  # Make disk callable as a router function
+  FTS.system._.disk.__functor =
+    _self:
     {
-      # Import disko module to generate fileSystems from disko.devices
-      imports = [ inputs.disko.nixosModules.disko ];
-
-      options.FTS.disk = {
-        enable = mkEnableOption "disk and filesystem configuration";
-
-        type = mkOption {
-          type = types.enum [ "btrfs-impermanence" ];
-          default = "btrfs-impermanence";
-          description = "Type of disk configuration to use";
-        };
-
-        device = mkOption {
-          type = types.str;
-          default = "/dev/vda";
-          description = "Device to use for the filesystem (e.g., /dev/sda, /dev/nvme0n1)";
-        };
-
-        withSwap = mkOption {
-          type = types.bool;
-          default = false;
-          description = "Enable swap partition";
-        };
-
-        swapSize = mkOption {
-          type = types.str;
-          default = "8";
-          description = "Swap size in GB (without the 'G' suffix)";
-        };
-
-        persistFolder = mkOption {
-          type = types.str;
-          default = "/persist";
-          description = "Folder to persist data for impermanence configurations";
-        };
-      };
-
-      config = mkIf (cfg.enable && cfg.type == "btrfs-impermanence") {
-        # Enable Btrfs support
-        boot.supportedFilesystems = [ "btrfs" ];
-
-        # Disko configuration for Btrfs partitioning with impermanence
-        disko.devices = {
-          disk = {
-            system = {
-              type = "disk";
-              device = cfg.device;
-              content = {
-                type = "gpt";
-                partitions = {
-                  ESP = {
-                    priority = 1;
-                    name = "ESP";
-                    start = "1M";
-                    end = "512M";
-                    type = "EF00";
-                    content = {
-                      type = "filesystem";
-                      format = "vfat";
-                      mountpoint = "/boot";
-                      mountOptions = [ "defaults" ];
-                    };
-                  };
-                  bios = {
-                    name = "BIOS";
-                    size = "1M";
-                    type = "EF02";
-                  };
-                  root = {
-                    size = "100%";
-                    content = {
-                      type = "btrfs";
-                      extraArgs = [ "-f" ]; # Override existing partition
-                      # Subvolumes must set a mountpoint in order to be mounted,
-                      # unless their parent is mounted
-                      subvolumes = {
-                        "@root" = {
-                          mountpoint = "/";
-                          mountOptions = [
-                            "compress=zstd"
-                            "noatime"
-                          ];
-                        };
-                        "@persist" = {
-                          mountpoint = cfg.persistFolder;
-                          mountOptions = [
-                            "compress=zstd"
-                            "noatime"
-                          ];
-                        };
-                        "@nix" = {
-                          mountpoint = "/nix";
-                          mountOptions = [
-                            "compress=zstd"
-                            "noatime"
-                          ];
-                        };
-                        "@swap" = lib.mkIf cfg.withSwap {
-                          mountpoint = "/.swapvol";
-                          swap.swapfile.size = "${cfg.swapSize}G";
-                        };
-                      };
-                    };
-                  };
-                };
-              };
-            };
-          };
-        };
-
-        # Btrfs maintenance services
-        services.btrfs.autoScrub = {
-          enable = true;
-          interval = "weekly";
-          fileSystems = [ "/" ];
-        };
-      };
+      type,
+      # Btrfs parameters
+      device ? null,
+      swapSize ? "8",
+      withSwap ? false,
+      persistFolder ? "/persist",
+      # ZFS parameters
+      rootPool ? null,
+      dataPool ? null,
+      initialBackupDataset ? true,
+      ...
+    }@args:
+    { class, aspect-chain }:
+    {
+      includes = [
+        # Route to the appropriate disk type implementation
+        (if type == "btrfs-impermanence" then
+          (FTS.system._.disk._.btrfs {
+            inherit device swapSize withSwap persistFolder;
+          })
+        else if type == "zfs" then
+          (FTS.system._.disk._.zfs {
+            inherit rootPool dataPool initialBackupDataset;
+          })
+        else
+          throw "FTS.system.disk: unsupported type '${type}'. Available types: btrfs-impermanence, zfs")
+      ];
     };
-  };
 }
 

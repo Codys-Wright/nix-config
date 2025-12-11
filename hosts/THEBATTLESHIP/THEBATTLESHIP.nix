@@ -1,4 +1,4 @@
-{ inputs, den, pkgs, FTS, deployment, ... }:
+{ inputs, den, pkgs, FTS, __findFile, ... }:
 
 {
 
@@ -15,30 +15,27 @@ den.hosts.x86_64-linux = {
     THEBATTLESHIP = {
       # Include role-based aspects
       includes = [
-        FTS.gdm
-        FTS.gnome
-        FTS.grub
-        FTS.minegrub
-        FTS.disk
-        FTS.kernel  
-        FTS.hardware
-        deployment.default  # Deployment configuration (includes all deployment aspects)
+        <FTS/gdm>
+        <FTS/gnome>
+        (<FTS/grub> { })  # GRUB with default UEFI configuration
+        <FTS/minegrub>
+        # Configure disk and filesystem using function-based approach
+        (<FTS/system/disk> {
+          type = "btrfs-impermanence";
+          device = "/dev/nvme2n1";
+          withSwap = true;
+          swapSize = "205";  # 205GB swap for full hibernation
+          persistFolder = "/persist";
+        })
+        <FTS/kernel>
+        <FTS/hardware>
+        <deployment/default>  # Deployment configuration (includes all deployment aspects)
       ];
 
       # Manually set fileSystems and bootloader for now
       nixos = { config, lib, pkgs, ... }: {
         # Hardware detection is handled by FTS.hardware (includes FTS.hardware.facter)
         # The facter report path is auto-derived as hosts/THEBATTLESHIP/facter.json
-
-        # Configure disk and filesystem
-        FTS.disk = {
-          enable = true;
-          type = "btrfs-impermanence";
-          device = "/dev/nvme2n1";
-          withSwap = true;
-          swapSize = "205";  # 205GB swap for full hibernation
-          persistFolder = "/persist";
-        };
 
   # https://gist.github.com/nat-418/1101881371c9a7b419ba5f944a7118b0
       services.xserver = {

@@ -19,7 +19,7 @@
     description = "Carter user configuration";
     includes = [
       # Install all terminals with ghostty as default
-      # (FTS.terminals { default = "ghostty"; })
+      # (FTS.coding._.terminals { default = "ghostty"; })
       FTS.coding
       # FTS.yazi
       # FTS.fzf
