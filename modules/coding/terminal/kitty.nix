@@ -2,7 +2,7 @@
 {
   FTS, ... }:
 {
-  FTS.kitty = {
+  FTS.coding._.kitty = {
     description = "Kitty terminal emulator with custom configuration";
 
 

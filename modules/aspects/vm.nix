@@ -17,6 +17,7 @@ top@{ inputs, den, lib, ... }:
             services.btrfs.autoScrub.enable = lib.mkForce false;
           };
         };
+      includes = [ ];
     };
 
   perSystem =

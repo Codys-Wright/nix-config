@@ -12,6 +12,7 @@ top@{ inputs, den, lib, ... }:
         {
           # ISO-specific configuration can go here if needed
         };
+      includes = [ ];
     };
 
   perSystem =
