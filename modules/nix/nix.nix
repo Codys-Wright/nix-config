@@ -1,7 +1,7 @@
 { inputs, ... }:
 {
   flake-file.inputs.nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.11";
-  flake-file.inputs.nixpkgs-unstable.url = "github:nixos/nixpkgs/unstable";
+  flake-file.inputs.nixpkgs-unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable";
 
   # Enable unfree packages for darwin/nixos/home-manager modules
   flake.modules.darwin.nixpkgs.config.allowUnfree = true;

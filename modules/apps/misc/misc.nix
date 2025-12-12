@@ -1,0 +1,14 @@
+# Browsers facet - All web browsers
+{
+  FTS,
+  ...
+}:
+{
+  FTS.apps._.misc = {
+    description = "misc apps";
+
+    includes = [
+      FTS.apps._.misc._.nextcloud-client
+    ];
+  };
+}
