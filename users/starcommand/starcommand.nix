@@ -6,8 +6,7 @@
   FTS,
   __findFile,
   ...
-}:
-{
+}: {
   den = {
     homes = {
       # Darwin (macOS) home configuration

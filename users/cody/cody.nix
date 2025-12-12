@@ -31,6 +31,7 @@
         <FTS.apps/browsers>
         <FTS.apps/gaming>
         <FTS.apps/notes>
+        <FTS.apps/misc>
 
         # Coding environment - all tools included by default
         <FTS.coding/cli>
@@ -43,7 +44,7 @@
         <FTS.user/admin> # Admin privileges and user configuration
         <FTS.user/autologin> # Autologin configuration (enabled when display manager is present)
         (<FTS.user/shell> { default = "fish"; }) # Set fish as default shell
-        
+
         # Cody-specific configurations
         cody.dots
         cody.fish
