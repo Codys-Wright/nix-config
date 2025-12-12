@@ -1,4 +1,4 @@
-{ inputs, den, pkgs, FTS, deployment, ... }:
+{ inputs, den, pkgs, FTS, deployment, __findFile, ... }:
 
 {
   # Define the host
@@ -15,7 +15,7 @@
     template = {
       # Include basic aspects for testing
       includes = [
-        FTS.hardware
+        <FTS/hardware>
         deployment.default  # Deployment configuration (includes all deployment aspects)
       ];
 

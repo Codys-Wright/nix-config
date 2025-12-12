@@ -4,7 +4,7 @@
   ...
 }:
 {
-  FTS.nvidia = {
+  FTS.hardware._.nvidia = {
     description = "NVIDIA graphics hardware support";
 
     nixos = { ... }: {

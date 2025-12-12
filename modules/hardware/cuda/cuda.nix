@@ -4,7 +4,7 @@
   ...
 }:
 {
-  FTS.cuda = {
+  FTS.hardware._.cuda = {
     description = "CUDA hardware support";
 
     nixos = { pkgs, ... }: {

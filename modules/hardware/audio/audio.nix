@@ -1,15 +1,14 @@
-# Audio hardware aspect - includes all audio components
-# Sub-aspects are defined in separate files: pipewire/pipewire.nix, raysession/raysession.nix, wireguard/wireguard.nix
+# Audio hardware facet - All audio components
 {
   FTS,
   ...
 }:
 {
-  FTS.audio = {
+  FTS.hardware._.audio = {
     description = "Audio system with PipeWire and device management";
     includes = [
-      FTS.pipewire
-      FTS.wireguard
+      FTS.hardware._.audio._.pipewire
+      FTS.hardware._.audio._.wireplumber
     ];
   };
 }

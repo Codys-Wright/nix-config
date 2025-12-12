@@ -4,7 +4,7 @@
   ...
 }:
 {
-  FTS.wireguard = {
+  FTS.hardware._.audio._.wireplumber = {
     description = "WirePlumber audio device management";
 
     nixos = { ... }: {
