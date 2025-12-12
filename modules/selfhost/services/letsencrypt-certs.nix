@@ -35,25 +35,12 @@
         if certName != null
         then certName
         else domain;
-    in {
-      # Create a properly formatted credentials file for ACME/lego
-      # lego expects: CF_DNS_API_TOKEN=token_value
-      systemd.services."cloudflare-credentials-wrapper" = {
-        description = "Create Cloudflare credentials file for ACME";
-        wantedBy = ["multi-user.target"];
-        before = ["acme-${actualCertName}.service"];
-        serviceConfig = {
-          Type = "oneshot";
-          RemainAfterExit = true;
-        };
-        script = ''
-          mkdir -p /var/lib/secrets/acme
-          echo "CF_DNS_API_TOKEN=$(cat ${config.shb.sops.secret."${cloudflareTokenKey}".result.path})" > /var/lib/secrets/acme/cloudflare-credentials
-          chmod 0400 /var/lib/secrets/acme/cloudflare-credentials
-        '';
-      };
 
+      # The SOPS template will be created at this path
+      credentialsFile = config.sops.templates."acme-cloudflare-credentials".path;
+    in {
       # Let's Encrypt certificate configuration
+      # This follows the selfhostblocks pattern directly
       shb.certs.certs.letsencrypt.${actualCertName} = {
         domain = domain; # Request cert for root domain
         extraDomains = ["*.${domain}"]; # Include wildcard for all subdomains
@@ -61,16 +48,32 @@
         reloadServices = ["nginx.service"];
         dnsProvider = "cloudflare";
         adminEmail = adminEmail;
-        credentialsFile = "/var/lib/secrets/acme/cloudflare-credentials";
+        credentialsFile = credentialsFile;
+        # Optional: Enable debug logging during initial setup
+        debug = lib.mkDefault false;
       };
 
-      # SOPS secret for Cloudflare API token
+      # SOPS secret for Cloudflare API token (just the raw token value)
       shb.sops.secret."${cloudflareTokenKey}" = {
         request = lib.mkDefault {};
-        settings.mode = "0400";
+        settings = {
+          mode = "0400";
+        };
       };
 
-      # Disable systemd-resolved to avoid conflicts
+      # Create a sops-nix template file that formats the credentials correctly for ACME/lego
+      # lego expects: CF_DNS_API_TOKEN=token_value
+      # This uses sops-nix's built-in template feature to create the formatted file
+      sops.templates."acme-cloudflare-credentials" = {
+        content = ''
+          CF_DNS_API_TOKEN=${config.sops.placeholder."${cloudflareTokenKey}"}
+        '';
+        mode = "0400";
+        owner = "acme";
+        group = "acme";
+      };
+
+      # Disable systemd-resolved to avoid DNS conflicts during ACME challenge
       services.resolved.enable = lib.mkForce false;
     };
   };

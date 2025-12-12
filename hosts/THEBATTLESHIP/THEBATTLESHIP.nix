@@ -13,12 +13,13 @@
     THEBATTLESHIP = {
       description = "The Main System, ready for everyday battle";
       users.cody = { };
-      users.starcommand = { };  # Service user for self-hosting infrastructure
+      users.starcommand = { }; # Service user for self-hosting infrastructure
       aspect = "THEBATTLESHIP";
-      
+
       # Use nixpkgs-unstable with selfhostblocks patches applied
       # This gives us the latest packages plus LLDAP/borgbackup enhancements
-      instantiate = args: 
+      instantiate =
+        args:
         let
           system = "x86_64-linux";
           # Get pkgs from nixpkgs for applyPatches
@@ -27,7 +28,7 @@
           shbPatches = inputs.selfhostblocks.lib.${system}.patches;
           patchedNixpkgs = pkgs'.applyPatches {
             name = "nixpkgs-unstable-shb-patched";
-            src = inputs.nixpkgs;  # Use our nixpkgs-unstable
+            src = inputs.nixpkgs; # Use our nixpkgs-unstable
             patches = shbPatches;
           };
           nixosSystem' = import "${patchedNixpkgs}/nixos/lib/eval-config.nix";
@@ -43,7 +44,7 @@
       includes = [
         # System-wide theme (bootloader, default appearance)
         (<FTS.theme> { default = "cody"; })
-        
+
         # Complete desktop setup (environment + display manager + bootloader)
         (FTS.desktop {
           environment.default = "gnome";
@@ -54,9 +55,9 @@
               # theme is set by system theme preset
             };
           };
-          displayManager.auto = true;  # Auto-selects GDM for GNOME
+          displayManager.auto = true; # Auto-selects GDM for GNOME
         })
-        
+
         # Disk and filesystem configuration
         (<FTS.system/disk> {
           type = "btrfs-impermanence";
@@ -65,14 +66,14 @@
           swapSize = "205"; # 205GB swap for full hibernation
           persistFolder = "/persist";
         })
-        
+
         # Hardware and kernel
         <FTS.kernel>
         <FTS.hardware>
-        
+
         # Deployment configuration (SSH, networking, secrets, VM/ISO generation)
         <FTS.deployment>
-        
+
         # Self-hosting services are provided by the starcommand user
         # See users/starcommand/starcommand.nix for service configuration
       ];
@@ -109,8 +110,8 @@
           ];
 
           # Limit number of generations in boot partition (critical with 512MB boot)
-          boot.loader.grub.configurationLimit = 2;  # Only keep last 2 generations in GRUB
-          
+          boot.loader.grub.configurationLimit = 2; # Only keep last 2 generations in GRUB
+
           # Automatic cleanup
           nix.gc = {
             automatic = true;
