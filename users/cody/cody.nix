@@ -27,10 +27,18 @@
         # User-level theme (context-aware: only affects homeManager appearance)
         (<FTS/theme> { default = "cody"; })
         
-        FTS.browsers
-        FTS.gaming
-        FTS.coding
-        FTS.notes
+        # Applications - all included by default
+        FTS.apps._.browsers
+        FTS.apps._.gaming
+        FTS.apps._.notes
+        
+        # Coding environment - all tools included by default
+        FTS.coding._.cli
+        FTS.coding._.editors
+        FTS.coding._.terminals
+        FTS.coding._.shells
+        FTS.coding._.lang
+        FTS.coding._.tools
         # FTS.keyboard
         cody.dots
         cody.fish

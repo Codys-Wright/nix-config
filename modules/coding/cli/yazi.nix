@@ -2,7 +2,7 @@
 {
   FTS, ... }:
 {
-  FTS.yazi = {
+  FTS.coding._.cli._.yazi = {
     description = "Yazi file manager";
 
     homeManager = { pkgs, lib, ... }: {

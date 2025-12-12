@@ -1,13 +1,16 @@
-# browsers aspect
+# Browsers facet - All web browsers
 {
-  FTS, ... }:
+  FTS,
+  ...
+}:
 {
-  FTS.browsers = {
-    description = "All coding modules - includes cli-tools, editors, lang, shell-tools, terminals, and tools";
-
+  FTS.apps._.browsers = {
+    description = "All web browsers - brave, firefox";
+    
     includes = [
-      FTS.brave
-      FTS.firefox
+      FTS.apps._.browsers._.brave
+      FTS.apps._.browsers._.firefox
+      # FTS.apps._.browsers._.zen  # Disabled for now - has module conflicts
     ];
   };
 }

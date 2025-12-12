@@ -1,21 +1,24 @@
-# CLI tools meta-aspect - includes all CLI tool modules
+# CLI tools facet - All command-line tools
 {
-  FTS, ... }:
+  FTS,
+  ...
+}:
 {
-  FTS.cli-tools = {
-    description = "All CLI tools - includes direnv, btop, atuin, eza, fzf, zoxide, yazi, sesh, and just";
-
+  FTS.coding._.cli = {
+    description = "All CLI development tools - atuin, btop, direnv, eza, fzf, just, sesh, yazi, zoxide";
+    
     includes = [
-      FTS.direnv
-      FTS.btop
-      FTS.atuin
-      FTS.eza
-      FTS.fzf
-      FTS.zoxide
-      FTS.yazi
-      FTS.sesh
-      FTS.just
+      FTS.coding._.cli._.atuin
+      FTS.coding._.cli._.btop
+      FTS.coding._.cli._.direnv
+      FTS.coding._.cli._.eza
+      FTS.coding._.cli._.fzf
+      FTS.coding._.cli._.just
+      FTS.coding._.cli._.sesh
+      FTS.coding._.cli._.yazi
+      FTS.coding._.cli._.zoxide
     ];
+    
     # NixOS system packages
     nixos = { pkgs, ... }: {
       environment.systemPackages = with pkgs; [
@@ -23,7 +26,6 @@
         ripgrep
       ];
     };
-    
   };
 }
 

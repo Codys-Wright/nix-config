@@ -2,7 +2,7 @@
 {
   FTS, ... }:
 {
-  FTS.code-cursor = {
+  FTS.coding._.editors._.cursor = {
     description = "Code Cursor AI-powered editor";
 
     homeManager = { config, pkgs, lib, ... }: {

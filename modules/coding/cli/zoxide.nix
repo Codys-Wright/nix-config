@@ -2,7 +2,7 @@
 {
   FTS, ... }:
 {
-  FTS.zoxide = {
+  FTS.coding._.cli._.zoxide = {
     description = "Zoxide smart cd replacement";
 
     homeManager = { pkgs, lib, ... }: {

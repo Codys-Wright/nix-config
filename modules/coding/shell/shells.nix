@@ -1,16 +1,17 @@
-# Shell tools meta-aspect - includes all shell modules
+# Shells facet - All shell environments
 {
-  FTS, ... }:
+  FTS,
+  ...
+}:
 {
-  FTS.shells = {
-    description = "All shell modules - includes zsh, fish, starship, and powerlevel10k";
-
+  FTS.coding._.shells = {
+    description = "All shell environments - fish, zsh, nushell, oh-my-posh";
+    
     includes = [
-      FTS.zsh
-      FTS.fish
-      # FTS.starship
-      FTS.nushell
-      FTS.oh-my-posh
+      FTS.coding._.shells._.fish
+      FTS.coding._.shells._.zsh
+      FTS.coding._.shells._.nushell
+      FTS.coding._.shells._.oh-my-posh
     ];
   };
 }

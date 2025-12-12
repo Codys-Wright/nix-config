@@ -5,7 +5,7 @@
   flake-file.inputs.nvf.url = "github:notashelf/nvf";
   flake-file.inputs.nvf.inputs.nixpkgs.follows = "nixpkgs";
 
-  FTS.nvf = {
+  FTS.coding._.editors._.nvf = {
     description = "Neovim built with nvf configuration framework";
 
     homeManager = { pkgs, ... }:

@@ -2,7 +2,7 @@
 {
   FTS, ... }:
 {
-  FTS.coding._.wezterm = {
+  FTS.coding._.terminals._.wezterm = {
     description = "Wezterm terminal emulator with custom configuration";
 
     homeManager = { config, pkgs, lib, ... }: {

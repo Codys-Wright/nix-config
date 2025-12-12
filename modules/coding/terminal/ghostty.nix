@@ -2,7 +2,7 @@
 {
   FTS, ... }:
 {
-  FTS.coding._.ghostty = {
+  FTS.coding._.terminals._.ghostty = {
     description = "Ghostty terminal emulator";
 
     nixos = { pkgs, ... }: {

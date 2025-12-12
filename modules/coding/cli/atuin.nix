@@ -2,7 +2,7 @@
 {
   FTS, ... }:
 {
-  FTS.atuin = {
+  FTS.coding._.cli._.atuin = {
     description = "Atuin shell history manager";
 
     homeManager = { pkgs, lib, ... }: {

@@ -2,7 +2,7 @@
 {
   FTS, ... }:
 {
-  FTS.git = {
+  FTS.coding._.tools._.git = {
     description = "Git version control with delta and LFS support";
 
     homeManager =

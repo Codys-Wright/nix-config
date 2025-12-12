@@ -2,7 +2,7 @@
 {
   FTS, ... }:
 {
-  FTS.opencode = {
+  FTS.coding._.tools._.opencode = {
     description = "OpenCode AI terminal assistant";
 
     homeManager =

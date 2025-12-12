@@ -1,24 +1,17 @@
-# Terminals meta-aspect - function that includes all terminal modules
+# Terminals facet - All terminal emulators
 {
   FTS,
-  lib,
   ...
 }:
 {
-  # Function that produces an aspect with all terminals
-  FTS.coding._.terminals =
-    {
-      default ? "ghostty",
-      ...
-    }@args:
-    {
-      description = "Terminal modules - includes all terminals (ghostty, kitty, tmux, wezterm)";
-
-      includes = [
-        FTS.coding._.ghostty
-        FTS.coding._.kitty
-        FTS.coding._.tmux
-        FTS.coding._.wezterm
-      ];
-    };
+  FTS.coding._.terminals = {
+    description = "All terminal emulators - ghostty, kitty, tmux, wezterm";
+    
+    includes = [
+      FTS.coding._.terminals._.ghostty
+      FTS.coding._.terminals._.kitty
+      FTS.coding._.terminals._.tmux
+      FTS.coding._.terminals._.wezterm
+    ];
+  };
 }

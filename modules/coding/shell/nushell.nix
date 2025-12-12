@@ -2,7 +2,7 @@
 {
   FTS, ... }:
 {
-  FTS.nushell = {
+  FTS.coding._.shells._.nushell = {
     description = "Nushell shell package";
 
     nixos = { pkgs, ... }: {

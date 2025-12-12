@@ -2,7 +2,7 @@
 {
   FTS, ... }:
 {
-  FTS.direnv = {
+  FTS.coding._.cli._.direnv = {
     description = "Direnv for automatic environment loading";
 
     homeManager = { pkgs, lib, ... }: {
