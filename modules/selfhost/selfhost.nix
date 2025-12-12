@@ -34,6 +34,7 @@
       authSubdomain = "auth";
       grafanaSubdomain = "grafana";
       vaultwardenSubdomain = "vault";
+      jellyfinSubdomain = "jellyfin";
 
       # Extract host information from aspect-chain if available
       # This allows us to configure the host's instantiate function
@@ -48,7 +49,21 @@
         # Local certificates and DNS
         (FTS.selfhost._.local-certs {
           inherit domain;
-          subdomains = [nextcloudSubdomain lldapSubdomain authSubdomain grafanaSubdomain vaultwardenSubdomain];
+          subdomains = [
+            nextcloudSubdomain
+            lldapSubdomain
+            authSubdomain
+            grafanaSubdomain
+            vaultwardenSubdomain
+            jellyfinSubdomain
+            # Arr stack subdomains
+            "radarr"
+            "sonarr"
+            "bazarr"
+            "readarr"
+            "lidarr"
+            "jackett"
+          ];
         })
 
         # LLDAP Identity Provider
@@ -64,6 +79,8 @@
           # - nextcloud_user, nextcloud_admin (from Nextcloud)
           # - grafana_user, grafana_admin (from Monitoring)
           # - vaultwarden_admin (from Vaultwarden)
+          # - jellyfin_user, jellyfin_admin (from Jellyfin)
+          # - arr_user (from Arr stack)
           # - lldap_admin, lldap_password_manager (from LLDAP)
           groups = {
             nextcloud_user = {};
@@ -71,6 +88,9 @@
             grafana_user = {};
             grafana_admin = {};
             vaultwarden_admin = {};
+            jellyfin_user = {};
+            jellyfin_admin = {};
+            arr_user = {};
             lldap_admin = {};
             lldap_password_manager = {};
           };
@@ -87,6 +107,9 @@
                 "grafana_user"
                 "grafana_admin"
                 "vaultwarden_admin"
+                "jellyfin_user"
+                "jellyfin_admin"
+                "arr_user"
                 "lldap_admin"
                 "lldap_password_manager"
               ];
@@ -169,6 +192,23 @@
           databasePasswordKey = "starcommand/selfhost/apps/vaultwarden/database_password";
           authEndpoint = "https://${authSubdomain}.${domain}";
         })
+
+        # Jellyfin Media Server
+        (FTS.selfhost._.jellyfin {
+          inherit domain;
+          subdomain = jellyfinSubdomain;
+          dcdomain = "dc=${builtins.replaceStrings ["."] [",dc="] domain}";
+          ldapAdminPasswordKey = "starcommand/selfhost/apps/jellyfin/ldap_admin_password";
+          ssoSecretKey = "starcommand/selfhost/apps/jellyfin/sso_secret";
+          ssoSecretForAutheliaKey = "starcommand/selfhost/auth/authelia/jellyfin_sso_secret";
+          authEndpoint = "https://${authSubdomain}.${domain}";
+        })
+
+        # Arr Stack - Media management (Radarr, Sonarr, Bazarr, Readarr, Lidarr, Jackett)
+        (FTS.selfhost._.arr {
+          inherit domain;
+          authEndpoint = "https://${authSubdomain}.${domain}";
+        })
       ];
 
       nixos = {
@@ -234,6 +274,22 @@
         shb.sops.secret."starcommand/selfhost/monitoring/grafana/oidc_secret_for_authelia" = {
           request = config.shb.monitoring.sso.sharedSecretForAuthelia.request;
           settings.key = "starcommand/selfhost/monitoring/grafana/oidc_secret"; # Share the same secret
+        };
+
+        # Jellyfin LDAP admin password - reuse LLDAP admin password
+        shb.sops.secret."starcommand/selfhost/apps/jellyfin/ldap_admin_password" = {
+          request = config.shb.jellyfin.ldap.adminPassword.request;
+          settings.key = "starcommand/selfhost/auth/lldap/admin_password";
+        };
+
+        # Jellyfin SSO secret
+        shb.sops.secret."starcommand/selfhost/apps/jellyfin/sso_secret".request =
+          config.shb.jellyfin.sso.sharedSecret.request;
+
+        # Authelia's copy of Jellyfin SSO secret - share same value
+        shb.sops.secret."starcommand/selfhost/auth/authelia/jellyfin_sso_secret" = {
+          request = config.shb.jellyfin.sso.sharedSecretForAuthelia.request;
+          settings.key = "starcommand/selfhost/apps/jellyfin/sso_secret";
         };
       };
     };
