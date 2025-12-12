@@ -23,7 +23,7 @@
       # Include role-based aspects
       includes = [
         # System-wide theme (bootloader, default appearance)
-        (<FTS/theme> { default = "cody"; })
+        (<FTS.theme> { default = "cody"; })
         
         # Complete desktop setup (environment + display manager + bootloader)
         (FTS.desktop {
@@ -39,7 +39,7 @@
         })
         
         # Disk and filesystem configuration
-        (<FTS/system/disk> {
+        (<FTS.system/disk> {
           type = "btrfs-impermanence";
           device = "/dev/nvme2n1";
           withSwap = true;
@@ -48,8 +48,8 @@
         })
         
         # Hardware and kernel
-        <FTS/kernel>
-        <FTS/hardware>
+        <FTS.kernel>
+        <FTS.hardware>
         
         # Deployment configuration
         <deployment/default> # Deployment configuration (includes all deployment aspects)

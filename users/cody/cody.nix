@@ -25,13 +25,13 @@
       description = "Cody user configuration";
       includes = [
         # User-level theme (context-aware: only affects homeManager appearance)
-        (<FTS/theme> { default = "cody"; })
+        (<FTS.theme> { default = "cody"; })
 
         # Applications - all included by default
         <FTS.apps/browsers>
         <FTS.apps/gaming>
         <FTS.apps/notes>
-        
+
         # Coding environment - all tools included by default
         <FTS.coding/cli>
         <FTS.coding/editors>
@@ -39,17 +39,20 @@
         <FTS.coding/shells>
         <FTS.coding/lang>
         <FTS.coding/tools>
-        # FTS.keyboard
+        # User configuration
+        <FTS.user/admin> # Admin privileges and user configuration
+        <FTS.user/autologin> # Autologin configuration (enabled when display manager is present)
+        (<FTS.user/shell> { default = "fish"; }) # Set fish as default shell
+        
+        # Cody-specific configurations
         cody.dots
         cody.fish
-        cody.admin # Admin privileges and user configuration
-        cody.autologin # Autologin configuration (enabled when display manager is present)
-        cody.display-session # Default desktop session (gnome)
+        
+        # Test module
         (FTS.test {
           hello = true;
           cowsay = true;
-        }) # Test module with both packages
-        cody.default-shell # Set fish as default shell
+        })
       ];
     };
 

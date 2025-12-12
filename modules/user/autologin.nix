@@ -1,7 +1,7 @@
 {
-  # Autologin configuration for cody (useful for VM testing)
-  # Automatically logs in cody when display manager is enabled
-  cody.autologin =
+  # Autologin configuration for user (useful for VM testing)
+  # Automatically logs in the user when display manager is enabled
+  FTS.user._.autologin =
     { user, ... }:
     {
       nixos =
