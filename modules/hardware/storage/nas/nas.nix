@@ -5,10 +5,10 @@
   ...
 }:
 {
-  FTS.hardware.storage.nas = {
+  FTS.hardware._.storage._.nas = {
     description = "NAS functionality with MergerFS";
     includes = [
-      FTS.hardware.storage.nas._.mergerfs
+      FTS.hardware._.storage._.nas._.mergerfs
     ];
   };
 }

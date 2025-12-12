@@ -6,7 +6,7 @@
   ...
 }:
 {
-  FTS.facter = {
+  FTS.hardware._.facter = {
     description = "Hardware detection using nixos-facter";
 
     nixos = { config, lib, pkgs, ... }:

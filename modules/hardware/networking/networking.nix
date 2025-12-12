@@ -4,7 +4,7 @@
   ...
 }:
 {
-  FTS.networking = {
+  FTS.hardware._.networking = {
     description = "NetworkManager networking support";
 
     nixos = { ... }: {
