@@ -19,6 +19,9 @@
     defaultService ? "http_status:404",
     noTLSVerify ? true,
     autoRouteDNS ? true,
+    # Manual ingress rules - list of { hostname, service } objects
+    # Example: [{ hostname = "cloud.example.com"; service = "https://localhost"; }]
+    manualIngress ? [],
     ...
   } @ args: {
     class,
@@ -59,11 +62,13 @@
           then builtins.head proxyPassMatch
           else null;
 
-        # Use whichever we found
+        # Use whichever we found, or default to https://localhost for direct nginx hosts
         rawProxyPass =
           if proxyPassAttr != null
           then proxyPassAttr
-          else proxyPassFromConfig;
+          else if proxyPassFromConfig != null
+          then proxyPassFromConfig
+          else "https://localhost"; # Default for hosts served directly by nginx (like Nextcloud, Jellyfin)
 
         # Strip trailing slash if present (cloudflared doesn't like paths)
         proxyPass =
@@ -78,7 +83,7 @@
         excludeJDownloader && lib.hasInfix "jdownloader" (lib.toLower domain);
 
       # Build ingress rules as an array
-      buildRules =
+      autoDetectedRules =
         lib.foldl' (
           acc: host: let
             cleanedDomain = cleanDomain host;
@@ -97,6 +102,10 @@
               ]
         ) []
         nginxHosts;
+
+      # Merge manual ingress rules with auto-detected ones
+      # Manual rules come first and take precedence
+      buildRules = manualIngress ++ autoDetectedRules;
 
       # Create cloudflared config
       tunnelConfig = {
