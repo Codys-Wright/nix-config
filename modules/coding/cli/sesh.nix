@@ -2,7 +2,7 @@
 {
   FTS, ... }:
 {
-  FTS.sesh = {
+  FTS.coding._.cli._.sesh = {
     description = "Sesh terminal session management with tmux integration";
 
     homeManager = { pkgs, lib, ... }: {

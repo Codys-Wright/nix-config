@@ -2,7 +2,7 @@
 {
   FTS, ... }:
 {
-  FTS.btop = {
+  FTS.coding._.cli._.btop = {
     description = "Btop system monitor with vim keys";
 
     homeManager = { pkgs, lib, ... }: {

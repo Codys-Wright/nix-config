@@ -1,13 +1,18 @@
 # Lutris gaming platform aspect
-{  FTS, ... }:
 {
-  FTS.lutris = {
+  FTS,
+  ...
+}:
+{
+  FTS.apps._.gaming._.lutris = {
     description = "Lutris gaming platform for managing Windows games on Linux";
 
+    homeManager = { pkgs, ... }: {
+      home.packages = [ pkgs.lutris ];
+    };
+
     nixos = { config, pkgs, lib, ... }: {
-      environment.systemPackages = with pkgs; [
-        lutris
-      ];
+      environment.systemPackages = [ pkgs.lutris ];
     };
   };
 }

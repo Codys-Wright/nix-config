@@ -2,7 +2,7 @@
 {
   FTS, ... }:
 {
-  FTS.fish = {
+  FTS.coding._.shells._.fish = {
     description = "Fish shell with custom configuration and optimizations";
 
     homeManager = { config, pkgs, lib, ... }: {

@@ -2,7 +2,7 @@
 {
   FTS, ... }:
 {
-  FTS.zed = {
+  FTS.coding._.editors._.zed = {
     description = "Zed editor with comprehensive configuration and vim keybindings";
 
     homeManager = { config, pkgs, lib, ... }: {

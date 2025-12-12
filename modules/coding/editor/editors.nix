@@ -1,26 +1,19 @@
-# Editors meta-aspect - includes all editor modules
+# Editors facet - All code editors
 {
-  FTS, ... }:
+  FTS,
+  ...
+}:
 {
-  FTS.editors = {
-    description = "All editor modules - includes code-cursor, neovim, nvf, lazyvim, astrovim, and zed";
-
+  FTS.coding._.editors = {
+    description = "All code editors - cursor, neovim, nvf, lazyvim, zed";
+    
     includes = [
-      FTS.code-cursor
-      FTS.nvf
-      FTS.lazyvim
-      FTS.zed
-      # FTS.doom-btw
+      FTS.coding._.editors._.cursor
+      FTS.coding._.editors._.neovim
+      FTS.coding._.editors._.nvf
+      FTS.coding._.editors._.lazyvim
+      FTS.coding._.editors._.zed
     ];
-
-    nixos = { pkgs, ... }: {
-      # Set nvim as the default editor at system level (testing)
-      environment.sessionVariables = {
-        EDITOR = "lazyvim";
-        VISUAL = "lazyvim";
-      };
-    };
-
   };
 }
 

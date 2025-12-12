@@ -2,7 +2,7 @@
 {
   FTS, ... }:
 {
-  FTS.oh-my-posh = {
+  FTS.coding._.shells._.oh-my-posh = {
     description = "Oh My Posh prompt theme with custom configuration";
     nixos = { pkgs, ... }: {
       environment.systemPackages = [ pkgs.oh-my-posh ];

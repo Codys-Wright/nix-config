@@ -2,7 +2,7 @@
 {
   FTS, ... }:
 {
-  FTS.lazygit = {
+  FTS.coding._.tools._.lazygit = {
     description = "LazyGit terminal UI for git";
 
     homeManager =

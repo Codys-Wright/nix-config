@@ -1,13 +1,15 @@
-# Language tools meta-aspect - includes all language modules
+# Languages facet - All programming language toolchains
 {
-  FTS, ... }:
+  FTS,
+  ...
+}:
 {
-  FTS.lang = {
-    description = "All language modules - includes rust and typescript";
-
+  FTS.coding._.lang = {
+    description = "All programming language toolchains - rust, typescript";
+    
     includes = [
-      FTS.rust
-      FTS.typescript
+      FTS.coding._.lang._.rust
+      FTS.coding._.lang._.typescript
     ];
   };
 }

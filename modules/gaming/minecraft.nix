@@ -1,14 +1,18 @@
 # Minecraft gaming aspect
 {
-  FTS, ... }:
+  FTS,
+  ...
+}:
 {
-  FTS.minecraft = {
+  FTS.apps._.gaming._.minecraft = {
     description = "Minecraft with PrismLauncher";
 
+    homeManager = { pkgs, ... }: {
+      home.packages = [ pkgs.prismlauncher ];
+    };
+
     nixos = { config, pkgs, lib, ... }: {
-      environment.systemPackages = with pkgs; [
-        prismlauncher
-      ];
+      environment.systemPackages = [ pkgs.prismlauncher ];
     };
   };
 }
