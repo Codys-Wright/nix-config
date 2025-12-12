@@ -21,7 +21,7 @@
     oidcIssuerPrivateKey,
     # Optional parameters
     ssl ? null,
-    sslCertName ? "starcommand",
+    sslCertName ? domain, # Use domain as cert name (e.g., "starcommand.live")
     ...
   } @ args: {
     class,
@@ -44,7 +44,7 @@
       sslCert =
         if ssl != null
         then ssl
-        else config.shb.certs.certs.selfsigned.${sslCertName};
+        else config.shb.certs.certs.letsencrypt.${sslCertName};
     in {
       # Authelia configuration
       shb.authelia = {

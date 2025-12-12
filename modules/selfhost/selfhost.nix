@@ -34,7 +34,7 @@
       authSubdomain = "auth";
       grafanaSubdomain = "grafana";
       vaultwardenSubdomain = "vault";
-      jellyfinSubdomain = "jellyfin";
+      jellyfinSubdomain = "media";
 
       # Extract host information from aspect-chain if available
       # This allows us to configure the host's instantiate function
@@ -46,24 +46,22 @@
       # This ensures the patched nixpkgs (with LLDAP enhancements) is used.
 
       includes = [
-        # Local certificates and DNS
-        (FTS.selfhost._.local-certs {
+        # Let's Encrypt certificates with Cloudflare DNS
+        (FTS.selfhost._.letsencrypt-certs {
           inherit domain;
-          subdomains = [
-            nextcloudSubdomain
-            lldapSubdomain
-            authSubdomain
-            grafanaSubdomain
-            vaultwardenSubdomain
-            jellyfinSubdomain
-            # Arr stack subdomains
-            "radarr"
-            "sonarr"
-            "bazarr"
-            "readarr"
-            "lidarr"
-            "jackett"
-          ];
+          adminEmail = "admin@${domain}";
+          cloudflareTokenKey = "starcommand/selfhost/proxy/cloudflare/zone_dns_key";
+        })
+
+        # Cloudflare Tunnel - Exposes services without port forwarding
+        (FTS.selfhost._.cloudflare-tunnel {
+          inherit domain;
+          tunnelId = "803700ac-6ca2-4041-94c7-3d1c9ef05e52";
+          accountTagKey = "starcommand/selfhost/proxy/cloudflare/account_tag";
+          tunnelSecretKey = "starcommand/selfhost/proxy/cloudflare/starcommand_tunnel/secret";
+          dnsApiTokenKey = "starcommand/selfhost/proxy/cloudflare/starcommand_dns_key";
+          noTLSVerify = true; # Let's Encrypt certs are trusted, but internal routing uses HTTP
+          autoRouteDNS = true; # Automatically route DNS through tunnel
         })
 
         # LLDAP Identity Provider
@@ -208,6 +206,9 @@
         (FTS.selfhost._.arr {
           inherit domain;
           authEndpoint = "https://${authSubdomain}.${domain}";
+          radarrApiKey = "starcommand/selfhost/apps/arr/radarr/api_key";
+          sonarrApiKey = "starcommand/selfhost/apps/arr/sonarr/api_key";
+          jackettApiKey = "starcommand/selfhost/apps/arr/jackett/api_key";
         })
       ];
 
@@ -279,17 +280,55 @@
         # Jellyfin LDAP admin password - reuse LLDAP admin password
         shb.sops.secret."starcommand/selfhost/apps/jellyfin/ldap_admin_password" = {
           request = config.shb.jellyfin.ldap.adminPassword.request;
-          settings.key = "starcommand/selfhost/auth/lldap/admin_password";
+          settings = {
+            key = "starcommand/selfhost/auth/lldap/admin_password";
+            owner = "jellyfin";
+            group = "jellyfin";
+            mode = "0440";
+          };
         };
 
-        # Jellyfin SSO secret
-        shb.sops.secret."starcommand/selfhost/apps/jellyfin/sso_secret".request =
-          config.shb.jellyfin.sso.sharedSecret.request;
+        # Jellyfin SSO secrets
+        shb.sops.secret."starcommand/selfhost/apps/jellyfin/sso_secret" = {
+          request = config.shb.jellyfin.sso.sharedSecret.request;
+          settings = {
+            key = "starcommand/selfhost/apps/jellyfin/sso_secret";
+            owner = "jellyfin";
+            group = "jellyfin";
+            mode = "0440";
+          };
+        };
 
         # Authelia's copy of Jellyfin SSO secret - share same value
         shb.sops.secret."starcommand/selfhost/auth/authelia/jellyfin_sso_secret" = {
           request = config.shb.jellyfin.sso.sharedSecretForAuthelia.request;
           settings.key = "starcommand/selfhost/apps/jellyfin/sso_secret";
+        };
+
+        # Arr stack API keys with proper ownership
+        shb.sops.secret."starcommand/selfhost/apps/arr/radarr/api_key" = {
+          settings = {
+            key = "starcommand/selfhost/apps/arr/radarr/api_key";
+            owner = "radarr";
+            group = "radarr";
+            mode = "0440";
+          };
+        };
+        shb.sops.secret."starcommand/selfhost/apps/arr/sonarr/api_key" = {
+          settings = {
+            key = "starcommand/selfhost/apps/arr/sonarr/api_key";
+            owner = "sonarr";
+            group = "sonarr";
+            mode = "0440";
+          };
+        };
+        shb.sops.secret."starcommand/selfhost/apps/arr/jackett/api_key" = {
+          settings = {
+            key = "starcommand/selfhost/apps/arr/jackett/api_key";
+            owner = "jackett";
+            group = "jackett";
+            mode = "0440";
+          };
         };
       };
     };

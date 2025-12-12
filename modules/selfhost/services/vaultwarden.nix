@@ -12,7 +12,7 @@
     databasePasswordKey,
     # Optional parameters
     ssl ? null,
-    sslCertName ? "starcommand",
+    sslCertName ? domain,  # Use domain as cert name (e.g., "starcommand.live")
     port ? 8222,
     authEndpoint ? null,
     smtp ? null,
@@ -39,7 +39,7 @@
       sslCert =
         if ssl != null
         then ssl
-        else config.shb.certs.certs.selfsigned.${sslCertName};
+        else config.shb.certs.certs.letsencrypt.${sslCertName};
     in {
       # Vaultwarden configuration
       shb.vaultwarden = {
