@@ -16,11 +16,23 @@
       users.starcommand = { };  # Service user for self-hosting infrastructure
       aspect = "THEBATTLESHIP";
       
-      # Use selfhostblocks' patched nixpkgs for LLDAP and other enhanced services
-      # Required by starcommand user's self-hosting stack
-      instantiate = args: inputs.selfhostblocks.lib.x86_64-linux.patchedNixpkgs.nixosSystem (args // {
-        system = "x86_64-linux";
-      });
+      # Use nixpkgs-unstable with selfhostblocks patches applied
+      # This gives us the latest packages plus LLDAP/borgbackup enhancements
+      instantiate = args: 
+        let
+          system = "x86_64-linux";
+          # Get pkgs from nixpkgs for applyPatches
+          pkgs' = inputs.nixpkgs.legacyPackages.${system};
+          # Apply selfhostblocks patches to our unstable nixpkgs
+          shbPatches = inputs.selfhostblocks.lib.${system}.patches;
+          patchedNixpkgs = pkgs'.applyPatches {
+            name = "nixpkgs-unstable-shb-patched";
+            src = inputs.nixpkgs;  # Use our nixpkgs-unstable
+            patches = shbPatches;
+          };
+          nixosSystem' = import "${patchedNixpkgs}/nixos/lib/eval-config.nix";
+        in
+        nixosSystem' (args // { inherit system; });
     };
   };
 
@@ -76,6 +88,35 @@
         {
           # Hardware detection is handled by FTS.hardware (includes FTS.hardware.facter)
           # The facter report path is auto-derived as hosts/THEBATTLESHIP/facter.json
+
+          # Add overlays for stable/unstable package access
+          # Note: Base nixpkgs is already unstable with selfhostblocks patches
+          nixpkgs.overlays = [
+            # Add stable packages as pkgs.stable
+            (final: prev: {
+              stable = import inputs.nixpkgs-stable {
+                system = final.stdenv.hostPlatform.system;
+                config.allowUnfree = true;
+              };
+            })
+            # Add another unstable reference for explicit access
+            (final: prev: {
+              unstable = import inputs.nixpkgs {
+                system = final.stdenv.hostPlatform.system;
+                config.allowUnfree = true;
+              };
+            })
+          ];
+
+          # Limit number of generations in boot partition (critical with 512MB boot)
+          boot.loader.grub.configurationLimit = 2;  # Only keep last 2 generations in GRUB
+          
+          # Automatic cleanup
+          nix.gc = {
+            automatic = true;
+            dates = "weekly";
+            options = "--delete-older-than 7d";
+          };
 
           programs.nh.enable = true;
 

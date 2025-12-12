@@ -27,7 +27,7 @@
       <FTS/fonts>
       <FTS/phoenix>
       <FTS/experimental-features>  # Enable nix-command and flakes
-      <FTS/secrets>  # SOPS secrets management
+      # <FTS/secrets>  # SOPS secrets management - disabled, using SelfHostBlocks SOPS instead
       # Allow unfree packages
       (<den/unfree> true)
       # Boot loader - disabled by default, enable per-host as needed
@@ -39,7 +39,7 @@
     home.includes = [
       den.aspects.nix-index
       den.aspects.nix-registry
-      <FTS/secrets>  # SOPS secrets infrastructure (home-manager part)
+      # <FTS/secrets>  # SOPS secrets infrastructure (home-manager part) - disabled, using SelfHostBlocks SOPS instead
       <FTS/user-secrets>  # User secrets from SOPS with environment variables
     ];
   };
