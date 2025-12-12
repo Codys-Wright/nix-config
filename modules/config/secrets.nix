@@ -10,7 +10,7 @@
 }:
 {
   FTS.secrets = {
-    description = "SOPS secrets management for hosts and users";
+    description = "SOPS secrets management for hosts, users, and self-hosting services";
 
     # NixOS (host-level) SOPS configuration
     nixos = { config, pkgs, ... }:
@@ -22,12 +22,18 @@
       # Path is resolved relative to the host file: ../../hosts/<hostname>/secrets.yaml
       secretsYamlPath = ../../hosts/${hostname}/secrets.yaml;
       
+      # Get all users configured for this host
+      host = config._module.args.host or null;
+      hostUsers = if host != null then (builtins.attrNames (host.users or {})) else [];
+      
       # Get primary username (first user or fallback)
-      primaryUsername = let
-        host = config._module.args.host or null;
-        users = if host != null then (builtins.attrNames (host.users or {})) else [];
-      in
-        if users != [] then builtins.head users else "admin";
+      primaryUsername = if hostUsers != [] then builtins.head hostUsers else "admin";
+      
+      # Check if selfhost user is enabled (for self-hosting services)
+      hasSelfhostUser = builtins.elem "selfhost" hostUsers;
+      
+      # Path to selfhost user secrets (for services)
+      selfhostSecretsPath = ../../users/selfhost/secrets.yaml;
     in
     {
       # Import SOPS NixOS module
@@ -36,13 +42,17 @@
       ];
 
       sops = {
-        # Set default SOPS file to host-specific secrets
-        defaultSopsFile = secretsYamlPath;
+        # Set default SOPS file based on context:
+        # - If selfhost user exists, use selfhost secrets (for services)
+        # - Otherwise use host-specific secrets (for deployment)
+        defaultSopsFile = if hasSelfhostUser then selfhostSecretsPath else secretsYamlPath;
         validateSopsFiles = true;  # Validate SOPS files at evaluation time
         
         # Automatically import host SSH keys as age keys for SOPS decryption
         age = {
           sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
+          # Also support age key file if it exists (for selfhost user)
+          keyFile = lib.mkIf hasSelfhostUser "/var/lib/sops-nix/key.txt";
         };
       };
 

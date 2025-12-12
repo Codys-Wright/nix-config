@@ -13,7 +13,14 @@
     THEBATTLESHIP = {
       description = "The Main System, ready for everyday battle";
       users.cody = { };
+      users.starcommand = { };  # Service user for self-hosting infrastructure
       aspect = "THEBATTLESHIP";
+      
+      # Use selfhostblocks' patched nixpkgs for LLDAP and other enhanced services
+      # Required by starcommand user's self-hosting stack
+      instantiate = args: inputs.selfhostblocks.lib.x86_64-linux.patchedNixpkgs.nixosSystem (args // {
+        system = "x86_64-linux";
+      });
     };
   };
 
@@ -53,6 +60,9 @@
         
         # Deployment configuration (SSH, networking, secrets, VM/ISO generation)
         <FTS.deployment>
+        
+        # Self-hosting services are provided by the starcommand user
+        # See users/starcommand/starcommand.nix for service configuration
       ];
 
       # Manually set fileSystems and bootloader for now
@@ -69,11 +79,8 @@
 
           programs.nh.enable = true;
 
-          networking.hosts = {
-            "127.0.0.1" = [ "n.example.com" ];
-          };
-
-
+          # Self-hosting services configuration is handled by the starcommand user
+          # See users/starcommand/starcommand.nix for all service configuration
         };
     };
   };

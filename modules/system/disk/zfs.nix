@@ -77,9 +77,6 @@
     {
       description = "ZFS disk configuration with root pool and optional data pool";
 
-      flake-file.inputs.disko.url = "github:nix-community/disko";
-      flake-file.inputs.disko.inputs.nixpkgs.follows = "nixpkgs";
-
       nixos = { pkgs, lib, ... }:
         {
           # Import disko module to generate fileSystems from disko.devices

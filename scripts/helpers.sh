@@ -99,8 +99,15 @@ function git_branch() {
 ### Nix helpers
 
 # Run a command in nix develop shell
+# If already inside a nix develop shell, just run the command directly
 function nix_develop() {
-    nix develop --command "$@"
+    if [ -n "${IN_NIX_SHELL:-}" ]; then
+        # Already in a nix shell, run directly
+        "$@"
+    else
+        # Not in a shell, enter it first
+        nix develop --command "$@"
+    fi
 }
 
 # Check if a nix package is available

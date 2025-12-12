@@ -50,6 +50,22 @@ else
     fi
 fi
 
+# Generate initrd SSH host key (for boot-time SSH access, encrypted disk unlocking)
+if [ ! -f "$HOST_DIR/initrd_ssh_host_key" ] || [ ! -f "$HOST_DIR/initrd_ssh_host_key.pub" ]; then
+    if yes_or_no "Generate initrd SSH host key for encrypted disk unlocking?"; then
+        blue "Generating initrd SSH host key..."
+        ssh-keygen -t ed25519 -N "" -f "$HOST_DIR/initrd_ssh_host_key" -C "$HOSTNAME-initrd"
+        chmod 600 "$HOST_DIR/initrd_ssh_host_key"
+        green "Generated initrd SSH host key"
+        green "Boot SSH will be automatically enabled by FTS.deployment/bootssh"
+    else
+        blue "Skipping initrd SSH host key generation"
+        yellow "Note: Boot SSH will not be available unless you generate this key later"
+    fi
+else
+    blue "Initrd SSH host key already exists, skipping generation"
+fi
+
 # Generate deployment SSH key pair (for connecting to the server)
 # We need to generate the key if either ssh.pub doesn't exist OR secrets.yaml doesn't exist
 if [ ! -f "$HOST_DIR/ssh.pub" ] || [ ! -f "$HOST_DIR/secrets.yaml" ]; then
@@ -96,28 +112,58 @@ if [ -f "$HOST_DIR/host_key" ]; then
     fi
 fi
 
-# Create secrets.yaml with the private key embedded (plain text first)
+# Create secrets.yaml from template
 if [ ! -f "$HOST_DIR/secrets.yaml" ]; then
     if [ "$DEPLOYMENT_KEY_AVAILABLE" = true ]; then
-        blue "Creating secrets.yaml..."
-        if [ -n "$AGE_KEY" ]; then
+        blue "Creating secrets.yaml from template..."
+        
+        # Copy template
+        if [ ! -f "$FLAKE_ROOT/hosts/template/secrets-example.yaml" ]; then
+            yellow "Warning: hosts/template/secrets-example.yaml not found, using minimal template"
             cat > "$HOST_DIR/secrets.yaml" <<EOF
 $HOSTNAME:
   system:
     sshPrivateKey: |
 $(echo "$SSH_PRIVATE_KEY" | sed 's/^/      /')
+EOF
+            if [ -n "$AGE_KEY" ]; then
+                cat >> "$HOST_DIR/secrets.yaml" <<EOF
   keys:
     age: |
 $(echo "$AGE_KEY" | sed 's/^/      /')
 EOF
+            fi
         else
-            cat > "$HOST_DIR/secrets.yaml" <<EOF
-$HOSTNAME:
-  system:
+            # Copy template and replace placeholders
+            cp "$FLAKE_ROOT/hosts/template/secrets-example.yaml" "$HOST_DIR/secrets.yaml"
+            
+            # Replace hostname placeholder
+            sed -i "s/<hostname>/$HOSTNAME/g" "$HOST_DIR/secrets.yaml"
+            
+            # Create temp files for multi-line replacements
+            SSH_KEY_TEMP=$(mktemp)
+            echo "$SSH_PRIVATE_KEY" | sed 's/^/      /' > "$SSH_KEY_TEMP"
+            
+            # Replace SSH private key placeholder
+            # This is a bit tricky with multi-line replacements, so we'll use perl
+            perl -i -pe "BEGIN{undef $/;} s/      -----BEGIN OPENSSH PRIVATE KEY-----\n      <WILL_BE_FILLED_BY_SCRIPT>\n      -----END OPENSSH PRIVATE KEY-----/$(cat $SSH_KEY_TEMP | sed 's/\//\\\//g' | sed ':a;N;$!ba;s/\n/\\n/g')/smg" "$HOST_DIR/secrets.yaml" 2>/dev/null || {
+                # Fallback: just append the key if perl replacement fails
+                yellow "Using fallback method for SSH key insertion"
+                sed -i '/sshPrivateKey:/,/-----END OPENSSH PRIVATE KEY-----/d' "$HOST_DIR/secrets.yaml"
+                cat >> "$HOST_DIR/secrets.yaml" <<EOF
     sshPrivateKey: |
 $(echo "$SSH_PRIVATE_KEY" | sed 's/^/      /')
 EOF
+            }
+            
+            rm -f "$SSH_KEY_TEMP"
+            
+            # Replace age key placeholder if available
+            if [ -n "$AGE_KEY" ]; then
+                sed -i "s|<WILL_BE_FILLED_BY_SCRIPT>|$AGE_KEY|g" "$HOST_DIR/secrets.yaml"
+            fi
         fi
+        
         green "Created secrets.yaml"
     else
         yellow "Cannot create secrets.yaml - deployment SSH key not available"
@@ -125,17 +171,12 @@ EOF
     fi
 else
     blue "secrets.yaml already exists, skipping creation"
-    # Check if keys/age needs to be added
-    if [ -n "$AGE_KEY" ] && ! SOPS_AGE_KEY_FILE=sops.key nix_develop sops --config sops.yaml -d "$HOST_DIR/secrets.yaml" 2>/dev/null | grep -q "keys:"; then
-        blue "Adding keys/age to existing secrets.yaml..."
-        # This would require decrypting, editing, and re-encrypting
-        yellow "Please manually add keys/age to secrets.yaml using: just edit-secrets $HOSTNAME"
-    fi
 fi
 
 # Convert host key to age key and add to sops.yaml (so host can decrypt its secrets)
 # Check if host key is already in sops.yaml
-if nix_develop yq-go eval ".keys[] | select(anchor == \"$HOSTNAME\")" "$SOPS_FILE" >/dev/null 2>&1; then
+EXISTING_KEY=$(nix_develop yq eval ".keys[] | select(anchor == \"$HOSTNAME\")" "$SOPS_FILE" 2>/dev/null || true)
+if [ -n "$EXISTING_KEY" ]; then
     blue "Host age key already exists in sops.yaml, skipping"
     HOST_AGE_KEY=$(nix_develop ssh-to-age < "$HOST_DIR/host_key.pub")
 else
@@ -186,13 +227,20 @@ fi
 if [ ! -f "$HOST_DIR/$HOSTNAME.nix" ]; then
     blue "Creating host configuration file..."
     cat > "$HOST_DIR/$HOSTNAME.nix" <<EOF
-{ inputs, den, pkgs, FTS, deployment, ... }:
-
+{
+  inputs,
+  den,
+  pkgs,
+  FTS,
+  __findFile,
+  ...
+}:
 {
   # Define the host
   den.hosts.x86_64-linux = {
     $HOSTNAME = {
       description = "$HOSTNAME host";
+      users.admin = { };  # Add users as needed
       aspect = "$HOSTNAME";
     };
   };
@@ -201,19 +249,46 @@ if [ ! -f "$HOST_DIR/$HOSTNAME.nix" ]; then
   den.aspects = {
     $HOSTNAME = {
       includes = [
-        FTS.hardware
-        deployment.default
+        # Hardware and kernel
+        <FTS.hardware>
+        <FTS.kernel>
+        
+        # Deployment (SSH, networking, secrets, VM/ISO generation)
+        <FTS.deployment>
+        
+        # Disk configuration (uncomment and configure as needed)
+        # (<FTS.system/disk> {
+        #   type = "btrfs-impermanence";
+        #   device = "/dev/nvme0n1";
+        #   withSwap = true;
+        #   swapSize = "32";
+        # })
+        
+        # Optional: Desktop environment
+        # (FTS.desktop {
+        #   environment.default = "gnome";
+        #   displayManager.auto = true;
+        # })
       ];
 
       nixos = { config, lib, pkgs, ... }: {
         # Hardware detection is handled by FTS.hardware (includes FTS.hardware.facter)
         # Generate hardware config with: just generate-hardware $HOSTNAME
-        # Then uncomment the line below to use it:
-        # facter.reportPath = ./facter.json;
+        # The facter report path is auto-derived as hosts/$HOSTNAME/facter.json
 
-        deployment = {
-          ip = "192.168.1.XXX";  # Update with your actual IP address
-        };
+        # Optional: Configure static network
+        # deployment.staticNetwork = {
+        #   ip = "192.168.1.XXX";
+        #   gateway = "192.168.1.1";
+        #   device = "en*";
+        # };
+        
+        # Optional: Enable boot SSH for remote unlocking (if encrypted disk)
+        # Requires: hosts/$HOSTNAME/initrd_ssh_host_key
+        # deployment.bootssh.enable = true;
+        
+        # Optional: Enable WiFi hotspot for bootstrap
+        # deployment.hotspot.enable = true;
       };
     };
   };
@@ -224,13 +299,20 @@ else
     if yes_or_no "Host configuration file already exists. Overwrite?"; then
         blue "Overwriting host configuration file..."
         cat > "$HOST_DIR/$HOSTNAME.nix" <<EOF
-{ inputs, den, pkgs, FTS, deployment, ... }:
-
+{
+  inputs,
+  den,
+  pkgs,
+  FTS,
+  __findFile,
+  ...
+}:
 {
   # Define the host
   den.hosts.x86_64-linux = {
     $HOSTNAME = {
       description = "$HOSTNAME host";
+      users.admin = { };  # Add users as needed
       aspect = "$HOSTNAME";
     };
   };
@@ -239,19 +321,46 @@ else
   den.aspects = {
     $HOSTNAME = {
       includes = [
-        FTS.hardware
-        deployment.default
+        # Hardware and kernel
+        <FTS.hardware>
+        <FTS.kernel>
+        
+        # Deployment (SSH, networking, secrets, VM/ISO generation)
+        <FTS.deployment>
+        
+        # Disk configuration (uncomment and configure as needed)
+        # (<FTS.system/disk> {
+        #   type = "btrfs-impermanence";
+        #   device = "/dev/nvme0n1";
+        #   withSwap = true;
+        #   swapSize = "32";
+        # })
+        
+        # Optional: Desktop environment
+        # (FTS.desktop {
+        #   environment.default = "gnome";
+        #   displayManager.auto = true;
+        # })
       ];
 
       nixos = { config, lib, pkgs, ... }: {
         # Hardware detection is handled by FTS.hardware (includes FTS.hardware.facter)
         # Generate hardware config with: just generate-hardware $HOSTNAME
-        # Then uncomment the line below to use it:
-        # facter.reportPath = ./facter.json;
+        # The facter report path is auto-derived as hosts/$HOSTNAME/facter.json
 
-        deployment = {
-          ip = "192.168.1.XXX";  # Update with your actual IP address
-        };
+        # Optional: Configure static network
+        # deployment.staticNetwork = {
+        #   ip = "192.168.1.XXX";
+        #   gateway = "192.168.1.1";
+        #   device = "en*";
+        # };
+        
+        # Optional: Enable boot SSH for remote unlocking (if encrypted disk)
+        # Requires: hosts/$HOSTNAME/initrd_ssh_host_key
+        # deployment.bootssh.enable = true;
+        
+        # Optional: Enable WiFi hotspot for bootstrap
+        # deployment.hotspot.enable = true;
       };
     };
   };
@@ -269,6 +378,10 @@ echo ""
 blue "Generated files:"
 echo "  - $HOST_DIR/host_key (host private key - for server identity, SOPS encryption)"
 echo "  - $HOST_DIR/host_key.pub (host public key - for known_hosts)"
+if [ -f "$HOST_DIR/initrd_ssh_host_key" ]; then
+echo "  - $HOST_DIR/initrd_ssh_host_key (initrd SSH host key - for boot-time SSH access)"
+echo "  - $HOST_DIR/initrd_ssh_host_key.pub (initrd SSH public key)"
+fi
 echo "  - $HOST_DIR/ssh.pub (deployment public key - for authorized_keys)"
 echo "  - $HOST_DIR/secrets.yaml (encrypted secrets file with deployment SSH private key)"
 echo "  - $HOST_DIR/$HOSTNAME.nix (host configuration)"
@@ -276,7 +389,16 @@ echo ""
 yellow "Note: The deployment SSH private key is stored in secrets.yaml (encrypted), not as a separate file."
 echo ""
 blue "Next steps:"
-echo "  1. Update the IP address in $HOST_DIR/$HOSTNAME.nix"
-echo "  2. Generate hardware config: just generate-hardware $HOSTNAME"
-echo "  3. Generate known_hosts: nix run .#gen-knownhosts-file \"$HOST_DIR/host_key.pub\" <ip> <port>"
+echo "  1. Generate hardware config: just generate-hardware $HOSTNAME"
+echo "  2. Configure your host in $HOST_DIR/$HOSTNAME.nix:"
+echo "     - Uncomment and configure disk setup (FTS.system/disk)"
+echo "     - Add desktop environment if needed (FTS.desktop)"
+echo "     - Configure static network if needed (deployment.staticNetwork)"
+if [ -f "$HOST_DIR/initrd_ssh_host_key" ]; then
+echo "     - Boot SSH is automatically enabled (initrd key detected)"
+else
+echo "     - (Optional) Generate initrd SSH key later for boot-time access:"
+echo "       ssh-keygen -t ed25519 -N \"\" -f $HOST_DIR/initrd_ssh_host_key"
+fi
+echo "  3. Build and deploy: just build $HOSTNAME"
 
