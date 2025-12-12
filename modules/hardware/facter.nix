@@ -30,6 +30,9 @@
       # Only set if the file exists (allows building before hardware is detected)
       # Path is auto-derived from hostname: hosts/<hostname>/facter.json
       facter.reportPath = lib.mkIf (builtins.pathExists facterConfigPath) facterConfigPath;
+      
+      # Install nixos-facter package for manual hardware detection
+      environment.systemPackages = [ pkgs.nixos-facter ];
     };
   };
 }

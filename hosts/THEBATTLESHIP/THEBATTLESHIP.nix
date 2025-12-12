@@ -51,8 +51,8 @@
         <FTS.kernel>
         <FTS.hardware>
         
-        # Deployment configuration
-        <deployment/default> # Deployment configuration (includes all deployment aspects)
+        # Deployment configuration (SSH, networking, secrets, VM/ISO generation)
+        <FTS.deployment>
       ];
 
       # Manually set fileSystems and bootloader for now
@@ -73,10 +73,6 @@
             "127.0.0.1" = [ "n.example.com" ];
           };
 
-          deployment = {
-            ip = "192.168.1.XXX"; # Update with your actual IP
-
-          };
 
         };
     };

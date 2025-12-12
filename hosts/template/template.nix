@@ -1,4 +1,4 @@
-{ inputs, den, pkgs, FTS, deployment, __findFile, ... }:
+{ inputs, den, pkgs, FTS, __findFile, ... }:
 
 {
   # Define the host
@@ -16,7 +16,7 @@
       # Include basic aspects for testing
       includes = [
         <FTS.hardware>
-        deployment.default  # Deployment configuration (includes all deployment aspects)
+        # <FTS.deployment>  # Deployment configuration (optional - uncomment when needed)
       ];
 
       # NixOS configuration for this host

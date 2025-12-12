@@ -1,78 +1,90 @@
 # Boot SSH module
 # Enables SSH access during initrd boot for remote unlocking
+# Automatically enables if host keys are found
 {
   inputs,
   den,
   lib,
-  deployment,
+  FTS,
   ...
 }:
 {
-  deployment.bootssh = {
-    description = "SSH access during initrd boot for remote system access";
+  FTS.deployment._.bootssh = {
+    description = ''
+      SSH access during initrd boot for remote system unlocking.
+      
+      Automatically enables if host keys exist at hosts/<hostname>/initrd_ssh_host_key
+      Automatically uses deployment.sshKey from deployment.config.
+      
+      Usage:
+        <FTS.deployment/bootssh>  # Auto-detects host keys
+        (<FTS.deployment/bootssh> { sshPort = 2223; })  # Custom port
+        (<FTS.deployment/bootssh> { hostKeys = [ ./my-key ]; })  # Custom keys
+    '';
 
-    nixos = { config, pkgs, lib, ... }:
-    let
-      inherit (lib) mkOption optionals types;
-      cfg = config.deployment.boot;
-    in
-    {
-      options.deployment.boot = {
-        sshPort = mkOption {
-          type = types.int;
-          description = "Port the SSH daemon used during initrd boot listens to";
-          default = 2223;
-        };
-
-        hostKeys = mkOption {
-          type = types.listOf types.str;
-          description = "List of host key paths for SSH during initrd";
-          default = [];
-        };
-
-        authorizedKeys = mkOption {
-          type = types.listOf types.str;
-          description = "Public SSH keys authorized for initrd SSH access";
-          default = [];
-        };
-      };
-
-      config = {
-        # Enables DHCP in stage-1 even if networking.useDHCP is false
-        boot.initrd.network.udhcpc.enable = lib.mkDefault (config.deployment.staticNetwork == null);
-
-        # Enable SSH during initrd boot
-        boot.initrd.network = {
-          # This will use udhcp to get an ip address. Nixos-facter should have found the correct drivers
-          # to load but in case not, they need to be added to `boot.initrd.availableKernelModules`.
-          # Static ip addresses might be configured using the ip argument in kernel command line:
-          # https://www.kernel.org/doc/Documentation/filesystems/nfs/nfsroot.txt
-          enable = true;
-          ssh = {
-            enable = true;
-            # To prevent ssh clients from freaking out because a different host key is used,
-            # a different port for ssh is used.
-            port = lib.mkDefault cfg.sshPort;
-            hostKeys = lib.mkForce cfg.hostKeys;
-            # Public ssh key used for login.
-            # This should contain just one line and removing the trailing
-            # newline could be fixed with a removeSuffix call but treating
-            # it as a file containing multiple lines makes this forward compatible.
-            authorizedKeys = cfg.authorizedKeys;
-          };
-        };
-
-        boot.kernelParams = lib.optionals (config.deployment.staticNetwork != null && (config.facter.report or {}) != {}) (let
-          cfg' = config.deployment.staticNetwork;
-          # Use hostname from config (set by den) or fallback to a default
+    __functor =
+      _self:
+      {
+        enable ? null,  # null = auto-detect, true = force enable, false = disable
+        sshPort ? 2223,
+        hostKeys ? null,  # null = auto-detect from hosts/<hostname>/initrd_ssh_host_key
+        authorizedKeys ? null,  # null = use deployment.sshKey
+        staticNetwork ? null,  # null = use deployment.staticNetwork
+        ...
+      }@args:
+      { class, aspect-chain }:
+      {
+        nixos = { config, pkgs, lib, ... }:
+        let
+          cfg = config.deployment;
           hostname = config.networking.hostName or "nixos";
-        in [
-          # https://www.kernel.org/doc/Documentation/filesystems/nfs/nfsroot.txt
-          # ip=<client-ip>:<server-ip>:<gw-ip>:<netmask>:<hostname>:<device>:<autoconf>:<dns0-ip>:<dns1-ip>:<ntp0-ip>
-          "ip=${cfg'.ip}::${cfg'.gateway}:255.255.255.0:${hostname}-initrd:${cfg'.deviceName}:off:::"
-        ]);
+          
+          # Auto-detect host keys
+          defaultHostKeyPath = ../../hosts/${hostname}/initrd_ssh_host_key;
+          hostKeyExists = builtins.tryEval (builtins.pathExists defaultHostKeyPath);
+          hasHostKey = hostKeyExists.success && hostKeyExists.value;
+          
+          # Determine if we should enable
+          shouldEnable = 
+            if enable != null then enable  # Explicit override
+            else if hostKeys != null then true  # If hostKeys provided, enable
+            else hasHostKey;  # Auto-detect based on file existence
+          
+          # Determine which host keys to use
+          actualHostKeys = 
+            if hostKeys != null then hostKeys
+            else if hasHostKey then [ defaultHostKeyPath ]
+            else [];
+          
+          # Determine authorized keys
+          actualAuthorizedKeys =
+            if authorizedKeys != null then authorizedKeys
+            else if cfg.sshKey != null then [ cfg.sshKey ]
+            else [];
+          
+          # Determine network config
+          actualStaticNetwork = if staticNetwork != null then staticNetwork else cfg.staticNetwork;
+        in
+        lib.mkIf (cfg.enable && shouldEnable) {
+          # Enable DHCP in stage-1 (or use static network)
+          boot.initrd.network.udhcpc.enable = lib.mkDefault (actualStaticNetwork == null);
+
+          # Enable SSH during initrd boot
+          boot.initrd.network = {
+            enable = true;
+            ssh = {
+              enable = true;
+              port = sshPort;
+              hostKeys = actualHostKeys;
+              authorizedKeys = actualAuthorizedKeys;
+            };
+          };
+
+          # Static IP for initrd if configured
+          boot.kernelParams = lib.optionals (actualStaticNetwork != null) [
+            "ip=${actualStaticNetwork.ip}::${actualStaticNetwork.gateway}:255.255.255.0:${hostname}-initrd:${actualStaticNetwork.device}:off:::"
+          ];
+        };
       };
-    };
   };
 }
-

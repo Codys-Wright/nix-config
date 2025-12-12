@@ -47,12 +47,6 @@
         # Cody-specific configurations
         cody.dots
         cody.fish
-        
-        # Test module
-        (FTS.test {
-          hello = true;
-          cowsay = true;
-        })
       ];
     };
 

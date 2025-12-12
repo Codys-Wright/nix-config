@@ -1,22 +1,18 @@
 # Add deployment-related flake inputs
-{ inputs, lib, ... }:
+# These inputs provide the core functionality for deployment and bootstrapping
+{ inputs, lib, FTS, ... }:
 {
-  # Core deployment tools
-  flake-file.inputs.nixos-anywhere.url = lib.mkDefault "github:nix-community/nixos-anywhere";
-  flake-file.inputs.nixos-anywhere.inputs.nixpkgs.follows = "nixpkgs";
+  FTS.deployment._.inputs = {
+    description = "Deployment-related flake inputs (informational aspect)";
+  };
   
-  # Deployment tools (both available, user can choose)
-  flake-file.inputs.deploy-rs.url = lib.mkDefault "github:serokell/deploy-rs";
-  flake-file.inputs.deploy-rs.inputs.nixpkgs.follows = "nixpkgs";
-  
-  flake-file.inputs.colmena.url = lib.mkDefault "github:zhaofengli/colmena";
-  flake-file.inputs.colmena.inputs.nixpkgs.follows = "nixpkgs";
-  
-  # Hardware detection
-  flake-file.inputs.nixos-facter-modules.url = lib.mkDefault "github:numtide/nixos-facter-modules";
-  
-  # Secrets management
-  flake-file.inputs.sops-nix.url = lib.mkDefault "github:Mic92/sops-nix";
-  flake-file.inputs.sops-nix.inputs.nixpkgs.follows = "nixpkgs";
+  # Core deployment tools (already in main flake)
+  # - nixos-anywhere: Headless NixOS installation
+  # - disko: Declarative disk partitioning
+  # - nixos-facter-modules: Hardware detection
+  # - sops-nix: Secrets management
+  # - deploy-rs: Deployment tool
+  # - colmena: Alternative deployment tool
+  # - nixos-generators: ISO/VM generation
 }
 

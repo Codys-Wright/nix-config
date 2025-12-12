@@ -1,10 +1,11 @@
-# parametric providers for user
+# Parametric provider for user configuration
+# Sets up basic user accounts on nixos and darwin
 {
   den,
   ...
 }:
 {
-  den.aspects.example.provides.user =
+  den.aspects.dendritic.provides.user =
     { user, host, ... }:
     let
       by-class.nixos.users.users.${user.userName}.isNormalUser = true;
@@ -13,8 +14,8 @@
         users.users.${user.userName}.isNormalUser = true;
       };
 
-      # adelie is nixos-on-wsl, has special additional user setup
-      by-host.outrider.nixos.defaultUser = user.userName;
+      # Host-specific overrides can go here if needed
+      by-host = { };
     in
     {
       includes = [

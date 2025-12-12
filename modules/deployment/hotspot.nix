@@ -1,76 +1,58 @@
 # WiFi Hotspot module
-# Creates a WiFi hotspot for easy access to the system
+# Creates a WiFi access point for bootstrap scenarios
 {
   inputs,
   den,
   lib,
-  deployment,
+  FTS,
   ...
 }:
 {
-  deployment.hotspot = {
-    description = "WiFi hotspot configuration for easy system access";
+  FTS.deployment._.hotspot = {
+    description = ''
+      WiFi hotspot for bootstrap scenarios.
+      
+      Automatically uses deployment.staticNetwork.ip if configured.
+    '';
 
     nixos = { config, pkgs, lib, ... }:
     let
-      inherit (lib) mkOption types;
-      cfg = config.deployment.hotspot;
-      hotspotService = "deployment-hotspot-createap";
+      cfg = config.deployment;
+      # Use static IP from deployment.config if set, otherwise use default
+      hotspotIp = if cfg.staticNetwork != null then cfg.staticNetwork.ip else "192.168.50.1";
     in
     {
       options.deployment.hotspot = {
-        enable = lib.mkEnableOption "WiFi hotspot";
-
-        ip = mkOption {
-          description = "IP address of the system in the hotspot network";
-          type = types.str;
-          default = "192.168.12.1";
-        };
-
-        ssid = mkOption {
-          description = "SSID (network name) for the hotspot";
-          type = types.str;
+        enable = lib.mkEnableOption "WiFi hotspot" // { default = false; };
+        ssid = lib.mkOption {
+          type = lib.types.str;
           default = "NixOS-Hotspot";
+        };
+        passphrase = lib.mkOption {
+          type = lib.types.str;
+          default = "nixos-hotspot";
         };
       };
 
-      config = lib.mkIf cfg.enable {
-        # Ensure linux-wifi-hotspot is available
+      config = lib.mkIf (cfg.enable && cfg.hotspot.enable) {
         environment.systemPackages = [ pkgs.linux-wifi-hotspot ];
 
-        systemd.services."${hotspotService}@" = {
-          description = "Create AP Service";
-          after = [ "network.target" "network-pre.target" ];
+        # Simple hotspot service using linux-wifi-hotspot
+        systemd.services."deployment-hotspot@" = {
+          description = "WiFi Hotspot Service";
+          after = [ "network.target" ];
           serviceConfig = {
-            ExecStart = "${pkgs.linux-wifi-hotspot}/bin/create_ap --redirect-to-localhost -n -g ${cfg.ip} %I ${cfg.ssid}";
+            ExecStart = "${pkgs.linux-wifi-hotspot}/bin/create_ap --redirect-to-localhost -n -g ${hotspotIp} %I ${cfg.hotspot.ssid} ${cfg.hotspot.passphrase}";
             KillSignal = "SIGINT";
             Restart = "on-failure";
           };
         };
 
-        systemd.services."deployment-hotspot-force-udev" = {
-          description = "Trigger udev for existing wlan interfaces";
-          after = [ "systemd-udev-settle.service" "network-pre.target" ];
-          before = [ "network.target" ];
-          wantedBy = [ "network.target" ];
-
-          unitConfig = {
-            DefaultDependencies = false;
-          };
-
-          serviceConfig = {
-            Type = "oneshot";
-            ExecStart = "${pkgs.systemdMinimal}/bin/udevadm trigger --subsystem-match=net --property-match=DEVTYPE=wlan";
-          };
-        };
-
-        # 'change' is needed to be correctly triggered by the udevadm trigger command.
+        # Auto-start hotspot on WiFi interfaces
         services.udev.extraRules = ''
-          ACTION=="add|change", SUBSYSTEM=="net", ENV{DEVTYPE}=="wlan", TAG+="systemd", ENV{SYSTEMD_WANTS}="${hotspotService}@%k.service"
-          ACTION=="remove",     SUBSYSTEM=="net", ENV{DEVTYPE}=="wlan", RUN+="${pkgs.systemdMinimal}/bin/systemctl stop ${hotspotService}@%k.service"
+          ACTION=="add|change", SUBSYSTEM=="net", ENV{DEVTYPE}=="wlan", TAG+="systemd", ENV{SYSTEMD_WANTS}="deployment-hotspot@%k.service"
         '';
       };
     };
   };
 }
-
