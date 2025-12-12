@@ -26,19 +26,19 @@
       includes = [
         # User-level theme (context-aware: only affects homeManager appearance)
         (<FTS/theme> { default = "cody"; })
-        
+
         # Applications - all included by default
-        FTS.apps._.browsers
-        FTS.apps._.gaming
-        FTS.apps._.notes
+        <FTS.apps/browsers>
+        <FTS.apps/gaming>
+        <FTS.apps/notes>
         
         # Coding environment - all tools included by default
-        FTS.coding._.cli
-        FTS.coding._.editors
-        FTS.coding._.terminals
-        FTS.coding._.shells
-        FTS.coding._.lang
-        FTS.coding._.tools
+        <FTS.coding/cli>
+        <FTS.coding/editors>
+        <FTS.coding/terminals>
+        <FTS.coding/shells>
+        <FTS.coding/lang>
+        <FTS.coding/tools>
         # FTS.keyboard
         cody.dots
         cody.fish

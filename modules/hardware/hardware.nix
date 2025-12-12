@@ -1,17 +1,19 @@
-# browsers aspect
+# Hardware facet - All hardware support
 {
-  FTS, ... }:
+  FTS,
+  ...
+}:
 {
   FTS.hardware = {
-    description = "Easily add common hardware configuration changes to your system";
+    description = "All hardware support - facter, audio, bluetooth, cuda, networking, nvidia";
 
     includes = [
-      FTS.facter  # Hardware detection using nixos-facter
-      FTS.audio
-      FTS.bluetooth
-      FTS.cuda
-      FTS.networking
-      FTS.nvidia
+      FTS.hardware._.facter     # Hardware detection using nixos-facter
+      FTS.hardware._.audio
+      FTS.hardware._.bluetooth
+      FTS.hardware._.cuda
+      FTS.hardware._.networking
+      FTS.hardware._.nvidia
     ];
   };
 }

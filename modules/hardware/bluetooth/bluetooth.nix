@@ -4,7 +4,7 @@
   ...
 }:
 {
-  FTS.bluetooth = {
+  FTS.hardware._.bluetooth = {
     description = "Bluetooth hardware support";
 
     nixos = { pkgs, ... }: {

@@ -4,7 +4,7 @@
   ...
 }:
 {
-  FTS.pipewire = {
+  FTS.hardware._.audio._.pipewire = {
     description = "PipeWire audio system with low-latency configuration";
 
     nixos = { pkgs, lib, ... }: {
