@@ -1,32 +1,42 @@
-# User secrets module
-# Declares SOPS secrets and sets corresponding environment variables
+# User-specific SOPS secrets for home-manager
+# Separates user secrets from host/service secrets
 {
+  inputs,
   lib,
   FTS,
   ...
 }:
 {
   FTS.user-secrets = {
-    description = "User secrets from SOPS with environment variables";
+    description = "User-level SOPS secrets management (for home-manager)";
 
-    homeManager = { config, ... }:
-    {
-      # Declare the personal_email secret
-      # The key points to "{username}.personal_email" in the user's secrets.yaml
-      # Using '/' to access nested YAML keys: cody.personal_email -> cody/personal_email
-      sops.secrets."personal_email" = {
-        key = "${config.home.username}/personal_email";
-        # Ensure the secret is decrypted to a file we can read
-        # The default path will be ~/.config/sops-nix/secrets/personal_email
-      };
+    homeManager =
+      { config, ... }:
+      let
+        homeDirectory = config.home.homeDirectory;
+        username = config.home.username;
 
-      # Set PERSONAL_EMAIL environment variable from the secret
-      home.sessionVariables = {
-        PERSONAL_EMAIL = lib.mkIf (config ? sops && config.sops ? secrets && config.sops.secrets ? "personal_email") (
-          builtins.readFile config.sops.secrets."personal_email".path
-        );
+        # Path to user-specific secrets file
+        userSecretsPath = ../../users/${username}/secrets.yaml;
+        
+        # Check if the secrets file exists
+        secretsFileExists = builtins.pathExists userSecretsPath;
+      in
+      lib.mkIf secretsFileExists {
+        # Import SOPS home-manager module
+        imports = [ inputs.sops-nix.homeManagerModules.sops ];
+
+        sops = {
+          # Use the age key extracted by the host-level SOPS module
+          age.keyFile = "${homeDirectory}/.config/sops/age/keys.txt";
+
+          # User-specific secrets file
+          defaultSopsFile = userSecretsPath;
+          validateSopsFiles = true;
+
+          # Secrets should be declared in modules that use them
+          secrets = { };
+        };
       };
-    };
   };
 }
-

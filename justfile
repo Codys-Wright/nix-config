@@ -224,7 +224,13 @@ sops-view:
 # Usage: just new-host <hostname>
 # Example: just new-host myserver
 new-host hostname:
-    @./scripts/new-host.sh {{hostname}}
+    @nix develop --command bash ./scripts/new-host.sh {{hostname}}
+
+# Generate a new user with age keys and secrets.yaml
+# Usage: just new-user <username>
+# Example: just new-user alice
+new-user username:
+    @nix develop --command bash ./scripts/new-user.sh {{username}}
 
 # Create initial sops.yaml configuration file
 # Usage: just sops-init-config [sops.yaml] <your-public-key> [host-public-key]
