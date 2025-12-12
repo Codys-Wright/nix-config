@@ -2,10 +2,13 @@
 # Automatically imports nixos-facter-modules for hardware configuration
 {
   inputs,
+  lib,
   FTS,
   ...
 }:
 {
+  flake-file.inputs.nixos-facter-modules.url = "github:numtide/nixos-facter-modules";
+
   FTS.hardware._.facter = {
     description = "Hardware detection using nixos-facter";
 

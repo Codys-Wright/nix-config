@@ -19,8 +19,6 @@
       den.aspects.dendritic._.user    # User account setup
       den.aspects.dendritic._.host    # Hostname configuration
       den.aspects.dendritic._.home    # Home directory setup
-      <den/vm>   # VM generation (perSystem packages)
-      <den/iso>  # ISO generation (perSystem packages)
     ];
     host.includes = [
       <FTS/nh>

@@ -10,28 +10,22 @@ source "$SCRIPT_DIR/helpers.sh"
 
 SOPS_FILE="${FLAKE_ROOT}/sops.yaml"
 
-# Updates the sops.yaml file with a new host or user age key.
-# Usage: sops_update_age_key <field> <keyname> <key>
-#   field: "hosts" or "users"
+# Updates the sops.yaml file with a new age key.
+# Usage: sops_update_age_key <keyname> <key>
 #   keyname: name for the anchor (e.g., hostname or username)
 #   key: the age public key
 function sops_update_age_key() {
-    local field="$1"
-    local keyname="$2"
-    local key="$3"
-
-    if [ ! "$field" == "hosts" ] && [ ! "$field" == "users" ]; then
-        red "Invalid field passed to sops_update_age_key. Must be either 'hosts' or 'users'."
-        exit 1
-    fi
+    local keyname="$1"
+    local key="$2"
 
     # Check if key already exists (using Go yq syntax)
-    if nix_develop yq-go eval ".keys[] | select(anchor == \"$keyname\")" "$SOPS_FILE" >/dev/null 2>&1; then
+    EXISTING=$(nix_develop yq eval ".keys[] | select(anchor == \"$keyname\")" "$SOPS_FILE" 2>/dev/null || true)
+    if [ -n "$EXISTING" ]; then
         green "Updating existing ${keyname} key"
-        nix_develop yq-go eval -i "(.keys[] | select(anchor == \"$keyname\")) = \"$key\"" "$SOPS_FILE"
+        nix_develop yq eval -i "(.keys[] | select(anchor == \"$keyname\")) = \"$key\"" "$SOPS_FILE"
     else
         green "Adding new ${keyname} key"
-        nix_develop yq-go eval -i ".keys += [\"$key\"] | .keys[-1] anchor = \"$keyname\"" "$SOPS_FILE"
+        nix_develop yq eval -i ".keys += [\"$key\"] | .keys[-1] anchor = \"$keyname\"" "$SOPS_FILE"
     fi
 }
 
@@ -43,14 +37,24 @@ function sops_add_host_creation_rule() {
     local me="\"me\""        # quoted me for yaml
 
     # Check if a specific rule for this host already exists (using Go yq syntax)
-    if nix_develop yq-go eval ".creation_rules[] | select(.path_regex == \"^hosts/$hostname/secrets\\.yaml$\")" "$SOPS_FILE" >/dev/null 2>&1; then
+    EXISTING_RULE=$(nix_develop yq eval ".creation_rules[] | select(.path_regex == \"^hosts/$hostname/secrets\\.yaml$\")" "$SOPS_FILE" 2>/dev/null || true)
+    if [ -n "$EXISTING_RULE" ]; then
         blue "Creation rule for $hostname already exists"
         return 0
     fi
 
     green "Adding new host file creation rule for $hostname"
-    # Add specific rule for this host (using Go yq syntax)
-    nix_develop yq-go eval -i ".creation_rules += [{\"path_regex\": \"^hosts/$hostname/secrets\\.yaml$\", \"key_groups\": [{\"age\": [\"*me\", \"*$hostname\"]}]}]" "$SOPS_FILE"
+    # Add creation rule with placeholder values, then convert to aliases
+    local h="\"$hostname\""
+    local m="\"me\""
+    local host_selector=".creation_rules[] | select(.path_regex == \"^hosts/$hostname/secrets\\\\.yaml\$\")"
+    
+    # First add the rule with placeholder string values
+    nix_develop yq eval -i ".creation_rules += [{\"path_regex\": \"^hosts/$hostname/secrets\\\\.yaml$\", \"key_groups\": [{\"age\": [$m, $h]}]}]" "$SOPS_FILE"
+    
+    # Then convert those strings to YAML aliases/anchors using the 'alias' keyword
+    nix_develop yq eval -i "($host_selector).key_groups[].age[0] alias = $m" "$SOPS_FILE"
+    nix_develop yq eval -i "($host_selector).key_groups[].age[1] alias = $h" "$SOPS_FILE"
 }
 
 # Adds a host age key to sops.yaml and creates the creation rule
@@ -69,9 +73,9 @@ function sops_add_host_key() {
         exit 1
     fi
 
-    # Check if yq-go is available (use nix shell to avoid full flake evaluation)
-    if ! nix shell nixpkgs#yq-go --command yq-go --version >/dev/null 2>&1; then
-        yellow "yq-go not available via nix develop. Cannot update sops.yaml automatically."
+    # Check if yq is available (from yq-go package)
+    if ! nix_develop yq --version >/dev/null 2>&1; then
+        yellow "yq (from yq-go) not available. Cannot update sops.yaml automatically."
         yellow "Please manually add the following to sops.yaml:"
         echo "  - &$hostname $age_key"
         echo "And add a creation rule:"
@@ -84,7 +88,7 @@ function sops_add_host_key() {
     fi
 
     # Add the key to the keys section
-    sops_update_age_key "hosts" "$hostname" "$age_key"
+    sops_update_age_key "$hostname" "$age_key"
     
     # Add the creation rule
     sops_add_host_creation_rule "$hostname"
