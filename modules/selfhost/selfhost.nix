@@ -28,10 +28,12 @@
       aspect-chain,
       ...
     } @ aspectArgs: let
-      domain = "starcommand.local";
+      domain = "starcommand.live";
       nextcloudSubdomain = "cloud";
-      ldapSubdomain = "ldap";
+      lldapSubdomain = "ldap";
       authSubdomain = "auth";
+      grafanaSubdomain = "grafana";
+      vaultwardenSubdomain = "vault";
 
       # Extract host information from aspect-chain if available
       # This allows us to configure the host's instantiate function
@@ -42,6 +44,133 @@
       #     inputs.selfhostblocks.lib.<system>.patchedNixpkgs.nixosSystem;
       # This ensures the patched nixpkgs (with LLDAP enhancements) is used.
 
+      includes = [
+        # Local certificates and DNS
+        (FTS.selfhost._.local-certs {
+          inherit domain;
+          subdomains = [nextcloudSubdomain lldapSubdomain authSubdomain grafanaSubdomain vaultwardenSubdomain];
+        })
+
+        # LLDAP Identity Provider
+        (FTS.selfhost._.lldap {
+          inherit domain;
+          subdomain = lldapSubdomain;
+          adminPasswordKey = "starcommand/selfhost/auth/lldap/admin_password";
+          jwtSecretKey = "starcommand/selfhost/auth/lldap/jwt_secret";
+
+          # Service-specific groups
+          # TODO: These should be automatically registered by each service module
+          # For now, they're defined here but logically belong to their respective services:
+          # - nextcloud_user, nextcloud_admin (from Nextcloud)
+          # - grafana_user, grafana_admin (from Monitoring)
+          # - vaultwarden_admin (from Vaultwarden)
+          # - lldap_admin, lldap_password_manager (from LLDAP)
+          groups = {
+            nextcloud_user = {};
+            nextcloud_admin = {};
+            grafana_user = {};
+            grafana_admin = {};
+            vaultwarden_admin = {};
+            lldap_admin = {};
+            lldap_password_manager = {};
+          };
+
+          # Define users
+          users = {
+            codywright = {
+              email = "acodywright@gmail.com";
+              firstName = "Cody";
+              lastName = "Wright";
+              groups = [
+                "nextcloud_user"
+                "nextcloud_admin"
+                "grafana_user"
+                "grafana_admin"
+                "vaultwarden_admin"
+                "lldap_admin"
+                "lldap_password_manager"
+              ];
+              passwordKey = "cody/personal/password";
+              passwordSopsFile = ../../users/cody/secrets.yaml;
+            };
+          };
+        })
+
+        # Authelia SSO Provider
+        (FTS.selfhost._.authelia {
+          inherit domain;
+          subdomain = authSubdomain;
+          # LDAP connection info - will be read from config.shb.lldap
+          ldapPort = 3890; # Same as LLDAP
+          ldapHostname = "127.0.0.1";
+          dcdomain = "dc=${builtins.replaceStrings ["."] [",dc="] domain}";
+
+          # Secret keys
+          jwtSecretKey = "starcommand/selfhost/auth/authelia/jwt_secret";
+          ldapAdminPasswordKey = "starcommand/selfhost/auth/authelia/ldap_admin_password";
+          sessionSecretKey = "starcommand/selfhost/auth/authelia/session_secret";
+          storageEncryptionKey = "starcommand/selfhost/auth/authelia/storage_encryption_key";
+          oidcHmacSecretKey = "starcommand/selfhost/auth/authelia/oidc_hmac_secret";
+          oidcIssuerPrivateKey = "starcommand/selfhost/auth/authelia/oidc_issuer_private_key";
+        })
+
+        # Nextcloud Server
+        (FTS.selfhost._.nextcloud {
+          inherit domain;
+          subdomain = nextcloudSubdomain;
+          adminPasswordKey = "starcommand/selfhost/apps/nextcloud/admin_password";
+
+          # LDAP integration
+          ldap = {
+            enable = true;
+            port = 3890; # Same as LLDAP
+            dcdomain = "dc=${builtins.replaceStrings ["."] [",dc="] domain}";
+            adminPasswordKey = "starcommand/selfhost/apps/nextcloud/ldap_admin_password";
+            userGroup = "nextcloud_user";
+          };
+
+          # SSO integration
+          sso = {
+            enable = true;
+            endpoint = "https://${authSubdomain}.${domain}";
+            clientID = "nextcloud";
+            secretKey = "starcommand/selfhost/apps/nextcloud/sso_secret";
+            secretForAutheliaKey = "starcommand/selfhost/auth/authelia/nextcloud_sso_secret";
+          };
+        })
+
+        # Monitoring Stack
+        (FTS.selfhost._.monitoring {
+          inherit domain;
+          subdomain = grafanaSubdomain;
+          adminPasswordKey = "starcommand/selfhost/monitoring/grafana/admin_password";
+          secretKeyKey = "starcommand/selfhost/monitoring/grafana/secret_key";
+          contactPoints = ["acodywright@gmail.com"];
+
+          # LDAP integration
+          ldap = {
+            userGroup = "grafana_user";
+            adminGroup = "grafana_admin";
+          };
+
+          # SSO integration
+          sso = {
+            enable = true;
+            authEndpoint = "https://${authSubdomain}.${domain}";
+            sharedSecretKey = "starcommand/selfhost/monitoring/grafana/oidc_secret";
+            sharedSecretForAutheliaKey = "starcommand/selfhost/monitoring/grafana/oidc_secret_for_authelia";
+          };
+        })
+
+        # Vaultwarden Password Manager
+        (FTS.selfhost._.vaultwarden {
+          inherit domain;
+          subdomain = vaultwardenSubdomain;
+          databasePasswordKey = "starcommand/selfhost/apps/vaultwarden/database_password";
+          authEndpoint = "https://${authSubdomain}.${domain}";
+        })
+      ];
+
       nixos = {
         config,
         lib,
@@ -49,14 +178,10 @@
         ...
       }: {
         # Import SelfHostBlocks modules
-        # These use selfhostblocks' patched nixpkgs for enhanced options
+        # default imports everything except sops
         imports = [
-          inputs.selfhostblocks.nixosModules.lldap
+          inputs.selfhostblocks.nixosModules.default
           inputs.selfhostblocks.nixosModules.sops
-          inputs.selfhostblocks.nixosModules.authelia
-          inputs.selfhostblocks.nixosModules.nextcloud-server
-          inputs.selfhostblocks.nixosModules.nginx
-          inputs.selfhostblocks.nixosModules.ssl
           inputs.sops-nix.nixosModules.default
         ];
 
@@ -67,198 +192,49 @@
           age.sshKeyPaths = ["/etc/ssh/ssh_host_ed25519_key"];
         };
 
-        # SSL certificates (self-signed CA)
-        shb.certs = {
-          cas.selfsigned.myca = {
-            name = "Homelab CA";
-          };
-          certs.selfsigned.n = {
-            ca = config.shb.certs.cas.selfsigned.myca;
-            domain = "*.${domain}";
-            group = "nginx";
-          };
-        };
+        # Nginx reverse proxy
+        shb.nginx.accessLog = lib.mkDefault true;
+        shb.nginx.debugLog = lib.mkDefault false;
 
-        # LLDAP - Lightweight LDAP identity provider
-        # This tests if we're using the patched nixpkgs (which adds the enforceGroups option)
-        shb.lldap = {
-          enable = true;
-          inherit domain;
-          subdomain = ldapSubdomain;
-          ldapPort = 3890;
-          webUIListenPort = 17170;
-          dcdomain = "dc=${builtins.replaceStrings ["."] [",dc="] domain}";
-          ssl = config.shb.certs.certs.selfsigned.n;
-          # Generated with: openssl rand -base64 32
-          ldapUserPassword.result =
-            config.shb.sops.secret."starcommand/selfhost/auth/lldap/admin_password".result;
-          # Generated with: openssl rand -base64 32
-          jwtSecret.result = config.shb.sops.secret."starcommand/selfhost/auth/lldap/jwt_secret".result;
-
-          # Declaratively manage groups - they will be created automatically
-          ensureGroups = {
-            nextcloud_user = {}; # Users who can access Nextcloud
-            nextcloud_admin = {}; # Nextcloud administrators
-          };
-
-          # Declaratively manage users
-          ensureUsers = {
-            CodyWright = {
-              email = "acodywright@gmail.com";
-              firstName = "Cody";
-              lastName = "Wright";
-              groups = ["nextcloud_user" "nextcloud_admin"];
-              # Password from cody's personal secrets file
-              password.result = config.shb.sops.secret."cody/personal/password".result;
-            };
-          };
-
-          # enforceGroups = true;  # Delete groups not declared (default: true)
-          # enforceUsers = false;  # Don't delete manually created users (default: false)
-        };
-        # SOPS secret for cody's password (from cody's personal secrets file)
+        # SOPS secret for codywright's password (from cody's personal secrets file)
+        # This needs to be in the parent module to avoid circular dependency
         shb.sops.secret."cody/personal/password" = {
-          request = config.shb.lldap.ensureUsers.CodyWright.password.request;
+          request = config.shb.lldap.ensureUsers.codywright.password.request;
           settings = {
             sopsFile = ../../users/cody/secrets.yaml;
             key = "cody/personal/password";
           };
         };
-        shb.sops.secret."starcommand/selfhost/auth/lldap/admin_password".request =
-          config.shb.lldap.ldapUserPassword.request;
-        shb.sops.secret."starcommand/selfhost/auth/lldap/jwt_secret".request =
-          config.shb.lldap.jwtSecret.request;
 
-        # Authelia - SSO/OIDC provider
-        shb.authelia = {
-          enable = true;
-          inherit domain;
-          subdomain = authSubdomain;
-          ssl = config.shb.certs.certs.selfsigned.n;
-          ldapPort = config.shb.lldap.ldapPort;
-          ldapHostname = "127.0.0.1";
-          dcdomain = config.shb.lldap.dcdomain;
+        # Secret sharing configuration
+        # Set up secrets that need to be shared between services
 
-          secrets = {
-            # Generated with: openssl rand -base64 64
-            jwtSecret.result = config.shb.sops.secret."starcommand/selfhost/auth/authelia/jwt_secret".result;
-            # Reuse LLDAP admin password for LDAP connection
-            ldapAdminPassword.result =
-              config.shb.sops.secret."starcommand/selfhost/auth/authelia/ldap_admin_password".result;
-            # Generated with: openssl rand -base64 64
-            sessionSecret.result =
-              config.shb.sops.secret."starcommand/selfhost/auth/authelia/session_secret".result;
-            # Generated with: openssl rand -base64 64
-            storageEncryptionKey.result =
-              config.shb.sops.secret."starcommand/selfhost/auth/authelia/storage_encryption_key".result;
-            # Generated with: openssl rand -base64 64
-            identityProvidersOIDCHMACSecret.result =
-              config.shb.sops.secret."starcommand/selfhost/auth/authelia/oidc_hmac_secret".result;
-            # Generated with: openssl genrsa 4096
-            identityProvidersOIDCIssuerPrivateKey.result =
-              config.shb.sops.secret."starcommand/selfhost/auth/authelia/oidc_issuer_private_key".result;
-          };
-        };
-        shb.sops.secret."starcommand/selfhost/auth/authelia/jwt_secret".request =
-          config.shb.authelia.secrets.jwtSecret.request;
-        shb.sops.secret."starcommand/selfhost/auth/authelia/ldap_admin_password" = {
-          request = config.shb.authelia.secrets.ldapAdminPassword.request;
-          settings.key = "starcommand/selfhost/auth/lldap/admin_password"; # Reuse LLDAP admin password
-        };
-        # Nextcloud's copy of LLDAP admin password (owned by nextcloud user)
+        # Authelia LDAP admin password - reuse LLDAP admin password
+        shb.sops.secret."starcommand/selfhost/auth/authelia/ldap_admin_password".settings.key = "starcommand/selfhost/auth/lldap/admin_password";
+
+        # Nextcloud LDAP admin password - reuse LLDAP admin password
         shb.sops.secret."starcommand/selfhost/apps/nextcloud/ldap_admin_password" = {
           request = config.shb.nextcloud.apps.ldap.adminPassword.request;
-          settings.key = "starcommand/selfhost/auth/lldap/admin_password"; # Reuse same LLDAP admin password
+          settings.key = "starcommand/selfhost/auth/lldap/admin_password";
         };
-        shb.sops.secret."starcommand/selfhost/auth/authelia/session_secret".request =
-          config.shb.authelia.secrets.sessionSecret.request;
-        shb.sops.secret."starcommand/selfhost/auth/authelia/storage_encryption_key".request =
-          config.shb.authelia.secrets.storageEncryptionKey.request;
-        shb.sops.secret."starcommand/selfhost/auth/authelia/oidc_hmac_secret".request =
-          config.shb.authelia.secrets.identityProvidersOIDCHMACSecret.request;
-        shb.sops.secret."starcommand/selfhost/auth/authelia/oidc_issuer_private_key".request =
-          config.shb.authelia.secrets.identityProvidersOIDCIssuerPrivateKey.request;
 
-        # Nextcloud with LDAP and SSO integration
-        shb.nextcloud = {
-          enable = true;
-          inherit domain;
-          subdomain = nextcloudSubdomain;
-          dataDir = "/var/lib/nextcloud";
-          port = lib.mkForce null; # Use SSL
-          ssl = config.shb.certs.certs.selfsigned.n;
-          tracing = null;
-          defaultPhoneRegion = "US";
+        # Nextcloud SSO secret
+        shb.sops.secret."starcommand/selfhost/apps/nextcloud/sso_secret".request = config.shb.nextcloud.apps.sso.secret.request;
 
-          # Generated with: openssl rand -base64 32
-          adminPass.result =
-            config.shb.sops.secret."starcommand/selfhost/apps/nextcloud/admin_password".result;
-
-          apps = {
-            previewgenerator.enable = true;
-
-            # LDAP integration
-            ldap = {
-              enable = true;
-              host = "127.0.0.1";
-              port = config.shb.lldap.ldapPort;
-              dcdomain = config.shb.lldap.dcdomain;
-              adminName = "admin";
-              # Reuse LLDAP admin password (Nextcloud's copy with proper ownership)
-              adminPassword.result =
-                config.shb.sops.secret."starcommand/selfhost/apps/nextcloud/ldap_admin_password".result;
-              userGroup = "nextcloud_user";
-            };
-
-            # SSO integration via Authelia
-            sso = {
-              enable = true;
-              endpoint = "https://${authSubdomain}.${domain}";
-              clientID = "nextcloud";
-              fallbackDefaultAuth = true;
-              # Secret for Nextcloud (owned by nextcloud user)
-              secret.result = config.shb.sops.secret."starcommand/selfhost/apps/nextcloud/sso_secret".result;
-              # Shared secret for Authelia (owned by authelia user, same value via settings.key)
-              secretForAuthelia.result =
-                config.shb.sops.secret."starcommand/selfhost/auth/authelia/nextcloud_sso_secret".result;
-            };
-          };
-        };
-        shb.sops.secret."starcommand/selfhost/apps/nextcloud/admin_password".request =
-          config.shb.nextcloud.adminPass.request;
-        # Nextcloud's copy of the SSO secret (owned by nextcloud user)
-        shb.sops.secret."starcommand/selfhost/apps/nextcloud/sso_secret".request =
-          config.shb.nextcloud.apps.sso.secret.request;
-        # Authelia's copy of the SSO secret (owned by authelia user, same value)
+        # Authelia's copy of Nextcloud SSO secret - share same value
         shb.sops.secret."starcommand/selfhost/auth/authelia/nextcloud_sso_secret" = {
           request = config.shb.nextcloud.apps.sso.secretForAuthelia.request;
-          settings.key = "starcommand/selfhost/apps/nextcloud/sso_secret"; # Use same secret value
+          settings.key = "starcommand/selfhost/apps/nextcloud/sso_secret";
         };
 
-        # Local DNS resolution for homelab services
-        # Disable systemd-resolved so dnsmasq can use port 53
-        services.resolved.enable = false;
+        # Monitoring SSO secrets - set up by parent to share secret with Authelia
+        shb.sops.secret."starcommand/selfhost/monitoring/grafana/oidc_secret".request =
+          config.shb.monitoring.sso.sharedSecret.request;
 
-        services.dnsmasq = {
-          enable = true;
-          settings = {
-            domain-needed = true;
-            bogus-priv = true;
-            no-resolv = true; # Don't read /etc/resolv.conf
-            # Forward other DNS queries to external DNS
-            server = ["1.1.1.1" "8.8.8.8"];
-            address = map (hostname: "/${hostname}/127.0.0.1") [
-              domain
-              "${nextcloudSubdomain}.${domain}"
-              "${ldapSubdomain}.${domain}"
-              "${authSubdomain}.${domain}"
-            ];
-          };
+        shb.sops.secret."starcommand/selfhost/monitoring/grafana/oidc_secret_for_authelia" = {
+          request = config.shb.monitoring.sso.sharedSecretForAuthelia.request;
+          settings.key = "starcommand/selfhost/monitoring/grafana/oidc_secret"; # Share the same secret
         };
-
-        # Nginx configuration
-        shb.nginx.accessLog = lib.mkDefault true;
-        shb.nginx.debugLog = lib.mkDefault false;
       };
     };
   };
