@@ -1,4 +1,5 @@
-# parametric providers for home
+# Parametric provider for home configuration
+# Sets home directory and username for home-manager
 {
   den,
   lib,
@@ -6,7 +7,7 @@
   ...
 }:
 {
-  den.aspects.example.provides.home =
+  den.aspects.dendritic.provides.home =
     { home, ... }:
     { class, ... }:
     let

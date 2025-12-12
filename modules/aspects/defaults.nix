@@ -15,16 +15,17 @@
     includes = [
       <den/home-manager>  # den.provides.home-manager
       den.aspects.hm-backup
-      den.aspects.example._.routes
-      den.aspects.example._.user
-      den.aspects.example._.host
-      den.aspects.example._.home
-      <den/vm>   # den.provides.vm
-      <den/iso>  # den.provides.iso
+      den.aspects.dendritic._.routes  # Mutual dependency routing
+      den.aspects.dendritic._.user    # User account setup
+      den.aspects.dendritic._.host    # Hostname configuration
+      den.aspects.dendritic._.home    # Home directory setup
+      <den/vm>   # VM generation (perSystem packages)
+      <den/iso>  # ISO generation (perSystem packages)
     ];
     host.includes = [
       <FTS/nh>
       # System aspects
+      <FTS.system>  # Essential system utilities
       <FTS/fonts>
       <FTS/phoenix>
       <FTS/experimental-features>  # Enable nix-command and flakes
@@ -34,9 +35,10 @@
       # Boot loader - disabled by default, enable per-host as needed
       # (<FTS/grub> { })
     ];
-    user.includes = [ <FTS/example/user> ];
+    user.includes = [ 
+      # User-specific modules can be added here
+    ];
     home.includes = [
-      <FTS/example/home>
       den.aspects.nix-index
       den.aspects.nix-registry
       <FTS/secrets>  # SOPS secrets infrastructure (home-manager part)
