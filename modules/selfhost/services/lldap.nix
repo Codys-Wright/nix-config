@@ -13,7 +13,7 @@
     jwtSecretKey,
     # Optional parameters
     ssl ? null,
-    sslCertName ? "starcommand",
+    sslCertName ? domain,  # Use domain as cert name (e.g., "starcommand.live")
     ldapPort ? 3890,
     webUIListenPort ? 17170,
     users ? {},
@@ -44,7 +44,7 @@
       sslCert =
         if ssl != null
         then ssl
-        else config.shb.certs.certs.selfsigned.${sslCertName};
+        else config.shb.certs.certs.letsencrypt.${sslCertName};
     in {
       # LLDAP configuration
       shb.lldap = {

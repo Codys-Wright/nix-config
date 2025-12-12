@@ -1,63 +1,67 @@
 # Jellyfin media server aspect module
 {
-  domain,
-  subdomain ? "jellyfin",
-  dcdomain,
-  ldapAdminPasswordKey,
-  ssoSecretKey,
-  ssoSecretForAutheliaKey,
-  authEndpoint,
-}: {
+  FTS,
   lib,
-  config,
   __findFile,
   ...
-}: let
-  FTS = import <FTS.selfhost> {inherit lib config __findFile;};
-in {
-  # Ensure LLDAP groups for Jellyfin
-  shb.lldap.ensureGroups = {
-    jellyfin_user = {};
-    jellyfin_admin = {};
-  };
+}: {
+  FTS.selfhost._.jellyfin = {
+    domain,
+    subdomain ? "jellyfin",
+    dcdomain,
+    ldapAdminPasswordKey,
+    ssoSecretKey,
+    ssoSecretForAutheliaKey,
+    authEndpoint,
+    ...
+  } @ aspectArgs: {
+    class,
+    aspect-chain,
+  }: {
+    nixos = {
+      lib,
+      config,
+      ...
+    }: {
+      # Ensure LLDAP groups for Jellyfin
+      shb.lldap.ensureGroups = {
+        jellyfin_user = {};
+        jellyfin_admin = {};
+      };
 
-  # SOPS secrets for Jellyfin
-  shb.sops.secret."${ldapAdminPasswordKey}".request = config.shb.jellyfin.ldap.adminPassword.request;
-  shb.sops.secret."${ldapAdminPasswordKey}".settings.key = ldapAdminPasswordKey;
+      # Jellyfin service configuration
+      shb.jellyfin = {
+        enable = true;
+        inherit domain subdomain;
 
-  shb.sops.secret."${ssoSecretKey}".request = config.shb.jellyfin.sso.sharedSecret.request;
-  shb.sops.secret."${ssoSecretKey}".settings.key = ssoSecretKey;
+        # Reference SSL certs from config (already set up by letsencrypt-certs aspect)
+        # The certificate name matches the domain
+        ssl = config.shb.certs.certs.letsencrypt.${domain};
 
-  shb.sops.secret."${ssoSecretForAutheliaKey}".request = config.shb.jellyfin.sso.sharedSecretForAuthelia.request;
-  shb.sops.secret."${ssoSecretForAutheliaKey}".settings.key = ssoSecretForAutheliaKey;
+        ldap = {
+          enable = true;
+          host = "127.0.0.1";
+          port = config.shb.ldap.ldapPort;
+          inherit dcdomain;
+          userGroup = "jellyfin_user";
+          adminGroup = "jellyfin_admin";
+          # Reference the SOPS secret result
+          adminPassword.result = config.shb.sops.secret."${ldapAdminPasswordKey}".result;
+        };
 
-  # Jellyfin service configuration
-  shb.jellyfin = {
-    enable = true;
-    inherit domain subdomain;
-
-    ssl = (FTS.selfhost._.local-certs {}).shb.certs.certs.selfsigned.n;
-
-    ldap = {
-      enable = true;
-      host = "127.0.0.1";
-      port = config.shb.ldap.ldapPort;
-      inherit dcdomain;
-      userGroup = "jellyfin_user";
-      adminGroup = "jellyfin_admin";
-      adminPassword = {}; # Will be filled by SOPS
-    };
-
-    sso = {
-      enable = true;
-      provider = "Authelia";
-      endpoint = authEndpoint;
-      clientID = "jellyfin";
-      userGroup = "jellyfin_user";
-      adminUserGroup = "jellyfin_admin";
-      authorization_policy = "one_factor";
-      sharedSecret = {}; # Will be filled by SOPS
-      sharedSecretForAuthelia = {}; # Will be filled by SOPS
+        sso = {
+          enable = true;
+          provider = "Authelia";
+          endpoint = authEndpoint;
+          clientID = "jellyfin";
+          userGroup = "jellyfin_user";
+          adminUserGroup = "jellyfin_admin";
+          authorization_policy = "one_factor";
+          # Reference the SOPS secret results
+          sharedSecret.result = config.shb.sops.secret."${ssoSecretKey}".result;
+          sharedSecretForAuthelia.result = config.shb.sops.secret."${ssoSecretForAutheliaKey}".result;
+        };
+      };
     };
   };
 }

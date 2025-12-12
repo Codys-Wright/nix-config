@@ -17,7 +17,7 @@
     sso ? {},
     # Optional parameters
     ssl ? null,
-    sslCertName ? "starcommand",
+    sslCertName ? domain, # Use domain as cert name (e.g., "starcommand.live")
     contactPoints ? [],
     ...
   } @ args: {
@@ -41,7 +41,7 @@
       sslCert =
         if ssl != null
         then ssl
-        else config.shb.certs.certs.selfsigned.${sslCertName};
+        else config.shb.certs.certs.letsencrypt.${sslCertName};
 
       # Check if LDAP is configured
       ldapEnabled = ldap != {};
@@ -77,6 +77,12 @@
       # SOPS secrets for monitoring
       shb.sops.secret."${adminPasswordKey}".request = config.shb.monitoring.adminPassword.request;
       shb.sops.secret."${secretKeyKey}".request = config.shb.monitoring.secretKey.request;
+
+      # Ensure Grafana waits for Let's Encrypt certificate
+      systemd.services.grafana = lib.mkIf (ssl != null || config.shb.certs.certs.letsencrypt != {}) {
+        wants = [config.shb.certs.certs.letsencrypt.${sslCertName}.systemdService];
+        after = [config.shb.certs.certs.letsencrypt.${sslCertName}.systemdService];
+      };
 
       # NOTE: SSO secrets must be set up by the parent module
       # because they require settings.key overrides for secret sharing.
