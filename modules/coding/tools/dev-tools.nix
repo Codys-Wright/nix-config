@@ -2,7 +2,7 @@
 {
   FTS, ... }:
 {
-  FTS.dev-tools = {
+  FTS.coding._.tools._.dev-tools = {
     description = "General development tools and utilities";
 
     # NixOS-specific tools (Linux-only)

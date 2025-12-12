@@ -2,7 +2,7 @@
 {
   FTS, ... }:
 {
-  FTS.docker = {
+  FTS.coding._.tools._.docker = {
     description = "Docker and container tools";
 
     homeManager =

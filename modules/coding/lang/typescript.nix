@@ -2,7 +2,7 @@
 {
 FTS, ... }:
 {
-  FTS.typescript = {
+  FTS.coding._.lang._.typescript = {
     description = "TypeScript and Node.js development environment";
 
     homeManager =

@@ -7,7 +7,7 @@
     SPC.url = "github:vic/SPC";
   };
 
-  FTS.doom-btw = {
+  FTS.coding._.editors._.doom-btw = {
     homeManager =
       { pkgs, lib, ... }:
       let

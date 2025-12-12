@@ -1,14 +1,21 @@
 # Proton compatibility tools aspect
 {
-  FTS, ... }:
+  FTS,
+  ...
+}:
 {
-  FTS.proton = {
+  FTS.apps._.gaming._.proton = {
     description = "Proton compatibility tools for running Windows games on Linux";
 
+    homeManager = { pkgs, ... }: {
+      home.packages = [ pkgs.protonup-ng ];
+      home.sessionVariables = {
+        STEAM_EXTRA_COMPAT_TOOLS_PATHS = "\${HOME}/.steam/root/compatibilitytools.d";
+      };
+    };
+
     nixos = { config, pkgs, lib, ... }: {
-      environment.systemPackages = with pkgs; [
-        protonup-ng
-      ];
+      environment.systemPackages = [ pkgs.protonup-ng ];
 
       # AFTER THIS OPTION IS SET, RUN PROTONUP
       environment.sessionVariables = {

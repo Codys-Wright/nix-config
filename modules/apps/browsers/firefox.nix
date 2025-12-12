@@ -1,14 +1,18 @@
 # Firefox Browser aspect
 {
-  FTS, ... }:
+  FTS,
+  ...
+}:
 {
-  FTS.firefox = {
-    description = "Firefox Browser";
+  FTS.apps._.browsers._.firefox = {
+    description = "Firefox Browser - Mozilla's open-source browser";
 
+    homeManager = { pkgs, ... }: {
+      home.packages = [ pkgs.firefox ];
+    };
+    
     nixos = { pkgs, ... }: {
-      environment.systemPackages = [
-        pkgs.firefox
-      ];
+      environment.systemPackages = [ pkgs.firefox ];
     };
   };
 }

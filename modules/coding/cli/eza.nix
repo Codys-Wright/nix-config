@@ -2,7 +2,7 @@
 {
   FTS, ... }:
 {
-  FTS.eza = {
+  FTS.coding._.cli._.eza = {
     description = "Eza modern ls replacement";
 
     homeManager = { pkgs, lib, ... }: {

@@ -1,14 +1,15 @@
-# CLI tools meta-aspect - includes all CLI tool modules
+# Notes facet - All note-taking applications
 {
-  FTS, ... }:
+  FTS,
+  ...
+}:
 {
-  FTS.notes = {
-    description = "All Notes Tools";
-
-    includes = [
-      FTS.obsidian
-    ];
+  FTS.apps._.notes = {
+    description = "All note-taking applications - obsidian";
     
+    includes = [
+      FTS.apps._.notes._.obsidian
+    ];
   };
 }
 

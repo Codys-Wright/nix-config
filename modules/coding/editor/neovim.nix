@@ -3,7 +3,7 @@
 {
   FTS, ... }:
 {
-  FTS.neovim = {
+  FTS.coding._.editors._.neovim = {
     description = "Base Neovim editor configuration";
 
     homeManager = { pkgs, ... }: {

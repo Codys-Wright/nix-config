@@ -2,7 +2,7 @@
 {
   FTS, ... }:
 {
-  FTS.just = {
+  FTS.coding._.cli._.just = {
     description = "Just command runner";
 
     # NixOS system packages

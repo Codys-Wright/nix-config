@@ -11,7 +11,7 @@
   flake-file.inputs.rust-overlay.url = lib.mkDefault "github:oxalica/rust-overlay";
   flake-file.inputs.rust-overlay.inputs.nixpkgs.follows = "nixpkgs";
 
-  FTS.rust = {
+  FTS.coding._.lang._.rust = {
     description = "Rust development environment with cargo tools and toolchain using rust-overlay";
 
     

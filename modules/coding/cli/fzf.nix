@@ -2,7 +2,7 @@
 {
   FTS, ... }:
 {
-  FTS.fzf = {
+  FTS.coding._.cli._.fzf = {
     description = "Fzf fuzzy finder with custom colors";
 
     homeManager = { pkgs, lib, ... }: {

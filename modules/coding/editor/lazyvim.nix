@@ -8,7 +8,7 @@
 {
   flake-file.inputs.lazyvim.url = "github:Codys-Wright/lazyvim-nix";
 
-  FTS.lazyvim = {
+  FTS.coding._.editors._.lazyvim = {
     description = "LazyVim Neovim distribution";
 
     nixos =
