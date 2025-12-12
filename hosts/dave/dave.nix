@@ -22,8 +22,8 @@ den.hosts.x86_64-linux = {
           displayManager.auto = true;  # Auto-selects GDM for GNOME
         })
 
-        <FTS/kernel>
-        <FTS/hardware>
+        <FTS.kernel>
+        <FTS.hardware>
       ];
 
       # Manually set fileSystems and bootloader for now

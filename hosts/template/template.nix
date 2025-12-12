@@ -15,7 +15,7 @@
     template = {
       # Include basic aspects for testing
       includes = [
-        <FTS/hardware>
+        <FTS.hardware>
         deployment.default  # Deployment configuration (includes all deployment aspects)
       ];
 

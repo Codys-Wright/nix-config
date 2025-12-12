@@ -1,5 +1,5 @@
 {
-  cody.admin =
+  FTS.user._.admin =
     { user, ... }:
     {
       darwin.system.primaryUser = user.userName;
@@ -12,7 +12,7 @@
           "input"
         ];
         initialPassword = "password";
-        description = "Cody";
+        description = user.userName;
       };
     };
 }
