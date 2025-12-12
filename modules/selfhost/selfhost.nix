@@ -62,6 +62,17 @@
           dnsApiTokenKey = "starcommand/selfhost/proxy/cloudflare/starcommand_dns_key";
           noTLSVerify = true; # Let's Encrypt certs are trusted, but internal routing uses HTTP
           autoRouteDNS = true; # Automatically route DNS through tunnel
+          # Manual ingress rules for services served directly by nginx (not proxied)
+          manualIngress = [
+            {
+              hostname = "cloud.${domain}"; # Nextcloud
+              service = "https://localhost";
+            }
+            {
+              hostname = "media.${domain}"; # Jellyfin
+              service = "https://localhost";
+            }
+          ];
         })
 
         # LLDAP Identity Provider
