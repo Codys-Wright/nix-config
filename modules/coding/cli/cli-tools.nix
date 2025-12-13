@@ -31,5 +31,17 @@
           openssl_3
         ];
       };
+
+    # Darwin system packages
+    darwin =
+      { pkgs, ... }:
+      {
+        environment.systemPackages = with pkgs; [
+          ripgrep
+          openssl
+          openssl.dev
+          # gcc is available via Xcode Command Line Tools on macOS
+        ];
+      };
   };
 }

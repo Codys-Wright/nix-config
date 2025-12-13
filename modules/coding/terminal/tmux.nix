@@ -7,9 +7,12 @@
 
     # Darwin-specific configuration
     darwin = { config, pkgs, lib, ... }: {
-      # Darwin system-level configurations can go here if needed
-      # Tmux configuration is handled via Home Manager on both platforms
+      # Darwin system-level configurations
       # Note: pbcopy is a macOS system utility, available by default
+      # No additional system packages needed for clipboard integration on macOS
+      environment.systemPackages = with pkgs; [
+        # tmux is installed via home-manager, but can be added here if needed
+      ];
     };
 
     # NixOS-specific configuration
