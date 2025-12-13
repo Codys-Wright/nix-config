@@ -7,7 +7,7 @@
   FTS.apps._.gaming._.proton = {
     description = "Proton compatibility tools for running Windows games on Linux";
 
-    homeManager = { pkgs, ... }: {
+    homeManager = { pkgs, lib, ... }: lib.mkIf (!pkgs.stdenv.isDarwin) {
       home.packages = [ pkgs.protonup-ng ];
       home.sessionVariables = {
         STEAM_EXTRA_COMPAT_TOOLS_PATHS = "\${HOME}/.steam/root/compatibilitytools.d";

@@ -1,6 +1,8 @@
 # Gaming facet - All gaming platforms and tools
 {
   FTS,
+  lib,
+  pkgs,
   ...
 }:
 {

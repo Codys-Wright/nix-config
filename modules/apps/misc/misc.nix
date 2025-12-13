@@ -8,7 +8,7 @@
     description = "misc apps";
 
     includes = [
-      FTS.apps._.misc._.nextcloud-client
+      # FTS.apps._.misc._.nextcloud-client  # Not available on aarch64-darwin
     ];
   };
 }
