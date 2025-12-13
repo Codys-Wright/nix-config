@@ -12,6 +12,10 @@
     darwin = { pkgs, ... }: {
       environment.systemPackages = [ pkgs.nh ];
     };
+
+    homeManager = { pkgs, ... }: {
+      home.packages = [ pkgs.nh ];
+    };
   };
 }
 
