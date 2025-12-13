@@ -47,6 +47,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
       url = "github:Davi-S/sddm-theme-minesddm";
     };
+    musnix.url = "github:musnix/musnix";
     nix-index-database.url = "github:nix-community/nix-index-database";
     nixos-facter-modules.url = "github:numtide/nixos-facter-modules";
     nixos-generators = {
