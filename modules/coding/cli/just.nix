@@ -11,6 +11,13 @@
         just
       ];
     };
+
+    # Darwin system packages
+    darwin = { pkgs, ... }: {
+      environment.systemPackages = with pkgs; [
+        just
+      ];
+    };
   };
 }
 

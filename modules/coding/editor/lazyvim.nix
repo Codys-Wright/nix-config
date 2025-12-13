@@ -36,6 +36,31 @@
         ];
       };
 
+    darwin =
+      { pkgs, ... }:
+      {
+        environment.systemPackages = with pkgs; [
+          ripgrep
+          imagemagick
+          tectonic
+          ghostscript
+          mermaid-cli
+          fd
+          luajitPackages.luarocks-nix
+          alejandra
+          sqlite
+          tree-sitter
+          statix
+          biome
+          nixfmt
+          shfmt
+          stylua
+          typstyle
+          terraform
+          packer
+        ];
+      };
+
     homeManager =
       {
         config,

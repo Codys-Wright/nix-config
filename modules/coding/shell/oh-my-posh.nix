@@ -8,6 +8,10 @@
       environment.systemPackages = [ pkgs.oh-my-posh ];
     };
 
+    darwin = { pkgs, ... }: {
+      environment.systemPackages = [ pkgs.oh-my-posh ];
+    };
+
     homeManager = { pkgs, ... }: {
       programs.oh-my-posh = {
         enable = true;
