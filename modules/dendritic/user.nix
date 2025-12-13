@@ -11,7 +11,10 @@
       by-class.nixos.users.users.${user.userName}.isNormalUser = true;
       by-class.darwin = {
         system.primaryUser = user.userName;
-        users.users.${user.userName}.isNormalUser = true;
+        users.users.${user.userName} = {
+          name = user.userName;
+          home = "/Users/${user.userName}";
+        };
       };
 
       # Host-specific overrides can go here if needed
