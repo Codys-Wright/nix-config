@@ -13,6 +13,7 @@
     
     # Enable unfree packages
     nixos.nixpkgs.config.allowUnfree = true;
+    darwin.nixpkgs.config.allowUnfree = true;
     homeManager.nixpkgs.config.allowUnfree = true;
   };
 
