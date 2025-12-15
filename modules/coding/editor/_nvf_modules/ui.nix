@@ -8,6 +8,37 @@
     nvimTree.enable = false;
   };
 
+  # Add NUI (UI component library) - required by many plugins
+  # NUI is available in nvf as "nui-nvim" but doesn't have a module yet
+  startPlugins = ["nui-nvim"];
+
+  # Mini.icons configuration (LazyVim-style)
+  # Provides icons and mocks nvim-web-devicons
+  mini = {
+    icons = {
+      enable = true;
+      # LazyVim-style mini.icons configuration
+      setupOpts = {
+        file = {
+          ".keep" = {
+            glyph = "󰊢";
+            hl = "MiniIconsGrey";
+          };
+          "devcontainer.json" = {
+            glyph = "";
+            hl = "MiniIconsAzure";
+          };
+        };
+        filetype = {
+          dotenv = {
+            glyph = "";
+            hl = "MiniIconsYellow";
+          };
+        };
+      };
+    };
+  };
+
   # Bufferline configuration (LazyVim-style)
   tabline = {
     nvimBufferline = {
@@ -22,14 +53,15 @@
           diagnostics = "nvim_lsp";
           # Don't always show bufferline (LazyVim default)
           always_show_bufferline = false;
-          # LazyVim-style diagnostics indicator
+          # LazyVim-style diagnostics indicator (uses LazyVim.config.icons.diagnostics)
           diagnostics_indicator = lib.generators.mkLuaInline ''
             function(_, _, diag)
+              -- Use LazyVim-style icons (matching LazyVim.config.icons.diagnostics)
               local icons = {
-                Error = "󰅚 ",
-                Warn = "󰀪 ",
-                Hint = "󰆈 ",
-                Info = "󰋼 ",
+                Error = " ",
+                Warn = " ",
+                Hint = " ",
+                Info = " ",
               }
               local ret = (diag.error and icons.Error .. diag.error .. " " or "")
                 .. (diag.warning and icons.Warn .. diag.warning or "")
@@ -42,10 +74,27 @@
               filetype = "snacks_layout_box";
             }
           ];
-          # Get element icon from filetype icons (LazyVim uses LazyVim.config.icons.ft)
-          # Note: nvf uses nvim-web-devicons by default, so we can leave this as null
-          # to use the default behavior
-          get_element_icon = null;
+          # Get element icon from mini.icons (LazyVim uses LazyVim.config.icons.ft)
+          # Use mini.icons via the mocked nvim-web-devicons API
+          # This matches LazyVim's approach: LazyVim.config.icons.ft[opts.filetype]
+          get_element_icon = lib.generators.mkLuaInline ''
+            function(opts)
+              -- Ensure mini.icons is loaded (the mock should handle this, but be safe)
+              if not package.loaded["mini.icons"] then
+                pcall(require, "mini.icons")
+              end
+              -- Use mini.icons via the mocked nvim-web-devicons
+              local icons = require("nvim-web-devicons")
+              if icons and icons.get_icon_by_filetype then
+                -- get_icon_by_filetype returns icon, highlight_group
+                -- We only need the icon string (first return value)
+                local icon = icons.get_icon_by_filetype(opts.filetype, { default = false })
+                -- Return the icon string, or nil to use bufferline default
+                return type(icon) == "string" and icon or nil
+              end
+              return nil
+            end
+          '';
         };
       };
     };
@@ -58,16 +107,19 @@
   statusline = {
     lualine = {
       enable = true;
+      # Use nvf's dedicated theme option - automatically uses "catppuccin" since it's supported
+      # or falls back to "auto" if theme is not supported
+      theme = "auto";
       # LazyVim-style lualine configuration (exact replica from ui.lua)
       setupOpts = {
         options = {
-          theme = "auto";
           globalstatus = lib.generators.mkLuaInline "vim.o.laststatus == 3";
           disabled_filetypes = {
             statusline = ["dashboard" "alpha" "ministarter" "snacks_dashboard"];
           };
           # Note: LazyVim doesn't set component_separators or section_separators,
           # so it uses the theme defaults which include diagonal/curved lines
+          # Theme is handled by nvf's dedicated theme option above
         };
         # Override sections with LazyVim-style configuration (exact replica from ui.lua)
         sections = lib.mkForce {
@@ -83,15 +135,15 @@
           lualine_c = [
             # Root directory (using LazyVim.lualine.root_dir)
             (lib.generators.mkLuaInline "_G.LazyVim.lualine.root_dir()")
-            # Diagnostics
+            # Diagnostics (using LazyVim-style icons)
             (lib.generators.mkLuaInline ''
               {
                 "diagnostics",
                 symbols = {
-                  error = "󰅚 ",
-                  warn = "󰀪 ",
-                  info = "󰋼 ",
-                  hint = "󰆈 ",
+                  error = " ",
+                  warn = " ",
+                  info = " ",
+                  hint = " ",
                 },
               }
             '')
