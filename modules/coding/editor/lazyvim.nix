@@ -33,6 +33,7 @@
           typstyle
           terraform
           packer
+          oxlint
         ];
       };
 
@@ -44,6 +45,7 @@
           imagemagick
           tectonic
           ghostscript
+          vscode-js-debug
           mermaid-cli
           fd
           luajitPackages.luarocks-nix
@@ -58,6 +60,7 @@
           typstyle
           terraform
           packer
+          oxlint
         ];
       };
 
@@ -133,7 +136,12 @@
                 installDependencies = true;
                 installRuntimeDependencies = false;
               };
-              typescript.enable = true;
+              typescript = {
+                enable = true;
+                installDependencies = true;
+                installRuntimeDependencies = true;
+              };
+
               tailwind.enable = true;
               typst.enable = true;
               nushell.enable = true;
