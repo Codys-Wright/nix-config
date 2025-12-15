@@ -77,6 +77,7 @@
     sops-nix.url = "github:Mic92/sops-nix";
     stylix.url = "github:danth/stylix";
     systems.url = "github:nix-systems/default";
+    wrappers.url = "github:lassulus/wrappers";
     zen-browser = {
       inputs.nixpkgs.follows = "nixpkgs";
       url = "github:0xc000022070/zen-browser-flake";

@@ -35,3 +35,4 @@ host_key
 # Development directories (personal projects, not part of the flake)
 Development/
 
+.aider*
