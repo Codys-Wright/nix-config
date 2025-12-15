@@ -1,25 +1,18 @@
 # CUDA hardware aspect
-{
-  FTS,
-  ...
-}:
-{
+{FTS, ...}: {
   FTS.hardware._.cuda = {
     description = "CUDA hardware support";
 
-    nixos = { pkgs, ... }: {
+    nixos = {pkgs, ...}: {
       environment.systemPackages = with pkgs; [
         pciutils
         cudatoolkit
       ];
 
-      services.xserver.videoDrivers = [ "nvidia" ];
+      services.xserver.videoDrivers = ["nvidia"];
 
-      systemd.services.nvidia-control-devices = {
-        wantedBy = [ "multi-user.target" ];
-        serviceConfig.ExecStart = "${pkgs.linuxPackages.nvidia_x11.bin}/bin/nvidia-smi";
-      };
+      # Note: nvidia-control-devices service is automatically created by NixOS's NVIDIA module
+      # No need to manually define it - the hardware.nvidia configuration handles this
     };
   };
 }
-

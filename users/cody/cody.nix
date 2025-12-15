@@ -3,8 +3,7 @@
   cody,
   __findFile,
   ...
-}:
-{
+}: {
   den = {
     homes = {
       # Darwin (macOS) home configuration
@@ -25,7 +24,7 @@
       description = "Cody user configuration";
       includes = [
         # User-level theme (context-aware: only affects homeManager appearance)
-        (<FTS.theme> { default = "cody"; })
+        (<FTS.theme> {default = "cody";})
 
         # Applications - all included by default
         <FTS.apps/browsers>
@@ -43,14 +42,12 @@
         # User configuration
         <FTS.user/admin> # Admin privileges and user configuration
         <FTS.user/autologin> # Autologin configuration (enabled when display manager is present)
-        (<FTS.user/shell> { default = "fish"; }) # Set fish as default shell
+        (<FTS.user/shell> {default = "fish";}) # Set fish as default shell
 
         # Cody-specific configurations
         cody.dots
         cody.fish
       ];
     };
-
   };
-
 }
