@@ -21,7 +21,6 @@
           ghostscript
           mermaid-cli
           fd
-          luajitPackages.luarocks-nix
           alejandra
           sqlite
           tree-sitter
@@ -34,6 +33,7 @@
           terraform
           packer
           oxlint
+          sops
         ];
       };
 
@@ -61,6 +61,7 @@
           terraform
           packer
           oxlint
+          sops
         ];
       };
 
@@ -93,7 +94,7 @@
 
         programs.lazyvim = {
           enable = true;
-          pluginSource = "latest";
+          pluginSource = "nixpkgs"; # Prefer nixpkgs plugins to avoid luarocks issues
           appName = "lazyvim"; # Install to ~/.config/lazyvim/ instead of ~/.config/nvim/
 
           # Optionally use existing lazyvim config directory from dots
@@ -172,7 +173,6 @@
               mini_hipatterns.enable = true;
               rest.enable = true;
             };
-
           };
 
           # Additional packages (optional)
@@ -182,7 +182,19 @@
             alejandra # Nix formatter
             bacon # rust background checker
             ripgrep
-
+            jq # For JSON formatting in rest-nvim
+            sqlite
+            lsof
+            html-tidy # For HTML formatting in rest-nvim
+            luajitPackages.luarocks-nix # Lua package manager for rest-nvim
+            lua54Packages.luarocks-nix # Lua package manager for rest-nvim
+            luajitPackages.luarocks
+            luajitPackages.luarocks_bootstrap
+            luajitPackages.xml2lua # Lua package for XML to Lua conversion
+            luajitPackages.mimetypes # Lua package for MIME type detection
+            websocat
+            grpcurl
+            sops # SOPS encryption tool for nvim-sops
           ];
 
           # Tree-sitter parsers (nix and rust are auto-installed via lang extras)
@@ -195,11 +207,142 @@
             tree-sitter-typst
             tree-sitter-vue
           ];
+
+          # Custom plugin configurations
+          # Each key becomes a file lua/plugins/{key}.lua
+          plugins = {
+            fidget-nvim = ''
+              return {
+                {
+                  -- Use nixpkgs version via dir option to avoid fetching from GitHub
+                  dir = "${pkgs.vimPlugins.fidget-nvim}",
+                  name = "fidget-nvim",
+                  config = function()
+                    require("fidget").setup({
+                    -- Options related to LSP progress subsystem
+                    progress = {
+                      poll_rate = 0,
+                      suppress_on_insert = false,
+                      ignore_done_already = false,
+                      ignore_empty_message = false,
+                      clear_on_detach = function(client_id)
+                        local client = vim.lsp.get_client_by_id(client_id)
+                        return client and client.name or nil
+                      end,
+                      notification_group = function(msg) return msg.lsp_client.name end,
+                      ignore = {},
+                      display = {
+                        render_limit = 16,
+                        done_ttl = 3,
+                        done_icon = "✔",
+                        done_style = "Constant",
+                        progress_ttl = math.huge,
+                        progress_icon = { "dots" },
+                        progress_style = "WarningMsg",
+                        group_style = "Title",
+                        icon_style = "Question",
+                        priority = 30,
+                        skip_history = true,
+                        format_message = require("fidget.progress.display").default_format_message,
+                        format_annote = function(msg) return msg.title end,
+                        format_group_name = function(group) return tostring(group) end,
+                        overrides = {
+                          rust_analyzer = { name = "rust-analyzer" },
+                        },
+                      },
+                      lsp = {
+                        progress_ringbuf_size = 0,
+                        log_handler = false,
+                      },
+                    },
+                    -- Options related to notification subsystem
+                    notification = {
+                      poll_rate = 10,
+                      filter = vim.log.levels.INFO,
+                      history_size = 128,
+                      override_vim_notify = false,
+                      configs = { default = require("fidget.notification").default_config },
+                      redirect = function(msg, level, opts)
+                        if opts and opts.on_open then
+                          return require("fidget.integration.nvim-notify").delegate(msg, level, opts)
+                        end
+                      end,
+                      view = {
+                        stack_upwards = true,
+                        align = "message",
+                        reflow = false,
+                        icon_separator = " ",
+                        group_separator = "---",
+                        group_separator_hl = "Comment",
+                        line_margin = 1,
+                        render_message = function(msg, cnt)
+                          return cnt == 1 and msg or string.format("(%dx) %s", cnt, msg)
+                        end,
+                      },
+                      window = {
+                        normal_hl = "Comment",
+                        winblend = 100,
+                        border = "none",
+                        zindex = 45,
+                        max_width = 0,
+                        max_height = 0,
+                        x_padding = 1,
+                        y_padding = 0,
+                        align = "bottom",
+                        relative = "editor",
+                        tabstop = 8,
+                        avoid = {},
+                      },
+                    },
+                    -- Options related to integrating with other plugins
+                    integration = {
+                      ["nvim-tree"] = {
+                        enable = true,
+                      },
+                      ["xcodebuild-nvim"] = {
+                        enable = true,
+                      },
+                    },
+                    -- Options related to logging
+                    logger = {
+                      level = vim.log.levels.WARN,
+                      max_size = 10000,
+                      float_precision = 0.01,
+                      path = string.format("%s/fidget.nvim.log", vim.fn.stdpath("cache")),
+                    },
+                    })
+                  end,
+                },
+              }
+            '';
+
+            nvim-sops = ''
+              return {
+                {
+                  "lucidph3nx/nvim-sops",
+                  event = { "BufEnter" },
+                  opts = {
+                    enabled = true,
+                    debug = false,
+                    binPath = "sops",
+                    defaults = {
+                      awsProfile = "AWS_PROFILE",
+                      ageKeyFile = "SOPS_AGE_KEY_FILE",
+                      gcpCredentialsPath = "GOOGLE_APPLICATION_CREDENTIALS",
+                    },
+                  },
+                  keys = {
+                    { "<leader>dsd", vim.cmd.SopsDecrypt, desc = "[S]ops [D]ecrypt" },
+                    { "<leader>dse", vim.cmd.SopsEncrypt, desc = "[S]ops [E]ncrypt" },
+                  },
+                },
+              }
+            '';
+          };
         };
 
         # Install the lazyvim wrapper executable
         home.packages = [ lazyvimWrapper ];
       };
-
   };
 }

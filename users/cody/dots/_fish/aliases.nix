@@ -3,7 +3,7 @@
   l = "exa -l";
   ll = "exa -l -@ --git";
   tree = "exa -T";
-  # "." = "exa -g";
+  "." = "eval (history | head -1 | string replace -r '^\\s*\\d+\\s+' '')";
   ".." = "cd ..";
   vs = ''vim -c "lua Snacks.picker.smart()"'';
   vf = ''vim -c "lua Snacks.picker.files()"'';

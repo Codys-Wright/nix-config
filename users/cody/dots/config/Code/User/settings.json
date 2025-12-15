@@ -109,7 +109,6 @@
   "geminicodeassist.inlineSuggestions.enableAuto": false,
   "git.blame.statusBarItem.enabled": false,
   "git.confirmSync": false,
-  "git.enabled": false,
   "github.copilot.chat.agent.thinkingTool": true,
   "github.copilot.chat.codesearch.enabled": true,
   "github.copilot.chat.editor.temporalContext.enabled": true,
