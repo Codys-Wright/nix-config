@@ -6,6 +6,14 @@
   # These functions are used throughout the config (lualine, root detection, etc.)
   # luaConfigPre runs before the DAG, ensuring _G.LazyVim is available when plugins load
   luaConfigPre = ''
+    -- LazyVim-style mini.icons init: mock nvim-web-devicons
+    -- This must run before any plugin tries to load nvim-web-devicons
+    -- This allows mini.icons to replace nvim-web-devicons transparently
+    package.preload["nvim-web-devicons"] = function()
+      require("mini.icons").mock_nvim_web_devicons()
+      return package.loaded["nvim-web-devicons"]
+    end
+
     -- LazyVim utility functions (ported from LazyVim)
     -- These provide the same API as LazyVim.util for compatibility
     -- Loaded via luaConfigPre to ensure availability before plugins load
