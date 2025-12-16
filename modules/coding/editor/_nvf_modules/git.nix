@@ -10,19 +10,19 @@
       # LazyVim-style gitsigns configuration
       setupOpts = {
         signs = {
-          add = { text = "▎" };
-          change = { text = "▎" };
-          delete = { text = "" };
-          topdelete = { text = "" };
-          changedelete = { text = "▎" };
-          untracked = { text = "▎" };
+          add = { text = "│"; };
+          change = { text = "│"; };
+          delete = { text = ""; };
+          topdelete = { text = ""; };
+          changedelete = { text = "▎"; };
+          untracked = { text = "▎"; };
         };
         signs_staged = {
-          add = { text = "▎" };
-          change = { text = "▎" };
-          delete = { text = "" };
-          topdelete = { text = "" };
-          changedelete = { text = "▎" };
+          add = { text = "│"; };
+          change = { text = "│"; };
+          delete = { text = ""; };
+          topdelete = { text = ""; };
+          changedelete = { text = "│"; };
         };
         on_attach = lib.generators.mkLuaInline ''
           function(buffer)
@@ -83,33 +83,7 @@
     };
   };
 
-  # Git-related keymaps for which-key
-  binds.whichKey.register = {
-    # Git hunks
-    "<leader>gh" = "+hunks";
-    "<leader>ghs" = "Stage Hunk";
-    "<leader>ghr" = "Reset Hunk";
-    "<leader>ghS" = "Stage Buffer";
-    "<leader>ghu" = "Undo Stage Hunk";
-    "<leader>ghR" = "Reset Buffer";
-    "<leader>ghp" = "Preview Hunk Inline";
-    "<leader>ghb" = "Blame Line";
-    "<leader>ghB" = "Blame Buffer";
-    "<leader>ghd" = "Diff This";
-    "<leader>ghD" = "Diff This ~";
-    "]h" = "Next Hunk";
-    "[h" = "Prev Hunk";
-    "]H" = "Last Hunk";
-    "[H" = "First Hunk";
-    # LazyGit
-    "<leader>gg" = "Lazygit";
-    "<leader>gG" = "Lazygit (Root Dir)";
-    "<leader>gb" = "Git Browse";
-    "<leader>gB" = "Git Browse (Open)";
-    "<leader>gf" = "Lazygit Current File History";
-    "<leader>gl" = "Lazygit Log";
-    "<leader>gL" = "Lazygit Log (cwd)";
-  };
+
 
   # Gitsigns toggle integration with Snacks
   # This sets up a toggle for gitsigns that works with Snacks.toggle
@@ -136,87 +110,45 @@
     {
       key = "<leader>gG";
       mode = "n";
-      action = lib.generators.mkLuaInline ''
-        function()
-          if Snacks and Snacks.lazygit then
-            Snacks.lazygit({ cwd = LazyVim.root.git() })
-          else
-            vim.cmd("TermExec cmd='lazygit' direction=float")
-          end
-        end
-      '';
+      action = ":lua if Snacks and Snacks.lazygit then Snacks.lazygit({ cwd = LazyVim.root.git() }) else vim.cmd('TermExec cmd=\\'lazygit\\' direction=float') end<CR>";
       desc = "Lazygit (Root Dir)";
     }
     # Git browse (open current file/line in browser)
     {
       key = "<leader>gb";
       mode = "n";
-      action = lib.generators.mkLuaInline ''
-        function()
-          if Snacks and Snacks.gitbrowse then
-            Snacks.gitbrowse()
-          end
-        end
-      '';
+      action = ":lua if Snacks and Snacks.gitbrowse then Snacks.gitbrowse() end<CR>";
       desc = "Git Browse";
     }
     # Git browse (open and browse)
     {
       key = "<leader>gB";
       mode = "n";
-      action = lib.generators.mkLuaInline ''
-        function()
-          if Snacks and Snacks.gitbrowse then
-            Snacks.gitbrowse({ open = true })
-          end
-        end
-      '';
+      action = ":lua if Snacks and Snacks.gitbrowse then Snacks.gitbrowse({ open = true }) end<CR>";
       desc = "Git Browse (Open)";
     }
     # LazyGit current file history
     {
       key = "<leader>gf";
       mode = "n";
-      action = lib.generators.mkLuaInline ''
-        function()
-          local git_path = vim.api.nvim_buf_get_name(0)
-          if Snacks and Snacks.lazygit then
-            Snacks.lazygit({args = { "-f", vim.api.nvim_buf_get_name(0) }})
-          else
-            vim.cmd("TermExec cmd='lazygit -f " .. git_path .. "' direction=float")
-          end
-        end
-      '';
+      action = "function() local git_path = vim.api.nvim_buf_get_name(0); if Snacks and Snacks.lazygit then Snacks.lazygit({args = { '-f', vim.api.nvim_buf_get_name(0) }}) else vim.cmd('TermExec cmd=lazygit -f ' .. git_path .. ' direction=float') end end";
+      lua = true;
       desc = "Lazygit Current File History";
     }
     # LazyGit log
     {
       key = "<leader>gl";
       mode = "n";
-      action = lib.generators.mkLuaInline ''
-        function()
-          if Snacks and Snacks.lazygit then
-            Snacks.lazygit({ args = { "log" }, cwd = LazyVim.root.git() })
-          else
-            vim.cmd("TermExec cmd='lazygit log' direction=float")
-          end
-        end
-      '';
+      action = "function() if Snacks and Snacks.lazygit then Snacks.lazygit({ args = { 'log' }, cwd = LazyVim.root.git() }) else vim.cmd('TermExec cmd=lazygit log direction=float') end end";
+      lua = true;
       desc = "Lazygit Log";
     }
     # LazyGit log (current directory)
     {
       key = "<leader>gL";
       mode = "n";
-      action = lib.generators.mkLuaInline ''
-        function()
-          if Snacks and Snacks.lazygit then
-            Snacks.lazygit({ args = { "log" } })
-          else
-            vim.cmd("TermExec cmd='lazygit log' direction=float")
-          end
-        end
-      '';
+      action = "function() if Snacks and Snacks.lazygit then Snacks.lazygit({ args = { 'log' } }) else vim.cmd('TermExec cmd=lazygit log direction=float') end end";
+      lua = true;
       desc = "Lazygit Log (cwd)";
     }
   ];

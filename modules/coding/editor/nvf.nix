@@ -1,6 +1,5 @@
 # Nvf-built Neovim configuration
 {
-  FTS,
   inputs,
   lib,
   ...
@@ -50,6 +49,7 @@
     "debug" # TEMPORARILY DISABLED to test x key timeout
     "editor"
     "format"
+    "git"
     "lang"
     "lint"
     "lsp"
@@ -66,7 +66,10 @@
 
   # Common function to build the wrapped neovim package
   # This eliminates duplication between perSystem and homeManager
-  buildWrappedNeovim = {pkgs, lib}: let
+  buildWrappedNeovim = {
+    pkgs,
+    lib,
+  }: let
     # Import all modules using the helper function (all get lib)
     # Nix will automatically merge all keymaps and configs
     allModules = importNvfModules {
@@ -97,16 +100,15 @@
       package = customNeovim.neovim;
 
       # Add aliases so you can call it as 'nvf', 'nv', or 'v'
-      aliases = [ "nvf" "nv" "v" ];
+      aliases = ["nvf" "nv" "v"];
 
-      # Example: Add runtime dependencies (language servers, formatters, etc.)
+      # Add runtime dependencies for git integration
       # These will be available in PATH when neovim runs
-      # runtimeInputs = [
-      #   pkgs.nodejs
-      #   pkgs.python3
-      #   pkgs.rust-analyzer
-      #   pkgs.nil  # Nix language server
-      # ];
+      runtimeInputs = [
+        pkgs.lazygit  # Required for Snacks.lazygit integration
+        pkgs.gh       # Required for Snacks.gh (GitHub CLI) integration
+        pkgs.git      # Required for git operations
+      ];
 
       # Example: Add environment variables
       # env = {
@@ -130,7 +132,8 @@
       #   echo "Starting Neovim at $(date)" >&2
       # '';
     };
-  in wrappedNeovim;
+  in
+    wrappedNeovim;
 in {
   flake-file.inputs.nvf.url = "github:notashelf/nvf";
   flake-file.inputs.nvf.inputs.nixpkgs.follows = "nixpkgs";
@@ -140,7 +143,11 @@ in {
     description = "Neovim built with nvf configuration framework";
 
     # Home Manager integration - expose wrapped nvf as a package
-    homeManager = {pkgs, lib, ...}: {
+    homeManager = {
+      pkgs,
+      lib,
+      ...
+    }: {
       home.packages = [
         (buildWrappedNeovim {inherit pkgs lib;})
       ];
@@ -150,11 +157,7 @@ in {
   # Expose nvf as a standalone wrapped package using nvf.lib.neovimConfiguration
   # This builds the configuration from all sub-modules and wraps it
   # Usage: nix run .#nvf or nix build .#nvf
-  perSystem = {
-    pkgs,
-    system,
-    ...
-  }: let
+  perSystem = {pkgs, ...}: let
     # Use the shared function to build the wrapped neovim package
     wrappedNeovim = buildWrappedNeovim {inherit pkgs lib;};
   in {
