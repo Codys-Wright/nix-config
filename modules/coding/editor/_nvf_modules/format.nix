@@ -48,8 +48,6 @@
     }
   ];
 
-  # Register which-key description
-  binds.whichKey.register = {
-    "<leader>cF" = "Format Injected Langs";
-  };
+  # Note: which-key automatically discovers keymaps with desc attributes,
+  # so we don't need to manually register them here.
 }

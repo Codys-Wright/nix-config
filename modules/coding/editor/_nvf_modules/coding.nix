@@ -383,59 +383,10 @@
     # Grug-far keymap (LazyVim-style) - duplicate removed, already defined above
   ];
 
-  # Register which-key descriptions
-  binds.whichKey.register = {
-    # Treesitter textobjects navigation
-    "]f" = "Next Function Start";
-    "]F" = "Next Function End";
-    "[f" = "Prev Function Start";
-    "[F" = "Prev Function End";
-    "]c" = "Next Class Start";
-    "]C" = "Next Class End";
-    "[c" = "Prev Class Start";
-    "[C" = "Prev Class End";
-    "]a" = "Next Parameter Start";
-    "]A" = "Next Parameter End";
-    "[a" = "Prev Parameter Start";
-    "[A" = "Prev Parameter End";
-    # Mini.pairs toggle
-    "<leader>up" = "Toggle Mini Pairs";
-    # Todo comments
-    "<leader>st" = "Todo (Snacks Picker)";
-    "<leader>sT" = "Todo/Fix/Fixme (Snacks Picker)";
-    "<leader>tdq" = "Todo Quickfix";
-    "<leader>tds" = "Todo Telescope";
-    "<leader>tdt" = "Todo Trouble";
-    "]t" = "Next Todo Comment";
-    "[t" = "Prev Todo Comment";
-    # Flash.nvim
-    "gs" = "Flash";
-    "gS" = "Flash Treesitter";
-    "r" = "Remote Flash";
-    "R" = "Treesitter Search";
-    "<c-space>" = "Treesitter Incremental Selection";
-    # Mini.surround
-    "gsa" = "Add Surrounding";
-    "gsd" = "Delete Surrounding";
-    "gsf" = "Find Right Surrounding";
-    "gsF" = "Find Left Surrounding";
-    "gsh" = "Highlight Surrounding";
-    "gsr" = "Replace Surrounding";
-    "gsn" = "Update n_lines";
-    # Yanky
-    "<leader>p" = "Open Yank History";
-    "y" = "Yank Text";
-    "p" = "Put Text After Cursor";
-    "P" = "Put Text Before Cursor";
-    "gp" = "Put Text After Selection";
-    "gP" = "Put Text Before Selection";
-    "[y" = "Cycle Forward Through Yank History";
-    "]y" = "Cycle Backward Through Yank History";
-    "]p" = "Put Indented After Cursor (Linewise)";
-    "[p" = "Put Indented Before Cursor (Linewise)";
-    # Grug-far (search/replace)
-    "<leader>sr" = "Search and Replace";
-  };
+  # Note: which-key automatically discovers keymaps with desc attributes.
+  # Plugin-configured keymaps (treesitter textobjects, mini.surround, yanky, flash)
+  # will be discovered automatically if they have desc attributes set by the plugins.
+  # We only need manual registrations for category prefixes (handled in which-key.nix).
 
   # Grug-far.nvim - Search/replace in multiple files (LazyVim-style)
   # The package is passed from nvf.nix (from nixpkgs)
