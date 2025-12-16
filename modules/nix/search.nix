@@ -7,6 +7,20 @@
   FTS.nix._.search = {
     description = "Nix search tools (nix-search-tv) with ns alias";
 
+    nixos = {pkgs, ...}: {
+      environment.systemPackages = with pkgs; [
+        nix-search-tv
+        fzf # Required for the ns alias
+      ];
+    };
+
+    darwin = {pkgs, ...}: {
+      environment.systemPackages = with pkgs; [
+        nix-search-tv
+        fzf # Required for the ns alias
+      ];
+    };
+
     homeManager = {pkgs, ...}: {
       home.packages = with pkgs; [
         nix-search-tv
