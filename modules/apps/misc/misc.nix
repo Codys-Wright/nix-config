@@ -10,6 +10,7 @@
     includes = [
       # FTS.apps._.misc._.nextcloud-client  # Not available on aarch64-darwin
       FTS.apps._.misc._.localsend
+      FTS.apps._.misc._.flameshot
     ];
   };
 }

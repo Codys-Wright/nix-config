@@ -19,6 +19,32 @@
       "url": "https://releases.nixos.org/nixpkgs/nixpkgs-26.05pre911985.09b8fda8959d/nixexprs.tar.xz",
       "hash": "12b9cxxmmnlk2f8jbhijsixb9lbqh20bd2wria19ym8xdg6pkg93"
     },
+    "nvzone-floaterm": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "nvzone",
+        "repo": "floaterm"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "fc2efaf25eeefcb33177d5807c0c745e125cf293",
+      "url": "https://github.com/nvzone/floaterm/archive/fc2efaf25eeefcb33177d5807c0c745e125cf293.tar.gz",
+      "hash": "1ycvb1qwb0hby2ad8hr81x01cppn76gdly2a4m26dlv9ibiw8f4i"
+    },
+    "nvzone-volt": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "nvzone",
+        "repo": "volt"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "620de1321f275ec9d80028c68d1b88b409c0c8b1",
+      "url": "https://github.com/nvzone/volt/archive/620de1321f275ec9d80028c68d1b88b409c0c8b1.tar.gz",
+      "hash": "16fwa08k396qq8xw4vy3a8xlyhkjm4sypjr5q3mfnr0pwkbshxp5"
+    },
     "vim-repeat": {
       "type": "Git",
       "repository": {
