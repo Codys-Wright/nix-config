@@ -681,13 +681,13 @@
     {
       key = "]T";
       mode = "n";
-      action = lib.generators.mkLuaInline "function() require('todo-comments').jump_next() end";
+      action = ":lua require('todo-comments').jump_next()<CR>";
       desc = "Next Todo Comment";
     }
     {
       key = "[T";
       mode = "n";
-      action = lib.generators.mkLuaInline "function() require('todo-comments').jump_prev() end";
+      action = ":lua require('todo-comments').jump_prev()<CR>";
       desc = "Previous Todo Comment";
     }
     {
