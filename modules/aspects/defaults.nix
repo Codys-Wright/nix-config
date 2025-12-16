@@ -6,27 +6,26 @@
   lib,
   __findFile,
   ...
-}:
-{
+}: {
   # see also defaults.nix where static settings are set.
   den.default = {
     # parametric defaults for host/user/home. see aspects/dependencies.nix
     # `_` is shorthand alias for `provides`.
     includes = [
-      <den/home-manager>  # den.provides.home-manager
+      <den/home-manager> # den.provides.home-manager
       den.aspects.hm-backup
-      den.aspects.dendritic._.routes  # Mutual dependency routing
-      den.aspects.dendritic._.user    # User account setup
-      den.aspects.dendritic._.host    # Hostname configuration
-      den.aspects.dendritic._.home    # Home directory setup
+      den.aspects.dendritic._.routes # Mutual dependency routing
+      den.aspects.dendritic._.user # User account setup
+      den.aspects.dendritic._.host # Hostname configuration
+      den.aspects.dendritic._.home # Home directory setup
     ];
     host.includes = [
       <FTS/nh>
       # System aspects
-      <FTS/system>  # Essential system utilities
+      <FTS/system> # Essential system utilities
       <FTS/fonts>
       <FTS/phoenix>
-      <FTS/experimental-features>  # Enable nix-command and flakes
+      <FTS/experimental-features> # Enable nix-command and flakes
       # <FTS/secrets>  # SOPS secrets management - disabled, using SelfHostBlocks SOPS instead
       # Allow unfree packages
       (<den/unfree> true)
@@ -35,15 +34,15 @@
       # Nix configuration (includes nixpkgs overlays, unfree-default, etc.)
       <FTS/nix>
     ];
-    user.includes = [ 
+    user.includes = [
       # User-specific modules can be added here
     ];
     home.includes = [
       # Nix tools (nix-index, nix-registry, npins, search are included via FTS.nix)
       <FTS/nix>
+      # Also include search directly to test
       # <FTS/secrets>  # SOPS secrets infrastructure (home-manager part) - disabled, using SelfHostBlocks SOPS instead
-      <FTS/user-secrets>  # User secrets from SOPS with environment variables
+      <FTS/user-secrets> # User secrets from SOPS with environment variables
     ];
   };
 }
-
