@@ -29,6 +29,7 @@
           openssl
           openssl.dev
           openssl_3
+          dioxus-cli
         ];
       };
 
@@ -40,6 +41,7 @@
           ripgrep
           openssl
           openssl.dev
+          dioxus-cli
           # gcc is available via Xcode Command Line Tools on macOS
         ];
       };

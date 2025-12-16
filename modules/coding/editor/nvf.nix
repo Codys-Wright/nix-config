@@ -178,6 +178,29 @@
       # Add aliases so you can call it as 'nvf', 'nv', or 'v'
       aliases = ["nvf" "nv" "v"];
 
+      # Create merged config directory in Nix store using linkFarm
+      # This avoids writing to dotfiles and keeps everything in the Nix store
+      # Neovim will look for config at XDG_CONFIG_HOME/nvf (since NVIM_APPNAME=nvf)
+      env = let
+        # Path to themes directory - relative to nvf.nix location
+        # Themes are at ./_nvf_modules/themes/lua/themes/
+        themesDir = ./_nvf_modules/themes;
+        # Create a linkFarm that merges the themes directory into nvf/lua/themes/
+        # This creates a directory structure: XDG_CONFIG_HOME/nvf/lua/themes/
+        mergedConfig = pkgs.linkFarm "nvf-merged-config" [
+          {
+            name = "nvf/lua/themes";
+            path = "${toString themesDir}/lua/themes";
+          }
+        ];
+      in {
+        # Set NVIM_APPNAME so Neovim uses the appname-specific config directory
+        NVIM_APPNAME = "nvf";
+        # Set XDG_CONFIG_HOME to point to our merged config in the Nix store
+        # This makes Neovim look for config at XDG_CONFIG_HOME/nvf instead of ~/.config/nvf
+        XDG_CONFIG_HOME = builtins.toString mergedConfig;
+      };
+
       # Add runtime dependencies for git integration
       # These will be available in PATH when neovim runs
       runtimeInputs = [
@@ -185,28 +208,6 @@
         pkgs.gh # Required for Snacks.gh (GitHub CLI) integration
         pkgs.git # Required for git operations
       ];
-
-      # Example: Add environment variables
-      # env = {
-      #   # Set custom config directory
-      #   # NVIM_CONFIG_DIR = "/path/to/config";
-      #   # Enable debug logging
-      #   # NVIM_LOG_FILE = "/tmp/nvim.log";
-      # };
-
-      # Example: Add command-line flags that are always passed to neovim
-      # flags = {
-      #   # Add a startup command
-      #   # "--cmd" = "set rtp+=/path/to/plugins";
-      #   # Enable headless mode (useful for scripting)
-      #   # "--headless" = {};
-      # };
-
-      # Example: Add a pre-hook (runs before neovim starts)
-      # preHook = ''
-      #   # Log startup time
-      #   echo "Starting Neovim at $(date)" >&2
-      # '';
     };
   in
     wrappedNeovim;

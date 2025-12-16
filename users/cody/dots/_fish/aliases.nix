@@ -12,5 +12,5 @@
   vd = ''vim -c "DiffEditor $left $right $output"'';
   av = ''astrovim'';
   lv = ''lazyvim'';
-  vp = ''nix run /home/cody/.flake#nvf'';
+  vp = ''nix run ~/.flake#nvf'';
 }
