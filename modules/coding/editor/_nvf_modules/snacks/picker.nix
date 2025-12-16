@@ -452,74 +452,7 @@
     }
   ];
 
-  # Register all picker keybinds with which-key
-  binds.whichKey.register = {
-    # Explorer
-    "<leader>e" = "File Explorer";
-    "<leader>E" = "File Explorer (cwd)";
-    # Top Pickers
-    "<leader><space>" = "Smart Find Files";
-    "<leader>," = "Buffers";
-    "<leader>/" = "Grep";
-    "<leader>:" = "Command History";
-    "<leader>n" = "Notification History";
-    # find
-    "<leader>fb" = "Buffers";
-    "<leader>fc" = "Find Config File";
-    "<leader>ff" = "Find Files";
-    "<leader>fg" = "Find Git Files";
-    "<leader>fp" = "Projects";
-    "<leader>fr" = "Recent";
-    # git
-    "<leader>gb" = "Git Branches";
-    "<leader>gl" = "Git Log";
-    "<leader>gL" = "Git Log Line";
-    "<leader>gs" = "Git Status";
-    "<leader>gS" = "Git Stash";
-    "<leader>gd" = "Git Diff (Hunks)";
-    "<leader>gf" = "Git Log File";
-    # gh
-    "<leader>gi" = "GitHub Issues (open)";
-    "<leader>gI" = "GitHub Issues (all)";
-    "<leader>gp" = "GitHub Pull Requests (open)";
-    "<leader>gP" = "GitHub Pull Requests (all)";
-    # Grep
-    "<leader>sb" = "Buffer Lines";
-    "<leader>sB" = "Grep Open Buffers";
-    "<leader>sg" = "Grep";
-    "<leader>sw" = "Visual selection or word";
-    # search
-    "<leader>s\"" = "Registers";
-    "<leader>s/" = "Search History";
-    "<leader>sa" = "Autocmds";
-    "<leader>sc" = "Command History";
-    "<leader>sC" = "Commands";
-    "<leader>sd" = "Diagnostics";
-    "<leader>sD" = "Buffer Diagnostics";
-    "<leader>sh" = "Help Pages";
-    "<leader>sH" = "Highlights";
-    "<leader>si" = "Icons";
-    "<leader>sj" = "Jumps";
-    "<leader>sk" = "Keymaps";
-    "<leader>sl" = "Location List";
-    "<leader>sm" = "Marks";
-    "<leader>sM" = "Man Pages";
-    "<leader>sp" = "Search for Plugin Spec";
-    "<leader>sq" = "Quickfix List";
-    "<leader>sR" = "Resume";
-    "<leader>su" = "Undo History";
-    "<leader>uC" = "Colorschemes";
-    # LSP
-    "gd" = "Goto Definition";
-    "gD" = "Goto Declaration";
-    "gr" = "References";
-    "gI" = "Goto Implementation";
-    "gy" = "Goto T[y]pe Definition";
-    "gai" = "C[a]lls Incoming";
-    "gao" = "C[a]lls Outgoing";
-    "<leader>ss" = "LSP Symbols";
-    "<leader>sS" = "LSP Workspace Symbols";
-    # LSP Config
-    "<leader>cl" = "Lsp Info";
-  };
+  # Note: which-key automatically discovers keymaps with desc attributes.
+  # All keymaps above have desc, so they're auto-discovered.
+  # We only need manual registrations for category prefixes (handled in which-key.nix).
 }

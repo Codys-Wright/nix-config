@@ -474,41 +474,8 @@ in {
     }
   ];
 
-  # Register keybinds with which-key
-  binds.whichKey.register = {
-    # Scratch buffers
-    "<leader>." = "Toggle Scratch Buffer";
-    "<leader>S" = "Select Scratch Buffer";
-    # Profiler
-    "<leader>dpp" = "Toggle Profiler";
-    "<leader>dph" = "Toggle Profiler Highlights";
-    "<leader>dps" = "Profiler Scratch Buffer";
-    # Rename
-    "<leader>cR" = "Rename File";
-    # Notifier
-    "<leader>un" = "Dismiss All Notifications";
-    # Words navigation
-    "]]" = "Next Reference";
-    "[[" = "Prev Reference";
-    "<a-n>" = "Next Reference (cycle)";
-    "<a-p>" = "Prev Reference (cycle)";
-    # UI toggles (already registered via toggle API, but adding for completeness)
-    "<leader>us" = "Spelling";
-    "<leader>uw" = "Wrap";
-    "<leader>uL" = "Relative Number";
-    "<leader>ud" = "Diagnostics";
-    "<leader>ul" = "Line Number";
-    "<leader>uc" = "Conceal Level";
-    "<leader>uA" = "Tabline";
-    "<leader>uT" = "Treesitter";
-    "<leader>ub" = "Dark Background";
-    "<leader>uD" = "Dim Mode";
-    "<leader>ua" = "Animate";
-    "<leader>ug" = "Indent";
-    "<leader>uS" = "Scroll";
-    "<leader>uh" = "Inlay Hints";
-    "<leader>uz" = "Zen Mode";
-    "<leader>uZ" = "Zoom Mode";
-    "<leader>wm" = "Zoom Mode";
-  };
+  # Note: which-key automatically discovers keymaps with desc attributes.
+  # Keymaps in the keymaps array above all have desc, so they're auto-discovered.
+  # Toggles set up via Snacks.toggle().map() may also auto-register with desc.
+  # We only need manual registrations for category prefixes (handled in which-key.nix).
 }
