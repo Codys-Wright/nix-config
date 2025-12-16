@@ -96,8 +96,8 @@
       inherit pkgs;
       package = customNeovim.neovim;
 
-      # Add aliases so you can call it as 'nvf', 'nv'
-      aliases = [ "nvf" "nv" ];
+      # Add aliases so you can call it as 'nvf', 'nv', or 'v'
+      aliases = [ "nvf" "nv" "v" ];
 
       # Example: Add runtime dependencies (language servers, formatters, etc.)
       # These will be available in PATH when neovim runs
