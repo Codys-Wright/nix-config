@@ -2,6 +2,9 @@
 # Returns config.vim settings directly
 # Takes lib as parameter for consistency (even if not used)
 {lib, ...}: {
+  # Add plenary.nvim as a start plugin (common dependency for many Lua plugins)
+  startPlugins = ["plenary-nvim"];
+
   # Port LazyVim utility functions via luaConfigPre
   # These functions are used throughout the config (lualine, root detection, etc.)
   # luaConfigPre runs before the DAG, ensuring _G.LazyVim is available when plugins load
