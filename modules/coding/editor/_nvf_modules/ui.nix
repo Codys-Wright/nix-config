@@ -40,61 +40,77 @@
   };
 
   # Bufferline configuration (LazyVim-style)
+  # Matching LazyVim's exact configuration
   tabline = {
     nvimBufferline = {
       enable = true;
-      # LazyVim-style bufferline configuration
       setupOpts = {
         options = {
+          # Use buffers mode (LazyVim default - doesn't explicitly set mode)
+          # Bufferline groups work in buffers mode - buffers are automatically grouped by directory
+          # Disable buffer numbers (nvf default shows "buffer_id·ordinal", LazyVim doesn't show numbers)
+          numbers = "none";
           # Use Snacks.bufdelete for closing buffers (LazyVim uses this)
           close_command = lib.generators.mkLuaInline "function(n) require('snacks').bufdelete(n) end";
           right_mouse_command = lib.generators.mkLuaInline "function(n) require('snacks').bufdelete(n) end";
           # Diagnostics from LSP
           diagnostics = "nvim_lsp";
-          # Don't always show bufferline (LazyVim default)
+          # Don't always show bufferline (nvf default is true, LazyVim uses false)
           always_show_bufferline = false;
-          # LazyVim-style diagnostics indicator (uses LazyVim.config.icons.diagnostics)
+          # LazyVim-style diagnostics indicator (only shows error and warning, not hint/info)
           diagnostics_indicator = lib.generators.mkLuaInline ''
             function(_, _, diag)
               -- Use LazyVim-style icons (matching LazyVim.config.icons.diagnostics)
               local icons = {
                 Error = " ",
                 Warn = " ",
-                Hint = " ",
-                Info = " ",
               }
               local ret = (diag.error and icons.Error .. diag.error .. " " or "")
                 .. (diag.warning and icons.Warn .. diag.warning or "")
               return vim.trim(ret)
             end
           '';
-          # Offsets for snacks explorer (LazyVim uses snacks_layout_box)
+          # Offsets matching LazyVim (neo-tree with text/highlight, snacks_layout_box minimal)
           offsets = [
+            {
+              filetype = "neo-tree";
+              text = "Neo-tree";
+              highlight = "Directory";
+              text_align = "left";
+            }
             {
               filetype = "snacks_layout_box";
             }
           ];
-          # Get element icon from mini.icons (LazyVim uses LazyVim.config.icons.ft)
-          # Use mini.icons via the mocked nvim-web-devicons API
-          # This matches LazyVim's approach: LazyVim.config.icons.ft[opts.filetype]
-          get_element_icon = lib.generators.mkLuaInline ''
-            function(opts)
-              -- Ensure mini.icons is loaded (the mock should handle this, but be safe)
-              if not package.loaded["mini.icons"] then
-                pcall(require, "mini.icons")
-              end
-              -- Use mini.icons via the mocked nvim-web-devicons
-              local icons = require("nvim-web-devicons")
-              if icons and icons.get_icon_by_filetype then
-                -- get_icon_by_filetype returns icon, highlight_group
-                -- We only need the icon string (first return value)
-                local icon = icons.get_icon_by_filetype(opts.filetype, { default = false })
-                -- Return the icon string, or nil to use bufferline default
-                return type(icon) == "string" and icon or nil
-              end
-              return nil
-            end
-          '';
+          # Get element icon - LazyVim returns LazyVim.config.icons.ft[opts.filetype]
+          # which is nil for most filetypes, so bufferline uses nvim-web-devicons automatically
+          # (mocked by mini.icons, so icons will work correctly)
+          get_element_icon = null;
+          # Indicator style - LazyVim doesn't explicitly set this, so bufferline uses its default
+          # Bufferline's default indicator creates a left-side line/icon on active tabs
+          # Using "icon" style with default icon (null) to match bufferline's default behavior
+          indicator = {
+            style = "icon";
+            icon = null; # Use bufferline's default indicator icon
+          };
+          # Prevent tabs from changing size when selected (match LazyVim behavior)
+          # nvf defaults tab_size = 18, but LazyVim doesn't set it, so we don't set it either
+          # enforce_regular_tabs = false is nvf's default, but explicitly set to match LazyVim
+          enforce_regular_tabs = false;
+          # Always show close icons (LazyVim default - nvf also defaults to true, but explicit for clarity)
+          show_buffer_close_icons = true;
+          show_close_icon = true;
+          # Sort buffers - nvf defaults to "extension", but LazyVim doesn't set this
+          # Use "insert_after_current" to match bufferline's default behavior (visual order)
+          # This ensures Shift+H and Shift+L cycle in visual order, not by extension
+          sort_by = "insert_after_current";
+          # Bufferline groups disabled for now
+          # groups = {
+          #   options = {
+          #     toggle_hidden_on_enter = true;
+          #   };
+          #   items = [ ... ];
+          # };
         };
       };
     };
@@ -120,6 +136,10 @@
           # Note: LazyVim doesn't set component_separators or section_separators,
           # so it uses the theme defaults which include diagonal/curved lines
           # Theme is handled by nvf's dedicated theme option above
+          # Don't override separators - let theme provide angled/slanted separators
+          # nvf defaults these to empty strings, but we want theme defaults
+          component_separators = null; # Use theme defaults for angled separators
+          section_separators = null; # Use theme defaults for angled separators
         };
         # Override sections with LazyVim-style configuration (exact replica from ui.lua)
         sections = lib.mkForce {
@@ -162,15 +182,18 @@
           # Section X: Profiler, noice, dap, lazy updates, diff
           lualine_x = [
             # Snacks profiler status (exact match from ui.lua)
+            # Note: Snacks.profiler.status() returns a table, but we need to handle when Snacks isn't loaded yet
             (lib.generators.mkLuaInline ''
-              {
-                function()
-                  if package.loaded.snacks and Snacks and Snacks.profiler and Snacks.profiler.status then
-                    return Snacks.profiler.status()
-                  end
-                  return ""
-                end,
-              }
+              (function()
+                if package.loaded.snacks and Snacks and Snacks.profiler and Snacks.profiler.status then
+                  return Snacks.profiler.status()
+                end
+                -- Return a safe fallback that won't display anything
+                return {
+                  function() return "" end,
+                  cond = function() return false end,
+                }
+              end)()
             '')
             # Noice command status
             (lib.generators.mkLuaInline ''
@@ -202,22 +225,6 @@
                 color = function()
                   local Snacks = require("snacks")
                   return { fg = Snacks.util.color("Debug") }
-                end,
-              }
-            '')
-            # Lazy updates
-            (lib.generators.mkLuaInline ''
-              {
-                function()
-                  if package.loaded.lazy and require("lazy.status").updates then
-                    return require("lazy.status").updates
-                  end
-                  return ""
-                end,
-                cond = function() return package.loaded.lazy and require("lazy.status").has_updates() end,
-                color = function()
-                  local Snacks = require("snacks")
-                  return { fg = Snacks.util.color("Special") }
                 end,
               }
             '')
@@ -353,8 +360,8 @@
   # Theme configuration (Catppuccin)
   theme = {
     enable = true;
-    name = "catppuccin";
-    style = "mocha"; # LazyVim default is mocha
+    name = "tokyonight";
+    style = "moon"; # LazyVim default is mocha
     transparent = false;
   };
 }

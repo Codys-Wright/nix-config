@@ -1,7 +1,8 @@
 # LSP configuration and features
 # Returns config.vim settings directly
 # Takes lib as parameter for consistency (even if not used)
-{lib, ...}: {
+{ lib, ... }:
+{
   # LSP configuration
   lsp = {
     enable = true;
@@ -21,12 +22,12 @@
       };
       # LazyVim-style trouble keymaps
       mappings = {
-        documentDiagnostics = "xx"; # Diagnostics toggle
-        workspaceDiagnostics = "xX"; # Buffer Diagnostics toggle
-        symbols = "cs"; # Symbols toggle
-        lspReferences = "cS"; # LSP references/definitions toggle
-        locList = "xL"; # Location List toggle
-        quickfix = "xQ"; # Quickfix List toggle
+        documentDiagnostics = "<leader>xx"; # Diagnostics toggle
+        workspaceDiagnostics = "<leader>xX"; # Buffer Diagnostics toggle
+        symbols = "<leader>cs"; # Symbols toggle
+        lspReferences = "<leader>cS"; # LSP references/definitions toggle
+        locList = "<leader>xL"; # Location List toggle
+        quickfix = "<leader>xQ"; # Quickfix List toggle
       };
     };
     lspSignature.enable = true;
