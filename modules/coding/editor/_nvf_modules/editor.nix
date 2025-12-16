@@ -677,19 +677,6 @@
     # Note: Requires snacks.debug module (part of snacks.nvim)
     # This is filetype-specific, so we'll use luaConfigRC for it
 
-    # Category 16: Todo-comments navigation (using different keys to avoid conflicts)
-    {
-      key = "]T";
-      mode = "n";
-      action = ":lua require('todo-comments').jump_next()<CR>";
-      desc = "Next Todo Comment";
-    }
-    {
-      key = "[T";
-      mode = "n";
-      action = ":lua require('todo-comments').jump_prev()<CR>";
-      desc = "Previous Todo Comment";
-    }
     {
       key = "<leader>xt";
       mode = "n";
