@@ -677,15 +677,15 @@
     # Note: Requires snacks.debug module (part of snacks.nvim)
     # This is filetype-specific, so we'll use luaConfigRC for it
 
-    # Category 16: Todo-comments navigation
+    # Category 16: Todo-comments navigation (using different keys to avoid conflicts)
     {
-      key = "]t";
+      key = "]T";
       mode = "n";
       action = lib.generators.mkLuaInline "function() require('todo-comments').jump_next() end";
       desc = "Next Todo Comment";
     }
     {
-      key = "[t";
+      key = "[T";
       mode = "n";
       action = lib.generators.mkLuaInline "function() require('todo-comments').jump_prev() end";
       desc = "Previous Todo Comment";
@@ -782,9 +782,9 @@
     "<leader>snt" = "Noice Picker (Telescope/FzfLua)";
     "<c-f>" = "Scroll Forward";
     "<c-b>" = "Scroll Backward";
-    # Todo comments
-    "]t" = "Next Todo Comment";
-    "[t" = "Previous Todo Comment";
+    # Todo comments (using capital T to avoid conflicts)
+    "]T" = "Next Todo Comment";
+    "[T" = "Previous Todo Comment";
     "<leader>xt" = "Todo (Trouble)";
     "<leader>xT" = "Todo/Fix/Fixme (Trouble)";
   };
