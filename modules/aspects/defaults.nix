@@ -23,7 +23,7 @@
     host.includes = [
       <FTS/nh>
       # System aspects
-      <FTS.system>  # Essential system utilities
+      <FTS/system>  # Essential system utilities
       <FTS/fonts>
       <FTS/phoenix>
       <FTS/experimental-features>  # Enable nix-command and flakes
@@ -32,14 +32,15 @@
       (<den/unfree> true)
       # Boot loader - disabled by default, enable per-host as needed
       # (<FTS/grub> { })
+      # Nix configuration (includes nixpkgs overlays, unfree-default, etc.)
+      <FTS/nix>
     ];
     user.includes = [ 
       # User-specific modules can be added here
     ];
     home.includes = [
-      den.aspects.nix-index
-      den.aspects.nix-registry
-      den.aspects.npins
+      # Nix tools (nix-index, nix-registry, npins, search are included via FTS.nix)
+      <FTS/nix>
       # <FTS/secrets>  # SOPS secrets infrastructure (home-manager part) - disabled, using SelfHostBlocks SOPS instead
       <FTS/user-secrets>  # User secrets from SOPS with environment variables
     ];

@@ -2,6 +2,26 @@
 # Returns config.vim settings directly
 # Takes lib as parameter for consistency (even if not used)
 {lib, ...}: {
+  # Enable mini.snippets as the snippet provider
+  # Configure it to load snippets from friendly-snippets (like LazyVim does)
+  mini = {
+    snippets = {
+      enable = true;
+      # Configure snippets loader to use gen_loader.from_lang()
+      # This automatically loads snippets from friendly-snippets and other runtimepath sources
+      # LazyVim uses: snippets = { mini_snippets.gen_loader.from_lang() }
+      # We need to use mkLuaInline because gen_loader.from_lang() is a function that must be called
+      setupOpts = {
+        snippets = lib.generators.mkLuaInline ''
+          (function()
+            local mini_snippets = require("mini.snippets")
+            return { mini_snippets.gen_loader.from_lang() }
+          end)()
+        '';
+      };
+    };
+  };
+
   # LSP configuration
   lsp = {
     enable = true;
@@ -90,59 +110,110 @@
       friendly-snippets.enable = true;
       # Use LazyVim-style blink configuration
       # Based on LazyVim's blink.lua configuration
-      setupOpts = lib.generators.mkLuaInline ''
-        {
-          snippets = { preset = "luasnip" },
-          cmdline = {
-            enabled = true,
-            keymap = {
-              preset = "cmdline",
-              ["<Right>"] = false,
-              ["<Left>"] = false,
-            },
-            completion = {
-              list = { selection = { preselect = false } },
-              menu = {
-                auto_show = function(ctx)
-                  return vim.fn.getcmdtype() == ":"
-                end,
-              },
-              ghost_text = { enabled = true },
-            },
-          },
-          appearance = {
-            nerd_font_variant = "mono", -- LazyVim uses "mono" for better alignment
-          },
-          fuzzy = { implementation = "prefer_rust" },
-          sources = {
-            default = { "lsp", "snippets", "buffer", "path" },
-          },
+      setupOpts = {
+        snippets = lib.mkForce {
+          preset = "mini_snippets"; # Use mini.snippets instead of luasnip
+        };
+        cmdline = {
+          enabled = true; # Enable cmdline completion
+          # Use default sources for cmdline (null means use default source list)
+          sources = null;
           keymap = {
-            preset = "enter", -- LazyVim uses "enter" preset (Enter to accept)
-            ["<C-y>"] = { "select_and_accept" }, -- LazyVim adds C-y for select_and_accept
-          },
-          signature = {
-            enabled = true,
-          },
+            preset = "cmdline";
+            # Disable Left/Right arrows in cmdline (don't include them in keymap)
+            # "<Right>" and "<Left>" are not set, so they won't be mapped
+          };
           completion = {
-            accept = {
-              -- experimental auto-brackets support (LazyVim enables this)
-              auto_brackets = {
-                enabled = true,
-              },
-            },
+            list = {
+              selection = {
+                preselect = false;
+              };
+            };
             menu = {
-              draw = {
-                treesitter = { "lsp" }, -- LazyVim enables treesitter in menu draw
-              },
-            },
-            documentation = {
-              auto_show = true, -- LazyVim enables auto-show
-              auto_show_delay_ms = 200,
-            },
-          },
-        }
-      '';
+              auto_show = lib.generators.mkLuaInline "function(ctx) return vim.fn.getcmdtype() == ':' end";
+            };
+            ghost_text = {
+              enabled = true;
+            };
+          };
+        };
+        appearance = {
+          nerd_font_variant = "mono"; # LazyVim uses "mono" for better alignment
+        };
+        fuzzy = {
+          implementation = "prefer_rust";
+          # Prioritize snippets over other sources
+          # Custom sort function that gives snippets highest priority
+          sorts = lib.generators.mkLuaInline ''
+            {
+              function(a, b)
+                -- Define source priorities (higher number = higher priority)
+                local source_priority = {
+                  snippets = 4,
+                  lsp = 3,
+                  path = 2,
+                  buffer = 1,
+                }
+                local a_priority = source_priority[a.source_id] or 0
+                local b_priority = source_priority[b.source_id] or 0
+                -- If priorities differ, sort by priority
+                if a_priority ~= b_priority then
+                  return a_priority > b_priority
+                end
+                -- Otherwise use default sorting (score, then sort_text)
+                if a.score ~= b.score then
+                  return a.score > b.score
+                end
+                return (a.sort_text or "") < (b.sort_text or "")
+              end,
+              "score",
+              "sort_text",
+            }
+          '';
+        };
+        sources = {
+          # Put snippets first in the list to prioritize them
+          # Combined with custom fuzzy.sorts, this ensures snippets appear at the top
+          default = ["snippets" "lsp" "buffer" "path"];
+          providers = {
+          };
+        };
+        keymap = {
+          preset = "enter"; # LazyVim uses "enter" preset (Enter to accept)
+          "<C-y>" = ["select_and_accept"]; # LazyVim adds C-y for select_and_accept
+          # Force Tab to ONLY do snippet_forward (override nvf's default which has select_next first)
+          # nvf's config.nix sets mappings.next (Tab) to ["select_next" "snippet_forward" ...]
+          # We need to completely override this to remove select_next
+          "<Tab>" = lib.mkForce ["snippet_forward"];
+          # Force Shift+Tab to ONLY do snippet_backward (override nvf's default)
+          "<S-Tab>" = lib.mkForce ["snippet_backward"];
+        };
+        signature = {
+          enabled = true;
+        };
+        completion = {
+          accept = {
+            # experimental auto-brackets support (LazyVim enables this)
+            auto_brackets = {
+              enabled = true;
+            };
+          };
+          menu = {
+            auto_show = true; # Show menu automatically (set to false to only show on manual <C-space>)
+            draw = {
+              treesitter = ["lsp"]; # LazyVim enables treesitter in menu draw
+            };
+          };
+          ghost_text = {
+            enabled = true; # Enable ghost text preview of selected item
+            show_with_menu = true; # Only show ghost text when menu is closed
+          };
+          documentation = {
+            auto_show = true; # Show documentation whenever an item is selected
+            auto_show_delay_ms = 500; # Delay before auto-show triggers
+          };
+        };
+      };
     };
   };
 
@@ -171,15 +242,21 @@
         end
       end
 
-      -- LazyVim-style Tab key handling for snippets
-      -- Add Tab key mapping if not already set (for snippet navigation)
+      -- Set Tab keymap AFTER setup (like LazyVim does in blink.lua line 125-139)
+      -- This ensures it overrides any preset defaults that might add select_next
+      -- Tab should ONLY handle snippet navigation, NOT menu navigation
       local blink = require("blink.cmp")
-      if blink and blink._config and not blink._config.keymap["<Tab>"] then
-        -- For "enter" preset, Tab should handle snippets
-        -- This is a simplified version - LazyVim has more complex handling for AI
+      if blink and blink._config then
+        -- Override Tab to ONLY do snippet_forward (no menu navigation, no fallback)
+        -- This matches LazyVim's approach but without AI actions
+        -- LazyVim does: opts.keymap["<Tab>"] = { LazyVim.cmp.map({ "snippet_forward", "ai_nes", "ai_accept" }), "fallback" }
+        -- We only want snippet_forward, no AI, no fallback to menu navigation
         blink._config.keymap["<Tab>"] = {
           "snippet_forward",
-          "fallback", -- fallback to normal Tab behavior if not in snippet
+        }
+        -- Override Shift+Tab to ONLY do snippet_backward (no menu navigation, no fallback)
+        blink._config.keymap["<S-Tab>"] = {
+          "snippet_backward",
         }
       end
     end, 0)
