@@ -1,8 +1,7 @@
 # LSP configuration and features
 # Returns config.vim settings directly
 # Takes lib as parameter for consistency (even if not used)
-{ lib, ... }:
-{
+{lib, ...}: {
   # LSP configuration
   lsp = {
     enable = true;
@@ -24,7 +23,7 @@
       mappings = {
         documentDiagnostics = "<leader>xx"; # Diagnostics toggle
         workspaceDiagnostics = "<leader>xX"; # Buffer Diagnostics toggle
-        symbols = "<leader>cs"; # Symbols toggle
+        # symbols removed - using <leader>cs for aerial instead
         lspReferences = "<leader>cS"; # LSP references/definitions toggle
         locList = "<leader>xL"; # Location List toggle
         quickfix = "<leader>xQ"; # Quickfix List toggle
