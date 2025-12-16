@@ -1,10 +1,12 @@
 # Adding a New Host
 
-This guide walks you through adding a new NixOS host to your flake configuration.
+This guide walks you through adding a new NixOS host to your flake
+configuration.
 
 ## Overview
 
 Adding a new host involves:
+
 1. Creating the host directory structure
 2. Generating SSH keys (if needed)
 3. Creating the host configuration file
@@ -38,6 +40,7 @@ chmod 600 host_key
 ```
 
 This creates:
+
 - `ssh` / `ssh.pub` - Key for SSH connections to the host
 - `host_key` / `host_key.pub` - Host key for known_hosts verification
 
@@ -360,7 +363,8 @@ After adding your host:
 
 ## See Also
 
-- [Deployment Module README](../modules/deployment/README.md) - Detailed deployment documentation
+- [Deployment Module README](../modules/deployment/README.md) - Detailed
+  deployment documentation
 - [Managing Secrets](./managing-secrets.md) - SOPS secrets management
-- [Deployment Tools](../modules/deployment/DEPLOYMENT_TOOLS.md) - Available deployment tools
-
+- [Deployment Tools](../modules/deployment/DEPLOYMENT_TOOLS.md) - Available
+  deployment tools
