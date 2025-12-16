@@ -676,6 +676,32 @@
     # Category 15: Lua Debug
     # Note: Requires snacks.debug module (part of snacks.nvim)
     # This is filetype-specific, so we'll use luaConfigRC for it
+
+    # Category 16: Todo-comments navigation
+    {
+      key = "]t";
+      mode = "n";
+      action = lib.generators.mkLuaInline "function() require('todo-comments').jump_next() end";
+      desc = "Next Todo Comment";
+    }
+    {
+      key = "[t";
+      mode = "n";
+      action = lib.generators.mkLuaInline "function() require('todo-comments').jump_prev() end";
+      desc = "Previous Todo Comment";
+    }
+    {
+      key = "<leader>xt";
+      mode = "n";
+      action = "<cmd>Trouble todo toggle<cr>";
+      desc = "Todo (Trouble)";
+    }
+    {
+      key = "<leader>xT";
+      mode = "n";
+      action = "<cmd>Trouble todo toggle filter = {tag = {TODO,FIX,FIXME}}<cr>";
+      desc = "Todo/Fix/Fixme (Trouble)";
+    }
   ];
 
   # Register keybinds with which-key
@@ -789,35 +815,7 @@
     };
   };
 
-  # Todo-comments navigation keymaps
-  keymaps = [
-    # Navigate todo comments
-    {
-      key = "]t";
-      mode = "n";
-      action = lib.generators.mkLuaInline "function() require('todo-comments').jump_next() end";
-      desc = "Next Todo Comment";
-    }
-    {
-      key = "[t";
-      mode = "n";
-      action = lib.generators.mkLuaInline "function() require('todo-comments').jump_prev() end";
-      desc = "Previous Todo Comment";
-    }
-    # Todo comments in trouble
-    {
-      key = "<leader>xt";
-      mode = "n";
-      action = "<cmd>Trouble todo toggle<cr>";
-      desc = "Todo (Trouble)";
-    }
-    {
-      key = "<leader>xT";
-      mode = "n";
-      action = "<cmd>Trouble todo toggle filter = {tag = {TODO,FIX,FIXME}}<cr>";
-      desc = "Todo/Fix/Fixme (Trouble)";
-    }
-  ];
+
 
   # Code outline and symbols
   utility = {
