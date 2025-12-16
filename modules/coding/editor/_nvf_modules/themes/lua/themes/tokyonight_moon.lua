@@ -61,15 +61,6 @@ M.base_16 = {
 -- base46's syntax.lua maps many groups, but tokyonight uses different colors
 -- Using hex values directly to avoid cache resolution issues with string color names
 M.polish_hl = {
-  -- CMP-specific overrides: Separate icon colors from text colors
-  -- The icon uses CmpItemKind* groups, text uses CmpItemAbbr (which is white)
-  cmp = {
-    -- Override icon colors only - text stays white via CmpItemAbbr
-    CmpItemKindFunction = { fg = M.base_30.nord_blue }, -- nord_blue: icon only (overrides base0D)
-    CmpItemKindMethod = { fg = M.base_30.nord_blue }, -- nord_blue: icon only (overrides base0D)
-    -- Keep text color separate (CmpItemAbbr is already white in base46)
-    CmpItemAbbr = { fg = M.base_30.white }, -- white: Ensure text stays white
-  },
   -- Blink.cmp overrides (if using blink.cmp/atom_colored style)
   -- BlinkCmpKind* groups control icon colors in blink.cmp
   blink = {
@@ -77,6 +68,14 @@ M.polish_hl = {
     BlinkCmpKindMethod = { fg = M.base_30.nord_blue }, -- nord_blue: icon only (overrides base0D)
     -- Text uses BlinkCmpLabel which is already white
     BlinkCmpLabel = { fg = M.base_30.white }, -- white: Ensure text stays white
+    -- Selected menu item - for atom_colored, bg should match BlinkCmpMenu (black2) 
+    -- so it doesn't interfere with the colored icon squares
+    -- Only the text should be highlighted, not the whole row background
+    BlinkCmpMenuSelection = { bg = M.base_30.black2, fg = M.base_30.white, bold = true }, -- match menu bg, white text, bold
+    -- Menu border - should match menu background for atom_colored to eliminate gap
+    BlinkCmpMenuBorder = { fg = M.base_30.black2, bg = M.base_30.black2 }, -- match menu bg to remove border gap
+    -- Menu background for atom_colored style
+    BlinkCmpMenu = { bg = M.base_30.black2 }, -- black2 for atom_colored style
   },
   defaults = {
     -- Basic syntax groups - using M.base_30 and M.base_16 color references
@@ -97,6 +96,10 @@ M.polish_hl = {
     ErrorMsg = { fg = "#c53b53" }, -- red1 - error color (specific color, not in base_30/base_16)
     -- Hide end of buffer markers (~) by making them the same color as background
     EndOfBuffer = { fg = M.base_30.black }, -- black: same as background to hide ~ characters
+    -- Popup menu selected item - needs lighter background for readability
+    -- Using a lighter color for better contrast with white text
+    -- This ensures BlinkCmpMenuSelection (which links to this) is readable
+    PmenuSel = { bg = "#4a5270", fg = M.base_30.white }, -- lighter blue-gray bg (#4a5270), white text
     -- Mini.icons color groups (used when mini.icons mocks nvim-web-devicons)
     -- Matching tokyonight.nvim's mini_icons.lua color mappings
     -- Note: MiniIconsBlue uses nord_blue instead of blue to differentiate icons from text
@@ -158,6 +161,137 @@ M.polish_hl = {
     DevIconrb = { fg = M.base_30.pink },
     -- Vibrant green: vue
     DevIconvue = { fg = M.base_30.vibrant_green },
+  },
+  -- WhichKey overrides to match tokyonight.nvim color scheme
+  -- These override base46's whichkey.lua integration
+  whichkey = {
+    WhichKey = { fg = M.base_30.cyan }, -- cyan: main key color
+    WhichKeyGroup = { fg = M.base_30.blue }, -- blue: group names
+    WhichKeyDesc = { fg = M.base_30.pink }, -- magenta: descriptions
+    WhichKeySeparator = { fg = M.base_30.grey_fg }, -- comment: separator
+    WhichKeyNormal = { bg = M.base_30.darker_black }, -- bg_dark: background
+    WhichKeyValue = { fg = M.base_30.grey }, -- dark5: value color
+  },
+  -- Telescope overrides to match tokyonight.nvim color scheme
+  -- These override base46's telescope.lua integration
+  telescope = {
+    TelescopeBorder = { fg = M.base_30.blue2, bg = M.base_30.darker_black }, -- border_highlight, bg_float
+    TelescopeNormal = { fg = M.base_30.white, bg = M.base_30.darker_black }, -- fg, bg_float
+    TelescopePromptBorder = { fg = M.base_30.sun, bg = M.base_30.darker_black }, -- orange, bg_float
+    TelescopePromptTitle = { fg = M.base_30.sun, bg = M.base_30.darker_black }, -- orange, bg_float
+    TelescopeResultsComment = { fg = M.base_30.one_bg2 }, -- dark3
+  },
+  -- Trouble overrides to match tokyonight.nvim color scheme
+  -- These override base46's trouble.lua integration
+  trouble = {
+    TroubleText = { fg = M.base_30.light_grey }, -- fg_dark
+    TroubleCount = { fg = M.base_30.pink, bg = M.base_30.one_bg }, -- magenta, fg_gutter
+    TroubleNormal = { fg = M.base_30.white, bg = M.base_30.darker_black }, -- fg, bg_sidebar
+  },
+  -- Notify overrides to match tokyonight.nvim color scheme
+  -- These override base46's notify.lua integration
+  notify = {
+    NotifyERRORIcon = { fg = "#c53b53" }, -- error (red1)
+    NotifyERRORTitle = { fg = "#c53b53" }, -- error (red1)
+    NotifyWARNIcon = { fg = M.base_30.yellow }, -- warning
+    NotifyWARNTitle = { fg = M.base_30.yellow }, -- warning
+    NotifyINFOIcon = { fg = M.base_30.blue2 }, -- info (blue2)
+    NotifyINFOTitle = { fg = M.base_30.blue2 }, -- info (blue2)
+    NotifyDEBUGIcon = { fg = M.base_30.grey_fg }, -- comment
+    NotifyDEBUGTitle = { fg = M.base_30.grey_fg }, -- comment
+    NotifyTRACEIcon = { fg = M.base_30.baby_pink }, -- purple
+    NotifyTRACETitle = { fg = M.base_30.baby_pink }, -- purple
+  },
+  -- Alpha overrides to match tokyonight.nvim color scheme
+  -- These override base46's alpha.lua integration
+  alpha = {
+    AlphaShortcut = { fg = M.base_30.sun }, -- orange
+    AlphaHeader = { fg = M.base_30.blue }, -- blue
+    AlphaHeaderLabel = { fg = M.base_30.sun }, -- orange
+    AlphaFooter = { fg = M.base_30.nord_blue }, -- blue1
+    AlphaButtons = { fg = M.base_30.cyan }, -- cyan
+  },
+  -- NvimTree overrides to match tokyonight.nvim color scheme
+  -- These override base46's nvimtree.lua integration
+  nvimtree = {
+    NvimTreeFolderIcon = { fg = M.base_30.blue }, -- blue (not folder_bg)
+    NvimTreeRootFolder = { fg = M.base_30.blue, bold = true }, -- blue, bold
+    NvimTreeSpecialFile = { fg = M.base_30.baby_pink, underline = true }, -- purple, underline
+    NvimTreeNormal = { fg = M.base_30.light_grey, bg = M.base_30.darker_black }, -- fg_sidebar, bg_sidebar
+    NvimTreeNormalNC = { fg = M.base_30.light_grey, bg = M.base_30.darker_black }, -- fg_sidebar, bg_sidebar
+    NvimTreeGitDirty = { fg = "#7ca1f2" }, -- git.change
+    NvimTreeGitNew = { fg = "#b8db87" }, -- git.add
+    NvimTreeGitDeleted = { fg = "#e26a75" }, -- git.delete
+  },
+  -- LSP overrides to match tokyonight.nvim color scheme
+  -- These override base46's lsp.lua integration
+  lsp = {
+    DiagnosticHint = { fg = M.base_30.teal }, -- teal (not purple)
+    DiagnosticInfo = { fg = M.base_30.blue2 }, -- info/blue2 (not green)
+    DiagnosticError = { fg = "#c53b53" }, -- error (red1)
+    DiagnosticWarn = { fg = M.base_30.yellow }, -- warning (yellow)
+  },
+  -- Snacks overrides to match tokyonight.nvim color scheme
+  -- These override any default snacks highlights
+  -- Key muted elements: SnacksDashboardDir uses dark3 for muted directory paths
+  snacks = {
+    -- Notifier
+    SnacksNotifierDebug = { fg = M.base_30.white, bg = M.base_30.black },
+    SnacksNotifierIconDebug = { fg = M.base_30.grey_fg }, -- comment
+    SnacksNotifierTitleDebug = { fg = M.base_30.grey_fg }, -- comment
+    SnacksNotifierError = { fg = M.base_30.white, bg = M.base_30.black },
+    SnacksNotifierIconError = { fg = "#c53b53" }, -- error (red1)
+    SnacksNotifierTitleError = { fg = "#c53b53" }, -- error (red1)
+    SnacksNotifierInfo = { fg = M.base_30.white, bg = M.base_30.black },
+    SnacksNotifierIconInfo = { fg = M.base_30.blue2 }, -- info/blue2
+    SnacksNotifierTitleInfo = { fg = M.base_30.blue2 }, -- info/blue2
+    SnacksNotifierTrace = { fg = M.base_30.white, bg = M.base_30.black },
+    SnacksNotifierIconTrace = { fg = M.base_30.baby_pink }, -- purple
+    SnacksNotifierTitleTrace = { fg = M.base_30.baby_pink }, -- purple
+    SnacksNotifierWarn = { fg = M.base_30.white, bg = M.base_30.black },
+    SnacksNotifierIconWarn = { fg = M.base_30.yellow }, -- warning
+    SnacksNotifierTitleWarn = { fg = M.base_30.yellow }, -- warning
+    -- Dashboard
+    SnacksDashboardDesc = { fg = M.base_30.cyan }, -- cyan
+    SnacksDashboardFooter = { fg = M.base_30.nord_blue }, -- blue1
+    SnacksDashboardHeader = { fg = M.base_30.blue }, -- blue
+    SnacksDashboardIcon = { fg = M.base_30.nord_blue }, -- blue1
+    SnacksDashboardKey = { fg = M.base_30.sun }, -- orange
+    SnacksDashboardSpecial = { fg = M.base_30.baby_pink }, -- purple
+    SnacksDashboardDir = { fg = M.base_30.one_bg2 }, -- dark3: muted directory paths (this is the key muted line!)
+    -- Profiler
+    SnacksProfilerIconInfo = { bg = M.base_30.one_bg, fg = M.base_30.nord_blue }, -- blue1 with blended bg
+    SnacksProfilerBadgeInfo = { bg = M.base_30.black2, fg = M.base_30.nord_blue }, -- blue1 with blended bg
+    SnacksProfilerIconTrace = { bg = M.base_30.one_bg, fg = M.base_30.one_bg2 }, -- dark3 with blended bg
+    SnacksProfilerBadgeTrace = { bg = M.base_30.black2, fg = M.base_30.one_bg2 }, -- dark3 with blended bg
+    -- Indent
+    SnacksIndent = { fg = M.base_30.one_bg, nocombine = true }, -- fg_gutter
+    SnacksIndentScope = { fg = M.base_30.nord_blue, nocombine = true }, -- blue1
+    -- Other
+    SnacksZenIcon = { fg = M.base_30.baby_pink }, -- purple
+    SnacksInputIcon = { fg = M.base_30.nord_blue }, -- blue1
+    SnacksInputBorder = { fg = M.base_30.yellow }, -- yellow
+    SnacksInputTitle = { fg = M.base_30.yellow }, -- yellow
+    -- Picker
+    SnacksPickerInputBorder = { fg = M.base_30.sun, bg = M.base_30.darker_black }, -- orange, bg_float
+    SnacksPickerInputTitle = { fg = M.base_30.sun, bg = M.base_30.darker_black }, -- orange, bg_float
+    SnacksPickerBoxTitle = { fg = M.base_30.sun, bg = M.base_30.darker_black }, -- orange, bg_float
+    SnacksPickerSelected = { fg = "#ff007c" }, -- magenta2
+    SnacksPickerPickWinCurrent = { fg = M.base_30.white, bg = "#ff007c", bold = true }, -- magenta2
+    SnacksPickerPickWin = { fg = M.base_30.white, bg = "#3e68d7", bold = true }, -- bg_search (blue0)
+    SnacksGhLabel = { fg = M.base_30.nord_blue, bold = true }, -- blue1
+    SnacksGhDiffHeader = { bg = M.base_30.black2, fg = M.base_30.nord_blue }, -- blue1 with blended bg
+    -- Picker UI elements (manual modifications for better appearance)
+    SnacksPickerBorder = { fg = M.base_30.sun, bg = M.base_30.darker_black }, -- orange border, bg_dark background
+    SnacksPicker = { bg = M.base_30.darker_black }, -- bg_dark background
+    SnacksPickerPreviewBorder = { fg = M.base_30.darker_black, bg = M.base_30.darker_black }, -- bg_dark
+    SnacksPickerPreview = { bg = M.base_30.darker_black }, -- bg_dark
+    SnacksPickerPreviewTitle = { fg = M.base_30.darker_black, bg = M.base_30.green }, -- bg_dark foreground, green background
+    SnacksPickerBoxBorder = { fg = M.base_30.darker_black, bg = M.base_30.darker_black }, -- bg_dark
+    SnacksPickerInputSearch = { fg = "#c53b53", bg = M.base_30.darker_black }, -- red (error), bg_dark
+    SnacksPickerListBorder = { fg = M.base_30.darker_black, bg = M.base_30.darker_black }, -- bg_dark
+    SnacksPickerList = { bg = M.base_30.darker_black }, -- bg_dark
+    SnacksPickerListTitle = { fg = M.base_30.darker_black, bg = M.base_30.darker_black }, -- bg_dark
   },
 }
 
