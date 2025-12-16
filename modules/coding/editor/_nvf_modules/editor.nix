@@ -643,6 +643,13 @@
       lua = true;
       desc = "Noice Picker (Telescope/FzfLua)";
     }
+    # Category 15: Cheatsheet (NvChad UI)
+    {
+      key = "<leader>ch";
+      mode = "n";
+      action = "<cmd>NvCheatsheet<cr>";
+      desc = "Toggle Cheatsheet";
+    }
     {
       key = "<c-f>";
       mode = ["i" "n" "s"];

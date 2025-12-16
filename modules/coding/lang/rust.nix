@@ -5,7 +5,8 @@
   FTS,
   lib,
   ...
-}: {
+}:
+{
   # Add rust-overlay as a flake input
   flake-file.inputs.rust-overlay.url = lib.mkDefault "github:oxalica/rust-overlay";
   flake-file.inputs.rust-overlay.inputs.nixpkgs.follows = "nixpkgs";
@@ -13,56 +14,58 @@
   FTS.coding._.lang._.rust = {
     description = "Rust development environment with cargo tools and toolchain using rust-overlay";
 
-    homeManager = {
-      pkgs,
-      lib,
-      ...
-    }: {
-      # Apply the rust-overlay to nixpkgs for this home-manager config
-      # This makes rust-bin.* available in pkgs
-      nixpkgs.overlays = [inputs.rust-overlay.overlays.default];
+    homeManager =
+      {
+        pkgs,
+        lib,
+        ...
+      }:
+      {
+        # Apply the rust-overlay to nixpkgs for this home-manager config
+        # This makes rust-bin.* available in pkgs
+        nixpkgs.overlays = [ inputs.rust-overlay.overlays.default ];
 
-      home.packages = with pkgs; [
-        # Rust toolchain from rust-overlay
-        # Uses latest stable Rust with default profile (rustc, cargo, rustfmt, clippy, etc.)
-        # This replaces rustup with a pure, reproducible Rust toolchain
-        rust-bin.stable.latest.default
-        rust-analyzer
+        home.packages = with pkgs; [
+          # Rust toolchain from rust-overlay
+          # Uses latest stable Rust with default profile (rustc, cargo, rustfmt, clippy, etc.)
+          # This replaces rustup with a pure, reproducible Rust toolchain
+          rust-bin.stable.latest.default
+          rust-analyzer
 
-        # Common cargo utilities
-        cargo-watch
-        cargo-edit
-        cargo-audit
-        # Note: cargo-nextest is currently broken in nixpkgs-unstable
-        # cargo-nextest
-        cargo-udeps
+          # Common cargo utilities
+          cargo-watch
+          cargo-edit
+          cargo-audit
+          # Note: cargo-nextest is currently broken in nixpkgs-unstable
+          # cargo-nextest
+          cargo-udeps
 
-        # Useful native tooling for building and debugging
-        pkg-config
-        cmake
-        ninja
-        gdb
-        lldb
-        llvmPackages.bintools
-        sccache
+          # Useful native tooling for building and debugging
+          pkg-config
+          cmake
+          ninja
+          gdb
+          lldb
+          llvmPackages.bintools
+          sccache
 
-        # Development libraries commonly needed by Rust crates
-        openssl.dev # Provides openssl.pc for pkg-config
-      ];
+          # Development libraries commonly needed by Rust crates
+          openssl.dev # Provides openssl.pc for pkg-config
+        ];
 
-      # Configure shell environment for pkg-config
-      # Exposes OpenSSL and other libraries' pkg-config files to cargo build scripts
-      programs.zsh = {
-        initExtra = ''
-          export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$HOME/.nix-profile/lib/pkgconfig
-        '';
+        # Configure shell environment for pkg-config
+        # Exposes OpenSSL and other libraries' pkg-config files to cargo build scripts
+        programs.zsh = {
+          initExtra = ''
+            export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$HOME/.nix-profile/lib/pkgconfig
+          '';
+        };
+
+        programs.fish = {
+          interactiveShellInit = ''
+            set -x PKG_CONFIG_PATH $PKG_CONFIG_PATH $HOME/.nix-profile/lib/pkgconfig
+          '';
+        };
       };
-
-      programs.fish = {
-        interactiveShellInit = ''
-          set -x PKG_CONFIG_PATH $PKG_CONFIG_PATH $HOME/.nix-profile/lib/pkgconfig
-        '';
-      };
-    };
   };
 }

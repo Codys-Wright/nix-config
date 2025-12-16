@@ -39,6 +39,7 @@
     home.includes = [
       den.aspects.nix-index
       den.aspects.nix-registry
+      den.aspects.npins
       # <FTS/secrets>  # SOPS secrets infrastructure (home-manager part) - disabled, using SelfHostBlocks SOPS instead
       <FTS/user-secrets>  # User secrets from SOPS with environment variables
     ];
