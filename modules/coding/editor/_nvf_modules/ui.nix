@@ -368,11 +368,13 @@ in {
         -- Initialize base46 cache path (required by nvchad-ui and base46)
         -- This must be set before base46 loads (before lazy.setup)
         vim.g.base46_cache = vim.fn.stdpath("data") .. "/base46_cache/"
+        
       ''
     else ''
       -- Initialize base46 cache path (required by nvchad-ui and base46)
       -- This must be set before base46 loads
       vim.g.base46_cache = vim.fn.stdpath("data") .. "/base46_cache/"
+      
     '';
 
   # Theme file is now written in nvchad-base46-cache (above) to ensure it exists before plugins load
