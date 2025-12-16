@@ -2,10 +2,13 @@
   inputs,
   lib,
   pkgs,
+  FTS,
   ...
 }: {
   # npins aspect - Pin management tool for Nix flakes
-  den.aspects.npins = {
+  FTS.nix._.npins = {
+    description = "npins - Pin management tool for Nix flakes";
+
     nixos = {pkgs, ...}: {
       environment.systemPackages = [pkgs.npins];
     };

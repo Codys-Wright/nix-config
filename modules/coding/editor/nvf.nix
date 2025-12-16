@@ -111,6 +111,8 @@
             config.vim.extraPlugins.timerly.package = pkgs.vimPlugins.timerly;
             # lzn-auto-require (required by nvchad-ui for optional module loading)
             config.vim.extraPlugins.lzn-auto-require.package = pkgs.vimPlugins.lzn-auto-require;
+            # friendly-snippets (snippet collection for mini.snippets and blink.cmp)
+            config.vim.extraPlugins.friendly-snippets.package = pkgs.vimPlugins.friendly-snippets;
             # Base46 theming plugin (required by nvchad-ui)
             # Setup function loads theme immediately when base46 loads (before UI renders)
             # This prevents flash of wrong theme on startup
@@ -178,27 +180,13 @@
       # Add aliases so you can call it as 'nvf', 'nv', or 'v'
       aliases = ["nvf" "nv" "v"];
 
-      # Create merged config directory in Nix store using linkFarm
-      # This avoids writing to dotfiles and keeps everything in the Nix store
-      # Neovim will look for config at XDG_CONFIG_HOME/nvf (since NVIM_APPNAME=nvf)
-      env = let
-        # Path to themes directory - relative to nvf.nix location
-        # Themes are at ./_nvf_modules/themes/lua/themes/
-        themesDir = ./_nvf_modules/themes;
-        # Create a linkFarm that merges the themes directory into nvf/lua/themes/
-        # This creates a directory structure: XDG_CONFIG_HOME/nvf/lua/themes/
-        mergedConfig = pkgs.linkFarm "nvf-merged-config" [
-          {
-            name = "nvf/lua/themes";
-            path = "${toString themesDir}/lua/themes";
-          }
-        ];
-      in {
-        # Set NVIM_APPNAME so Neovim uses the appname-specific config directory
+      # Set NVIM_APPNAME so Neovim uses the appname-specific config directory
+      # This makes Neovim look for config at ~/.config/nvf instead of ~/.config/nvim
+      # We don't set XDG_CONFIG_HOME because that would break other applications (like fish)
+      # Instead, we use additionalRuntimePaths in ui.nix to add the themes directory
+      # base46 will find themes via require("themes.tokyonight_moon") which searches runtimepath
+      env = {
         NVIM_APPNAME = "nvf";
-        # Set XDG_CONFIG_HOME to point to our merged config in the Nix store
-        # This makes Neovim look for config at XDG_CONFIG_HOME/nvf instead of ~/.config/nvf
-        XDG_CONFIG_HOME = builtins.toString mergedConfig;
       };
 
       # Add runtime dependencies for git integration
