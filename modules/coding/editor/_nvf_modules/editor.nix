@@ -20,6 +20,13 @@
     showmode = false;
   };
 
+  # Clipboard integration (LazyVim-style)
+  # Sync with system clipboard unless in SSH (to allow OSC 52 integration)
+  clipboard = {
+    enable = true;
+    registers = "unnamedplus"; # Use "+ register for system clipboard
+  };
+
   # Core LazyVim-style keymaps
   # Category 1: Navigation (better j/k, window navigation, resize)
   keymaps = [

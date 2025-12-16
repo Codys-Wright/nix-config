@@ -35,7 +35,11 @@
     # Common languages (enabled in nvf's maximal config)
     # Web development
     ts.enable = true; # TypeScript/JavaScript
-    html.enable = true;
+    html = {
+      enable = true;
+      # Enable HTML autotag (auto-close/rename HTML/JSX tags) - LazyVim uses nvim-ts-autotag
+      treesitter.autotagHtml = true;
+    };
     css.enable = true;
 
     # Systems programming
