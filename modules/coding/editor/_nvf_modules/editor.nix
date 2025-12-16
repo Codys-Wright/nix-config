@@ -539,18 +539,6 @@
       desc = "Buffer Diagnostics (Trouble)";
     }
     {
-      key = "<leader>cs";
-      mode = "n";
-      action = "<cmd>Trouble symbols toggle<cr>";
-      desc = "Symbols (Trouble)";
-    }
-    {
-      key = "<leader>cS";
-      mode = "n";
-      action = "<cmd>Trouble lsp toggle<cr>";
-      desc = "LSP references/definitions/... (Trouble)";
-    }
-    {
       key = "<leader>xL";
       mode = "n";
       action = "<cmd>Trouble loclist toggle<cr>";
@@ -691,91 +679,6 @@
     }
   ];
 
-  # Register keybinds with which-key
-  binds.whichKey.register = {
-    # Window navigation (Ctrl+hjkl are registered automatically by which-key)
-    # Resize windows
-    "<C-Up>" = "Increase Window Height";
-    "<C-Down>" = "Decrease Window Height";
-    "<C-Left>" = "Decrease Window Width";
-    "<C-Right>" = "Increase Window Width";
-    # Buffers
-    "<leader>bb" = "Switch to Other Buffer";
-    "<leader>`" = "Switch to Other Buffer";
-    "<leader>bd" = "Delete Buffer";
-    "<leader>bo" = "Delete Other Buffers";
-    "<leader>bD" = "Delete Buffer and Window";
-    # Bufferline-specific
-    "<leader>bp" = "Toggle Pin";
-    "<leader>bP" = "Delete Non-Pinned Buffers";
-    "<leader>br" = "Delete Buffers to the Right";
-    "<leader>bl" = "Delete Buffers to the Left";
-    "[B" = "Move buffer prev";
-    "]B" = "Move buffer next";
-    # Editing
-    "<leader>K" = "Keywordprg";
-    # Search
-    "<leader>ur" = "Redraw / Clear hlsearch / Diff Update";
-    # Windows
-    "<leader>-" = "Split Window Below";
-    "<leader>|" = "Split Window Right";
-    "<leader>wd" = "Delete Window";
-    # Tabs
-    "<leader><tab>l" = "Last Tab";
-    "<leader><tab>o" = "Close Other Tabs";
-    "<leader><tab>f" = "First Tab";
-    "<leader><tab><tab>" = "New Tab";
-    "<leader><tab>]" = "Next Tab";
-    "<leader><tab>d" = "Close Tab";
-    "<leader><tab>[" = "Previous Tab";
-    # Quit
-    "<leader>qq" = "Quit All";
-    # Terminal
-    "<leader>fT" = "Terminal (cwd)";
-    "<leader>ft" = "Terminal (Root Dir)";
-    "<c-/>" = "Terminal (Root Dir)";
-    # Format
-    "<leader>cf" = "Format";
-    # Diagnostics
-    "<leader>cd" = "Line Diagnostics";
-    "]d" = "Next Diagnostic";
-    "[d" = "Prev Diagnostic";
-    "]e" = "Next Error";
-    "[e" = "Prev Error";
-    "]w" = "Next Warning";
-    "[w" = "Prev Warning";
-    # Trouble
-    "<leader>xx" = "Diagnostics (Trouble)";
-    "<leader>xX" = "Buffer Diagnostics (Trouble)";
-    "<leader>cs" = "Symbols (Trouble)";
-    "<leader>cS" = "LSP references/definitions/... (Trouble)";
-    "<leader>xL" = "Location List (Trouble)";
-    "<leader>xQ" = "Quickfix List (Trouble)";
-    # Quickfix/Location
-    "<leader>xq" = "Quickfix List";
-    "<leader>xl" = "Location List";
-    "[q" = "Previous Trouble/Quickfix Item";
-    "]q" = "Next Trouble/Quickfix Item";
-    # UI/Inspect
-    "<leader>fn" = "New File";
-    "<leader>ui" = "Inspect Pos";
-    "<leader>uI" = "Inspect Tree";
-    # Noice
-    "<leader>sn" = "+noice";
-    "<leader>snl" = "Noice Last Message";
-    "<leader>snh" = "Noice History";
-    "<leader>sna" = "Noice All";
-    "<leader>snd" = "Dismiss All";
-    "<leader>snt" = "Noice Picker (Telescope/FzfLua)";
-    "<c-f>" = "Scroll Forward";
-    "<c-b>" = "Scroll Backward";
-    # Todo comments (using capital T to avoid conflicts)
-    "]T" = "Next Todo Comment";
-    "[T" = "Previous Todo Comment";
-    "<leader>xt" = "Todo (Trouble)";
-    "<leader>xT" = "Todo/Fix/Fixme (Trouble)";
-  };
-
   # Lua debug keymap (filetype-specific, must use luaConfigRC)
   # Note: Requires snacks.debug module (part of snacks.nvim)
   luaConfigRC.lua-debug-keymap = ''
@@ -802,8 +705,6 @@
     };
   };
 
-
-
   # Code outline and symbols
   utility = {
     outline = {
@@ -829,7 +730,7 @@
             # These control the width of the aerial window.
             # They can be integers or a float between 0 and 1 (e.g. 0.4 for 40%)
             # min_width and max_width can be a list of mixed types.
-            max_width = [ 40 0.2 ];
+            max_width = [40 0.2];
             width = null;
             min_width = 10;
             # key-value pairs of window-local options for aerial window (e.g. wrap, number, etc.)
