@@ -58,7 +58,7 @@
           shfmt
           stylua
           typstyle
-          terraform
+          # terraform  # Disabled for Darwin (unfree license and build issues)
           packer
           oxlint
           sops
