@@ -70,18 +70,7 @@
     };
   };
 
-  # LazyGit integration with toggleterm
-  terminal = {
-    toggleterm = {
-      lazygit = {
-        enable = true;
-        direction = "float";
-        mappings = {
-          open = "<leader>gg";
-        };
-      };
-    };
-  };
+
 
 
 
@@ -106,25 +95,36 @@
 
   # LazyGit additional keymaps (LazyVim-style)
   keymaps = [
+    # LazyGit (current directory) - LazyVim default
+    {
+      key = "<leader>gg";
+      mode = "n";
+      action = "function() if Snacks and Snacks.lazygit then Snacks.lazygit() else vim.cmd('TermExec cmd=lazygit direction=float') end end";
+      lua = true;
+      desc = "Lazygit";
+    }
     # LazyGit root dir (uses LazyVim root detection)
     {
       key = "<leader>gG";
       mode = "n";
-      action = ":lua if Snacks and Snacks.lazygit then Snacks.lazygit({ cwd = LazyVim.root.git() }) else vim.cmd('TermExec cmd=\\'lazygit\\' direction=float') end<CR>";
+      action = "function() if Snacks and Snacks.lazygit then Snacks.lazygit({ cwd = LazyVim.root.git() }) else vim.cmd('TermExec cmd=lazygit direction=float') end end";
+      lua = true;
       desc = "Lazygit (Root Dir)";
     }
     # Git browse (open current file/line in browser)
     {
       key = "<leader>gb";
       mode = "n";
-      action = ":lua if Snacks and Snacks.gitbrowse then Snacks.gitbrowse() end<CR>";
+      action = "function() if Snacks and Snacks.gitbrowse then Snacks.gitbrowse() end end";
+      lua = true;
       desc = "Git Browse";
     }
     # Git browse (open and browse)
     {
       key = "<leader>gB";
       mode = "n";
-      action = ":lua if Snacks and Snacks.gitbrowse then Snacks.gitbrowse({ open = true }) end<CR>";
+      action = "function() if Snacks and Snacks.gitbrowse then Snacks.gitbrowse({ open = true }) end end";
+      lua = true;
       desc = "Git Browse (Open)";
     }
     # LazyGit current file history
