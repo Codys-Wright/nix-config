@@ -59,10 +59,11 @@ in {
     # List of all nvf module names - single source of truth
     # All modules receive lib as a parameter for consistency
     # Use "snacks/picker" format for nested modules
+    # Comment out modules to disable them for debugging
     nvfModuleNames = [
       "ai"
       "coding"
-      "debug"
+      "debug" # TEMPORARILY DISABLED to test x key timeout
       "editor"
       "format"
       "lang"
@@ -90,7 +91,15 @@ in {
     # Import config files directly - Nix will merge them automatically
     customNeovim = inputs.nvf.lib.neovimConfiguration {
       inherit pkgs;
-      modules = allModules;
+      modules =
+        allModules
+        ++ [
+          # Pass the nixpkgs packages to the coding module
+          {
+            config.vim.extraPlugins.grug-far.package = pkgs.vimPlugins.grug-far-nvim;
+            config.vim.extraPlugins.vim-repeat.package = pkgs.vimPlugins.vim-repeat;
+          }
+        ];
     };
 
     # Wrap the neovim package using wrappers library
