@@ -1,12 +1,11 @@
-# WhiteSur Icon Theme
+#
 # macOS Big Sur-like icon theme
 {
   FTS,
   pkgs,
   lib,
   ...
-}:
-{
+}: {
   FTS.theme._.icons._.themes._.whitesur = {
     description = "WhiteSur icon theme (macOS Big Sur style)";
 

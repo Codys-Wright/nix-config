@@ -29,7 +29,9 @@
         quickfix = "<leader>xQ"; # Quickfix List toggle
       };
     };
-    lspSignature.enable = true;
+    # lspSignature is disabled when using blink.cmp
+    # Use blink.cmp's builtin signature feature instead
+    lspSignature.enable = false;
   };
 
   # Enable trouble_lualine (shows trouble symbols in lualine)
@@ -79,4 +81,67 @@
       };
     };
   };
+
+  # Blink.cmp configuration (NvChad's new completion engine)
+  # Uses NvChad's blink configuration and base46 highlights
+  autocomplete = {
+    blink-cmp = {
+      enable = true;
+      friendly-snippets.enable = true;
+      # Use NvChad's blink configuration
+      # The setupOpts will be merged with NvChad's config via luaConfigRC
+      setupOpts = lib.generators.mkLuaInline ''
+        {
+          snippets = { preset = "luasnip" },
+          cmdline = {
+            enabled = true,
+          },
+          appearance = { nerd_font_variant = "normal" },
+          fuzzy = { implementation = "prefer_rust" },
+          sources = {
+            default = { "lsp", "snippets", "buffer", "path" },
+          },
+          keymap = {
+            preset = "default",
+          },
+          signature = {
+            enabled = true,
+          },
+          completion = {
+            documentation = {
+              auto_show = true,
+              auto_show_delay_ms = 200,
+              window = { border = "single" },
+            },
+          },
+        }
+      '';
+    };
+  };
+
+  # Configure blink.cmp to use NvChad's blink config and base46 highlights
+  # This runs after blink-cmp is set up by nvf
+  luaConfigRC.blink-cmp-nvchad-config = ''
+    -- Load base46 blink highlights and apply NvChad's blink config
+    vim.defer_fn(function()
+      -- Load base46 blink highlights
+      if vim.g.base46_cache then
+        pcall(dofile, vim.g.base46_cache .. "blink")
+      end
+
+      -- Try to get NvChad blink config and merge it with setupOpts
+      local ok, nvchad_blink_config = pcall(require, "nvchad.blink.config")
+      if ok and nvchad_blink_config then
+        -- Merge NvChad's config (especially the menu config)
+        local blink = require("blink.cmp")
+        if blink and blink._config then
+          -- Update menu config from NvChad
+          if nvchad_blink_config.completion and nvchad_blink_config.completion.menu then
+            blink._config.completion = blink._config.completion or {}
+            blink._config.completion.menu = nvchad_blink_config.completion.menu
+          end
+        end
+      end
+    end, 0)
+  '';
 }

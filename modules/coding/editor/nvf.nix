@@ -53,6 +53,7 @@
     "lang"
     "lint"
     "lsp"
+    "nvzone"
     "snacks"
     "snacks/picker"
     "snacks/dashboard"
@@ -77,6 +78,11 @@
       inherit lib;
     };
 
+    # Import npins sources for building floaterm
+    # Path: from modules/coding/editor/nvf.nix to root npins/default.nix
+    # npins/default.nix returns a set directly, not a function
+    npinsSources = import ../../../npins/default.nix;
+
     # Build the neovim package using nvf.lib.neovimConfiguration
     # Import config files directly - Nix will merge them automatically
     customNeovim = inputs.nvf.lib.neovimConfiguration {
@@ -84,10 +90,80 @@
       modules =
         allModules
         ++ [
-          # Pass the nixpkgs packages to the coding module
+          # Pass the nixpkgs packages to various modules
           {
             config.vim.extraPlugins.grug-far.package = pkgs.vimPlugins.grug-far-nvim;
             config.vim.extraPlugins.vim-repeat.package = pkgs.vimPlugins.vim-repeat;
+            # Build floaterm from npins sources (not in nixpkgs yet)
+            # Disable require check because it depends on volt which isn't available during check
+            config.vim.extraPlugins.floaterm.package = pkgs.vimUtils.buildVimPlugin {
+              pname = "nvzone-floaterm";
+              version = builtins.substring 0 8 npinsSources.nvzone-floaterm.revision;
+              src = npinsSources.nvzone-floaterm.outPath;
+              doCheck = false; # Disable require check - depends on volt
+            };
+            # nvzone plugins from nixpkgs
+            config.vim.extraPlugins.volt.package = pkgs.vimPlugins.nvzone-volt;
+            config.vim.extraPlugins.typr.package = pkgs.vimPlugins.nvzone-typr;
+            config.vim.extraPlugins.minty.package = pkgs.vimPlugins.nvzone-minty;
+            config.vim.extraPlugins.menu.package = pkgs.vimPlugins.nvzone-menu;
+            config.vim.extraPlugins.showkeys.package = pkgs.vimPlugins.showkeys;
+            config.vim.extraPlugins.timerly.package = pkgs.vimPlugins.timerly;
+            # lzn-auto-require (required by nvchad-ui for optional module loading)
+            config.vim.extraPlugins.lzn-auto-require.package = pkgs.vimPlugins.lzn-auto-require;
+            # Base46 theming plugin (required by nvchad-ui)
+            # Setup function loads theme immediately when base46 loads (before UI renders)
+            # This prevents flash of wrong theme on startup
+            # Note: chadrc should be configured before this runs (via luaConfigRC.nvchad-ui-config)
+            config.vim.extraPlugins.base46 = {
+              package = pkgs.vimPlugins.base46;
+              setup = ''
+                -- Load base46 theme immediately when base46 loads (before UI renders)
+                -- This prevents flash of wrong theme on startup
+                -- Ensure chadrc/nvconfig is available (should be set up in luaConfigRC)
+                local function load_theme()
+                  -- Programmatically set the theme in nvconfig before base46 reads it
+                  pcall(function()
+                    local nvconfig = require("nvconfig")
+                    if nvconfig and nvconfig.base46 then
+                      nvconfig.base46.theme = "tokyonight_moon"
+                    end
+                  end)
+
+                  -- Clear cached theme module AND base46 module so base46 can find our custom theme
+                  -- This ensures polish_hl overrides are loaded fresh
+                  package.loaded["themes.tokyonight_moon"] = nil
+                  package.loaded["base46"] = nil
+
+                  -- Load base46 and compile/load highlights
+                  local base46 = require("base46")
+                  if base46 and vim.g.base46_cache then
+                    -- Force reload by clearing cache and recompiling
+                    base46.load_all_highlights()
+                    return true
+                  end
+                  return false
+                end
+
+                -- Try to load immediately
+                if not load_theme() then
+                  -- If chadrc isn't ready yet, wait a tiny bit
+                  vim.defer_fn(load_theme, 10)
+                end
+              '';
+            };
+            # NvChad base plugin (provides core functionality)
+            config.vim.extraPlugins.nvchad.package = pkgs.vimPlugins.nvchad;
+            # NvChad UI plugin (provides cheatsheet, statusline, tabufline, etc.)
+            # Requires lzn-auto-require, base46 and nvchad base
+            # Setup function must call require "nvchad" to initialize commands
+            config.vim.extraPlugins.nvchad-ui = {
+              package = pkgs.vimPlugins.nvchad-ui;
+              setup = ''
+                -- Initialize nvchad (this sets up commands like NvCheatsheet, Nvdash, etc.)
+                require "nvchad"
+              '';
+            };
           }
         ];
     };
@@ -105,9 +181,9 @@
       # Add runtime dependencies for git integration
       # These will be available in PATH when neovim runs
       runtimeInputs = [
-        pkgs.lazygit  # Required for Snacks.lazygit integration
-        pkgs.gh       # Required for Snacks.gh (GitHub CLI) integration
-        pkgs.git      # Required for git operations
+        pkgs.lazygit # Required for Snacks.lazygit integration
+        pkgs.gh # Required for Snacks.gh (GitHub CLI) integration
+        pkgs.git # Required for git operations
       ];
 
       # Example: Add environment variables
