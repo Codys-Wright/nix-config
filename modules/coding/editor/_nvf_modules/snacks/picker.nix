@@ -509,108 +509,30 @@
       end
     end, {})
 
-    -- Set up NvChad-style highlights for snacks picker
-    -- This makes it look like NvChad's telescope theme
+    -- Apply snacks highlights from theme's polish_hl.snacks
+    -- Since base46 doesn't include snacks in its integrations list, we need to manually apply them
+    -- The theme's polish_hl.snacks contains all the highlight definitions with resolved color values
     vim.defer_fn(function()
-      -- Get colors from highlight groups (similar to NvChad telescope)
-      local function get_hlgroup(name)
-        local hl = vim.api.nvim_get_hl(0, { name = name, link = false })
-        return hl
+      local function apply_snacks_highlights()
+        local ok, theme = pcall(require, "themes.tokyonight_moon")
+        if ok and theme and theme.polish_hl and theme.polish_hl.snacks then
+          local snacks_hl = theme.polish_hl.snacks
+          -- Apply all snacks highlights from the theme
+          -- The values in polish_hl should already be resolved (base46 processes them)
+          -- But since snacks isn't in base46's integrations, we apply them manually
+          for hl_name, hl_opts in pairs(snacks_hl) do
+            vim.api.nvim_set_hl(0, hl_name, hl_opts)
+          end
+        end
       end
 
-      local normal = get_hlgroup("Normal")
-      local visual = get_hlgroup("Visual")
-      local string_hl = get_hlgroup("String")
-      local error_hl = get_hlgroup("Error")
-
-      -- Get bg_dark (darker background for floats/pickers) - try to get from theme or use darker shade
-      local bg = normal.bg or "#000000"
-      local bg_dark = nil
-      -- Try to get bg_dark from tokyonight theme if available
-      local ok, theme = pcall(require, "themes.tokyonight_moon")
-      if ok and theme and theme.base_30 then
-        bg_dark = theme.base_30.darker_black or "#1e2030"
-      else
-        -- Fallback: use a slightly darker version of bg (for tokyonight moon: bg_dark is #1e2030 vs bg #222436)
-        bg_dark = "#1e2030" -- tokyonight moon bg_dark
-      end
-
-      local bg_alt = visual.bg or "#1e1e2e"
-      local green = string_hl.fg or "#98c379"
-      local red = error_hl.fg or "#e06c75"
-      local fg = normal.fg or "#abb2bf"
-
-      -- Get orange color from theme (for borders)
-      local orange = nil
-      if ok and theme and theme.base_30 then
-        orange = theme.base_30.orange or "#ff966c"
-      else
-        orange = "#ff966c" -- tokyonight moon orange
-      end
-
-      -- Set highlights for snacks picker to match tokyonight telescope theme
-      -- Use bg_dark (darker blue) for picker background instead of normal bg
-      -- Border should be orange (matching tokyonight's SnacksPickerInputBorder)
-      vim.api.nvim_set_hl(0, "SnacksPickerBorder", { fg = orange, bg = bg_dark })
-      vim.api.nvim_set_hl(0, "SnacksPicker", { bg = bg_dark })
-      vim.api.nvim_set_hl(0, "SnacksPickerPreviewBorder", { fg = bg_dark, bg = bg_dark })
-      vim.api.nvim_set_hl(0, "SnacksPickerPreview", { bg = bg_dark })
-      vim.api.nvim_set_hl(0, "SnacksPickerPreviewTitle", { fg = bg_dark, bg = green })
-      vim.api.nvim_set_hl(0, "SnacksPickerBoxBorder", { fg = bg_dark, bg = bg_dark })
-      -- Input border should be orange (matching tokyonight)
-      vim.api.nvim_set_hl(0, "SnacksPickerInputBorder", { fg = orange, bg = bg_dark })
-      vim.api.nvim_set_hl(0, "SnacksPickerInputSearch", { fg = red, bg = bg_dark })
-      vim.api.nvim_set_hl(0, "SnacksPickerListBorder", { fg = bg_dark, bg = bg_dark })
-      vim.api.nvim_set_hl(0, "SnacksPickerList", { bg = bg_dark })
-      vim.api.nvim_set_hl(0, "SnacksPickerListTitle", { fg = bg_dark, bg = bg_dark })
-
+      -- Apply highlights initially
+      apply_snacks_highlights()
 
       -- Update highlights when colorscheme changes
       vim.api.nvim_create_autocmd("ColorScheme", {
-        group = vim.api.nvim_create_augroup("SnacksPickerNvChadTheme", { clear = true }),
-        callback = function()
-          local normal = get_hlgroup("Normal")
-          local visual = get_hlgroup("Visual")
-          local string_hl = get_hlgroup("String")
-          local error_hl = get_hlgroup("Error")
-
-          local bg = normal.bg or "#000000"
-          local bg_dark = nil
-          -- Try to get bg_dark from tokyonight theme if available
-          local ok, theme = pcall(require, "themes.tokyonight_moon")
-          if ok and theme and theme.base_30 then
-            bg_dark = theme.base_30.darker_black or "#1e2030"
-          else
-            bg_dark = "#1e2030" -- tokyonight moon bg_dark fallback
-          end
-
-          local bg_alt = visual.bg or "#1e1e2e"
-          local green = string_hl.fg or "#98c379"
-          local red = error_hl.fg or "#e06c75"
-
-          -- Get orange color from theme (for borders)
-          local orange = nil
-          if ok and theme and theme.base_30 then
-            orange = theme.base_30.orange or "#ff966c"
-          else
-            orange = "#ff966c" -- tokyonight moon orange
-          end
-
-          -- Border should be orange (matching tokyonight's SnacksPickerInputBorder)
-          vim.api.nvim_set_hl(0, "SnacksPickerBorder", { fg = orange, bg = bg_dark })
-          vim.api.nvim_set_hl(0, "SnacksPicker", { bg = bg_dark })
-          vim.api.nvim_set_hl(0, "SnacksPickerPreviewBorder", { fg = bg_dark, bg = bg_dark })
-          vim.api.nvim_set_hl(0, "SnacksPickerPreview", { bg = bg_dark })
-          vim.api.nvim_set_hl(0, "SnacksPickerPreviewTitle", { fg = bg_dark, bg = green })
-          vim.api.nvim_set_hl(0, "SnacksPickerBoxBorder", { fg = bg_dark, bg = bg_dark })
-          -- Input border should be orange (matching tokyonight)
-          vim.api.nvim_set_hl(0, "SnacksPickerInputBorder", { fg = orange, bg = bg_dark })
-          vim.api.nvim_set_hl(0, "SnacksPickerInputSearch", { fg = red, bg = bg_dark })
-          vim.api.nvim_set_hl(0, "SnacksPickerListBorder", { fg = bg_dark, bg = bg_dark })
-          vim.api.nvim_set_hl(0, "SnacksPickerList", { bg = bg_dark })
-          vim.api.nvim_set_hl(0, "SnacksPickerListTitle", { fg = bg_dark, bg = bg_dark })
-
-        end,
+        group = vim.api.nvim_create_augroup("SnacksTheme", { clear = true }),
+        callback = apply_snacks_highlights,
       })
     end, 0)
   '';

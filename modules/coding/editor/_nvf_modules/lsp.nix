@@ -88,30 +88,57 @@
     blink-cmp = {
       enable = true;
       friendly-snippets.enable = true;
-      # Use NvChad's blink configuration
-      # The setupOpts will be merged with NvChad's config via luaConfigRC
+      # Use LazyVim-style blink configuration
+      # Based on LazyVim's blink.lua configuration
       setupOpts = lib.generators.mkLuaInline ''
         {
           snippets = { preset = "luasnip" },
           cmdline = {
             enabled = true,
+            keymap = {
+              preset = "cmdline",
+              ["<Right>"] = false,
+              ["<Left>"] = false,
+            },
+            completion = {
+              list = { selection = { preselect = false } },
+              menu = {
+                auto_show = function(ctx)
+                  return vim.fn.getcmdtype() == ":"
+                end,
+              },
+              ghost_text = { enabled = true },
+            },
           },
-          appearance = { nerd_font_variant = "normal" },
+          appearance = {
+            nerd_font_variant = "mono", -- LazyVim uses "mono" for better alignment
+          },
           fuzzy = { implementation = "prefer_rust" },
           sources = {
             default = { "lsp", "snippets", "buffer", "path" },
           },
           keymap = {
-            preset = "default",
+            preset = "enter", -- LazyVim uses "enter" preset (Enter to accept)
+            ["<C-y>"] = { "select_and_accept" }, -- LazyVim adds C-y for select_and_accept
           },
           signature = {
             enabled = true,
           },
           completion = {
+            accept = {
+              -- experimental auto-brackets support (LazyVim enables this)
+              auto_brackets = {
+                enabled = true,
+              },
+            },
+            menu = {
+              draw = {
+                treesitter = { "lsp" }, -- LazyVim enables treesitter in menu draw
+              },
+            },
             documentation = {
-              auto_show = true,
+              auto_show = true, -- LazyVim enables auto-show
               auto_show_delay_ms = 200,
-              window = { border = "single" },
             },
           },
         }
@@ -120,6 +147,7 @@
   };
 
   # Configure blink.cmp to use NvChad's blink config and base46 highlights
+  # Also add LazyVim-style Tab key handling for snippets
   # This runs after blink-cmp is set up by nvf
   luaConfigRC.blink-cmp-nvchad-config = ''
     -- Load base46 blink highlights and apply NvChad's blink config
@@ -141,6 +169,18 @@
             blink._config.completion.menu = nvchad_blink_config.completion.menu
           end
         end
+      end
+
+      -- LazyVim-style Tab key handling for snippets
+      -- Add Tab key mapping if not already set (for snippet navigation)
+      local blink = require("blink.cmp")
+      if blink and blink._config and not blink._config.keymap["<Tab>"] then
+        -- For "enter" preset, Tab should handle snippets
+        -- This is a simplified version - LazyVim has more complex handling for AI
+        blink._config.keymap["<Tab>"] = {
+          "snippet_forward",
+          "fallback", -- fallback to normal Tab behavior if not in snippet
+        }
       end
     end, 0)
   '';
