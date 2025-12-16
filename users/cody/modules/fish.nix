@@ -17,6 +17,11 @@
         functions = import "${fishDir}/functions.nix" { inherit inputs lib; };
         shellAliases = import "${fishDir}/aliases.nix";
         shellAbbrs = import "${fishDir}/abbrs.nix";
+        
+        # Enable vi key bindings
+        shellInit = ''
+          fish_vi_key_bindings
+        '';
       };
     };
 }
