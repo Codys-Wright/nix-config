@@ -7,7 +7,7 @@
   ...
 }:
 {
-  FTS.theme._.icons._.themes._.whitesur = {
+  FTS.theme._.ions._.themes._.whitesur = {
     description = "WhiteSur icon theme (macOS Big Sur style)";
 
     homeManager = {
@@ -29,4 +29,3 @@
     };
   };
 }
-

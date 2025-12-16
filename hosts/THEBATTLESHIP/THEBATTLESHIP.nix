@@ -5,35 +5,30 @@
   FTS,
   __findFile,
   ...
-}:
-
-{
-
+}: {
   den.hosts.x86_64-linux = {
     THEBATTLESHIP = {
       description = "The Main System, ready for everyday battle";
-      users.cody = { };
-      users.starcommand = { }; # Service user for self-hosting infrastructure
+      users.cody = {};
+      users.starcommand = {}; # Service user for self-hosting infrastructure
       aspect = "THEBATTLESHIP";
 
       # Use nixpkgs-unstable with selfhostblocks patches applied
       # This gives us the latest packages plus LLDAP/borgbackup enhancements
-      instantiate =
-        args:
-        let
-          system = "x86_64-linux";
-          # Get pkgs from nixpkgs for applyPatches
-          pkgs' = inputs.nixpkgs.legacyPackages.${system};
-          # Apply selfhostblocks patches to our unstable nixpkgs
-          shbPatches = inputs.selfhostblocks.lib.${system}.patches;
-          patchedNixpkgs = pkgs'.applyPatches {
-            name = "nixpkgs-unstable-shb-patched";
-            src = inputs.nixpkgs; # Use our nixpkgs-unstable
-            patches = shbPatches;
-          };
-          nixosSystem' = import "${patchedNixpkgs}/nixos/lib/eval-config.nix";
-        in
-        nixosSystem' (args // { inherit system; });
+      instantiate = args: let
+        system = "x86_64-linux";
+        # Get pkgs from nixpkgs for applyPatches
+        pkgs' = inputs.nixpkgs.legacyPackages.${system};
+        # Apply selfhostblocks patches to our unstable nixpkgs
+        shbPatches = inputs.selfhostblocks.lib.${system}.patches;
+        patchedNixpkgs = pkgs'.applyPatches {
+          name = "nixpkgs-unstable-shb-patched";
+          src = inputs.nixpkgs; # Use our nixpkgs-unstable
+          patches = shbPatches;
+        };
+        nixosSystem' = import "${patchedNixpkgs}/nixos/lib/eval-config.nix";
+      in
+        nixosSystem' (args // {inherit system;});
     };
   };
 
@@ -43,7 +38,7 @@
       # Include role-based aspects
       includes = [
         # System-wide theme (bootloader, default appearance)
-        (<FTS.theme> { default = "cody"; })
+        (<FTS.theme> {default = "cody";})
 
         # Complete desktop setup (environment + display manager + bootloader)
         (FTS.desktop {
@@ -79,52 +74,35 @@
       ];
 
       # Manually set fileSystems and bootloader for now
-      nixos =
-        {
-          config,
-          lib,
-          pkgs,
-          ...
-        }:
-        {
-          # Hardware detection is handled by FTS.hardware (includes FTS.hardware.facter)
-          # The facter report path is auto-derived as hosts/THEBATTLESHIP/facter.json
+      nixos = {
+        config,
+        lib,
+        pkgs,
+        ...
+      }: {
+        # Hardware detection is handled by FTS.hardware (includes FTS.hardware.facter)
+        # The facter report path is auto-derived as hosts/THEBATTLESHIP/facter.json
 
-          # Add overlays for stable/unstable package access
-          # Note: Base nixpkgs is already unstable with selfhostblocks patches
-          nixpkgs.overlays = [
-            # Add stable packages as pkgs.stable
-            (final: prev: {
-              stable = import inputs.nixpkgs-stable {
-                system = final.stdenv.hostPlatform.system;
-                config.allowUnfree = true;
-              };
-            })
-            # Add another unstable reference for explicit access
-            (final: prev: {
-              unstable = import inputs.nixpkgs {
-                system = final.stdenv.hostPlatform.system;
-                config.allowUnfree = true;
-              };
-            })
-          ];
+        # Note: Overlays for stable/unstable package access are already configured
+        # globally in modules/nix/nix.nix. The base nixpkgs is already unstable
+        # with selfhostblocks patches applied via the instantiate function above.
+        # You can access stable packages via pkgs.stable and unstable via pkgs.unstable.
 
-          # Limit number of generations in boot partition (critical with 512MB boot)
-          boot.loader.grub.configurationLimit = 2; # Only keep last 2 generations in GRUB
+        # Limit number of generations in boot partition (critical with 512MB boot)
+        boot.loader.grub.configurationLimit = 2; # Only keep last 2 generations in GRUB
 
-          # Automatic cleanup
-          nix.gc = {
-            automatic = true;
-            dates = "weekly";
-            options = "--delete-older-than 7d";
-          };
-
-          programs.nh.enable = true;
-
-          # Self-hosting services configuration is handled by the starcommand user
-          # See users/starcommand/starcommand.nix for all service configuration
+        # Automatic cleanup
+        nix.gc = {
+          automatic = true;
+          dates = "weekly";
+          options = "--delete-older-than 7d";
         };
+
+        programs.nh.enable = true;
+
+        # Self-hosting services configuration is handled by the starcommand user
+        # See users/starcommand/starcommand.nix for all service configuration
+      };
     };
   };
-
 }
