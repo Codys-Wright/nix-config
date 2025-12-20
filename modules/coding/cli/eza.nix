@@ -1,11 +1,9 @@
 # Eza - modern ls replacement
 {
-  FTS, ... }:
-{
   FTS.coding._.cli._.eza = {
     description = "Eza modern ls replacement";
 
-    homeManager = { pkgs, lib, ... }: {
+    homeManager = {...}: {
       programs.eza = {
         enable = true;
         icons = "auto";
@@ -19,4 +17,3 @@
     };
   };
 }
-
