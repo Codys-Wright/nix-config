@@ -28,6 +28,7 @@
 
         # Applications - all included by default
         <FTS.apps/browsers>
+        <FTS.apps/communications>
         <FTS.apps/gaming>
         <FTS.apps/notes>
         <FTS.apps/misc>
