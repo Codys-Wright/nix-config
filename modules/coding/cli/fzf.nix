@@ -1,11 +1,9 @@
 # Fzf - fuzzy finder with custom colors
 {
-  FTS, ... }:
-{
   FTS.coding._.cli._.fzf = {
     description = "Fzf fuzzy finder with custom colors";
 
-    homeManager = { pkgs, lib, ... }: {
+    homeManager = {lib, ...}: {
       programs.fzf = {
         enable = true;
         enableZshIntegration = true;
@@ -32,4 +30,3 @@
     };
   };
 }
-

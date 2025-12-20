@@ -1,9 +1,7 @@
 # Default aspect configuration
 # see also: aspects/developer.nix, aspects/example/
 {
-  inputs,
   den,
-  lib,
   __findFile,
   ...
 }: {

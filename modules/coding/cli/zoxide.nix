@@ -1,11 +1,9 @@
 # Zoxide - smart cd
 {
-  FTS, ... }:
-{
   FTS.coding._.cli._.zoxide = {
     description = "Zoxide smart cd replacement";
 
-    homeManager = { pkgs, lib, ... }: {
+    homeManager = {
       programs.zoxide = {
         enable = true;
         enableZshIntegration = true;
@@ -15,4 +13,3 @@
     };
   };
 }
-
