@@ -42,7 +42,7 @@
 
         # Complete desktop setup (environment + display manager + bootloader)
         (FTS.desktop {
-          environment.default = "gnome";
+          environment.default = "hyprland";
           bootloader = {
             default = "grub";
             grub = {
@@ -65,6 +65,7 @@
         # Hardware and kernel
         <FTS.kernel>
         <FTS.hardware>
+        <FTS.keyboard>
 
         # Deployment configuration (SSH, networking, secrets, VM/ISO generation)
         <FTS.deployment>

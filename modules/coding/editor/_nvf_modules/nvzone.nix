@@ -27,14 +27,14 @@
             end,
             term = function(buf)
               -- Terminal mappings (when in terminal buffer)
-              -- Note: Ctrl+h for sidebar may need to be configured differently
-              -- The API function toggle_sidebar() doesn't exist, so we'll skip it for now
+              -- Note: Only set these for terminal mode ("t") to avoid conflicting with
+              -- window navigation keymaps (<C-h/j/k/l>) in normal mode
               -- Ctrl+j -> Cycle to previous terminal
-              vim.keymap.set({ "n", "t" }, "<C-j>", function()
+              vim.keymap.set("t", "<C-j>", function()
                 require("floaterm.api").cycle_term_bufs("prev")
               end, { buffer = buf, desc = "Previous Terminal" })
               -- Ctrl+k -> Cycle to next terminal
-              vim.keymap.set({ "n", "t" }, "<C-k>", function()
+              vim.keymap.set("t", "<C-k>", function()
                 require("floaterm.api").cycle_term_bufs("next")
               end, { buffer = buf, desc = "Next Terminal" })
             end,

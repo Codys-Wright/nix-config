@@ -48,6 +48,9 @@
         # Cody-specific configurations
         cody.dots
         cody.fish
+
+        # Keyboard configuration (Kanata)
+        <FTS.keyboard>
       ];
     };
   };

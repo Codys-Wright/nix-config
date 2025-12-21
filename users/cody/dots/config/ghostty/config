@@ -15,7 +15,8 @@ focus-follows-mouse = true
 keybind = performable:ctrl+shift+v=paste_from_clipboard
 keybind = performable:ctrl+shift+c=copy_to_clipboard
 
-keybind = ctrl+l=clear_screen
+# Disabled to allow Ctrl+l to pass through to Zellij for pane navigation
+# keybind = ctrl+l=clear_screen
 
 # on escape sequences
 # https://www.leonerd.org.uk/hacks/fixterms/
