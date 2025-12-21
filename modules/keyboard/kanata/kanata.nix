@@ -1,50 +1,35 @@
-{ inputs, lib, den,
-  FTS, ... }:
-
 {
   FTS.kanata = {
     description = "Kanata keyboard remapper for both NixOS and Darwin";
 
-    nixos = { config, pkgs, lib, ... }:
-    {
+    nixos = {
+      # Enable uinput hardware support.
+      # This loads the kernel module and sets up the necessary udev rule.
+      hardware.uinput.enable = true;
 
       services.kanata = {
         enable = true;
-        package = pkgs.kanata;
-        keyboards.fts-kanata = {
-          configFile = ./kanata.kbd;
-          extraArgs = [ ];
+        keyboards.default = {
           devices = [
-            "/dev/input/by-path/pci-0000:0e:00.0-usb-0:5.1.1.2.1:1.0-event-kbd"  # Keychron K2 HE
-            "/dev/input/by-path/pci-0000:0e:00.0-usb-0:5.2.4:1.2-event-kbd"       # Keychron Link
-            "/dev/input/by-path/pci-0000:0e:00.0-usb-0:5.1.1.1.3:1.0-event-kbd"  # Logitech USB Receiver (keyboard 1)
-            "/dev/input/by-path/pci-0000:0e:00.0-usb-0:5.2.2:1.2-event-kbd"      # Logitech USB Receiver (keyboard 2)
+            "/dev/input/by-id/usb-Keychron_Keychron_K2_HE-event-kbd"
+            "/dev/input/by-id/usb-Keychron_Keychron_Link-if02-event-kbd"
           ];
-          port = null;
-          extraDefCfg = "process-unmapped-keys yes";
+          configFile = ./kanata.kbd;
         };
-      };
-
-      # Add the Kanata service user to necessary groups for input devices
-      systemd.services.kanata-fts-kanata.serviceConfig = {
-        SupplementaryGroups = [
-          "input"
-          "uinput"
-        ];
       };
     };
 
-    darwin = { config, pkgs, lib, ... }:
-    {
+    darwin = {pkgs, ...}: {
       # Install Kanata package
-      environment.systemPackages = [ pkgs.kanata ];
+      environment.systemPackages = [pkgs.kanata];
 
       # Create launchd service for Kanata on Darwin
       launchd.user.agents.kanata = {
         serviceConfig = {
           ProgramArguments = [
             "${pkgs.kanata}/bin/kanata"
-            "--cfg" "${./kanata.kbd}"
+            "--cfg"
+            "${./kanata.kbd}"
           ];
 
           RunAtLoad = true;

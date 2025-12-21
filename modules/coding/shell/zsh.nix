@@ -1,13 +1,20 @@
 # Zsh shell aspect with custom configuration
-{
-  FTS, ... }:
-{
+{FTS, ...}: {
   FTS.coding._.shells._.zsh = {
     description = "Zsh shell with custom configuration and optimizations";
 
-    homeManager = { config, pkgs, lib, ... }: {
+    homeManager = {
+      config,
+      pkgs,
+      lib,
+      ...
+    }: {
       programs.zsh = {
         enable = true;
+        initExtra = ''
+          # Unbind Ctrl+l (default clear binding) to allow it to pass through to Zellij
+          bindkey -r '^L'
+        '';
       };
     };
   };

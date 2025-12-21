@@ -26,6 +26,133 @@
       _G.LazyVim = {}
     end
 
+    -- LazyVim.config (matching LazyVim's init.lua)
+    _G.LazyVim.config = {}
+    _G.LazyVim.config.version = "15.13.0"
+
+    -- Icons configuration (matching LazyVim.config.icons)
+    _G.LazyVim.config.icons = {
+      misc = {
+        dots = "󰇘",
+      },
+      ft = {
+        octo = " ",
+        gh = " ",
+        ["markdown.gh"] = " ",
+      },
+      dap = {
+        Stopped = { "󰁕 ", "DiagnosticWarn", "DapStoppedLine" },
+        Breakpoint = " ",
+        BreakpointCondition = " ",
+        BreakpointRejected = { " ", "DiagnosticError" },
+        LogPoint = ".>",
+      },
+      diagnostics = {
+        Error = " ",
+        Warn = " ",
+        Hint = " ",
+        Info = " ",
+      },
+      git = {
+        added = " ",
+        modified = " ",
+        removed = " ",
+      },
+      kinds = {
+        Array = " ",
+        Boolean = "󰨙 ",
+        Class = " ",
+        Codeium = "󰘦 ",
+        Color = " ",
+        Control = " ",
+        Collapsed = " ",
+        Constant = "󰏿 ",
+        Constructor = " ",
+        Copilot = " ",
+        Enum = " ",
+        EnumMember = " ",
+        Event = " ",
+        Field = " ",
+        File = " ",
+        Folder = " ",
+        Function = "󰊕 ",
+        Interface = " ",
+        Key = " ",
+        Keyword = " ",
+        Method = "󰊕 ",
+        Module = " ",
+        Namespace = "󰦮 ",
+        Null = " ",
+        Number = "󰎠 ",
+        Object = " ",
+        Operator = " ",
+        Package = " ",
+        Property = " ",
+        Reference = " ",
+        Snippet = "󱄽 ",
+        String = " ",
+        Struct = "󰆼 ",
+        Supermaven = " ",
+        TabNine = "󰏚 ",
+        Text = " ",
+        TypeParameter = " ",
+        Unit = " ",
+        Value = " ",
+        Variable = "󰀫 ",
+      },
+    }
+
+    -- Kind filter configuration (matching LazyVim.config.kind_filter)
+    _G.LazyVim.config.kind_filter = {
+      default = {
+        "Class",
+        "Constructor",
+        "Enum",
+        "Field",
+        "Function",
+        "Interface",
+        "Method",
+        "Module",
+        "Namespace",
+        "Package",
+        "Property",
+        "Struct",
+        "Trait",
+      },
+      markdown = false,
+      help = false,
+      lua = {
+        "Class",
+        "Constructor",
+        "Enum",
+        "Field",
+        "Function",
+        "Interface",
+        "Method",
+        "Module",
+        "Namespace",
+        "Property",
+        "Struct",
+        "Trait",
+      },
+    }
+
+    -- Get kind filter for a buffer (matching LazyVim.get_kind_filter)
+    function _G.LazyVim.get_kind_filter(buf)
+      buf = (buf == nil or buf == 0) and vim.api.nvim_get_current_buf() or buf
+      local ft = vim.bo[buf].filetype
+      if _G.LazyVim.config.kind_filter == false then
+        return
+      end
+      if _G.LazyVim.config.kind_filter[ft] == false then
+        return
+      end
+      if type(_G.LazyVim.config.kind_filter[ft]) == "table" then
+        return _G.LazyVim.config.kind_filter[ft]
+      end
+      return type(_G.LazyVim.config.kind_filter) == "table" and type(_G.LazyVim.config.kind_filter.default) == "table" and _G.LazyVim.config.kind_filter.default or nil
+    end
+
     -- Helper: normalize paths (replicates lazy.core.util.norm)
     -- Uses vim.fs.normalize which is the Neovim built-in
     function _G.LazyVim.norm(path)
@@ -348,6 +475,105 @@
           local color_name = colors[status()] or colors.ok
           local Snacks = require("snacks")
           return { fg = Snacks.util.color(color_name) }
+        end,
+      }
+    end
+
+    -- User commands (matching LazyVim's init.lua)
+    -- Note: LazyExtras and LazyHealth are less relevant in nvf since we use Nix for config,
+    -- but we add them for API compatibility
+    vim.api.nvim_create_user_command("LazyExtras", function()
+      vim.notify("LazyExtras is not available in nvf - use Nix configuration instead", vim.log.levels.INFO)
+    end, { desc = "Manage LazyVim extras (not available in nvf)" })
+
+    vim.api.nvim_create_user_command("LazyHealth", function()
+      vim.cmd([[checkhealth]])
+    end, { desc = "Run :checkhealth" })
+
+    -- LazyVim.format module (matching LazyVim's util.format)
+    _G.LazyVim.format = {}
+    
+    -- formatexpr function (matching LazyVim.format.formatexpr)
+    function _G.LazyVim.format.formatexpr()
+      -- Check for conform.nvim first (LazyVim's default formatter)
+      if pcall(require, "conform") then
+        return require("conform").formatexpr()
+      end
+      -- Fallback to LSP formatexpr
+      return vim.lsp.formatexpr({ timeout_ms = 3000 })
+    end
+
+    -- LazyVim.statuscolumn function (provided by snacks.statuscolumn)
+    -- snacks.statuscolumn provides Snacks.statuscolumn.get() which returns the statuscolumn string
+    -- This function is called by vim.opt.statuscolumn = [[%!v:lua.LazyVim.statuscolumn()]]
+    _G.LazyVim.statuscolumn = function()
+      -- Use snacks.statuscolumn.get() if available
+      if Snacks and Snacks.statuscolumn and Snacks.statuscolumn.get then
+        return Snacks.statuscolumn.get()
+      end
+      -- Fallback to empty string
+      return ""
+    end
+
+    -- LazyVim.cmp module (matching LazyVim's util.cmp)
+    _G.LazyVim.cmp = {}
+    _G.LazyVim.cmp.actions = {
+      -- Native Snippets
+      snippet_forward = function()
+        if vim.snippet.active({ direction = 1 }) then
+          vim.schedule(function()
+            vim.snippet.jump(1)
+          end)
+          return true
+        end
+      end,
+      snippet_stop = function()
+        if vim.snippet then
+          vim.snippet.stop()
+        end
+      end,
+    }
+
+    -- LazyVim.cmp.map function (matching LazyVim's util.cmp.map)
+    function _G.LazyVim.cmp.map(actions, fallback)
+      return function()
+        for _, name in ipairs(actions) do
+          if _G.LazyVim.cmp.actions[name] then
+            local ret = _G.LazyVim.cmp.actions[name]()
+            if ret then
+              return true
+            end
+          end
+        end
+        return type(fallback) == "function" and fallback() or fallback
+      end
+    end
+
+    -- LazyVim.lualine.cmp_source helper (for lualine integration)
+    function _G.LazyVim.lualine.cmp_source(name)
+      return {
+        function()
+          local blink = require("blink.cmp")
+          if blink and blink._config then
+            local sources = blink._config.sources or {}
+            local default = sources.default or {}
+            if vim.tbl_contains(default, name) then
+              return "󰘦 "
+            end
+          end
+          return ""
+        end,
+        cond = function()
+          local blink = require("blink.cmp")
+          if blink and blink._config then
+            local sources = blink._config.sources or {}
+            local default = sources.default or {}
+            return vim.tbl_contains(default, name)
+          end
+          return false
+        end,
+        color = function()
+          return { fg = Snacks.util.color("Special") }
         end,
       }
     end

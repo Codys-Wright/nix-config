@@ -8,9 +8,23 @@
     autoformat = true;
     # Snacks animations (enabled by default)
     snacks_animate = true;
+    # LSP servers to ignore when detecting root (matching LazyVim)
+    root_lsp_ignore = ["copilot"];
+    # LazyVim picker to use (not used in nvf, but set for compatibility)
+    lazyvim_picker = "auto";
+    # LazyVim completion engine (not used in nvf, but set for compatibility)
+    lazyvim_cmp = "auto";
+    # Use AI source in completion if available
+    ai_cmp = true;
+    # Hide deprecation warnings
+    deprecation_warnings = false;
+    # Show trouble symbols in lualine
+    trouble_lualine = true;
+    # Fix markdown indentation settings
+    markdown_recommended_style = 0;
   };
 
-  # LazyVim-style UI options (hide native statusline, etc.)
+  # LazyVim-style options (matching LazyVim's options.lua)
   options = {
     # Global statusline (required for lualine to work properly)
     laststatus = 3;
@@ -18,7 +32,124 @@
     ruler = false;
     # Don't show mode since we have a statusline
     showmode = false;
+    # Enable auto write
+    autowrite = true;
+    # Clipboard (handled separately via clipboard.enable, but set here for compatibility)
+    # Note: nvf's clipboard module handles SSH detection automatically
+    # completeopt = "menu,menuone,noselect" - handled by blink.cmp
+    # Conceal level (hide * markup for bold/italic)
+    conceallevel = 2;
+    # Confirm to save changes before exiting modified buffer
+    confirm = true;
+    # Enable highlighting of the current line
+    cursorline = true;
+    # Use spaces instead of tabs
+    expandtab = true;
+    # Folding
+    foldlevel = 99;
+    foldmethod = "indent";
+    foldtext = "";
+    # Format options
+    formatoptions = "jcroqlnt";
+    # Grep settings
+    grepformat = "%f:%l:%c:%m";
+    grepprg = "rg --vimgrep";
+    # Search settings
+    ignorecase = true;
+    smartcase = true;
+    # Preview incremental substitute
+    inccommand = "nosplit";
+    # Jump options
+    jumpoptions = "view";
+    # Wrap lines at convenient points
+    linebreak = true;
+    # Show some invisible characters (tabs...)
+    list = true;
+    # Enable mouse mode
+    mouse = "a";
+    # Line numbers
+    number = true;
+    relativenumber = true;
+    # Popup menu settings
+    pumblend = 10;
+    pumheight = 10;
+    # Scrolling
+    scrolloff = 4;
+    sidescrolloff = 8;
+    # Indentation
+    shiftround = true;
+    shiftwidth = 2;
+    smartindent = true;
+    tabstop = 2;
+    # Short messages
+    # Note: shortmess.append is handled via luaConfigRC since nvf doesn't support append directly
+    # signcolumn = "yes" - handled by gitsigns
+    # Smooth scrolling
+    smoothscroll = true;
+    # Split settings
+    splitbelow = true;
+    splitkeep = "screen";
+    splitright = true;
+    # Status column (handled by snacks.statuscolumn)
+    # statuscolumn = [[%!v:lua.LazyVim.statuscolumn()]] - set via snacks.statuscolumn
+    # True color support
+    termguicolors = true;
+    # Timeout length (lower for which-key)
+    timeoutlen = 300;
+    # Undo settings
+    undofile = true;
+    undolevels = 10000;
+    # Update time (for swap file and CursorHold)
+    updatetime = 200;
+    # Virtual edit (allow cursor to move where there is no text in visual block mode)
+    virtualedit = "block";
+    # Command-line completion mode
+    wildmode = "longest:full,full";
+    # Minimum window width
+    winminwidth = 5;
+    # Disable line wrap (default, can be toggled)
+    wrap = false;
   };
+
+  # Additional options that need special handling (via luaConfigRC)
+  luaConfigRC.lazyvim-options = ''
+    -- Set options that require special handling or appending
+    -- formatexpr (requires LazyVim.format.formatexpr function)
+    vim.opt.formatexpr = "v:lua.LazyVim.format.formatexpr()"
+
+    -- shortmess:append (nvf doesn't support append directly)
+    vim.opt.shortmess:append({ W = true, I = true, c = true, C = true })
+
+    -- fillchars (nvf doesn't support dict options directly)
+    vim.opt.fillchars = {
+      foldopen = "󰅀",
+      foldclose = "󰅂",
+      fold = " ",
+      foldsep = " ",
+      diff = "╱",
+      eob = " ",
+    }
+
+    -- sessionoptions (nvf doesn't support array options directly)
+    vim.opt.sessionoptions = { "buffers", "curdir", "tabpages", "winsize", "help", "globals", "skiprtp", "folds" }
+
+    -- spelllang (nvf doesn't support array options directly)
+    vim.opt.spelllang = { "en" }
+
+    -- statuscolumn (requires LazyVim.statuscolumn function)
+    -- Note: snacks.statuscolumn also sets this automatically, but we set it here for LazyVim compatibility
+    -- If snacks.statuscolumn is enabled, it will override this, which is fine
+    if _G.LazyVim and _G.LazyVim.statuscolumn then
+      vim.opt.statuscolumn = [[%!v:lua.LazyVim.statuscolumn()]]
+    end
+
+    -- Set mapleader and maplocalleader (matching LazyVim)
+    vim.g.mapleader = " "
+    vim.g.maplocalleader = "\\"
+
+    -- Set root_spec (matching LazyVim)
+    vim.g.root_spec = { "lsp", { ".git", "lua" }, "cwd" }
+  '';
 
   # Clipboard integration (LazyVim-style)
   # Sync with system clipboard unless in SSH (to allow OSC 52 integration)
@@ -64,32 +195,30 @@
       desc = "Up";
     }
     # Move to window using the <ctrl> hjkl keys
+    # Set basic window navigation keymaps directly (like LazyVim does)
+    # The smart navigation with terminal multiplexer integration is in luaConfigRC.window-navigation
     {
       key = "<C-h>";
       mode = "n";
       action = "<C-w>h";
-      noremap = false; # Allow remapping (LazyVim uses remap = true)
       desc = "Go to Left Window";
     }
     {
       key = "<C-j>";
       mode = "n";
       action = "<C-w>j";
-      noremap = false; # Allow remapping (LazyVim uses remap = true)
       desc = "Go to Lower Window";
     }
     {
       key = "<C-k>";
       mode = "n";
       action = "<C-w>k";
-      noremap = false; # Allow remapping (LazyVim uses remap = true)
       desc = "Go to Upper Window";
     }
     {
       key = "<C-l>";
       mode = "n";
       action = "<C-w>l";
-      noremap = false; # Allow remapping (LazyVim uses remap = true)
       desc = "Go to Right Window";
     }
     # Resize window using <ctrl> arrow keys
@@ -703,6 +832,131 @@
     })
   '';
 
+  # Window navigation keymaps with terminal multiplexer integration
+  # This ensures seamless navigation between Neovim windows and terminal multiplexer panes
+  # If there's no Neovim window in a direction, the key is passed to the multiplexer
+  #
+  # Set these keymaps on VeryLazy event to match LazyVim's timing
+  luaConfigRC.window-navigation = ''
+    -- Smart window navigation that passes keys to terminal multiplexer when no window exists
+    -- This matches the behavior of vim-tmux-navigator and similar plugins
+    local function navigate(direction)
+      local cur_win = vim.api.nvim_get_current_win()
+      local cur_win_nr = vim.fn.winnr()
+
+      -- Check if there's a window in this direction
+      -- winnr(direction) returns the window number in that direction, or 0 if none
+      local target_win_nr = vim.fn.winnr(direction)
+      local has_window = target_win_nr ~= 0 and target_win_nr ~= cur_win_nr
+
+      if not has_window then
+        -- No window in this direction, immediately pass to terminal
+        -- No window in this direction, try to pass to terminal multiplexer
+        -- First, check if we're in a snacks explorer or picker that might be blocking
+        local buf_type = vim.bo[cur_buf].buftype
+        local filetype = vim.bo[cur_buf].filetype
+
+        -- If we're in snacks explorer/picker, we should still try to navigate out
+        -- But we need to send the key to the terminal, not just feedkeys
+
+        -- Map direction to key sequence
+        local key_seq = direction == "h" and "h" or
+                        direction == "j" and "j" or
+                        direction == "k" and "k" or
+                        direction == "l" and "l" or nil
+
+        if key_seq then
+          -- Check for tmux
+          if vim.env.TMUX then
+            -- Send Ctrl+key to tmux
+            -- tmux expects the key in a specific format
+            local tmux_key = "C-" .. key_seq
+            local pane = vim.fn.expand("$TMUX_PANE")
+            if pane and pane ~= "" then
+              vim.fn.systemlist({"tmux", "send-keys", "-t", pane, tmux_key})
+            else
+              vim.fn.systemlist({"tmux", "send-keys", tmux_key})
+            end
+            return
+          end
+
+          -- Check for zellij
+          -- When in Zellij, send the key to the terminal so Zellij can handle navigation
+          if vim.env.ZELLIJ then
+            local term_key = vim.api.nvim_replace_termcodes("<C-" .. key_seq .. ">", true, false, true)
+            -- Use feedkeys to send the key - it should reach Zellij
+            vim.api.nvim_feedkeys(term_key, "n", false)
+            return
+          end
+
+          -- For opencode or other multiplexers, we need to send the key to the terminal
+          -- Since we can't directly send keys to the parent terminal from Neovim,
+          -- we need to use a workaround. The best approach is to use feedkeys with
+          -- 't' mode (terminal mode) which should pass the key to the terminal.
+          -- However, this only works if we're in a terminal buffer.
+          -- For normal buffers, we need to use a different method.
+
+          -- Try to use feedkeys with 't' mode first (for terminal buffers)
+          -- For non-terminal buffers, we'll use 'n' mode and hope the terminal catches it
+          local term_key = vim.api.nvim_replace_termcodes("<C-" .. key_seq .. ">", true, false, true)
+
+          -- Check if we're in a terminal buffer
+          if vim.bo[cur_buf].buftype == "terminal" then
+            -- In terminal buffer, use 't' mode to send to terminal
+            vim.api.nvim_feedkeys(term_key, "t", false)
+          else
+            -- For non-terminal buffers (like snacks explorer), we need a different approach
+            -- Use feedkeys with 'n' mode and let it propagate
+            -- The key should eventually reach the terminal if no window exists
+            vim.api.nvim_feedkeys(term_key, "n", false)
+          end
+        end
+        return
+      end
+
+      -- There is a window in this direction, navigate to it
+      vim.cmd("wincmd " .. direction)
+    end
+
+    -- Set up keymaps immediately (like LazyVim does)
+    -- First set basic window navigation keymaps directly
+    vim.keymap.set("n", "<C-h>", function() navigate("h") end, { desc = "Go to Left Window", remap = true, silent = true })
+    vim.keymap.set("n", "<C-j>", function() navigate("j") end, { desc = "Go to Lower Window", remap = true, silent = true })
+    vim.keymap.set("n", "<C-k>", function() navigate("k") end, { desc = "Go to Upper Window", remap = true, silent = true })
+    vim.keymap.set("n", "<C-l>", function() navigate("l") end, { desc = "Go to Right Window", remap = true, silent = true })
+
+    -- Also set them on VeryLazy event to override any plugin bindings that might conflict
+    vim.api.nvim_create_autocmd("User", {
+      pattern = "VeryLazy",
+      callback = function()
+        if Snacks and Snacks.keymap then
+          -- Check for lazy key handlers (like LazyVim's safe_keymap_set does)
+          local keys = require("lazy.core.handler").handlers.keys
+          local function should_set(lhs, mode)
+            if keys and keys.have and keys:have(lhs, mode) then
+              return false
+            end
+            return true
+          end
+
+          -- Set keymaps with smart navigation (override if needed)
+          if should_set("<C-h>", "n") then
+            Snacks.keymap.set("n", "<C-h>", function() navigate("h") end, { desc = "Go to Left Window", silent = true })
+          end
+          if should_set("<C-j>", "n") then
+            Snacks.keymap.set("n", "<C-j>", function() navigate("j") end, { desc = "Go to Lower Window", silent = true })
+          end
+          if should_set("<C-k>", "n") then
+            Snacks.keymap.set("n", "<C-k>", function() navigate("k") end, { desc = "Go to Upper Window", silent = true })
+          end
+          if should_set("<C-l>", "n") then
+            Snacks.keymap.set("n", "<C-l>", function() navigate("l") end, { desc = "Go to Right Window", silent = true })
+          end
+        end
+      end,
+    })
+  '';
+
   # TODO, FIXME, HACK, etc. comments highlighting and navigation
   notes = {
     todo-comments = {
@@ -756,4 +1010,196 @@
       };
     };
   };
+
+  # LazyVim-style autocommand groups
+  augroups = [
+    {
+      name = "lazyvim_checktime";
+      clear = true;
+    }
+    {
+      name = "lazyvim_highlight_yank";
+      clear = true;
+    }
+    {
+      name = "lazyvim_resize_splits";
+      clear = true;
+    }
+    {
+      name = "lazyvim_last_loc";
+      clear = true;
+    }
+    {
+      name = "lazyvim_close_with_q";
+      clear = true;
+    }
+    {
+      name = "lazyvim_man_unlisted";
+      clear = true;
+    }
+    {
+      name = "lazyvim_wrap_spell";
+      clear = true;
+    }
+    {
+      name = "lazyvim_json_conceal";
+      clear = true;
+    }
+    {
+      name = "lazyvim_auto_create_dir";
+      clear = true;
+    }
+  ];
+
+  # LazyVim-style autocommands
+  autocmds = [
+    # Check if we need to reload the file when it changed
+    {
+      event = ["FocusGained" "TermClose" "TermLeave"];
+      group = "lazyvim_checktime";
+      desc = "Check if file changed externally";
+      callback = lib.generators.mkLuaInline ''
+        function()
+          if vim.o.buftype ~= "nofile" then
+            vim.cmd("checktime")
+          end
+        end
+      '';
+    }
+    # Highlight on yank
+    {
+      event = ["TextYankPost"];
+      group = "lazyvim_highlight_yank";
+      desc = "Highlight yanked text";
+      callback = lib.generators.mkLuaInline ''
+        function()
+          (vim.hl or vim.highlight).on_yank()
+        end
+      '';
+    }
+    # Resize splits if window got resized
+    {
+      event = ["VimResized"];
+      group = "lazyvim_resize_splits";
+      desc = "Resize splits when window resized";
+      callback = lib.generators.mkLuaInline ''
+        function()
+          local current_tab = vim.fn.tabpagenr()
+          vim.cmd("tabdo wincmd =")
+          vim.cmd("tabnext " .. current_tab)
+        end
+      '';
+    }
+    # Go to last loc when opening a buffer
+    {
+      event = ["BufReadPost"];
+      group = "lazyvim_last_loc";
+      desc = "Go to last location when opening buffer";
+      callback = lib.generators.mkLuaInline ''
+        function(event)
+          local exclude = { "gitcommit" }
+          local buf = event.buf
+          if vim.tbl_contains(exclude, vim.bo[buf].filetype) or vim.b[buf].lazyvim_last_loc then
+            return
+          end
+          vim.b[buf].lazyvim_last_loc = true
+          local mark = vim.api.nvim_buf_get_mark(buf, '"')
+          local lcount = vim.api.nvim_buf_line_count(buf)
+          if mark[1] > 0 and mark[1] <= lcount then
+            pcall(vim.api.nvim_win_set_cursor, 0, mark)
+          end
+        end
+      '';
+    }
+    # Close some filetypes with <q>
+    {
+      event = ["FileType"];
+      pattern = [
+        "PlenaryTestPopup"
+        "checkhealth"
+        "dbout"
+        "gitsigns-blame"
+        "grug-far"
+        "help"
+        "lspinfo"
+        "neotest-output"
+        "neotest-output-panel"
+        "neotest-summary"
+        "notify"
+        "qf"
+        "spectre_panel"
+        "startuptime"
+        "tsplayground"
+      ];
+      group = "lazyvim_close_with_q";
+      desc = "Close buffer with q for specific filetypes";
+      callback = lib.generators.mkLuaInline ''
+        function(event)
+          vim.bo[event.buf].buflisted = false
+          vim.schedule(function()
+            vim.keymap.set("n", "q", function()
+              vim.cmd("close")
+              pcall(vim.api.nvim_buf_delete, event.buf, { force = true })
+            end, {
+              buffer = event.buf,
+              silent = true,
+              desc = "Quit buffer",
+            })
+          end)
+        end
+      '';
+    }
+    # Make it easier to close man-files when opened inline
+    {
+      event = ["FileType"];
+      pattern = ["man"];
+      group = "lazyvim_man_unlisted";
+      desc = "Unlist man buffers";
+      callback = lib.generators.mkLuaInline ''
+        function(event)
+          vim.bo[event.buf].buflisted = false
+        end
+      '';
+    }
+    # Wrap and check for spell in text filetypes
+    {
+      event = ["FileType"];
+      pattern = ["text" "plaintex" "typst" "gitcommit" "markdown"];
+      group = "lazyvim_wrap_spell";
+      desc = "Enable wrap and spell for text filetypes";
+      callback = lib.generators.mkLuaInline ''
+        function()
+          vim.opt_local.wrap = true
+          vim.opt_local.spell = true
+        end
+      '';
+    }
+    # Fix conceallevel for json files
+    {
+      event = ["FileType"];
+      pattern = ["json" "jsonc" "json5"];
+      group = "lazyvim_json_conceal";
+      desc = "Disable conceal for json files";
+      callback = lib.generators.mkLuaInline ''
+        function()
+          vim.opt_local.conceallevel = 0
+        end
+      '';
+    }
+    # Auto create dir when saving a file
+    {
+      event = ["BufWritePre"];
+      group = "lazyvim_auto_create_dir";
+      desc = "Auto create directory when saving file";
+      callback = lib.generators.mkLuaInline ''
+        function(event)
+          if event.match:match("^%w%w+:[\\/][\\/]") then
+            return
+          end
+          local file = vim.uv.fs_realpath(event.match) or event.match
+          vim.fn.mkdir(vim.fn.fnamemodify(file, ":p:h"), "p")
+        end
+      '';
+    }
+  ];
 }
