@@ -109,6 +109,8 @@
             config.vim.extraPlugins.menu.package = pkgs.vimPlugins.nvzone-menu;
             config.vim.extraPlugins.showkeys.package = pkgs.vimPlugins.showkeys;
             config.vim.extraPlugins.timerly.package = pkgs.vimPlugins.timerly;
+            # sidekick (Sidekick for next edit suggestions)
+            config.vim.extraPlugins.sidekick.package = pkgs.vimPlugins.sidekick-nvim;
             # lzn-auto-require (required by nvchad-ui for optional module loading)
             config.vim.extraPlugins.lzn-auto-require.package = pkgs.vimPlugins.lzn-auto-require;
             # friendly-snippets (snippet collection for mini.snippets and blink.cmp)
@@ -195,6 +197,7 @@
         pkgs.lazygit # Required for Snacks.lazygit integration
         pkgs.gh # Required for Snacks.gh (GitHub CLI) integration
         pkgs.git # Required for git operations
+        pkgs.zellij # Required for sidekick.nvim CLI mux backend
       ];
     };
   in
@@ -222,9 +225,15 @@ in {
   # Expose nvf as a standalone wrapped package using nvf.lib.neovimConfiguration
   # This builds the configuration from all sub-modules and wraps it
   # Usage: nix run .#nvf or nix build .#nvf
-  perSystem = {pkgs, ...}: let
-    # Use the shared function to build the wrapped neovim package
-    wrappedNeovim = buildWrappedNeovim {inherit pkgs lib;};
+  perSystem = {pkgs, system, ...}: let
+    # Import nixpkgs with allowUnfree enabled for sidekick and other unfree packages
+    # Use inputs from module scope (not perSystem parameters)
+    pkgsUnfree = import inputs.nixpkgs {
+      inherit system;
+      config.allowUnfree = true;
+    };
+    # Use the shared function to build the wrapped neovim package with unfree-enabled pkgs
+    wrappedNeovim = buildWrappedNeovim {pkgs = pkgsUnfree; inherit lib;};
   in {
     packages.nvf = wrappedNeovim;
 
