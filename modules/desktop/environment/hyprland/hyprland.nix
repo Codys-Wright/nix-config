@@ -1,15 +1,11 @@
-# Hyprland Window Manager
-# Provides NixOS configuration for Hyprland Wayland compositor
-# Note: Display manager should be configured separately (e.g., FTS.sddm.wayland)
-{
-  den,
-  FTS,
-  ...
-}:
-{
-  # Base Hyprland window manager
-  FTS.hyprland = {
-    description = "Hyprland Wayland compositor";
+# Hyprland environment aggregator
+{FTS, ...}: {
+  FTS.desktop._.environment._.hyprland = {
+    description = "Hyprland desktop environment, including core and keybinds";
+
+    includes = [
+      FTS.desktop._.environment._.hyprland._.core
+    ];
 
     nixos = {
       # Enable Hyprland
@@ -19,4 +15,3 @@
     };
   };
 }
-

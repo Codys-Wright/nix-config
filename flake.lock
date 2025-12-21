@@ -288,6 +288,22 @@
         "url": "https://git.lix.systems/lix-project/flake-compat.git"
       }
     },
+    "flake-compat_2": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1747046372,
+        "narHash": "sha256-CIVLLkVgvHYbgI2UpXvIIBJ12HWgX+fjA8Xf8PUmqCY=",
+        "owner": "edolstra",
+        "repo": "flake-compat",
+        "rev": "9100a0f413b0c601e0533d1d94ffd501ce2e7885",
+        "type": "github"
+      },
+      "original": {
+        "owner": "edolstra",
+        "repo": "flake-compat",
+        "type": "github"
+      }
+    },
     "flake-file": {
       "locked": {
         "lastModified": 1763763269,
@@ -404,6 +420,24 @@
     "flake-utils_3": {
       "inputs": {
         "systems": "systems_5"
+      },
+      "locked": {
+        "lastModified": 1731533236,
+        "narHash": "sha256-l0KFg5HjrsfsO/JpG+r7fRrqm12kzFHyUHqHCVpMMbI=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "11707dc2f618dd54ca8739b309ec4fc024de578b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    },
+    "flake-utils_4": {
+      "inputs": {
+        "systems": "systems_8"
       },
       "locked": {
         "lastModified": 1731533236,
@@ -598,6 +632,22 @@
       "original": {
         "owner": "Gerg-L",
         "repo": "mnw",
+        "type": "github"
+      }
+    },
+    "multitask": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1754699152,
+        "narHash": "sha256-tvxp2xf/KC7Ep3rfFrTQ2Ifh6MErw5dkQI3ZDNjMS/w=",
+        "owner": "imsnif",
+        "repo": "multitask",
+        "rev": "acba08810ae8bac60f156361078cef0b5cff0453",
+        "type": "github"
+      },
+      "original": {
+        "owner": "imsnif",
+        "repo": "multitask",
         "type": "github"
       }
     },
@@ -854,6 +904,22 @@
         "type": "github"
       }
     },
+    "nixpkgs_14": {
+      "locked": {
+        "lastModified": 1766070988,
+        "narHash": "sha256-G/WVghka6c4bAzMhTwT2vjLccg/awmHkdKSd2JrycLc=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "c6245e83d836d0433170a16eb185cefe0572f8b8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "nixpkgs_2": {
       "locked": {
         "lastModified": 1757745802,
@@ -1095,6 +1161,7 @@
         "stylix": "stylix",
         "systems": "systems_7",
         "wrappers": "wrappers",
+        "zellij-nix": "zellij-nix",
         "zen-browser": "zen-browser"
       }
     },
@@ -1110,6 +1177,27 @@
         "owner": "oxalica",
         "repo": "rust-overlay",
         "rev": "4f53a635709d82652567f51ef7af4365fbc0c88b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "type": "github"
+      }
+    },
+    "rust-overlay_2": {
+      "inputs": {
+        "nixpkgs": [
+          "zellij-nix",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1766285238,
+        "narHash": "sha256-DqVXFZ4ToiFHgnxebMWVL70W+U+JOxpmfD37eWD/Qc8=",
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "rev": "c4249d0c370d573d95e33b472014eae4f2507c2f",
         "type": "github"
       },
       "original": {
@@ -1378,6 +1466,21 @@
         "type": "github"
       }
     },
+    "systems_8": {
+      "locked": {
+        "lastModified": 1681028828,
+        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
+        "owner": "nix-systems",
+        "repo": "default",
+        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default",
+        "type": "github"
+      }
+    },
     "tinted-foot": {
       "flake": false,
       "locked": {
@@ -1495,6 +1598,45 @@
       "original": {
         "owner": "lassulus",
         "repo": "wrappers",
+        "type": "github"
+      }
+    },
+    "zellij": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1758795277,
+        "narHash": "sha256-DMPe295KWTmVpB/lveatcuFVjUpKUhBcs4DCRL4HHfs=",
+        "owner": "zellij-org",
+        "repo": "zellij",
+        "rev": "bfbc7cd2af8bd13c81b87eb36f363ee406738db6",
+        "type": "github"
+      },
+      "original": {
+        "owner": "zellij-org",
+        "repo": "zellij",
+        "type": "github"
+      }
+    },
+    "zellij-nix": {
+      "inputs": {
+        "flake-compat": "flake-compat_2",
+        "flake-utils": "flake-utils_4",
+        "multitask": "multitask",
+        "nixpkgs": "nixpkgs_14",
+        "rust-overlay": "rust-overlay_2",
+        "zellij": "zellij"
+      },
+      "locked": {
+        "lastModified": 1766301573,
+        "narHash": "sha256-j51oGtdsdKNwqToF2mFKLh2QqORtesWq/+Uty0KKjC4=",
+        "owner": "a-kenji",
+        "repo": "zellij-nix",
+        "rev": "3b8fe60fa10274d41375c07e6951dcbf5829b753",
+        "type": "github"
+      },
+      "original": {
+        "owner": "a-kenji",
+        "repo": "zellij-nix",
         "type": "github"
       }
     },
