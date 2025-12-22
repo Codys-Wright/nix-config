@@ -5,10 +5,10 @@
 }:
 {
   FTS.coding._.tools = {
-    description = "All development tools - docker, git, lazygit, opencode, dev-tools";
-    
+    description = "All development tools - containers, git, lazygit, opencode, dev-tools";
+
     includes = [
-      FTS.coding._.tools._.docker
+      FTS.coding._.tools._.containers._.podman
       FTS.coding._.tools._.git
       FTS.coding._.tools._.lazygit
       FTS.coding._.tools._.opencode
