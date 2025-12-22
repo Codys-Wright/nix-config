@@ -115,6 +115,8 @@
             config.vim.extraPlugins.lzn-auto-require.package = pkgs.vimPlugins.lzn-auto-require;
             # friendly-snippets (snippet collection for mini.snippets and blink.cmp)
             config.vim.extraPlugins.friendly-snippets.package = pkgs.vimPlugins.friendly-snippets;
+            # vtsls (TypeScript language server wrapper)
+            config.vim.extraPlugins.vtsls.package = pkgs.vimPlugins.nvim-vtsls;
             # Base46 theming plugin (required by nvchad-ui)
             # Setup function loads theme immediately when base46 loads (before UI renders)
             # This prevents flash of wrong theme on startup
@@ -198,6 +200,7 @@
         pkgs.gh # Required for Snacks.gh (GitHub CLI) integration
         pkgs.git # Required for git operations
         pkgs.zellij # Required for sidekick.nvim CLI mux backend
+        pkgs.vtsls # TypeScript language server
       ];
     };
   in
