@@ -7,6 +7,7 @@
 
     includes = [
       FTS.kanata
+      FTS.karabiner-elements
     ];
     
   };
