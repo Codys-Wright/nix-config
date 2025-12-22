@@ -1,7 +1,5 @@
 # Podman container tools aspect
-{
-  FTS, ... }:
-{
+{FTS, ...}: {
   FTS.coding._.tools._.containers._.podman = {
     description = "Podman container tools with Docker compatibility";
 
@@ -29,12 +27,15 @@
       '';
     };
 
-    homeManager =
-      { pkgs, lib, ... }:
-      {
-        home.packages = with pkgs; [
-          lazydocker
-        ];
-      };
+    homeManager = {
+      pkgs,
+      lib,
+      ...
+    }: {
+      home.packages = with pkgs; [
+        lazydocker
+      ];
+    };
   };
 }
+
