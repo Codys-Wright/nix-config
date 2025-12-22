@@ -60,6 +60,7 @@
         home.file.".config/zed".source = dotsLink "config/zed";
         home.file.".config/wezterm".source = dotsLink "config/wezterm";
         home.file.".config/ghostty".source = dotsLink "config/ghostty";
+        home.file.".config/btca/btca.json".source = dotsLink "config/btca/btca.json";
 
         home.file.".config/Code/User/settings.json".source = dotsLink "config/Code/User/settings.json";
         home.file.".config/Code/User/keybindings.json".source =
