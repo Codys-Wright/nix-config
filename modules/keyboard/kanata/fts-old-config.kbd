@@ -1,0 +1,225 @@
+
+;; FTS Kanata Configuration for Custom Keyboard Layout
+;; Updated for new keyboard with additional keys
+
+(defcfg
+  ;; Process all keys through kanata
+  process-unmapped-keys yes
+)
+
+
+
+;; Define keyboard keys in logical categories
+(defsrc
+  ;; Function keys
+  esc   f1    f2    f3    f4    f5    f6    f7    f8    f9    f10   f11   f12   prtsc del
+  
+  ;; Number row
+  grv   1     2     3     4     5     6     7     8     9     0     -     =     bspc  pgup
+  
+  ;; QWERTY row
+  tab   q     w     e     r     t     y     u     i     o     p     [     ]     \     pgdn
+  
+  ;; ASDF row
+  caps  a     s     d     f     g     h     j     k     l     ;     '     ret   home
+  
+  ;; ZXCV row
+  lsft  z     x     c     v     b     n     m     ,     .     /     rsft  up    end
+  
+  ;; Modifier row
+  lctl  lalt  lmet  spc   rmet  rctl  left  down  right
+)
+
+(defvar
+  tap-time 200
+  tap-time-slow 300
+  tap-time-fast 150
+  hold-time 200
+  hold-time-slow 300
+  hold-time-fast 150
+
+  caps-tap-time 200
+  caps-hold-time 200
+  space-tap-time 500
+  space-hold-time 400
+
+  ;; Keys that should trigger control when pressed with caps
+  caps-mod-keys (
+    a s d f g h j k l ;
+    q w e r t y u i o p [ ] \
+    1 2 3 4 5 6 7 8 9 0 - =
+    z x c v b n m , . /
+  )
+
+  left-hand-keys (
+    q w e r t
+    a s d f g
+    z x c v b
+  )
+  right-hand-keys (
+    y u i o p
+    h j k l ;
+    n m , . /
+  )
+)
+
+(deffakekeys
+  to-base (layer-switch base)
+)
+
+(defalias
+  to-base (layer-switch base)
+  to-nohrm (layer-switch nohrm)
+  grv_key (tap-dance 200 
+    ((tap-hold-press $tap-time $hold-time grv grv)  ;; single tap/hold: normal
+     (fork (multi @to-nohrm) (tap-hold-press $tap-time $hold-time grv grv) (rsft))  ;; single tap with right shift: switch to nohrm
+     (fork (multi @to-base) (tap-hold-press $tap-time $hold-time grv grv) (rsft))))  ;; single tap with right shift: switch back to base
+  rmet_key (one-shot-press 500 (layer-while-held symbols))
+  caps_key (multi esc)
+  meh (multi lsft lctl lalt)
+  space_key spc
+
+  tap (multi
+    (layer-switch nomods)
+    (on-idle-fakekey to-base tap 80)
+  )
+  
+  ;; Magic shift functionality
+  ;; tap: one-shot shift, double-tap: caps-word, hold: shift
+  magic_lshift (tap-dance 200 ((one-shot 500 lsft) (caps-word-toggle 2000)))
+  magic_rshift (tap-dance 200 ((one-shot 500 lsft) (caps-word-toggle 2000)))
+
+  ;; Homerow modifier chords
+  a (chord homerow a)
+  s (chord homerow s)
+  d (chord homerow d)
+  f (chord homerow f)
+  j (chord homerow j)
+  k (chord homerow k)
+  l (chord homerow l)
+  ; (chord homerow ;)
+)
+
+(defchords homerow 10
+  ;; Left hand single key presses
+  (a      ) (tap-hold-release-keys $tap-time $hold-time (multi a @tap) lmet $left-hand-keys)
+  (   s   ) (tap-hold-release-keys $tap-time $hold-time (multi s @tap) lalt $left-hand-keys)
+  (      d) (tap-hold-release-keys $tap-time $hold-time (multi d @tap) lctl $left-hand-keys)
+  (      f) (tap-hold-release-keys $tap-time-fast $hold-time (multi f @tap) lsft $left-hand-keys)
+
+  ;; Right hand single key presses
+  (        j) (tap-hold-release-keys $tap-time-fast $hold-time-fast (multi j @tap) rsft $right-hand-keys)
+  (         k) (tap-hold-release-keys $tap-time $hold-time (multi k @tap) rctl $right-hand-keys)
+  (         l) (tap-hold-release-keys $tap-time $hold-time (multi l @tap) ralt $right-hand-keys)
+  (         ;) (tap-hold-release-keys $tap-time-fast $hold-time-fast (multi ; @tap) rmet $right-hand-keys)
+
+  ;; Left hand two-key chords
+  (a s    ) (multi lmet lalt)
+  (a   d  ) (multi lmet lctl)
+  (a     f) (multi lmet lsft)
+  (   s d ) (multi lalt lctl)
+  (   s  f) (multi lalt lsft)
+  (     d f) (multi lctl lsft)
+
+  ;; Right hand two-key chords
+  (         j k) (multi rsft rctl)
+  (         j l) (multi rsft ralt)
+  (         j ;) (multi rsft rmet)
+  (         k l) (multi rctl ralt)
+  (         k ;) (multi rctl rmet)
+  (         l ;) (multi ralt rmet)
+
+  ;; Left hand three-key chords
+  (a s d  ) (multi lmet lalt lctl)
+  (a s  f ) (multi lmet lalt lsft)
+  (a  d f ) (multi lmet lctl lsft)
+  (  s d f) (multi lalt lctl lsft)
+
+  ;; Right hand three-key chords
+  (         j k l) (multi rsft rctl ralt)
+  (         j k ;) (multi rsft rctl rmet)
+  (         j l ;) (multi rsft ralt rmet)
+  (         k l ;) (multi rctl ralt rmet)
+
+  ;; Left hand four-key chord
+  (a s d f) (multi lmet lalt lctl lsft)
+
+  ;; Right hand four-key chord
+  (         j k l ;) (multi rsft rctl ralt rmet)
+)
+
+;; Default layer - passthrough all keys
+(deflayer base
+  esc   f1    f2    f3    f4    f5    f6    f7    f8    f9    f10   f11   f12   prtsc del
+  @grv_key 1    2    3    4    5    6    7    8    9    0    -    =    bspc  pgup
+  tab  q    w    e    r    t    y    u    i    o    p    [    ]    \    pgdn
+  @caps_key @a    @s    @d    @f    g    h    @j    @k    @l    @;    '    ret   home
+  @magic_lshift z    x    c    v    b    n    m    ,    .    /    @magic_rshift up    end
+  lctl lalt lmet @space_key @rmet_key rctl left  down  right
+)
+
+;; Symbol layer - activated by holding right command
+(deflayer symbols
+  ;; Function keys - passthrough
+  _     _     _     _     _     _     _     _     _     _     _     _     _     _     _    
+  
+  ;; Number row - symbols and numbers
+  _     [     S-9   S-0   ]     .     S-5   S-6   S-7   S-8   S-9   S-0   S--   S-=   _
+  
+  ;; QWERTY row - symbols and punctuation
+  S-1   ,     S-[   S-]   ;     S-/   _     _     _     _     _     _     _     _     _
+  
+  ;; ASDF row - symbols and punctuation
+  S-3   S-6   =     S--   S-4   S-8   _     '     S-'   S-=   S-;   S-;   S-'   _
+  
+  ;; ZXCV row - symbols and punctuation
+  S-`   S-,   S-\   -     S-.   \     S-5   S-;   S-7    S-,   S-.   S-/   _     _
+  
+  ;; Modifier row - passthrough
+  _     _     _     _     _     S-3   _     _     _     
+)
+
+
+(deflayer nomods
+  ;; Function keys - passthrough
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  
+  ;; Number row - passthrough
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  
+  ;; QWERTY row - passthrough
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  
+  ;; ASDF row - homerow mods disabled
+  @caps_key    a    s    d    f    g    h    j    k    l    ;    '    ret   home
+  
+  ;; ZXCV row - passthrough
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  
+  ;; Modifier row - right command for symbols
+  _    _    _    _    _    @rmet_key _    _    _
+)
+
+
+
+;; Layer without home row mods
+(deflayer nohrm
+  ;; Function keys - passthrough
+  esc   f1    f2    f3    f4    f5    f6    f7    f8    f9    f10   f11   f12   prtsc del
+  
+  ;; Number row - with grave key special
+  @grv_key 1    2    3    4    5    6    7    8    9    0    -    =    bspc  pgup
+  
+  ;; QWERTY row - passthrough
+  tab  q    w    e    r    t    y    u    i    o    p    [    ]    \    pgdn
+  
+  ;; ASDF row - homerow mods disabled
+  @caps_key a    s    d    f    g    h    j    k    l    ;    '    ret   home
+  
+  ;; ZXCV row - with magic shift
+  @magic_lshift z    x    c    v    b    n    m    ,    .    /    @magic_rshift up    end
+  
+  ;; Modifier row - with space key special
+  lctl lalt lmet @space_key @rmet_key rctl left  down  right
+)
+

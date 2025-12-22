@@ -164,5 +164,39 @@
   m '
   , (chord fbr ,)
   . (chord fbr .)
-  / (t! charmod \ lctl)
+   / (t! charmod \ lctl)
+)
+
+(deflayermap (symbols)
+  q !
+  w ,
+  e {
+  r }
+  t :
+  y ?
+  u _
+  i _
+  o _
+  p _
+  a #
+  s ^
+  d =
+  f _
+  g $
+  h *
+  j _
+  k '
+  l "
+  ; +
+  z ~
+  x <
+  c |
+  v -
+  b >
+  n \
+  m %
+  , :
+  . '
+  / ?
+  spc #
 )
