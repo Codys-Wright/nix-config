@@ -1,9 +1,5 @@
 # Hardware facet - All hardware support
-{
-  FTS,
-  ...
-}:
-{
+{FTS, ...}: {
   FTS.hardware = {
     description = "All hardware support - facter, audio, bluetooth, cuda, networking, nvidia";
 
@@ -14,6 +10,7 @@
       FTS.hardware._.cuda
       FTS.hardware._.networking
       FTS.hardware._.nvidia
+      FTS.hardware._.storage
     ];
   };
 }

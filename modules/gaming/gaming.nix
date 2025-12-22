@@ -4,11 +4,10 @@
   lib,
   pkgs,
   ...
-}:
-{
+}: {
   FTS.apps._.gaming = {
     description = "All gaming platforms and tools - steam, minecraft, lutris, proton";
-    
+
     includes = [
       FTS.apps._.gaming._.steam
       FTS.apps._.gaming._.minecraft
@@ -17,4 +16,3 @@
     ];
   };
 }
-
