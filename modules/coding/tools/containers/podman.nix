@@ -22,7 +22,11 @@
       environment.systemPackages = with pkgs; [
         docker-compose
         podman-compose
+        podman-tui
       ];
+
+      # Create podman group for rootless container access
+      users.groups.podman = {};
     };
 
     homeManager = {
@@ -50,4 +54,3 @@
     };
   };
 }
-
