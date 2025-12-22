@@ -1,9 +1,5 @@
 # CLI tools facet - All command-line tools
-{
-  FTS,
-  ...
-}:
-{
+{FTS, ...}: {
   FTS.coding._.cli = {
     description = "All CLI development tools - atuin, btop, direnv, eza, fzf, just, sesh, yazi, zoxide";
 
@@ -20,30 +16,28 @@
     ];
 
     # NixOS system packages
-    nixos =
-      { pkgs, ... }:
-      {
-        environment.systemPackages = with pkgs; [
-          gcc
-          ripgrep
-          openssl
-          openssl.dev
-          openssl_3
-          dioxus-cli
-        ];
-      };
+    nixos = {pkgs, ...}: {
+      environment.systemPackages = with pkgs; [
+        gcc
+        ripgrep
+        openssl
+        openssl.dev
+        openssl_3
+        dioxus-cli
+        bat
+      ];
+    };
 
     # Darwin system packages
-    darwin =
-      { pkgs, ... }:
-      {
-        environment.systemPackages = with pkgs; [
-          ripgrep
-          openssl
-          openssl.dev
-          dioxus-cli
-          # gcc is available via Xcode Command Line Tools on macOS
-        ];
-      };
+    darwin = {pkgs, ...}: {
+      environment.systemPackages = with pkgs; [
+        ripgrep
+        bat
+        openssl
+        openssl.dev
+        dioxus-cli
+        # gcc is available via Xcode Command Line Tools on macOS
+      ];
+    };
   };
 }
