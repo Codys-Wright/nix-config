@@ -1,6 +1,6 @@
 # Podman container tools aspect
 {FTS, ...}: {
-  FTS.coding._.tools._.containers._.podman = {
+  FTS.coding._.tools._.containers._.podman = {user, ...}: {
     description = "Podman container tools with Docker compatibility";
 
     nixos = {pkgs, ...}: {
@@ -27,6 +27,9 @@
 
       # Create podman group for rootless container access
       users.groups.podman = {};
+
+      # Add user to podman group for rootless container access
+      users.users.${user.userName}.extraGroups = [ "podman" ];
     };
 
     homeManager = {
