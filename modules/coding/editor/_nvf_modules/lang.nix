@@ -34,7 +34,14 @@
 
     # Common languages (enabled in nvf's maximal config)
     # Web development
-    ts.enable = true; # TypeScript/JavaScript
+    ts = {
+      enable = true; # TypeScript/JavaScript
+      # Use vtsls instead of tsserver (default)
+      lsp = {
+        enable = true;
+        servers = ["vtsls"];
+      };
+    };
     html = {
       enable = true;
       # Enable HTML autotag (auto-close/rename HTML/JSX tags) - LazyVim uses nvim-ts-autotag
