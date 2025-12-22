@@ -6,7 +6,6 @@
       extraGroups = [
         "wheel"
         "networkmanager"
-        "podman"
       ];
       initialPassword = "password";
       description = user.userName;
