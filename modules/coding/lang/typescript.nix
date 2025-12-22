@@ -1,57 +1,56 @@
 # TypeScript development environment aspect
-{
-FTS, ... }:
-{
+{FTS, ...}: {
   FTS.coding._.lang._.typescript = {
     description = "TypeScript and Node.js development environment";
 
-    homeManager =
-      { pkgs, lib, ... }:
-      {
+    homeManager = {
+      pkgs,
+      lib,
+      ...
+    }: {
+      home = {
+        packages = with pkgs; [
+          # Node.js and package managers
+          nodejs_24
+          pnpm
+          yarn
 
-        home = {
+          # TypeScript core
+          typescript
+          typescript-language-server
+          # Note: ts-node was removed - NodeJS 22.6.0+ has built-in TypeScript support
+          tsx
 
-          packages = with pkgs; [
-            # Node.js and package managers
-            nodejs_24
-            pnpm
-            yarn
+          # Essential development tools
+          nodePackages.eslint
+          nodePackages.prettier
+          nodePackages.webpack-cli
 
-            # TypeScript core
-            typescript
-            typescript-language-server
-            # Note: ts-node was removed - NodeJS 22.6.0+ has built-in TypeScript support
-            tsx
+          # Build tools
+          esbuild
+          turbo
 
-            # Essential development tools
-            nodePackages.eslint
-            nodePackages.prettier
-            nodePackages.webpack-cli
+          # Linting and formatting
+          nodePackages.eslint_d
+          nodePackages.stylelint
 
-            # Build tools
-            esbuild
-            turbo
+          bun
 
-            # Linting and formatting
-            nodePackages.eslint_d
-            nodePackages.stylelint
+          # Development servers
+          # Note: live-server was removed - use alternatives like 'serve' or 'http-server'
+        ];
 
-            # Development servers
-            # Note: live-server was removed - use alternatives like 'serve' or 'http-server'
-          ];
-
-          # Configure pnpm and npm
-          sessionVariables = {
-            PNPM_HOME = "$HOME/.local/share/pnpm";
-            NPM_CONFIG_PREFIX = "$HOME/.npm-global";
-          };
-
-          sessionPath = [
-            "$HOME/.local/share/pnpm"
-            "$HOME/.npm-global/bin"
-          ];
+        # Configure pnpm and npm
+        sessionVariables = {
+          PNPM_HOME = "$HOME/.local/share/pnpm";
+          NPM_CONFIG_PREFIX = "$HOME/.npm-global";
         };
+
+        sessionPath = [
+          "$HOME/.local/share/pnpm"
+          "$HOME/.npm-global/bin"
+        ];
       };
+    };
   };
 }
-
