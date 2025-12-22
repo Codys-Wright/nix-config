@@ -1,13 +1,18 @@
 (defcfg
 ;; You can set the value below to no if you only use the keys defined in defsrc.
   process-unmapped-keys yes
+  macos-dev-names-include (
+    "Karabiner DriverKit VirtualHIDKeyboard 1.8.0"
+  )
 )
 
 (defsrc
-  q w e r t y u i o p
-  a s d f g h j k l ;
-  z x c v b n m , . /
+  tab q w e r t y u i o p
+  caps a s d f g h j k l ;
+  lsft z x c v b n m , . /
+  1 2 3 4 5 6 7 8 9 0
          spc
+  rmet
 )
 
 (defvar
@@ -69,7 +74,8 @@
   k (t! charmod k lctl)
   l (t! charmod l lalt)
   ; (t! charmod ; rmet)
-  z (t! charmod z lctl) 
+   lsft lsft
+   z (t! charmod z lctl)
   x (chord mbl x)
   c (chord mbl c)
   v (t! charmod v (layer-while-held fumbol))
@@ -77,7 +83,19 @@
   , (chord mbr ,)
   . (chord mbr .)
   / (t! charmod / rctl)
-  spc (t! charmod spc (multi (layer-switch extend) (on-release tap-virtualkey clear)))
+   spc (t! charmod spc (multi (layer-switch extend) (on-release tap-virtualkey clear)))
+   rmet (layer-while-held symbols)
+   caps esc
+   1 1
+   2 2
+   3 3
+   4 4
+   5 5
+   6 6
+   7 7
+   8 8
+   9 9
+   0 0
 )
 
 (deflayermap (extend)
@@ -168,35 +186,48 @@
 )
 
 (deflayermap (symbols)
-  q !
-  w ,
-  e {
-  r }
-  t :
-  y ?
+  tab S-1
+  q ,
+  w S-[
+  e S-]
+  r ;
+  t S-/
+  y _
   u _
   i _
   o _
   p _
-  a #
-  s ^
-  d =
-  f _
-  g $
-  h *
+  caps S-3
+  a S-6
+  s =
+  d S--
+  f S-4
+  g S-8
+  h _
   j _
   k '
-  l "
-  ; +
-  z ~
-  x <
-  c |
+  l S-'
+  ; S-=
+  lsft _
+  z S-`
+  x S-,
+  c S-\
   v -
-  b >
+  b S-.
   n \
-  m %
-  , :
-  . '
-  / ?
-  spc #
+  m S-5
+  , S-;
+  . S-7
+  / S-,
+  1 [
+  2 S-9
+  3 S-0
+  4 ]
+  5 .
+  6 S-5
+  7 S-6
+  8 S-7
+  9 S-8
+  0 S-9
+  spc S-3
 )

@@ -8,9 +8,10 @@
 
     darwin = {pkgs, ...}: {
       environment.systemPackages = [
-        pkgs.karabiner-elements
+        #Currently brokem, doesn't enable the right things, install manually for now
+        # pkgs.karabiner-elements
+        # pkgs.karabiner-dk
       ];
     };
   };
 }
-
