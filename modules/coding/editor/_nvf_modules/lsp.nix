@@ -144,32 +144,6 @@
           implementation = "prefer_rust";
           # Prioritize snippets over other sources
           # Custom sort function that gives snippets highest priority
-          sorts = lib.generators.mkLuaInline ''
-            {
-              function(a, b)
-                -- Define source priorities (higher number = higher priority)
-                local source_priority = {
-                  snippets = 4,
-                  lsp = 3,
-                  path = 2,
-                  buffer = 1,
-                }
-                local a_priority = source_priority[a.source_id] or 0
-                local b_priority = source_priority[b.source_id] or 0
-                -- If priorities differ, sort by priority
-                if a_priority ~= b_priority then
-                  return a_priority > b_priority
-                end
-                -- Otherwise use default sorting (score, then sort_text)
-                if a.score ~= b.score then
-                  return a.score > b.score
-                end
-                return (a.sort_text or "") < (b.sort_text or "")
-              end,
-              "score",
-              "sort_text",
-            }
-          '';
         };
         sources = {
           # Put snippets first in the list to prioritize them
