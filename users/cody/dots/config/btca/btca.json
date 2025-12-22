@@ -28,7 +28,7 @@
     },
     {
       "name": "effect",
-      "url": "https://github.com/Effect-TS/ effect",
+      "url": "https://github.com/Effect-TS/effect",
       "branch": "main"
     },
     {
@@ -52,6 +52,6 @@
       "branch": "canary"
     }
   ],
-  "model": "big-pickle",
-  "provider": "opencode"
+  "model": "claude-haiku-4-5",
+  "provider": "anthropic"
 }
