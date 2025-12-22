@@ -3,6 +3,28 @@
   FTS.coding._.lang._.typescript = {
     description = "TypeScript and Node.js development environment";
 
+    # Enable nix-ld for running dynamically linked binaries (bun global installs, etc.)
+    nixos = {pkgs, ...}: {
+      programs.nix-ld = {
+        enable = true;
+        # Common libraries needed by Node.js/Bun binaries
+        libraries = with pkgs; [
+          stdenv.cc.cc.lib
+          zlib
+          openssl
+          curl
+          icu
+          libuuid
+          libsecret
+          libGL
+          xorg.libX11
+          xorg.libXcursor
+          xorg.libXrandr
+          xorg.libXi
+        ];
+      };
+    };
+
     homeManager = {
       pkgs,
       lib,
@@ -49,6 +71,7 @@
         sessionPath = [
           "$HOME/.local/share/pnpm"
           "$HOME/.npm-global/bin"
+          "$HOME/.bun/bin"
         ];
       };
     };
