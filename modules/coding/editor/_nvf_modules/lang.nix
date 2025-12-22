@@ -36,10 +36,10 @@
     # Web development
     ts = {
       enable = true; # TypeScript/JavaScript
-      # Enable both tsserver and vtsls LSP servers
+      # Enable both ts_ls and vtsls LSP servers
       lsp = {
         enable = true;
-        servers = ["tsserver" "vtsls"];
+        servers = ["ts_ls" "vtsls"];
       };
     };
     html = {
