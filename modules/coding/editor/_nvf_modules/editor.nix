@@ -966,6 +966,8 @@
     };
   };
 
+  mini.files.enable = true;
+
   # Code outline and symbols
   utility = {
     outline = {

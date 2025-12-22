@@ -1,14 +1,12 @@
 # Storage hardware aspect
-{
-  FTS,
-  ...
-}:
-{
+{FTS, ...}: {
   FTS.hardware._.storage = {
     description = "Automatic storage mounting support";
 
-    nixos = { ... }: {
+    nixos = {...}: {
       # Enable automatic mounting of external and internal hard drives
+      #
+      boot.supportedFilesystems = ["ntfs"];
       services.udisks2 = {
         enable = true;
         settings = {
@@ -20,7 +18,7 @@
           };
         };
       };
-      
+
       # Configure polkit rules for udisks2 to allow mounting without authentication
       security.polkit.extraConfig = ''
         polkit.addRule(function(action, subject) {
@@ -50,10 +48,9 @@
           }
         })
       '';
-      
+
       services.gvfs.enable = true;
       services.devmon.enable = true;
     };
   };
 }
-
