@@ -145,6 +145,7 @@
           # Prioritize snippets over other sources
           # Custom sort function that gives snippets highest priority
         };
+
         sources = {
           # Put snippets first in the list to prioritize them
           # Combined with custom fuzzy.sorts, this ensures snippets appear at the top
