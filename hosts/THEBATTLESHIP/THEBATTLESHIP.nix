@@ -42,7 +42,7 @@
 
         # Complete desktop setup (environment + display manager + bootloader)
         (FTS.desktop {
-          environment.default = "hyprland";
+          environment.default = "gnome";
           bootloader = {
             default = "grub";
             grub = {
@@ -100,6 +100,12 @@
         };
 
         programs.nh.enable = true;
+
+        fileSystems."run/media/GAMES" = {
+          device = "/dev/nvme2n1p2";
+          fsType = "ntfs-3g";
+          options = ["rw" "uid=1000"];
+        };
 
         # Self-hosting services configuration is handled by the starcommand user
         # See users/starcommand/starcommand.nix for all service configuration

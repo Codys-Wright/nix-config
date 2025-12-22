@@ -225,7 +225,11 @@ in {
   # Expose nvf as a standalone wrapped package using nvf.lib.neovimConfiguration
   # This builds the configuration from all sub-modules and wraps it
   # Usage: nix run .#nvf or nix build .#nvf
-  perSystem = {pkgs, system, ...}: let
+  perSystem = {
+    pkgs,
+    system,
+    ...
+  }: let
     # Import nixpkgs with allowUnfree enabled for sidekick and other unfree packages
     # Use inputs from module scope (not perSystem parameters)
     pkgsUnfree = import inputs.nixpkgs {
@@ -233,7 +237,10 @@ in {
       config.allowUnfree = true;
     };
     # Use the shared function to build the wrapped neovim package with unfree-enabled pkgs
-    wrappedNeovim = buildWrappedNeovim {pkgs = pkgsUnfree; inherit lib;};
+    wrappedNeovim = buildWrappedNeovim {
+      pkgs = pkgsUnfree;
+      inherit lib;
+    };
   in {
     packages.nvf = wrappedNeovim;
 
