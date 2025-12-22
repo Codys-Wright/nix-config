@@ -4,27 +4,25 @@
     description = "Podman container tools with Docker compatibility";
 
     nixos = {pkgs, ...}: {
-      # Enable Podman
+      # Enable containers
+      virtualisation.containers.enable = true;
+
+      # Enable Podman with Docker compatibility
       virtualisation.podman = {
         enable = true;
-        # Enable Docker compatibility
         dockerCompat = true;
-        # Enable Docker socket for compatibility
         dockerSocket.enable = true;
+        defaultNetwork.settings.dns_enabled = true;
       };
 
       # Set Podman as the OCI containers backend
       virtualisation.oci-containers.backend = "podman";
 
-      # Enable Podman Compose for Docker Compose compatibility
+      # Enable Podman Compose and Docker Compose for compatibility
       environment.systemPackages = with pkgs; [
+        docker-compose
         podman-compose
       ];
-
-      # Set DOCKER_HOST for Docker Compose compatibility
-      environment.extraInit = ''
-        export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock
-      '';
     };
 
     homeManager = {
@@ -35,6 +33,20 @@
       home.packages = with pkgs; [
         lazydocker
       ];
+
+      # Set DOCKER_HOST environment variable for Docker Compose compatibility
+      home.sessionVariables = {
+        DOCKER_HOST = "unix://$XDG_RUNTIME_DIR/podman/podman.sock";
+      };
+
+      # Configure shells to set DOCKER_HOST
+      programs.fish.shellInit = ''
+        set -x DOCKER_HOST unix://$XDG_RUNTIME_DIR/podman/podman.sock
+      '';
+
+      programs.zsh.initExtra = ''
+        export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock
+      '';
     };
   };
 }
