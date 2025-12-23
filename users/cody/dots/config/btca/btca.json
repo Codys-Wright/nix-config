@@ -50,6 +50,18 @@
       "name": "better-auth",
       "url": "https://github.com/better-auth/better-auth",
       "branch": "canary"
+    },
+    {
+      "name": "kysely",
+      "url": "https://github.com/kysely-org/kysely",
+      "branch": "master",
+      "specialNotes": "Source code for Kysely"
+    },
+    {
+      "name": "practical-effect-capstone",
+      "url": "https://github.com/lucas-barake/practical-effect-capstone",
+      "branch": "main",
+      "specialNotes": "A reference implementation of effect httpapi and database schema migrations etc"
     }
   ],
   "model": "claude-haiku-4-5",

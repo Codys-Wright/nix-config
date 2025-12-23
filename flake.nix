@@ -15,7 +15,10 @@
 
   inputs = {
     SPC.url = "github:vic/SPC";
-    apple-fonts.url = "github:Lyndeno/apple-fonts.nix";
+    apple-fonts = {
+      inputs.nixpkgs.follows = "nixpkgs";
+      url = "github:Lyndeno/apple-fonts.nix";
+    };
     darwin = {
       inputs.nixpkgs.follows = "nixpkgs";
       url = "github:nix-darwin/nix-darwin";
@@ -75,7 +78,10 @@
     };
     selfhostblocks.url = "github:ibizaman/selfhostblocks";
     sops-nix.url = "github:Mic92/sops-nix";
-    stylix.url = "github:danth/stylix";
+    stylix = {
+      inputs.nixpkgs.follows = "nixpkgs";
+      url = "github:danth/stylix";
+    };
     systems.url = "github:nix-systems/default";
     wrappers.url = "github:lassulus/wrappers";
     zellij-nix.url = "github:a-kenji/zellij-nix";
