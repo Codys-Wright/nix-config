@@ -38,7 +38,6 @@
       # Include role-based aspects
       includes = [
         # System-wide theme (bootloader, default appearance)
-        (<FTS.theme> {default = "cody";})
 
         # Complete desktop setup (environment + display manager + bootloader)
         (FTS.desktop {

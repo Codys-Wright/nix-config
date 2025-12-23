@@ -12,11 +12,6 @@
       pkgs,
       ...
     }: {
-      # Set EDITOR environment variable globally
-      home.sessionVariables = {
-        EDITOR = "v";
-      };
-
       programs.fish = {
         enable = true;
 
@@ -292,11 +287,10 @@
           # Bind Tab to tv completion widget
           bind \t __tv_complete
 
-      # Add bun global bin to PATH
-      fish_add_path ~/.bun/bin
-
-      # Set EDITOR to use nvf (neovim with custom config)
-      set -x EDITOR v
-    '';
+          # Add bun global bin to PATH
+          fish_add_path ~/.bun/bin
+        '';
+      };
+    };
   };
 }
