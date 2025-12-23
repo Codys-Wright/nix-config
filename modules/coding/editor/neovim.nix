@@ -13,8 +13,8 @@
 
       # Set environment variables
       home.sessionVariables = {
-        EDITOR = "lazyvim";
-        VISUAL = "lazyvim";
+        EDITOR = "nvim";
+        VISUAL = "nvim";
       };
     };
   };

@@ -23,9 +23,6 @@
     aspects.cody = {
       description = "Cody user configuration";
       includes = [
-        # User-level theme (context-aware: only affects homeManager appearance)
-        (<FTS.theme> {default = "cody";})
-
         # Applications - all included by default
         <FTS.apps/browsers>
         <FTS.apps/communications>
@@ -48,6 +45,11 @@
         # Cody-specific configurations
         cody.dots
         cody.fish
+        
+        # Theme and fonts
+        FTS.mactahoe
+        FTS.apple-fonts
+        FTS.stylix
 
         # Keyboard configuration (Kanata)
         <FTS.keyboard>
