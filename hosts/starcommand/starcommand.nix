@@ -10,7 +10,7 @@
     starcommand = {
       description = "Dedicated selfhosting server";
       users.starcommand = {}; # Service user for self-hosting infrastructure
-      aspect = "starcommand";
+      aspect = "starcommand-host"; # Use unique name to avoid conflict with user aspect
 
       # Use nixpkgs-unstable with selfhostblocks patches applied
       instantiate = args: let
@@ -28,9 +28,9 @@
     };
   };
 
-  # starcommand host-specific aspect
+  # starcommand host-specific aspect (named starcommand-host to avoid conflict with user aspect)
   den.aspects = {
-    starcommand = {
+    starcommand-host = {
       includes = [
         # Hardware and kernel
         <FTS.hardware>
@@ -45,8 +45,12 @@
           persistFolder = "/persist";
         })
 
-        # Deployment (SSH, networking, secrets, VM/ISO generation)
-        <FTS.deployment>
+        # Deployment with deploy-rs configuration
+        (<FTS.deployment> {
+          ip = "192.168.0.102";
+          sshPort = 22;
+          sshUser = "admin";
+        })
 
         # Self-hosting services are provided by the starcommand user
         # See users/starcommand/starcommand.nix for service configuration
@@ -58,11 +62,6 @@
         pkgs,
         ...
       }: {
-        # Deploy-rs configuration
-        deployment.ip = "192.168.0.102";
-        deployment.sshPort = 22;
-        deployment.sshUser = "admin";
-
         # Automatic cleanup
         nix.gc = {
           automatic = true;

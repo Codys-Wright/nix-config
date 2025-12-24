@@ -1,12 +1,16 @@
-{ inputs, den, pkgs, FTS, __findFile, ... }:
-
 {
-
-den.hosts.x86_64-linux = {
+  inputs,
+  den,
+  pkgs,
+  FTS,
+  __findFile,
+  ...
+}: {
+  den.hosts.x86_64-linux = {
     dave = {
       description = "Dave system configuration";
       # users.carter = { };
-      users.cody = { };
+      users.cody = {};
       aspect = "dave";
     };
   };
@@ -17,21 +21,22 @@ den.hosts.x86_64-linux = {
       # Include role-based aspects
       includes = [
         # Complete desktop setup with GNOME
-        (FTS.desktop {
-          environment.default = "gnome";
-          displayManager.auto = true;  # Auto-selects GDM for GNOME
-        })
 
         <FTS.kernel>
         <FTS.hardware>
       ];
 
       # Manually set fileSystems and bootloader for now
-      nixos = { config, lib, pkgs, ... }: {
+      nixos = {
+        config,
+        lib,
+        pkgs,
+        ...
+      }: {
         # File systems - using /dev/vda partitions for VM
         # /dev/vda1 = ESP (boot) partition
         # /dev/vda2 = root partition with btrfs subvolumes
-      
+
         # User configuration is now provided by den.aspects.cody.provides.hostUser
         # No need to define it here - it's automatically applied when users.cody = { } is set
 
@@ -53,29 +58,24 @@ den.hosts.x86_64-linux = {
         # NetworkManager (enabled by FTS.gnome) will automatically handle DHCP
         # No need to configure useDHCP - NetworkManager manages networking
 
-  # https://gist.github.com/nat-418/1101881371c9a7b419ba5f944a7118b0
-      services.xserver = {
-        enable = true;
-        desktopManager = {
-          xterm.enable = false;
-          xfce.enable = true;
+        # https://gist.github.com/nat-418/1101881371c9a7b419ba5f944a7118b0
+        services.xserver = {
+          enable = true;
+          desktopManager = {
+            xterm.enable = false;
+            xfce.enable = true;
+          };
         };
-      };
 
-  #     services.displayManager = {
-  #       defaultSession = lib.mkDefault "xfce";
-  #       enable = true;
-  #       autoLogin = {
-  #         enable = true;
-  #         user = "cody";
-  #       };
-  #     };
-
-
-      
+        #     services.displayManager = {
+        #       defaultSession = lib.mkDefault "xfce";
+        #       enable = true;
+        #       autoLogin = {
+        #         enable = true;
+        #         user = "cody";
+        #       };
+        #     };
       };
     };
   };
-
 }
-
