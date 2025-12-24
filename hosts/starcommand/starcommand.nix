@@ -23,13 +23,18 @@
         <FTS.hardware>
         <FTS.kernel>
 
-        # Disk configuration (btrfs with impermanence)
+        # Disk configuration - existing btrfs layout (no reformatting)
         (<FTS.system/disk> {
-          type = "btrfs-impermanence";
+          type = "btrfs-manual";
           device = "/dev/nvme0n1";
-          withSwap = true;
-          swapSize = "32"; # 32GB swap
+          partition = 3; # nvme0n1p3 has the btrfs
+          bootPartition = 1; # nvme0n1p1 is EFI
           persistFolder = "/persist";
+          subvolumes = {
+            root = "@root";
+            nix = "@nix";
+            persist = "@persist";
+          };
         })
 
         # Deployment with deploy-rs configuration
@@ -49,15 +54,52 @@
         pkgs,
         ...
       }: {
+        # GRUB bootloader (UEFI)
+        boot.loader.grub = {
+          enable = true;
+          device = "nodev";
+          efiSupport = true;
+          configurationLimit = 10;
+        };
+        boot.loader.efi.canTouchEfiVariables = true;
+
+        # MergerFS and NTFS packages
+        environment.systemPackages = with pkgs; [
+          mergerfs
+          ntfs3g
+        ];
+
+        # Data drives (NTFS via ntfs-3g) - full read/write access for everyone
+        fileSystems."/mnt/disks/sda" = {
+          device = "/dev/sda2";
+          fsType = "ntfs-3g";
+          options = ["rw" "uid=0" "gid=0" "dmask=000" "fmask=000" "nofail"];
+        };
+        fileSystems."/mnt/disks/sdb" = {
+          device = "/dev/sdb2";
+          fsType = "ntfs-3g";
+          options = ["rw" "uid=0" "gid=0" "dmask=000" "fmask=000" "nofail"];
+        };
+
+        # MergerFS mount combining all disks
+        fileSystems."/mnt/storage" = {
+          device = "/mnt/disks/sda:/mnt/disks/sdb";
+          fsType = "fuse.mergerfs";
+          options = [
+            "cache.files=partial"
+            "dropcacheonclose=true"
+            "category.create=mfs"
+            "allow_other"
+            "nofail"
+          ];
+        };
+
         # Automatic cleanup
         nix.gc = {
           automatic = true;
           dates = "weekly";
           options = "--delete-older-than 7d";
         };
-
-        # Limit boot generations
-        boot.loader.grub.configurationLimit = 5;
 
         programs.nh.enable = true;
       };

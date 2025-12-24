@@ -40,11 +40,22 @@ iso host:
 
 # Deploy to a remote host using deploy-rs
 # Usage: just deploy starcommand
+# Usage: just deploy starcommand --no-rollback  (disable magic rollback for SSH/network changes)
 # Requires the host to have deployment.ip configured and SSH access set up
-deploy host:
+deploy host *args:
     #!/usr/bin/env bash
     set -e
     cd /home/cody/.flake
+    
+    # Parse arguments for --no-rollback flag
+    NO_ROLLBACK=0
+    for arg in {{args}}; do
+        case "$arg" in
+            --no-rollback)
+                NO_ROLLBACK=1
+                ;;
+        esac
+    done
     
     # Extract SSH key from SOPS
     TEMP_KEY=$(mktemp)
@@ -56,9 +67,17 @@ deploy host:
         "hosts/{{host}}/secrets.yaml" > "$TEMP_KEY"
     chmod 600 "$TEMP_KEY"
     
-    echo "Deploying to {{host}}..."
+    # Build deploy-rs arguments
+    DEPLOY_ARGS=(--skip-checks)
+    if [ "$NO_ROLLBACK" -eq 1 ]; then
+        echo "Deploying to {{host}} (magic rollback DISABLED)..."
+        DEPLOY_ARGS+=(--magic-rollback false)
+    else
+        echo "Deploying to {{host}}..."
+    fi
+    
     SSH_AUTH_SOCK="" nix run github:serokell/deploy-rs -- \
-        --skip-checks \
+        "${DEPLOY_ARGS[@]}" \
         --ssh-opts "-i $TEMP_KEY -o StrictHostKeyChecking=no" \
         ".#{{host}}"
 
