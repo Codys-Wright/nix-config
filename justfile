@@ -70,8 +70,8 @@ deploy host *args:
     # Build deploy-rs arguments
     DEPLOY_ARGS=(--skip-checks)
     if [ "$NO_ROLLBACK" -eq 1 ]; then
-        echo "Deploying to {{host}} (magic rollback DISABLED)..."
-        DEPLOY_ARGS+=(--magic-rollback false)
+        echo "Deploying to {{host}} (all rollbacks DISABLED)..."
+        DEPLOY_ARGS+=(--magic-rollback false --auto-rollback false)
     else
         echo "Deploying to {{host}}..."
     fi
