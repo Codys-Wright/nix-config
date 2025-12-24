@@ -34,7 +34,23 @@
 
       includes = [
         # Basic user setup with admin privileges (sets initialPassword = "password")
-        <FTS.user/admin>
+        <FTS.apps/browsers>
+        <FTS.apps/misc>
+
+        <FTS.coding/cli>
+        <FTS.coding/editors>
+        <FTS.coding/terminals>
+        <FTS.coding/shells>
+        <FTS.coding/lang>
+        <FTS.coding/tools>
+
+        <FTS.user/admin> # Admin privileges and user configuration
+        <FTS.user/autologin> # Autologin configuration (enabled when display manager is present)
+
+        (<FTS.user/shell> {default = "fish";}) # Set fish as default shell
+
+        # Desktop environment
+        <FTS.desktop/environment/hyprland>
 
         # Include the FTS.selfhost module which has all the SelfHostBlocks configuration
         (FTS.selfhost {})

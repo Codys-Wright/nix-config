@@ -12,6 +12,17 @@ switch host:
         exit 1; \
     fi
 
+# Switch and force bootloader installation (NixOS only)
+# Usage: just switch-bootloader starcommand
+switch-bootloader host:
+    @if command -v nixos-rebuild >/dev/null 2>&1 || [ -f /etc/nixos/configuration.nix ]; then \
+        echo "Switching to NixOS configuration with bootloader install: {{host}}"; \
+        sudo nixos-rebuild switch --flake .#{{host}} --install-bootloader; \
+    else \
+        echo "Error: This command only works on NixOS"; \
+        exit 1; \
+    fi
+
 # Build a host configuration without switching
 # Automatically detects NixOS or Darwin and uses the appropriate command
 build host:
