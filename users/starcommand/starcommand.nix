@@ -53,15 +53,15 @@
         (<FTS.user/shell> {default = "fish";}) # Set fish as default shell
 
         # Theme and fonts
-        FTS.mactahoe
-        FTS.apple-fonts
-        FTS.stylix
+        # FTS.mactahoe
+        # FTS.apple-fonts
+        # FTS.stylix
 
         # Desktop environment
         <FTS.desktop/environment/hyprland>
 
         # Include the FTS.selfhost module which has all the SelfHostBlocks configuration
-        (FTS.selfhost {})
+        # (FTS.selfhost {})
       ];
     };
   };
