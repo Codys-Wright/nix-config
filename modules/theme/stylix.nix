@@ -23,7 +23,25 @@
       # Use Apple San Francisco fonts if available
       stylix = {
         enable = true;
-        fonts = lib.mkDefault {
+        autoEnable = false;
+        base16Scheme = import ./_assets/stylix/ayu-dark/default.nix;
+        image = null;
+        polarity = "dark";
+
+        cursor = {
+          name = "MacTahoe-dark Cursors";
+          package = pkgs.callPackage ../../packages/mactahoe/cursor-theme.nix {};
+          size = 24;
+        };
+
+        icons = {
+          enable = true;
+          dark = "MacTahoe";
+          light = "MacTahoe";
+          package = pkgs.callPackage ../../packages/mactahoe/icon-theme.nix {};
+        };
+
+        fonts = {
           serif = {
             package = inputs.apple-fonts.packages.${pkgs.system}.sf-pro-nerd;
             name = "SFProDisplay Nerd Font";
@@ -37,7 +55,7 @@
             name = "SFMono Nerd Font";
           };
           emoji = {
-            package = pkgs.noto-fonts-emoji;
+            package = pkgs.noto-fonts-color-emoji;
             name = "Noto Color Emoji";
           };
         };

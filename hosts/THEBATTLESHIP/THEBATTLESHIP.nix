@@ -40,16 +40,12 @@
         # System-wide theme (bootloader, default appearance)
 
         # Complete desktop setup (environment + display manager + bootloader)
-        (FTS.desktop {
-          environment.default = "gnome";
-          bootloader = {
-            default = "grub";
-            grub = {
-              uefi = true;
-              # theme is set by system theme preset
-            };
-          };
-          displayManager.auto = true; # Auto-selects GDM for GNOME
+        <FTS.desktop/environment/gnome>
+        <FTS.desktop/environment/hyprland>
+        FTS.gdm
+        (FTS.grub {
+          uefi = true;
+          # theme is set by system theme preset
         })
 
         # Disk and filesystem configuration

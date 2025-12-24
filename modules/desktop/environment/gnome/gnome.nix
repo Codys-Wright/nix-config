@@ -17,6 +17,9 @@
       # Enable GNOME desktop manager
       services.desktopManager.gnome.enable = true;
 
+      # Set GNOME as default session
+      services.displayManager.defaultSession = "gnome";
+
       # Enable sysprof service for profiling
       services.sysprof.enable = true;
 
@@ -29,7 +32,7 @@
         platformTheme = lib.mkDefault "gnome";
         style = lib.mkDefault "adwaita-dark";
       };
-      
+
       # Don't set SSH askPassword (override default from gnome module)
       programs.ssh.askPassword = lib.mkForce "";
     };
