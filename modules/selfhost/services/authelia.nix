@@ -45,7 +45,13 @@
         if ssl != null
         then ssl
         else config.shb.certs.certs.letsencrypt.${sslCertName};
+      
+      # SHB uses underscores for internal naming, but nginx needs the real hostname
+      fqdnWithUnderscores = builtins.replaceStrings [ "." ] [ "_" ] "${subdomain}.${domain}";
+      fqdnReal = "${subdomain}.${domain}";
     in {
+      # Fix nginx server_name to use dots instead of underscores
+      services.nginx.virtualHosts.${fqdnWithUnderscores}.serverName = lib.mkForce fqdnReal;
       # Authelia configuration
       shb.authelia = {
         enable = true;

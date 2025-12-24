@@ -54,6 +54,7 @@
         enable = true;
         inherit domain subdomain contactPoints;
         ssl = sslCert;
+        grafanaPort = 3100; # Avoid conflict with Karakeep on 3000
 
         # Admin credentials
         adminPassword.result = config.shb.sops.secret."${adminPasswordKey}".result;
