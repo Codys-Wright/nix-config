@@ -51,7 +51,7 @@
         (<FTS.deployment> {
           ip = "192.168.0.102";
           sshPort = 22;
-          sshUser = "starcommand";
+          sshUser = "root";
         })
 
         FTS.gdm
