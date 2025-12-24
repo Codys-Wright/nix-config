@@ -18,6 +18,9 @@
   den.aspects.carter = {
     description = "Carter user configuration";
     includes = [
+      # Home-manager backup system
+      den.aspects.hm-backup
+      
       # Install all terminals with ghostty as default
       # (FTS.coding._.terminals { default = "ghostty"; })
       FTS.coding

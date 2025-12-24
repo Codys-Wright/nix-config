@@ -158,12 +158,10 @@
           ];
 
           # SSH server configuration
+          # Note: No SSH hardening - allows flexibility for different deployment scenarios
+          # (installation ISOs, beacons, etc. may have different requirements)
           services.openssh = {
             enable = true;
-            settings = {
-              PermitRootLogin = lib.mkDefault "prohibit-password";
-              PasswordAuthentication = lib.mkDefault true;
-            };
             ports = [ 22 ];
           };
 

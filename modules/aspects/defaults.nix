@@ -13,7 +13,6 @@
     # `_` is shorthand alias for `provides`.
     includes = [
       <den/home-manager> # den.provides.home-manager
-      den.aspects.hm-backup
       den.aspects.dendritic._.routes # Mutual dependency routing
       den.aspects.dendritic._.user # User account setup
       den.aspects.dendritic._.host # Hostname configuration

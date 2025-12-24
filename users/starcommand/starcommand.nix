@@ -33,6 +33,9 @@
       description = "Self-hosting services user (starcommand)";
 
       includes = [
+        # Home-manager backup system
+        den.aspects.hm-backup
+
         # Basic user setup with admin privileges (sets initialPassword = "password")
         <FTS.apps/browsers>
         <FTS.apps/misc>

@@ -18,6 +18,9 @@
       description = "Minimal guest user for bootstrap deployments";
 
       includes = [
+        # Home-manager backup system
+        den.aspects.hm-backup
+        
         # Basic user setup (no secrets required)
         <FTS.user/admin>
       ];
