@@ -27,26 +27,27 @@
   homeManager = {
     OS,
     host,
+    lib,
   }: {
     class,
     aspect-chain,
   }: let
-      hmClass = "homeManager";
-      hmUsers = builtins.filter (u: u.class == hmClass) (lib.attrValues host.users);
+    hmClass = "homeManager";
+    hmUsers = builtins.filter (u: u.class == hmClass) (lib.attrValues host.users);
 
     hmUserModule = user: let
-          ctx = {
-            inherit aspect-chain;
-            class = hmClass;
-          };
-          HM = den.aspects.${user.aspect};
-          aspect = HM {
-            inherit host user;
+      ctx = {
+        inherit aspect-chain;
+        class = hmClass;
+      };
+      HM = den.aspects.${user.aspect};
+      aspect = HM {
+        inherit host user;
         OS-HM = {inherit OS HM;};
-          };
-          module = aspect.resolve ctx;
-        in
-        module;
+      };
+      module = aspect.resolve ctx;
+    in
+      module;
 
     users =
       map (user: {
@@ -55,7 +56,7 @@
       })
       hmUsers;
 
-      hmModule = host.hm-module or inputs.home-manager."${class}Modules".home-manager;
+    hmModule = host.hm-module or inputs.home-manager."${class}Modules".home-manager;
 
     # Import nvf Home Manager module once per user to avoid duplicate declaration errors
     # We add it to each user's imports, but it will only be evaluated once per user
@@ -74,17 +75,17 @@
       })
       users;
 
-      aspect.${class} = {
+    aspect.${class} = {
       imports = [hmModule];
       home-manager.users = lib.listToAttrs usersWithNvf;
-      };
+    };
 
-      supportedOS = builtins.elem class [
-        "nixos"
-        "darwin"
-      ];
-      enabled = supportedOS && builtins.length hmUsers > 0;
-    in
+    supportedOS = builtins.elem class [
+      "nixos"
+      "darwin"
+    ];
+    enabled = supportedOS && builtins.length hmUsers > 0;
+  in
     if enabled
     then aspect
     else {};
