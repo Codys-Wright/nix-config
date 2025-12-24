@@ -1,3 +1,5 @@
+#version 300 es
+
 /*
  * Grayscale
  */
@@ -46,7 +48,6 @@ We only need to match the file name and use 'inc' to incdicate that
     #define GRAYSCALE_LUMINOSITY 0 // Default fallback value
 #endif
 
-#version 300 es
 precision highp float;
 in vec2 v_texcoord;
 out vec4 fragColor;

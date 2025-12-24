@@ -1,10 +1,11 @@
+#version 300 es
+
 /* 
   ┌─────────────────────────────────────────────────────────────────────────┐
   │ This is a blank shader to disable hyprland shaders.                     │
   └─────────────────────────────────────────────────────────────────────────┘
  */
 
-#version 300 es
 precision mediump float;
 
 in vec2 v_texcoord;

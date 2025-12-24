@@ -6,7 +6,11 @@ keys:
   # To get this: ssh-to-age < hosts/THEBATTLESHIP/host_key.pub
   - &THEBATTLESHIP age18xrg3x02lv2flw9tg25rkxwgg87mg8faaaehlt4vdwr58pm2ky9snfzdhx
   - &example age1d2c4dr9m76kdmtqqlmddjayremwkzcp83sst4rxa0ee6x3jghelqujqdqp
-  - &starcommand age1pqtyzg2y7mm6tdrzq5vrzrh77jtz8q0kgmw2eetdxjlzjaejvurq0g4nx0
+  # starcommand user's age key (for user secrets)
+  - &starcommand_user age1pqtyzg2y7mm6tdrzq5vrzrh77jtz8q0kgmw2eetdxjlzjaejvurq0g4nx0
+  # starcommand host's SSH-derived age key
+  # To get this: ssh-to-age < hosts/starcommand/host_key.pub
+  - &starcommand_host age1qu52yg6uaf942ttgnd5ag8rwgwrvcdsfmx9urernhvgdsgkmq3sqj72u7y
 creation_rules:
   # Host-level secrets - encrypted with both user's key and host's key
   # This allows: user to edit locally, host to decrypt at runtime
@@ -15,14 +19,21 @@ creation_rules:
       - age:
           - *me
           - *THEBATTLESHIP
-  # User-level secrets - encrypted with both user's key, host's key, and user's own key
-  # This allows: user to edit locally, home-manager on host to decrypt at runtime
+  # starcommand host secrets
+  - path_regex: ^hosts/starcommand/secrets\.yaml$
+    key_groups:
+      - age:
+          - *me
+          - *starcommand_host
+  # User-level secrets - encrypted with both user's key, all host keys, and user's own key
+  # This allows: user to edit locally, home-manager on any host to decrypt at runtime
   - path_regex: ^users/.*/secrets\.yaml$
     key_groups:
       - age:
           - *me
           - *THEBATTLESHIP
-          - *starcommand
+          - *starcommand_host
+          - *starcommand_user
   - path_regex: ^hosts/example/secrets\.yaml$
     key_groups:
       - age:

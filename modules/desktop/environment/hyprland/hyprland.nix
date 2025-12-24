@@ -10,30 +10,6 @@ Hyprland environment aggregator - Main entry point
   FTS.desktop._.environment._.hyprland = {
     description = ''
       Hyprland desktop environment with modular configuration.
-      
-      Usage:
-        (<FTS/desktop/environment/hyprland> { })
-      
-      Direct access to sub-aspects:
-        Config aspects:
-          (<FTS/desktop/environment/hyprland/config/binds> { })
-          (<FTS/desktop/environment/hyprland/config/monitors> { })
-          (<FTS/desktop/environment/hyprland/config/settings> { })
-          (<FTS/desktop/environment/hyprland/config/rules> { })
-        
-        Workflow system:
-          (<FTS/desktop/environment/hyprland/workflows> { })
-        
-        Plugin aspects:
-          (<FTS/desktop/environment/hyprland/plugins/hyprcursor> { })
-          (<FTS/desktop/environment/hyprland/plugins/hypridle> { })
-          (<FTS/desktop/environment/hyprland/plugins/hyprpaper> { })
-          (<FTS/desktop/environment/hyprland/plugins/hyprlock> { })
-          (<FTS/desktop/environment/hyprland/plugins/pyprland> { })
-        
-        Script aspects:
-          (<FTS/desktop/environment/hyprland/scripts/run-or-raise> { })
-          (<FTS/desktop/environment/hyprland/scripts/workflow-switcher> { })
     '';
 
     nixos = {pkgs, ...}: {
@@ -52,11 +28,14 @@ Hyprland environment aggregator - Main entry point
       ];
     };
 
-    homeManager = {
+    homeManager = {...}: {
       # Enable Hyprland window manager
       wayland.windowManager.hyprland = {
         enable = true;
         xwayland.enable = true;
+
+        # Enable workflow system (profiles loaded from workflows module)
+        workflows.enable = true;
       };
     };
 
@@ -71,7 +50,11 @@ Hyprland environment aggregator - Main entry point
       # Workflow system
       FTS.desktop._.environment._.hyprland._.workflows
 
+      # App aspects
+      FTS.desktop._.environment._.hyprland._.apps._.walker
+
       # Plugin aspects
+      FTS.desktop._.environment._.hyprland._.plugins._.dunst
       FTS.desktop._.environment._.hyprland._.plugins._.hyprcursor
       FTS.desktop._.environment._.hyprland._.plugins._.hypridle
       FTS.desktop._.environment._.hyprland._.plugins._.hyprpaper
@@ -81,6 +64,7 @@ Hyprland environment aggregator - Main entry point
       # Script aspects
       FTS.desktop._.environment._.hyprland._.scripts._.run-or-raise
       FTS.desktop._.environment._.hyprland._.scripts._.workflow-switcher
+      FTS.desktop._.environment._.hyprland._.scripts._.hyprland-manager
     ];
   };
 }

@@ -152,15 +152,37 @@ sops-edit:
 
 # Smart edit-secrets: finds and edits secrets.yaml for a given name
 # Searches in both hosts/ and users/ directories
-# Usage: just edit-secrets <name>
+# Usage: just edit-secrets <name> [--host|--user]
 # Example: just edit-secrets THEBATTLESHIP
-# Example: just edit-secrets cody
-edit-secrets name:
+# Example: just edit-secrets cody --user
+# Example: just edit-secrets starcommand --host
+# Default: --user when both exist
+edit-secrets name *args:
     #!/usr/bin/env bash
     set -e
     cd /home/cody/.flake
     HOST_FILE="hosts/{{name}}/secrets.yaml"
     USER_FILE="users/{{name}}/secrets.yaml"
+    
+    # Parse arguments for --host or --user flags
+    FORCE_HOST=0
+    FORCE_USER=0
+    for arg in {{args}}; do
+        case "$arg" in
+            --host|-h)
+                FORCE_HOST=1
+                ;;
+            --user|-u)
+                FORCE_USER=1
+                ;;
+        esac
+    done
+    
+    # Validate conflicting flags
+    if [ "$FORCE_HOST" -eq 1 ] && [ "$FORCE_USER" -eq 1 ]; then
+        echo "Error: Cannot specify both --host and --user"
+        exit 1
+    fi
     
     HOST_EXISTS=0
     USER_EXISTS=0
@@ -173,34 +195,28 @@ edit-secrets name:
         USER_EXISTS=1
     fi
     
-    if [ "$HOST_EXISTS" -eq 1 ] && [ "$USER_EXISTS" -eq 1 ]; then
-        echo "Found secrets in both locations:"
-        echo "  1. Host: $HOST_FILE"
-        echo "  2. User: $USER_FILE"
-        echo ""
-        echo "Which one do you want to edit? (1/2/both)"
-        read -r choice
-        case "$choice" in
-            1)
-                echo "Editing host secrets..."
-                SOPS_AGE_KEY_FILE=sops.key nix develop --command sops --config sops.yaml "$HOST_FILE"
-                ;;
-            2)
-                echo "Editing user secrets..."
-                SOPS_AGE_KEY_FILE=sops.key nix develop --command sops --config sops.yaml "$USER_FILE"
-                ;;
-            both)
-                echo "Editing host secrets first..."
-                SOPS_AGE_KEY_FILE=sops.key nix develop --command sops --config sops.yaml "$HOST_FILE"
-                echo ""
-                echo "Editing user secrets..."
-                SOPS_AGE_KEY_FILE=sops.key nix develop --command sops --config sops.yaml "$USER_FILE"
-                ;;
-            *)
-                echo "Invalid choice. Exiting."
-                exit 1
-                ;;
-        esac
+    # Handle forced flags
+    if [ "$FORCE_HOST" -eq 1 ]; then
+        if [ "$HOST_EXISTS" -eq 1 ]; then
+            echo "Editing host secrets: $HOST_FILE"
+            SOPS_AGE_KEY_FILE=sops.key nix develop --command sops --config sops.yaml "$HOST_FILE"
+        else
+            echo "Error: Host secrets not found: $HOST_FILE"
+            exit 1
+        fi
+    elif [ "$FORCE_USER" -eq 1 ]; then
+        if [ "$USER_EXISTS" -eq 1 ]; then
+            echo "Editing user secrets: $USER_FILE"
+            SOPS_AGE_KEY_FILE=sops.key nix develop --command sops --config sops.yaml "$USER_FILE"
+        else
+            echo "Error: User secrets not found: $USER_FILE"
+            exit 1
+        fi
+    elif [ "$HOST_EXISTS" -eq 1 ] && [ "$USER_EXISTS" -eq 1 ]; then
+        # Default to user when both exist (no flag provided)
+        echo "Found secrets in both locations, defaulting to user (use --host to edit host secrets)"
+        echo "Editing user secrets: $USER_FILE"
+        SOPS_AGE_KEY_FILE=sops.key nix develop --command sops --config sops.yaml "$USER_FILE"
     elif [ "$HOST_EXISTS" -eq 1 ]; then
         echo "Editing host secrets: $HOST_FILE"
         SOPS_AGE_KEY_FILE=sops.key nix develop --command sops --config sops.yaml "$HOST_FILE"
