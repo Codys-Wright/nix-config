@@ -10,7 +10,7 @@ keys:
   - &starcommand_user age1pqtyzg2y7mm6tdrzq5vrzrh77jtz8q0kgmw2eetdxjlzjaejvurq0g4nx0
   # starcommand host's SSH-derived age key (from actual host at 192.168.0.102)
   # To get this: ssh root@192.168.0.102 "cat /etc/ssh/ssh_host_ed25519_key.pub" | ssh-to-age
-  - &starcommand_host age1x8u57848fnn4l0xum3cvy8p699cjht9gdk75xfwann5qpjfx8d0qgpqw5h
+  - &starcommand_host age17mr9mzwny04n2x2nu4h2g49lnctq8l7z7yumv0hesnh6q70aup3q9hpdff
 creation_rules:
   # Host-level secrets - encrypted with both user's key and host's key
   # This allows: user to edit locally, host to decrypt at runtime
