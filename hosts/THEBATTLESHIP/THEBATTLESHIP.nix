@@ -10,7 +10,7 @@
     THEBATTLESHIP = {
       description = "The Main System, ready for everyday battle";
       users.cody = {};
-      users.starcommand = {}; # Service user for self-hosting infrastructure
+      # users.starcommand = {}; # Service user for self-hosting infrastructure
       aspect = "THEBATTLESHIP";
 
       # Use nixpkgs-unstable with selfhostblocks patches applied
