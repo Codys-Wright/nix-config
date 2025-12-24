@@ -66,6 +66,14 @@
         pkgs,
         ...
       }: {
+        # Bootstrap: root password and SSH keys for initial access
+        users.users.root = {
+          initialPassword = "password";
+          openssh.authorizedKeys.keys = [
+            "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO8y8AMfYQnvu3BvjJ54/qYJcedNkMHmnjexine1ypda cody"
+          ];
+        };
+
         # GRUB bootloader (UEFI)
         # Use efiInstallAsRemovable to install to fallback location (/boot/EFI/BOOT/BOOTX64.EFI)
         # This ensures GRUB is used instead of any previous bootloader (systemd-boot)
