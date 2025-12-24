@@ -30,6 +30,7 @@
       in
         nixosSystem' (args // {inherit system;});
     };
+
   };
 
   # starcommand host-specific aspect (named starcommand-host to avoid conflict with user aspect)
@@ -74,13 +75,16 @@
         ...
       }: {
         # GRUB bootloader (UEFI)
+        # Use efiInstallAsRemovable to install to fallback location (/boot/EFI/BOOT/BOOTX64.EFI)
+        # This ensures GRUB is used instead of any previous bootloader (systemd-boot)
         boot.loader.grub = {
           enable = true;
           device = "nodev";
           efiSupport = true;
-          configurationLimit = 10;
+          efiInstallAsRemovable = true;
+          configurationLimit = 25;
         };
-        boot.loader.efi.canTouchEfiVariables = true;
+        boot.loader.efi.canTouchEfiVariables = false;
 
         # MergerFS and NTFS packages
         environment.systemPackages = with pkgs; [
