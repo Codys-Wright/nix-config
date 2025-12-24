@@ -8,6 +8,11 @@
       borderDuration = 1.0;
     in {
       wayland.windowManager.hyprland.settings = {
+        # NOTE: Workflow profiles are sourced via './profile.conf' in workflows.nix
+        # Settings defined here will OVERRIDE workflow-specific settings.
+        # To allow workflows to control a setting, remove it from here and
+        # define it in the workflow profile instead.
+        
         # General window management settings
         general = {
           resize_on_border = true;

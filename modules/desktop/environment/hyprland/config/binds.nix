@@ -14,13 +14,14 @@
 
         # Regular keybindings
         bind = [
-          # Applications
-          "$mod, RETURN, exec, ${pkgs.kitty}/bin/kitty" # Kitty
-          "$mod, E, exec, ${pkgs.nautilus}/bin/nautilus" # Nautilus
-          "$mod, B, exec, ${pkgs.librewolf}/bin/librewolf" # Librewolf
-          "$mod, L, exec, ${pkgs.hyprlock}/bin/hyprlock" # Lock
+          # Applications (with run-or-raise)
+          "$mod, RETURN, exec, run-or-raise kitty" # Kitty
+          "$mod, E, exec, run-or-raise nautilus" # Nautilus
+          "$mod, B, exec, run-or-raise brave" # Brave
+          "SUPER_SHIFT, L, exec, ${pkgs.hyprlock}/bin/hyprlock" # Lock
           "$mod, X, exec, power-menu" # Powermenu
           "$mod, SPACE, exec, launcher" # Launcher
+          "$mod, W, exec, hyprland-workflow-switcher --select walker" # Workflow switcher
           "SUPER_SHIFT, SPACE, exec, hyprfocus-toggle" # Toggle HyprFocus
 
           # Window management
@@ -43,7 +44,7 @@
           # Monitor management
           "SUPER_SHIFT, up, focusmonitor, -1" # Focus previous monitor
           "SUPER_SHIFT, down, focusmonitor, 1" # Focus next monitor
-          
+
           # Master layout
           "SUPER_SHIFT, left, layoutmsg, addmaster" # Add to master
           "SUPER_SHIFT, right, layoutmsg, removemaster" # Remove from master

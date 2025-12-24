@@ -21,12 +21,19 @@ Hyprland environment aggregator - Main entry point
           (<FTS/desktop/environment/hyprland/config/settings> { })
           (<FTS/desktop/environment/hyprland/config/rules> { })
         
+        Workflow system:
+          (<FTS/desktop/environment/hyprland/workflows> { })
+        
         Plugin aspects:
           (<FTS/desktop/environment/hyprland/plugins/hyprcursor> { })
           (<FTS/desktop/environment/hyprland/plugins/hypridle> { })
           (<FTS/desktop/environment/hyprland/plugins/hyprpaper> { })
           (<FTS/desktop/environment/hyprland/plugins/hyprlock> { })
           (<FTS/desktop/environment/hyprland/plugins/pyprland> { })
+        
+        Script aspects:
+          (<FTS/desktop/environment/hyprland/scripts/run-or-raise> { })
+          (<FTS/desktop/environment/hyprland/scripts/workflow-switcher> { })
     '';
 
     nixos = {pkgs, ...}: {
@@ -61,12 +68,19 @@ Hyprland environment aggregator - Main entry point
       FTS.desktop._.environment._.hyprland._.config._.settings
       FTS.desktop._.environment._.hyprland._.config._.rules
 
+      # Workflow system
+      FTS.desktop._.environment._.hyprland._.workflows
+
       # Plugin aspects
       FTS.desktop._.environment._.hyprland._.plugins._.hyprcursor
       FTS.desktop._.environment._.hyprland._.plugins._.hypridle
       FTS.desktop._.environment._.hyprland._.plugins._.hyprpaper
       FTS.desktop._.environment._.hyprland._.plugins._.hyprlock
       FTS.desktop._.environment._.hyprland._.plugins._.pyprland
+
+      # Script aspects
+      FTS.desktop._.environment._.hyprland._.scripts._.run-or-raise
+      FTS.desktop._.environment._.hyprland._.scripts._.workflow-switcher
     ];
   };
 }
