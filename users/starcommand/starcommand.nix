@@ -61,7 +61,7 @@
         <FTS.desktop/environment/hyprland>
 
         # Include the FTS.selfhost module which has all the SelfHostBlocks configuration
-        # (FTS.selfhost {})
+        (FTS.selfhost {})
       ];
     };
   };

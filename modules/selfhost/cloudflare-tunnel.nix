@@ -37,6 +37,18 @@
       # Extract all nginx virtual hosts and clean domain names
       nginxHosts = lib.attrNames config.services.nginx.virtualHosts;
 
+      # Get the actual server name from virtualHost config
+      # Nginx uses the virtualHost attrset key (like auth_starcommand_live)
+      # but the actual serverName can be overridden (like auth.starcommand.live)
+      getServerName = hostKey: let
+        virtualHost = config.services.nginx.virtualHosts.${hostKey} or {};
+        # Use serverName if it's a non-null string, otherwise fall back to the attribute key
+        serverName = virtualHost.serverName or null;
+      in
+        if serverName != null && serverName != ""
+        then serverName
+        else hostKey;
+
       # Clean domain names (remove http:// or https:// prefix)
       cleanDomain = host:
         if lib.hasPrefix "http://" host
@@ -46,8 +58,8 @@
         else host;
 
       # Extract upstream from nginx config
-      getDestination = domain: let
-        virtualHost = config.services.nginx.virtualHosts.${domain} or {};
+      getDestination = hostKey: let
+        virtualHost = config.services.nginx.virtualHosts.${hostKey} or {};
         locations = virtualHost.locations or {};
         rootLocation = locations."/" or {};
 
@@ -82,15 +94,23 @@
       shouldExclude = domain:
         excludeJDownloader && lib.hasInfix "jdownloader" (lib.toLower domain);
 
+      # Check if a service URL is valid for cloudflared (no unix sockets)
+      isValidService = service:
+        service != null &&
+        !(lib.hasPrefix "http://unix:" service) &&
+        !(lib.hasPrefix "unix:" service);
+
       # Build ingress rules as an array
       autoDetectedRules =
         lib.foldl' (
-          acc: host: let
-            cleanedDomain = cleanDomain host;
-            destination = getDestination host;
+          acc: hostKey: let
+            # Get actual server name (with dots) not the attribute key (with underscores)
+            serverName = getServerName hostKey;
+            cleanedDomain = cleanDomain serverName;
+            destination = getDestination hostKey;
           in
-            # Skip if excluded or if destination is null/invalid
-            if shouldExclude cleanedDomain || destination == null
+            # Skip if excluded, destination is null/invalid, or is a unix socket
+            if shouldExclude cleanedDomain || destination == null || !isValidService destination
             then acc
             else
               acc
@@ -202,7 +222,12 @@
           RestartSec = "30s";
         };
         script = let
-          domainNames = map cleanDomain nginxHosts;
+          # Get actual server names, not attribute keys
+          # Filter out null values first
+          domainNames = builtins.filter (d: d != null) (map (hostKey: 
+            let serverName = getServerName hostKey;
+            in if serverName != null then cleanDomain serverName else null
+          ) nginxHosts);
           # Filter out localhost
           validDomains = builtins.filter (d: d != "localhost") domainNames;
           routeCommands = lib.concatStringsSep "\n" (map (d: ''
