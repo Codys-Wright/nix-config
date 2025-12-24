@@ -33,6 +33,9 @@
       description = "Self-hosting services user (starcommand)";
 
       includes = [
+        # Basic user setup with admin privileges (sets initialPassword = "password")
+        <FTS.user/admin>
+
         # Include the FTS.selfhost module which has all the SelfHostBlocks configuration
         (FTS.selfhost {})
       ];

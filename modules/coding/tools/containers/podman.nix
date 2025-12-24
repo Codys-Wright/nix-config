@@ -27,11 +27,6 @@
 
       # Create podman group for rootless container access
       users.groups.podman = {};
-
-      # Add user to podman group for rootless container access
-      # Note: This assumes the user is "cody" - in a multi-user setup,
-      # this would need to be parameterized
-      users.users.cody.extraGroups = ["podman"];
     };
 
     homeManager = {

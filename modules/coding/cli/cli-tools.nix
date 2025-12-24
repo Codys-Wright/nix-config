@@ -20,6 +20,7 @@
       environment.systemPackages = with pkgs; [
         gcc
         ripgrep
+        just
         openssl
         openssl.dev
         openssl_3
