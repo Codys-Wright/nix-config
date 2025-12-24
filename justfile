@@ -65,6 +65,103 @@ beacon-vm *args:
     @echo "Starting beacon VM for testing..."
     @nix run .#beacon-vm -- {{args}}
 
+# Install any host using nixos-anywhere (auto-detects primary disk)
+# Usage: just install <hostname> -i <ip> [-p <port>] [--password <password>]
+# Examples:
+#   just install starcommand -i localhost -p 2222  # Beacon VM
+#   just install starcommand -i localhost -p 2222 --password word1-word2-word3
+#   just install THEBATTLESHIP -i 192.168.1.100  # Real hardware
+install host *args:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    
+    # Default values
+    PORT="22"
+    IP=""
+    PASSWORD=""
+    USE_PASSWORD=false
+    
+    # Convert just args to array
+    eval "set -- {{args}}"
+    
+    # Parse arguments
+    while [[ $# -gt 0 ]]; do
+      case $1 in
+        -p|--port)
+          PORT="$2"
+          shift 2
+          ;;
+        -i|--ip)
+          IP="$2"
+          shift 2
+          ;;
+        --password)
+          PASSWORD="$2"
+          USE_PASSWORD=true
+          shift 2
+          ;;
+        *)
+          echo "Unknown option: $1"
+          echo "Usage: just install <hostname> -i <ip> [-p <port>] [--password <password>]"
+          echo ""
+          echo "Examples:"
+          echo "  just install starcommand -i localhost -p 2222"
+          echo "  just install starcommand -i localhost -p 2222 --password word1-word2-word3"
+          echo "  just install THEBATTLESHIP -i 192.168.1.100"
+          exit 1
+          ;;
+      esac
+    done
+    
+    # Validate IP is provided
+    if [ -z "$IP" ]; then
+      echo "Error: -i <ip> is required"
+      echo "Usage: just install <hostname> -i <ip> [-p <port>] [--password <password>]"
+      exit 1
+    fi
+    
+    echo "======================================"
+    echo "Installing {{host}}"
+    echo "======================================"
+    echo "Target: installer@$IP:$PORT"
+    echo "Auth: $(if $USE_PASSWORD; then echo "Password"; else echo "SSH Key"; fi)"
+    echo ""
+    echo "Note: Hardware configuration will be generated with nixos-facter"
+    echo "      Disko will auto-detect the primary disk on the target"
+    echo "      SSH to check disks: ssh -p $PORT installer@$IP lsblk"
+    echo ""
+    
+    # Build nixos-anywhere command
+    # Use --target-host for proper SSH connection
+    # Generate facter.json for hardware detection
+    if $USE_PASSWORD; then
+      # Use sshpass for password authentication
+      export SSHPASS="$PASSWORD"
+      nix run github:nix-community/nixos-anywhere -- \
+        --flake ".#{{host}}" \
+        --target-host "installer@$IP" \
+        --generate-hardware-config nixos-facter "hosts/{{host}}/facter.json" \
+        --ssh-option "StrictHostKeyChecking=no" \
+        --ssh-option "UserKnownHostsFile=/dev/null" \
+        --ssh-option "PubkeyAuthentication=no" \
+        --env-password \
+        --ssh-port "$PORT" \
+        --print-build-logs
+    else
+      # Use SSH key authentication
+      nix run github:nix-community/nixos-anywhere -- \
+        --flake ".#{{host}}" \
+        --target-host "installer@$IP" \
+        --generate-hardware-config nixos-facter "hosts/{{host}}/facter.json" \
+        --ssh-option "StrictHostKeyChecking=no" \
+        --ssh-option "UserKnownHostsFile=/dev/null" \
+        --ssh-port "$PORT" \
+        --print-build-logs
+    fi
+    
+    echo ""
+    echo "✓ Installation complete!"
+
 # Test any host in QEMU VM (GUI by default)
 # Usage: just vm starcommand               (GUI with default ports)
 # Usage: just vm starcommand --no-gui      (headless mode)
