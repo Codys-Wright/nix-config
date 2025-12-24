@@ -9,9 +9,26 @@
   den.hosts.x86_64-linux = {
     starcommand = {
       description = "Dedicated selfhosting server";
-      users.guest = {}; # Minimal guest user for bootstrap (no secrets required)
-      # users.starcommand = {}; # Service user for self-hosting infrastructure (add back after bootstrap)
+      users.guest = {}; # Minimal guest user for bootstrap
+      users.starcommand = {}; # Service user for self-hosting infrastructure
       aspect = "starcommand-host"; # Use unique name to avoid conflict with user aspect
+
+      # Use nixpkgs-unstable with selfhostblocks patches applied
+      # This gives us the latest packages plus LLDAP/borgbackup enhancements
+      instantiate = args: let
+        system = "x86_64-linux";
+        # Get pkgs from nixpkgs for applyPatches
+        pkgs' = inputs.nixpkgs.legacyPackages.${system};
+        # Apply selfhostblocks patches to our unstable nixpkgs
+        shbPatches = inputs.selfhostblocks.lib.${system}.patches;
+        patchedNixpkgs = pkgs'.applyPatches {
+          name = "nixpkgs-unstable-shb-patched";
+          src = inputs.nixpkgs; # Use our nixpkgs-unstable
+          patches = shbPatches;
+        };
+        nixosSystem' = import "${patchedNixpkgs}/nixos/lib/eval-config.nix";
+      in
+        nixosSystem' (args // {inherit system;});
     };
   };
 

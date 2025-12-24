@@ -161,8 +161,8 @@
           services.openssh = {
             enable = true;
             settings = {
-              PermitRootLogin = lib.mkForce "no";
-              PasswordAuthentication = lib.mkForce false;
+              PermitRootLogin = lib.mkDefault "prohibit-password";
+              PasswordAuthentication = lib.mkDefault true;
             };
             ports = [ 22 ];
           };
