@@ -15,13 +15,18 @@
         # Regular keybindings
         bind = [
           # Applications (with run-or-raise)
-          "$mod, RETURN, exec, run-or-raise kitty" # Kitty
-          "$mod, E, exec, run-or-raise nautilus" # Nautilus
-          "$mod, B, exec, run-or-raise brave" # Brave
-          "SUPER_SHIFT, L, exec, ${pkgs.hyprlock}/bin/hyprlock" # Lock
+          "$mod, RETURN, exec, run-or-raise kitty" # Kitty terminal (default)
+          "$mod, T, exec, run-or-raise ghostty" # Ghostty terminal
+          "$mod, N, exec, run-or-raise obsidian" # Obsidian notes
+          "$mod, B, exec, run-or-raise brave" # Brave browser
+          "$mod, M, exec, run-or-raise WebApp-youtube firefox" # YouTube webapp
+          "$mod, A, exec, run-or-raise WebApp-chatgpt firefox" # ChatGPT webapp
+          "$mod, E, exec, run-or-raise WebApp-gmail firefox" # Gmail webapp
+          "SUPER_SHIFT, L, exec, ${pkgs.hyprlock}/bin/hyprlock" # Lock screen
           "$mod, X, exec, power-menu" # Powermenu
-          "$mod, SPACE, exec, launcher" # Launcher
-          "$mod, W, exec, hyprland-workflow-switcher --select walker" # Workflow switcher
+          "$mod, SPACE, exec, walker" # Application launcher (Walker)
+          "$mod, W, exec, hyprland-workflow-switcher --select 'walker --dmenu --placeholder \"Select Workflow:\"'" # Workflow switcher
+          "SUPER_SHIFT, A, exec, hyprland-manager" # Hyprland Manager (Appearance)
           "SUPER_SHIFT, SPACE, exec, hyprfocus-toggle" # Toggle HyprFocus
 
           # Window management

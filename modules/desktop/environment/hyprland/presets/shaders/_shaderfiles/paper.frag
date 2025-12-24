@@ -1,3 +1,5 @@
+#version 300 es
+
 // Paper/e-ink effect shader for Hyprland
 // Simulates a grayscale e-ink display with optional quantization and paper grain
 // Author: khing
@@ -42,7 +44,6 @@ Use 'inc' to indicate that this is an "include" file for custom defines.
 #define PAPER_GRAIN 0.7
 #endif
 
-#version 300 es
 precision highp float;
 in vec2 v_texcoord;
 out vec4 fragColor;

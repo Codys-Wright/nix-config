@@ -1,3 +1,5 @@
+#version 300 es
+
 // from https://github.com/hyprwm/Hyprland/issues/1140#issuecomment-1335128437
 
 
@@ -19,7 +21,6 @@ We only need to match the file name and use 'inc' to incdicate that
 
 
  */
-#version 300 es
 
 #ifndef BLUE_LIGHT_FILTER_TEMPERATURE
     #define BLUE_LIGHT_FILTER_TEMPERATURE 3000.0 // Default fallback value

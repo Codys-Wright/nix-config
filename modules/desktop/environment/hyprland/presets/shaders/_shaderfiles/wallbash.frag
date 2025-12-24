@@ -1,3 +1,5 @@
+#version 300 es
+
 // Wallbash Shader for Hyprland - Applies a color tint to background blur
 //  by: khing
 
@@ -22,7 +24,6 @@ We only need to match the file name and use 'inc' to incdicate that
   └────────────────────────────────────────────────────────────────────────────┘
  */
 
-#version 300 es
 precision highp float;
 in vec2 v_texcoord;
 out vec4 fragColor;

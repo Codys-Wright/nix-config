@@ -32,6 +32,25 @@
       options.deployment = {
         enable = lib.mkEnableOption "deployment configuration" // { default = true; };
         
+        # Deploy-rs configuration
+        ip = lib.mkOption {
+          type = lib.types.str;
+          default = "";
+          description = "IP address or hostname for deploy-rs connections";
+        };
+        
+        sshPort = lib.mkOption {
+          type = lib.types.int;
+          default = 22;
+          description = "SSH port for deploy-rs connections";
+        };
+        
+        sshUser = lib.mkOption {
+          type = lib.types.str;
+          default = "admin";
+          description = "SSH user for deploy-rs connections";
+        };
+        
         # Network configuration
         staticNetwork = lib.mkOption {
           type = lib.types.nullOr (lib.types.submodule {

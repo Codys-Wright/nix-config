@@ -1,3 +1,5 @@
+#version 300 es
+
 // Invert colors shader
 // Known to have some quirks with some frames, example: when exiting an application,animations, and some blur effects
 // https://github.com/HyDE-Project/HyDE/pull/656
@@ -21,7 +23,6 @@ Example:
 #define INVERT_COLORS_INTENSITY 1.0// Default fallback value
 #endif
 
-#version 300 es
 precision highp float;
 in vec2 v_texcoord;
 out vec4 fragColor;

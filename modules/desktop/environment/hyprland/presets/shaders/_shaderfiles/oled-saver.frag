@@ -1,3 +1,5 @@
+#version 300 es
+
 // Credit: https://github.com/mklan/hyproled/blob/main/hyproled
 // LICENSE: BSD-3-Clause
 
@@ -35,7 +37,6 @@ this is an "include" file.
 └────────────────────────────────────────────────────────────────────────────┘
 */
 
-#version 300 es
 #define HYPRLAND_HOOK debug:damage_tracking false
 
 #ifndef OLED_MONITOR

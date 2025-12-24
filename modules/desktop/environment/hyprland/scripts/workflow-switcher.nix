@@ -19,6 +19,13 @@
           hyprConfDir="$confDir/hypr"
           profiles_dir="$hyprConfDir/profiles"
           profile_conf_path="$hyprConfDir/profile.conf"
+          runtime_anim_path="$hyprConfDir/runtime-animation.conf"
+          runtime_shader_path="$hyprConfDir/runtime-shader.conf"
+          runtime_decor_path="$hyprConfDir/runtime-decoration.conf"
+          runtime_layout_path="$hyprConfDir/runtime-layout.conf"
+          runtime_cursor_path="$hyprConfDir/runtime-cursor.conf"
+          runtime_wrules_path="$hyprConfDir/runtime-window-rules.conf"
+          runtime_wsrules_path="$hyprConfDir/runtime-workspace-rules.conf"
 
           # Get a Hyprland variable from a config file
           get_hypr_variable() {
@@ -40,7 +47,53 @@
           # Set the active profile
           set_profile() {
             selected_profile="$1"
-            ${pkgs.coreutils}/bin/ln -sf "$profiles_dir/''${selected_profile}.conf" "$hyprConfDir/profile.conf"
+            profile_path="$profiles_dir/''${selected_profile}.conf"
+            
+            # Link profile settings
+            ${pkgs.coreutils}/bin/ln -sf "$profile_path" "$hyprConfDir/profile.conf"
+            
+            # Extract animation preference from profile metadata
+            animation=$(get_hypr_variable "ANIMATION" "$profile_path" 2>/dev/null || echo "standard")
+            if [[ -n "$animation" && "$animation" != "standard" ]]; then
+              echo "source = ./presets/animations/''${animation}.conf" > "$runtime_anim_path"
+            else
+              echo "source = ./presets/animations/standard.conf" > "$runtime_anim_path"
+            fi
+            
+            # Extract shader preference from profile metadata
+            shader=$(get_hypr_variable "SHADER" "$profile_path" 2>/dev/null || echo "")
+            if [[ -n "$shader" && "$shader" != "null" ]]; then
+              # Use decoration:screen_shader syntax for proper merging
+              echo "decoration:screen_shader = ./presets/shaders/''${shader}" > "$runtime_shader_path"
+            else
+              # Clear shader if none specified or null
+              ${pkgs.coreutils}/bin/rm -f "$runtime_shader_path"
+              ${pkgs.coreutils}/bin/touch "$runtime_shader_path"
+            fi
+            
+            # Extract decoration preference from profile metadata
+            decoration=$(get_hypr_variable "DECORATION" "$profile_path" 2>/dev/null || echo "elegant")
+            echo "source = ./presets/decorations/''${decoration}.conf" > "$runtime_decor_path"
+            
+            # Extract layout preference from profile metadata
+            layout=$(get_hypr_variable "LAYOUT" "$profile_path" 2>/dev/null || echo "dwindle-default")
+            echo "source = ./presets/layouts/''${layout}.conf" > "$runtime_layout_path"
+            
+            # Extract cursor preference from profile metadata
+            cursor=$(get_hypr_variable "CURSOR" "$profile_path" 2>/dev/null || echo "default")
+            echo "source = ./presets/cursor/''${cursor}.conf" > "$runtime_cursor_path"
+            
+            # Extract window-rules preference from profile metadata
+            wrules=$(get_hypr_variable "WINDOW_RULES" "$profile_path" 2>/dev/null || echo "default")
+            echo "source = ./presets/window-rules/''${wrules}.conf" > "$runtime_wrules_path"
+            
+            # Extract workspace-rules preference from profile metadata
+            wsrules=$(get_hypr_variable "WORKSPACE_RULES" "$profile_path" 2>/dev/null || echo "default")
+            echo "source = ./presets/workspace-rules/''${wsrules}.conf" > "$runtime_wsrules_path"
+            
+            # Reload Hyprland to apply the new profile
+            hyprctl reload
+            
             ${pkgs.libnotify}/bin/notify-send -i "preferences-desktop-display" "Workflow Switched" "Switched to workflow: ''${selected_profile}"
           }
 

@@ -22,6 +22,42 @@
     # Cody user aspect - includes user-specific configurations
     aspects.cody = {
       description = "Cody user configuration";
+      
+      homeManager = {...}: {
+        # Firefox WebApps configuration
+        programs.firefox.webapps = {
+          # YouTube
+          youtube = {
+            url = "https://youtube.com";
+            id = 1;
+            name = "YouTube";
+            icon = "youtube";
+            categories = ["AudioVideo" "Video"];
+            theme = "dark";
+          };
+
+          # ChatGPT
+          chatgpt = {
+            url = "https://chatgpt.com";
+            id = 2;
+            name = "ChatGPT";
+            icon = "chatgpt";
+            categories = ["Office" "Utility"];
+            theme = "dark";
+          };
+
+          # Gmail
+          gmail = {
+            url = "https://gmail.com";
+            id = 3;
+            name = "Gmail";
+            icon = "gmail";
+            categories = ["Office" "Email"];
+            theme = "light";
+          };
+        };
+      };
+      
       includes = [
         # Applications - all included by default
         <FTS.apps/browsers>
@@ -50,6 +86,9 @@
         FTS.mactahoe
         FTS.apple-fonts
         FTS.stylix
+
+        # Desktop environment
+        <FTS.desktop/environment/hyprland>
 
         # Keyboard configuration (Kanata)
         <FTS.keyboard>

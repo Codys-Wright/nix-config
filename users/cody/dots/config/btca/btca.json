@@ -62,6 +62,48 @@
       "url": "https://github.com/lucas-barake/practical-effect-capstone",
       "branch": "main",
       "specialNotes": "A reference implementation of effect httpapi and database schema migrations etc"
+    },
+    {
+      "name": "flake-aspects",
+      "url": "https://github.com/vic/flake-aspects.git",
+      "branch": "main",
+      "specialNotes": "How aspects are structured"
+    },
+    {
+      "name": "import-tree",
+      "url": "https://github.com/vic/import-tree.git",
+      "branch": "main",
+      "specialNotes": "How files are imported"
+    },
+    {
+      "name": "flake-file",
+      "url": "https://github.com/vic/flake-file.git",
+      "branch": "main",
+      "specialNotes": "How the flake file is generated"
+    },
+    {
+      "name": "den",
+      "url": "https://github.com/vic/den.git",
+      "branch": "main",
+      "specialNotes": "How hosts are defined"
+    },
+    {
+      "name": "selfhostblocks",
+      "url": "https://github.com/ibizaman/selfhostblocks.git",
+      "branch": "main",
+      "specialNotes": "All selfhosting related services"
+    },
+    {
+      "name": "skarabox",
+      "url": "https://github.com/ibizaman/skarabox.git",
+      "branch": "main",
+      "specialNotes": "Example system deployment for secrets management and deployments"
+    },
+    {
+      "name": "deploy-rs",
+      "url": "https://github.com/serokell/deploy-rs.git",
+      "branch": "master",
+      "specialNotes": "NixOS deployment tool"
     }
   ],
   "model": "claude-haiku-4-5",
