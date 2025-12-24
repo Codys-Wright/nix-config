@@ -23,7 +23,7 @@
       ];
 
       # Minimal home-manager config
-      homeManager = { pkgs, ... }: {
+      homeManager = {pkgs, ...}: {
         home.packages = with pkgs; [
           vim
           htop
