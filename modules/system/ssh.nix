@@ -1,9 +1,10 @@
 # SSH server configuration
-{
-  FTS,
-  ...
-}:
-let
+{FTS, ...}: let
+  # Personal SSH public keys - these users can SSH into any fleet machine
+  personalKeys = {
+    cody = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO8y8AMfYQnvu3BvjJ54/qYJcedNkMHmnjexine1ypda cody";
+  };
+
   # Fleet SSH public keys - allows any of our machines to SSH into any other
   # These are the deploy keys from hosts/<hostname>/ssh.pub
   fleetKeys = {
@@ -11,21 +12,25 @@ let
     starcommand = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILBJxxU1TXbV1IvGFm67X7jX+C7uRtLcgimcoDGxapNP starcommand-deploy";
   };
 
-  # All fleet keys as a list
-  allFleetKeys = builtins.attrValues fleetKeys;
-in
-{
+  # All keys (personal + fleet) as a list
+  allFleetKeys = (builtins.attrValues personalKeys) ++ (builtins.attrValues fleetKeys);
+in {
   FTS.system._.ssh = {
     description = "SSH server configuration with secure defaults and fleet access";
 
-    nixos = { config, lib, pkgs, ... }: {
+    nixos = {
+      config,
+      lib,
+      pkgs,
+      ...
+    }: {
       services.openssh = {
         enable = lib.mkDefault true;
         settings = {
           PermitRootLogin = lib.mkDefault "prohibit-password";
           PasswordAuthentication = lib.mkDefault true;
         };
-        ports = [ 22 ];
+        ports = [22];
       };
 
       # Allow all fleet machines to SSH into root
@@ -33,8 +38,8 @@ in
     };
   };
 
-  # Export fleet keys for use by other modules
+  # Export keys for use by other modules
+  FTS.system._.ssh.personalKeys = personalKeys;
   FTS.system._.ssh.fleetKeys = fleetKeys;
   FTS.system._.ssh.allFleetKeys = allFleetKeys;
 }
-
