@@ -62,7 +62,7 @@
         <FTS.keyboard>
 
         # Deployment configuration (SSH, networking, secrets, VM/ISO generation)
-        <FTS.deployment>
+        (<FTS.deployment> {})
 
         # Self-hosting services are provided by the starcommand user
         # See users/starcommand/starcommand.nix for service configuration
