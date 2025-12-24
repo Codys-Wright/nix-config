@@ -41,10 +41,9 @@
         <FTS.kernel>
 
         # Disk configuration with disko (for automated installation)
-        # Defaults to /dev/vda for VMs, can be changed for real hardware
         (<FTS.system/disk> {
           type = "btrfs-impermanence";
-          device = "/dev/vda";
+          device = "/dev/nvme0n1";
           persistFolder = "/persist";
         })
 
@@ -52,7 +51,7 @@
         (<FTS.deployment> {
           ip = "192.168.0.102";
           sshPort = 22;
-          sshUser = "root";
+          sshUser = "starcommand";
         })
 
         FTS.gdm
