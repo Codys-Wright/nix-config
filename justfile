@@ -37,19 +37,54 @@ build host:
         exit 1; \
     fi
 
-# Build the universal beacon ISO for installing any host
-# Usage: just beacon
-beacon:
-    @echo "Building universal beacon ISO..."
-    @nix build .#nixosConfigurations.beacon.config.system.build.isoImage
-    @echo "Beacon ISO built successfully!"
-    @if [ -L result ]; then \
-        echo "ISO location: $(readlink -f result)/iso/beacon.iso"; \
-        echo ""; \
-        echo "To write to USB: just beacon-usb"; \
-        echo "To install a host: nix run .#HOSTNAME-install-on-beacon"; \
-    else \
-        echo "Build result: result/"; \
+# Build the universal beacon ISO and optionally copy to a path
+# Usage: just beacon              (build only, shows path)
+# Usage: just beacon -p ~/beacon.iso   (build and copy to path)
+beacon *args:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    
+    # Parse arguments
+    OUTPUT_PATH=""
+    eval "set -- {{args}}"
+    while [[ $# -gt 0 ]]; do
+      case $1 in
+        -p|--path)
+          OUTPUT_PATH="$2"
+          shift 2
+          ;;
+        *)
+          echo "Unknown option: $1"
+          echo "Usage: just beacon [-p <output-path>]"
+          exit 1
+          ;;
+      esac
+    done
+    
+    echo "Building universal beacon ISO..."
+    nix build .#nixosConfigurations.beacon.config.system.build.isoImage
+    
+    if [ -L result ]; then
+      ISO_PATH="$(readlink -f result)/iso/beacon.iso"
+      echo "✓ Beacon ISO built successfully!"
+      echo ""
+      
+      if [ -n "$OUTPUT_PATH" ]; then
+        # Expand ~ to home directory
+        OUTPUT_PATH="${OUTPUT_PATH/#\~/$HOME}"
+        cp "$ISO_PATH" "$OUTPUT_PATH"
+        echo "✓ ISO copied to: $OUTPUT_PATH"
+        echo ""
+        echo "To write to USB: just beacon-usb"
+      else
+        echo "ISO location: $ISO_PATH"
+        echo ""
+        echo "To copy: just beacon -p ~/beacon.iso"
+        echo "To write to USB: just beacon-usb"
+        echo "To install a host: just install <hostname> -i <ip> -p 2222"
+      fi
+    else
+      echo "Build result: result/"
     fi
 
 # Write beacon ISO to USB drive
