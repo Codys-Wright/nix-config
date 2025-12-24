@@ -12,10 +12,14 @@ let
   getDeploymentConfig = hostName: hostConfig:
     let
       cfg = hostConfig.config.deployment or { };
+      # Check if deployment is enabled AND ip is set (non-empty string)
+      isDeployable = (cfg.enable or false) && (cfg.ip or "") != "";
     in
-    if cfg.enable then {
+    if isDeployable then {
       inherit hostName;
-      inherit (cfg) ip sshPort sshUser;
+      ip = cfg.ip;
+      sshPort = cfg.sshPort or 22;
+      sshUser = cfg.sshUser or "admin";
       # SSH key is in SOPS, will be decrypted on-demand
       # Public keys and known_hosts are still files
       hostKeyPub = "./hosts/${hostName}/host_key.pub";

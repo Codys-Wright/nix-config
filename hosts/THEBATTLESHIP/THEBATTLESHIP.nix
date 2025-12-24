@@ -41,7 +41,6 @@
 
         # Complete desktop setup (environment + display manager + bootloader)
         <FTS.desktop/environment/gnome>
-        <FTS.desktop/environment/hyprland>
         FTS.gdm
         (FTS.grub {
           uefi = true;

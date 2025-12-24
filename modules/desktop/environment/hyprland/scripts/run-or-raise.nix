@@ -42,9 +42,29 @@
               CLASS="kitty"
               COMMAND="${pkgs.kitty}/bin/kitty $EXTRA_ARGS"
               ;;
+            ghostty)
+              CLASS="com.mitchellh.ghostty"
+              COMMAND="${pkgs.ghostty}/bin/ghostty $EXTRA_ARGS"
+              ;;
+            obsidian)
+              CLASS="obsidian"
+              COMMAND="${pkgs.obsidian}/bin/obsidian $EXTRA_ARGS"
+              ;;
             nautilus)
               CLASS="org.gnome.Nautilus"
               COMMAND="${pkgs.nautilus}/bin/nautilus $EXTRA_ARGS"
+              ;;
+            WebApp-youtube)
+              CLASS="WebApp-youtube"
+              COMMAND="gtk-launch youtube.desktop"
+              ;;
+            WebApp-chatgpt)
+              CLASS="WebApp-chatgpt"
+              COMMAND="gtk-launch chatgpt.desktop"
+              ;;
+            WebApp-gmail)
+              CLASS="WebApp-gmail"
+              COMMAND="gtk-launch gmail.desktop"
               ;;
             *)
               # Default: use app name as both class and command

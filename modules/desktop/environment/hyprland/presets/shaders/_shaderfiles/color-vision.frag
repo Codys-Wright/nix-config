@@ -1,3 +1,5 @@
+#version 300 es
+
 // Color Vision Shader for Hyprland - Simulates and compensates for color vision deficiency (CVD)
 //  by: khing
 
@@ -14,7 +16,6 @@
 To override this parameters create a file named './color-vision.inc'
 We only need to match the file name and use 'inc' to indicate that
  this is an "include" file
- NOTE: You also need to restate the #version  on top example: #version 300 es
  Example: 
   ┌────────────────────────────────────────────────────────────────────────────┐
   │  //file: ./color-vision.inc                                                │
@@ -26,7 +27,6 @@ We only need to match the file name and use 'inc' to indicate that
   └────────────────────────────────────────────────────────────────────────────┘
  */
 
-#version 300 es
 
 #ifndef COLOR_VISION_MODE
     #define COLOR_VISION_MODE 0 // Default fallback value

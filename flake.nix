@@ -32,6 +32,7 @@
       flake = false;
       url = "github:doomemacs/doomemacs";
     };
+    elephant.url = "github:abenz1267/elephant";
     flake-aspects.url = "github:vic/flake-aspects";
     flake-file.url = "github:vic/flake-file";
     flake-parts = {
@@ -83,6 +84,10 @@
       url = "github:danth/stylix";
     };
     systems.url = "github:nix-systems/default";
+    walker = {
+      inputs.elephant.follows = "elephant";
+      url = "github:abenz1267/walker";
+    };
     wrappers.url = "github:lassulus/wrappers";
     zellij-nix.url = "github:a-kenji/zellij-nix";
     zen-browser = {

@@ -1,3 +1,5 @@
+#version 300 es
+
 // Hyde Shader for Hyprland - Combined shader with all effects
 // Mix and match effects by changing the define values below
 //  by: khing
@@ -120,7 +122,6 @@ Example:
 #define COLOR_VISION_INTENSITY 0.0// Intensity of color vision effect (0.0-1.0)
 #endif
 
-#version 300 es
 precision highp float;
 in vec2 v_texcoord;
 out vec4 fragColor;

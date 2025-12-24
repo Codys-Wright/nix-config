@@ -1,3 +1,6 @@
+#version 300 es
+
+
 // Vibrance Shader for Hyprland - Enhances color vibrance while preserving skin tones
 //  by: khing
 
@@ -36,8 +39,6 @@ We only need to match the file name and use 'inc' to incdicate that
 #ifndef SHADER_VIBRANCE_SKIN_TONE_PROTECTION
     #define SHADER_VIBRANCE_SKIN_TONE_PROTECTION 0.75  // Default fallback value
 #endif
-
-#version 300 es
 precision highp float;
 in vec2 v_texcoord;
 out vec4 fragColor;

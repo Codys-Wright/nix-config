@@ -50,28 +50,39 @@ Organized in `presets/shaders/`:
 modules/desktop/environment/hyprland/
 ├── workflows/
 │   ├── workflows.nix          # Main workflow module
+│   ├── _profiles/             # Individual profile files (NEW!)
+│   │   │                      # (underscore prevents import-tree auto-import)
+│   │   ├── default.nix        # Balanced workflow
+│   │   ├── focus.nix          # Minimal distractions
+│   │   ├── gaming.nix         # Maximum performance
+│   │   ├── development.nix    # Clean and functional
+│   │   ├── music-production.nix # Smooth and creative
+│   │   ├── aesthetic.nix      # Beautiful eye candy
+│   │   └── crazy.nix          # Wild effects
 │   └── README.md             # Documentation
 ├── presets/
-│   ├── animations/           # 19 .nix files
+│   ├── animations/           # 19 .nix files (auto-discovered)
 │   │   ├── classic.nix
 │   │   ├── fast.nix
 │   │   └── ... (17 more)
 │   └── shaders/
 │       ├── shaders.nix       # Single module for all shaders
 │       ├── README.md        # Shader documentation
-│       └── _shaderfiles/    # Actual GLSL files
+│       └── _shaderfiles/    # Actual GLSL files (auto-discovered)
 │           ├── blue-light-filter.frag
 │           ├── grayscale.frag
 │           └── ... (8 more)
 ├── scripts/
 │   ├── run-or-raise.nix
-│   └── workflow-switcher.nix # Workflow switching script
+│   └── workflow-switcher.nix # Workflow switching script (includes hyprctl reload)
+├── apps/
+│   └── walker.nix            # Walker + Elephant integration
 ├── config/
 │   ├── binds.nix            # Added $mod+W keybinding
 │   ├── settings.nix         # Added workflow notes
 │   ├── monitors.nix
 │   └── rules.nix
-└── hyprland.nix             # Includes workflows aspect
+└── hyprland.nix             # Auto-imports profiles from workflows/profiles/
 
 Generated at runtime:
 ~/.config/hypr/
@@ -86,70 +97,41 @@ Generated at runtime:
 
 ### 1. Enable in Your Config
 
-In your Home Manager configuration (e.g., `users/cody/cody.nix`):
+The system comes with **7 pre-built profiles** that are automatically loaded:
+- `default` - Balanced workflow
+- `Focus` - Minimal distractions
+- `Gaming` - Maximum performance  
+- `Development` - Clean and functional
+- `Music-Production` - Smooth and creative
+- `Aesthetic` - Beautiful eye candy
+- `Crazy` - Wild effects
+
+To enable workflows in your Hyprland config, workflows are **already enabled by default** in `hyprland.nix`!
+
+### 2. Add Custom Profiles (Optional)
+
+To add your own profile, create a new `.nix` file in `workflows/_profiles/`:
 
 ```nix
-wayland.windowManager.hyprland.workflows = {
-  enable = true;
-  
-  profiles = [
-    {
-      name = "default";
-      animation = "optimized";
-      shader = null;
-      settings = {
-        decoration = {
-          blur.enabled = true;
-          rounding = 10;
-        };
-        general = {
-          gaps_in = 3;
-          gaps_out = 5;
-        };
-      };
-    }
-    {
-      name = "gaming";
-      animation = "disable";
-      shader = null;
-      settings = {
-        decoration = {
-          blur.enabled = false;
-          rounding = 0;
-        };
-        general = {
-          gaps_in = 0;
-          gaps_out = 0;
-        };
-      };
-    }
-    {
-      name = "coding";
-      animation = "fast";
-      shader = "blue-light-filter";
-      settings = {
-        decoration = {
-          blur.enabled = false;
-          rounding = 5;
-        };
-        general = {
-          gaps_in = 5;
-          gaps_out = 8;
-          border_size = 2;
-        };
-      };
-    }
-    {
-      name = "music-production";
-      animation = "minimal-1";
-      shader = null;
-      settings = {
-        misc.vfr = false;  # Fixed FPS for audio
-      };
-    }
-  ];
-};
+# workflows/_profiles/my-custom.nix
+{
+  name = "My-Custom";
+  settings = {
+    source = ["./presets/animations/optimized.conf"];
+    decoration = {
+      blur.enabled = true;
+      rounding = 10;
+      screen_shader = "./presets/shaders/vibrance.frag";
+    };
+    general = {
+      gaps_in = 3;
+      gaps_out = 5;
+    };
+  };
+}
 ```
+
+The profile will be **automatically discovered and loaded** on rebuild - no need to manually add it to any list!
 
 ### 2. Rebuild
 
@@ -174,6 +156,45 @@ hyprland-workflow-switcher --get-current
 # Reset to default
 hyprland-workflow-switcher --reset
 ```
+
+### 4. Customize Appearance at Runtime (NEW!)
+
+**Keybind: `Super + Shift + A`** - Opens Hyprland Manager menu
+
+The Hyprland Manager provides a two-tier menu system for runtime customization:
+
+**Main Menu:**
+- **Animations** - Change animation preset independently of workflow
+- **Shaders** - Apply or disable shader effects
+- **Reset to Workflow Defaults** - Restore workflow's original settings
+
+**Command Line Usage:**
+```bash
+# Open main menu
+hyprland-manager
+
+# Direct to animations menu
+hyprland-manager --animations
+
+# Direct to shaders menu
+hyprland-manager --shaders
+
+# Reset to workflow defaults
+hyprland-manager --reset
+```
+
+**How It Works:**
+1. Workflow profiles declare animation/shader preferences via metadata
+2. Preferences are written to `runtime-animation.conf` and `runtime-shader.conf`
+3. You can override these at any time via the Hyprland Manager
+4. Changes apply immediately with hot reload
+5. Switch workflows to get new defaults, or reset to restore workflow settings
+
+**Example Flow:**
+1. Switch to "Gaming" workflow → Gets `fast` animations + `vibrance.frag` shader
+2. Press `Super+Shift+A` → Animations → Select `minimal-1` → Animations change instantly
+3. Press `Super+Shift+A` → Shaders → Select `None` → Shader removed
+4. Press `Super+Shift+A` → Reset → Back to Gaming workflow's defaults
 
 ## 🎨 Adding New Shaders
 
@@ -215,6 +236,9 @@ The shader will automatically include it.
 ✅ **Fast Switching** - Instant workflow changes  
 ✅ **Walker Integration** - Beautiful menu ($mod + W)  
 ✅ **User Customization** - Override shader params with `.inc` files  
+✅ **Runtime Modularity** - Change animations/shaders independently ($mod + Shift + A)  
+✅ **Hot Reloading** - See changes immediately with `hyprctl reload`  
+✅ **Two-Tier Menu** - Organized Hyprland Manager menu system  
 
 ## 📚 Documentation
 
