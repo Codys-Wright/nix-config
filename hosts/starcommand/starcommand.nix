@@ -61,6 +61,13 @@
           sshUser = "root";
         })
 
+        <FTS.coding/cli>
+        <FTS.coding/editors>
+        <FTS.coding/terminals>
+        <FTS.coding/shells>
+        <FTS.coding/lang>
+        <FTS.coding/tools>
+
         # Self-hosting services are provided by the starcommand user
         # See users/starcommand/starcommand.nix for service configuration
       ];

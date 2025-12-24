@@ -3,6 +3,8 @@
 {
   den,
   __findFile,
+  FTS,
+  pkgs,
   ...
 }: {
   # see also defaults.nix where static settings are set.
@@ -16,6 +18,7 @@
       den.aspects.dendritic._.user # User account setup
       den.aspects.dendritic._.host # Hostname configuration
       den.aspects.dendritic._.home # Home directory setup
+      FTS.coding._.cli
     ];
     host.includes = [
       <FTS/nh>
@@ -32,6 +35,7 @@
       # Nix configuration (includes nixpkgs overlays, unfree-default, etc.)
       <FTS/nix>
     ];
+
     user.includes = [
       # User-specific modules can be added here
     ];
