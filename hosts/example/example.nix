@@ -25,7 +25,7 @@
         <FTS.kernel>
         
         # Deployment (SSH, networking, secrets, VM/ISO generation)
-        <FTS.deployment>
+        (<FTS.deployment> {})
         
         # Disk configuration (uncomment and configure as needed)
         # (<FTS.system/disk> {

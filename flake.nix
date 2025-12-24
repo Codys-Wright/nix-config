@@ -24,6 +24,7 @@
       url = "github:nix-darwin/nix-darwin";
     };
     den.url = "github:vic/den";
+    deploy-rs.url = "github:serokell/deploy-rs";
     disko = {
       inputs.nixpkgs.follows = "nixpkgs";
       url = "github:nix-community/disko";
