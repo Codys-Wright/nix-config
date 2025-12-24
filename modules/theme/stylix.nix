@@ -29,7 +29,7 @@
         polarity = "dark";
 
         cursor = {
-          name = "MacTahoe-dark Cursors";
+          name = "MacTahoe-dark-cursors";
           package = pkgs.callPackage ../../packages/mactahoe/cursor-theme.nix {};
           size = 24;
         };
