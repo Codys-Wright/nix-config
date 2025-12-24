@@ -45,7 +45,7 @@ iso host:
 deploy host *args:
     #!/usr/bin/env bash
     set -e
-    cd /home/cody/.flake
+    cd "{{justfile_directory()}}"
     
     # Parse arguments for --no-rollback flag
     NO_ROLLBACK=0
@@ -203,7 +203,7 @@ sops-edit:
 edit-secrets name *args:
     #!/usr/bin/env bash
     set -e
-    cd /home/cody/.flake
+    cd "{{justfile_directory()}}"
     HOST_FILE="hosts/{{name}}/secrets.yaml"
     USER_FILE="users/{{name}}/secrets.yaml"
     
@@ -360,7 +360,7 @@ sops-setup host port:
 generate-hardware hostname:
     #!/usr/bin/env bash
     set -e
-    cd /home/cody/.flake
+    cd "{{justfile_directory()}}"
     
     if [ -z "{{hostname}}" ]; then
         echo "Error: Hostname is required"
