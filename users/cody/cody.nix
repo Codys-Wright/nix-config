@@ -22,7 +22,7 @@
     # Cody user aspect - includes user-specific configurations
     aspects.cody = {
       description = "Cody user configuration";
-      
+
       homeManager = {...}: {
         # SSH host aliases for easy access to deployed machines
         programs.ssh = {
@@ -70,7 +70,7 @@
           };
         };
       };
-      
+
       includes = [
         # Applications - all included by default
         <FTS.apps/browsers>
@@ -94,7 +94,7 @@
         # Cody-specific configurations
         cody.dots
         cody.fish
-        
+
         # Theme and fonts
         FTS.mactahoe
         FTS.apple-fonts
