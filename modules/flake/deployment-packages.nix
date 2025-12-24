@@ -204,6 +204,92 @@
             ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p "$PORT" installer@localhost
           '';
         };
+
+        # Simple install command for starcommand
+        starcommand-install = pkgs.writeShellApplication {
+          name = "starcommand-install";
+          runtimeInputs = with pkgs; [
+            nixos-anywhere
+            openssh
+            sshpass
+          ];
+          text = ''
+            set -euo pipefail
+
+            # Default values
+            PORT="22"
+            IP=""
+            PASSWORD=""
+            USE_PASSWORD=false
+
+            # Parse arguments
+            while [[ $# -gt 0 ]]; do
+              case $1 in
+                -p|--port)
+                  PORT="$2"
+                  shift 2
+                  ;;
+                --ip)
+                  IP="$2"
+                  shift 2
+                  ;;
+                --password)
+                  PASSWORD="$2"
+                  USE_PASSWORD=true
+                  shift 2
+                  ;;
+                *)
+                  echo "Unknown option: $1"
+                  echo "Usage: starcommand-install --ip <ip> [-p <port>] [--password <password>]"
+                  echo ""
+                  echo "Examples:"
+                  echo "  starcommand-install --ip localhost -p 2222                    # Use SSH key"
+                  echo "  starcommand-install --ip localhost -p 2222 --password <pass>  # Use password"
+                  exit 1
+                  ;;
+              esac
+            done
+
+            # Validate IP is provided
+            if [ -z "$IP" ]; then
+              echo "Error: --ip is required"
+              echo "Usage: starcommand-install --ip <ip> [-p <port>] [--password <password>]"
+              exit 1
+            fi
+
+            echo "======================================"
+            echo "Installing starcommand"
+            echo "======================================"
+            echo "Target: installer@$IP:$PORT"
+            echo "Auth: $(if $USE_PASSWORD; then echo "Password"; else echo "SSH Key"; fi)"
+            echo ""
+
+            # Build nixos-anywhere command
+            if $USE_PASSWORD; then
+              # Use sshpass for password authentication
+              export SSHPASS="$PASSWORD"
+              nixos-anywhere \
+                --flake ".#starcommand" \
+                --ssh-option "StrictHostKeyChecking=no" \
+                --ssh-option "UserKnownHostsFile=/dev/null" \
+                --ssh-option "PubkeyAuthentication=no" \
+                --env-password \
+                --ssh-port "$PORT" \
+                "installer@$IP"
+            else
+              # Use SSH key authentication
+              nixos-anywhere \
+                --flake ".#starcommand" \
+                --ssh-option "StrictHostKeyChecking=no" \
+                --ssh-option "UserKnownHostsFile=/dev/null" \
+                --ssh-port "$PORT" \
+                "installer@$IP"
+            fi
+
+            echo ""
+            echo "✓ Installation complete!"
+          '';
+        };
       };
     };
 }
