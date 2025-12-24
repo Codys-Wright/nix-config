@@ -30,7 +30,6 @@
       in
         nixosSystem' (args // {inherit system;});
     };
-
   };
 
   # starcommand host-specific aspect (named starcommand-host to avoid conflict with user aspect)
@@ -41,18 +40,12 @@
         <FTS.hardware>
         <FTS.kernel>
 
-        # Disk configuration - existing btrfs layout (no reformatting)
+        # Disk configuration with disko (for automated installation)
+        # Defaults to /dev/vda for VMs, can be changed for real hardware
         (<FTS.system/disk> {
-          type = "btrfs-manual";
-          device = "/dev/nvme0n1";
-          partition = 3; # nvme0n1p3 has the btrfs
-          bootPartition = 1; # nvme0n1p1 is EFI
+          type = "btrfs-impermanence";
+          device = "/dev/vda";
           persistFolder = "/persist";
-          subvolumes = {
-            root = "@root";
-            nix = "@nix";
-            persist = "@persist";
-          };
         })
 
         # Deployment with deploy-rs configuration
