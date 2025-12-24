@@ -4,17 +4,19 @@
   lib,
   FTS,
   ...
-}:
-{
+}: {
   FTS.fonts = {
     description = "Fonts configuration for both NixOS and Darwin";
 
-    nixos = { config, pkgs, lib, ... }:
-    let
+    nixos = {
+      config,
+      pkgs,
+      lib,
+      ...
+    }: let
       inherit (lib) mkIf mkEnableOption mkOption types;
       cfg = config.FTS.fonts;
-    in
-    {
+    in {
       options.FTS.fonts = {
         enable = mkEnableOption "fonts configuration";
 
@@ -34,36 +36,40 @@
       config = mkIf cfg.enable {
         fonts = {
           enableDefaultPackages = true;
-          packages = with pkgs; [
-            # Programming fonts
-            jetbrains-mono
-            fira-code
-            fira-code-symbols
+          packages = with pkgs;
+            [
+              # Programming fonts
+              jetbrains-mono
+              fira-code
+              fira-code-symbols
 
-            # System fonts
-            noto-fonts
-            noto-fonts-cjk
-            noto-fonts-emoji
-            roboto
+              # System fonts
+              noto-fonts
+              noto-fonts-cjk
+              noto-fonts-color-emoji
+              roboto
 
-            # Powerline fonts
-            meslo-lgs-nf
+              # Powerline fonts
+              meslo-lgs-nf
 
-            # Microsoft fonts for compatibility
-            corefonts
-          ]
-          ++ lib.optionals cfg.enableAppleEmoji [
-            inputs.apple-emoji-linux.packages.${pkgs.stdenv.hostPlatform.system}.default or pkgs.noto-fonts-emoji
-          ]
-          ++ cfg.extraFonts;
+              # Microsoft fonts for compatibility
+              corefonts
+            ]
+            ++ lib.optionals cfg.enableAppleEmoji [
+              inputs.apple-emoji-linux.packages.${pkgs.stdenv.hostPlatform.system}.default or pkgs.noto-fonts-emoji
+            ]
+            ++ cfg.extraFonts;
 
           # Font configuration
           fontconfig = {
             defaultFonts = {
-              serif = [ "Noto Serif" ];
-              sansSerif = [ "Noto Sans" ];
-              monospace = [ "JetBrains Mono" ];
-              emoji = if cfg.enableAppleEmoji then [ "Apple Color Emoji" ] else [ "Noto Color Emoji" ];
+              serif = ["Noto Serif"];
+              sansSerif = ["Noto Sans"];
+              monospace = ["JetBrains Mono"];
+              emoji =
+                if cfg.enableAppleEmoji
+                then ["Apple Color Emoji"]
+                else ["Noto Color Emoji"];
             };
 
             # Apple Color Emoji configuration
@@ -107,12 +113,15 @@
       };
     };
 
-    darwin = { config, pkgs, lib, ... }:
-    let
+    darwin = {
+      config,
+      pkgs,
+      lib,
+      ...
+    }: let
       inherit (lib) mkIf mkEnableOption mkOption types;
       cfg = config.FTS.fonts;
-    in
-    {
+    in {
       options.FTS.fonts = {
         enable = mkEnableOption "fonts configuration";
 
@@ -131,21 +140,23 @@
 
       config = mkIf cfg.enable {
         fonts = {
-          packages = with pkgs; [
-            # Programming fonts
-            jetbrains-mono
-            fira-code
-            fira-code-symbols
+          packages = with pkgs;
+            [
+              # Programming fonts
+              jetbrains-mono
+              fira-code
+              fira-code-symbols
 
-            # System fonts
-            noto-fonts
-            noto-fonts-cjk
-            noto-fonts-emoji
-            roboto
+              # System fonts
+              noto-fonts
+              noto-fonts-cjk
+              noto-fonts-emoji
+              roboto
 
-            # Powerline fonts
-            meslo-lgs-nf
-          ] ++ cfg.extraFonts;
+              # Powerline fonts
+              meslo-lgs-nf
+            ]
+            ++ cfg.extraFonts;
         };
       };
     };
