@@ -1,5 +1,6 @@
 {
   FTS,
+  den,
   cody,
   __findFile,
   ...
@@ -72,6 +73,9 @@
       };
 
       includes = [
+        # Home-manager backup system
+        den.aspects.hm-backup
+
         # Applications - all included by default
         <FTS.apps/browsers>
         <FTS.apps/communications>

@@ -74,13 +74,6 @@
               options = [ "subvol=${subvolumes.nix}" ] ++ mountOptions;
             };
 
-            # Make /nix/store read-only
-            "/nix/store" = {
-              device = partitionPath;
-              fsType = "btrfs";
-              options = [ "subvol=${subvolumes.nix}" "ro" "nosuid" "nodev" ] ++ mountOptions;
-            };
-
             "${persistFolder}" = {
               device = partitionPath;
               fsType = "btrfs";

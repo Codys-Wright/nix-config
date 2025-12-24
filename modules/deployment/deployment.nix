@@ -46,6 +46,9 @@
       (FTS.deployment._.bootssh {})
       # WiFi hotspot (disabled by default, set deployment.hotspot.enable = true)
       FTS.deployment._.hotspot
+      FTS.deployment._.wifi
+      FTS.deployment._.tor-ssh
+      FTS.deployment._.restore-remote-access
       # Beacon is for creating installation ISOs - include it separately when needed:
       # (<FTS.deployment/beacon> {})  # Uses deployment.config defaults
       # Note: VM and ISO generation are defined in den.provides (modules/deployment/vm.nix and iso.nix)

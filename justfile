@@ -37,6 +37,41 @@ build host:
         exit 1; \
     fi
 
+# Build the universal beacon ISO for installing any host
+# Usage: just beacon
+beacon:
+    @echo "Building universal beacon ISO..."
+    @nix build .#nixosConfigurations.beacon.config.system.build.isoImage
+    @echo "Beacon ISO built successfully!"
+    @if [ -L result ]; then \
+        echo "ISO location: $(readlink -f result)/iso/beacon.iso"; \
+        echo ""; \
+        echo "To write to USB: just beacon-usb"; \
+        echo "To install a host: nix run .#HOSTNAME-install-on-beacon"; \
+    else \
+        echo "Build result: result/"; \
+    fi
+
+# Write beacon ISO to USB drive
+# Usage: just beacon-usb
+beacon-usb:
+    @nix run .#beacon-usbimager
+
+# Test beacon in QEMU VM (GUI by default)
+# Usage: just beacon-vm                    (GUI with default ports)
+# Usage: just beacon-vm --no-gui           (headless mode)
+# Usage: just beacon-vm 3000 3001          (custom ports)
+beacon-vm *args:
+    @echo "Starting beacon VM for testing..."
+    @nix run .#beacon-vm -- {{args}}
+
+# Test any host in QEMU VM (GUI by default)
+# Usage: just vm starcommand               (GUI with default ports)
+# Usage: just vm starcommand --no-gui      (headless mode)
+vm host *args:
+    @echo "Starting {{host}} VM for testing..."
+    @nix run .#{{host}}-vm -- {{args}}
+
 # Build an ISO image for a NixOS host
 # Usage: just iso dave
 iso host:
@@ -92,12 +127,7 @@ deploy host *args:
         --ssh-opts "-i $TEMP_KEY -o StrictHostKeyChecking=no" \
         ".#{{host}}"
 
-# Run a VM for a NixOS host
-# Usage: just vm dave
-# This launches a QEMU/KVM VM with your NixOS configuration
-vm host:
-    @echo "Launching VM for {{host}}..."
-    @nix run .#vm-{{host}}
+# Run a VM for a NixOS host (old vm command removed - use the new one at line 70)
 
 # Check VM CPU cores and memory (run this inside the VM)
 # Usage: Inside the VM, run: nproc, lscpu, or free -h
