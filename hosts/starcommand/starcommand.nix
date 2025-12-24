@@ -100,14 +100,14 @@
           options = ["rw" "uid=0" "gid=0" "dmask=000" "fmask=000" "nofail"];
         };
         fileSystems."/mnt/disks/sdb" = {
-          device = "/dev/sdb2";
+          device = "/dev/sdc2";
           fsType = "ntfs-3g";
           options = ["rw" "uid=0" "gid=0" "dmask=000" "fmask=000" "nofail"];
         };
 
         # MergerFS mount combining all disks
         fileSystems."/mnt/storage" = {
-          device = "/mnt/disks/sda:/mnt/disks/sdb";
+          device = "/mnt/disks/sda:/mnt/disks/sdc";
           fsType = "fuse.mergerfs";
           options = [
             "cache.files=partial"
