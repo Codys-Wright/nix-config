@@ -38,6 +38,30 @@ iso host:
         echo "Build result: result/"; \
     fi
 
+# Deploy to a remote host using deploy-rs
+# Usage: just deploy starcommand
+# Requires the host to have deployment.ip configured and SSH access set up
+deploy host:
+    #!/usr/bin/env bash
+    set -e
+    cd /home/cody/.flake
+    
+    # Extract SSH key from SOPS
+    TEMP_KEY=$(mktemp)
+    trap "rm -f $TEMP_KEY" EXIT
+    
+    echo "Extracting SSH key from SOPS..."
+    SOPS_AGE_KEY_FILE=sops.key nix develop --command sops --config sops.yaml \
+        --decrypt --extract "['{{host}}']['system']['sshPrivateKey']" \
+        "hosts/{{host}}/secrets.yaml" > "$TEMP_KEY"
+    chmod 600 "$TEMP_KEY"
+    
+    echo "Deploying to {{host}}..."
+    SSH_AUTH_SOCK="" nix run github:serokell/deploy-rs -- \
+        --skip-checks \
+        --ssh-opts "-i $TEMP_KEY -o StrictHostKeyChecking=no" \
+        ".#{{host}}"
+
 # Run a VM for a NixOS host
 # Usage: just vm dave
 # This launches a QEMU/KVM VM with your NixOS configuration

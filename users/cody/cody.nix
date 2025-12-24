@@ -24,6 +24,19 @@
       description = "Cody user configuration";
       
       homeManager = {...}: {
+        # SSH host aliases for easy access to deployed machines
+        programs.ssh = {
+          enable = true;
+          matchBlocks = {
+            "starcommand" = {
+              hostname = "192.168.0.102";
+              user = "root";
+              identityFile = "~/.ssh/starcommand-deploy";
+            };
+            # Add more hosts here as needed
+          };
+        };
+
         # Firefox WebApps configuration
         programs.firefox.webapps = {
           # YouTube

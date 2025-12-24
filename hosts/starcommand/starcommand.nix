@@ -49,7 +49,7 @@
         (<FTS.deployment> {
           ip = "192.168.0.102";
           sshPort = 22;
-          sshUser = "admin";
+          sshUser = "root";
         })
 
         # Self-hosting services are provided by the starcommand user
