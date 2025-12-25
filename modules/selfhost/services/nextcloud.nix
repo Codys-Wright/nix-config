@@ -20,6 +20,8 @@
     dataDir ? "/var/lib/nextcloud",
     defaultPhoneRegion ? "US",
     enablePreviewGenerator ? true,
+    # External Storage configuration
+    externalStorage ? null,
     ...
   } @ args: {
     class,
@@ -68,6 +70,12 @@
         apps = {
           # Preview generator for thumbnails
           previewgenerator.enable = enablePreviewGenerator;
+
+          # External Storage (if configured)
+          externalStorage = lib.mkIf (externalStorage != null) {
+            enable = true;
+            userLocalMount = externalStorage.userLocalMount or {};
+          };
 
           # LDAP integration (if configured)
           ldap = lib.mkIf ldapEnabled {

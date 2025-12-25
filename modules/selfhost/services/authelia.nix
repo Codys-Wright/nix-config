@@ -45,9 +45,9 @@
         if ssl != null
         then ssl
         else config.shb.certs.certs.letsencrypt.${sslCertName};
-      
+
       # SHB uses underscores for internal naming, but nginx needs the real hostname
-      fqdnWithUnderscores = builtins.replaceStrings [ "." ] [ "_" ] "${subdomain}.${domain}";
+      fqdnWithUnderscores = builtins.replaceStrings ["."] ["_"] "${subdomain}.${domain}";
       fqdnReal = "${subdomain}.${domain}";
     in {
       # Fix nginx server_name to use dots instead of underscores
@@ -57,6 +57,10 @@
         enable = true;
         inherit domain subdomain ldapPort ldapHostname dcdomain;
         ssl = sslCert;
+
+        # Debug logging disabled - mitmdump has broken systemd-python dependency
+        # TODO: Enable once selfhostblocks fixes the mitmdump service
+        # debug = true;
 
         secrets = {
           jwtSecret.result = config.shb.sops.secret."${jwtSecretKey}".result;
