@@ -95,14 +95,50 @@
 
         programs.nh.enable = true;
 
-        fileSystems."run/media/GAMES" = {
-          device = "/dev/nvme2n1p2";
-          fsType = "ntfs-3g";
-          options = ["rw" "uid=1000"];
-        };
+         fileSystems."run/media/GAMES" = {
+           device = "/dev/nvme2n1p2";
+           fsType = "ntfs-3g";
+           options = ["rw" "uid=1000"];
+         };
 
-        # Self-hosting services configuration is handled by the starcommand user
-        # See users/starcommand/starcommand.nix for all service configuration
+         # Create secrets directory for VPN password
+         systemd.tmpfiles.rules = [
+           "d /run/secrets 0750 root root -"
+         ];
+
+         # Create VPN password file from SOPS secret
+         systemd.services.protonvpn-password = {
+           description = "Create ProtonVPN password file";
+           wantedBy = [ "multi-user.target" ];
+           before = [ "openvpn-protonvpn.service" ];
+           serviceConfig = {
+             Type = "oneshot";
+             RemainAfterExit = true;
+             ExecStart = ''
+               /bin/sh -c 'echo "${config.shb.sops.secret."THEBATTLESHIP/protonvpn/password".result}" > /run/secrets/protonvpn-password && chmod 600 /run/secrets/protonvpn-password'
+             '';
+           };
+         };
+
+         # SOPS secret for ProtonVPN password
+         shb.sops.secret."THEBATTLESHIP/protonvpn/password" = {
+           settings.key = "THEBATTLESHIP/protonvpn/password";
+         };
+
+         # VPN configuration
+         myModules.vpn = {
+           enable = true;
+           username = "your_protonvpn_username"; # TODO: Set your ProtonVPN username
+           passwordFile = "/run/secrets/protonvpn-password";
+           killswitch = {
+             enable = true;
+             allowedSubnets = [ "192.168.0.0/16" "10.0.0.0/8" ];
+             exemptPorts = [ 22 ];
+           };
+         };
+
+         # Self-hosting services configuration is handled by the starcommand user
+         # See users/starcommand/starcommand.nix for all service configuration
       };
     };
   };
