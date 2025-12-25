@@ -64,18 +64,29 @@
         # Deployment configuration (SSH, networking, secrets, VM/ISO generation)
         (<FTS.deployment> {})
 
-        # Self-hosting services are provided by the starcommand user
-        # See users/starcommand/starcommand.nix for service configuration
-      ];
+         # Standalone VPN for desktop use
+         (FTS.selfhost._.protonvpn-standalone {
+           username = "your_protonvpn_username"; # TODO: Set your ProtonVPN username
+           passwordFile = "/run/secrets/protonvpn-password";
+           killswitch = {
+             enable = true;
+             allowedSubnets = [ "192.168.0.0/16" "10.0.0.0/8" ];
+             exemptPorts = [ 22 ];
+           };
+         })
+
+         # Self-hosting services are provided by the starcommand user
+         # See users/starcommand/starcommand.nix for service configuration
+       ];
 
       # Manually set fileSystems and bootloader for now
       nixos = {
-        config,
-        lib,
-        pkgs,
-        ...
-      }: {
-        # Hardware detection is handled by FTS.hardware (includes FTS.hardware.facter)
+         config,
+         lib,
+         pkgs,
+         ...
+       }: {
+         # Hardware detection is handled by FTS.hardware (includes FTS.hardware.facter)
         # The facter report path is auto-derived as hosts/THEBATTLESHIP/facter.json
 
         # Note: Overlays for stable/unstable package access are already configured
@@ -101,41 +112,7 @@
            options = ["rw" "uid=1000"];
          };
 
-         # Create secrets directory for VPN password
-         systemd.tmpfiles.rules = [
-           "d /run/secrets 0750 root root -"
-         ];
 
-         # Create VPN password file from SOPS secret
-         systemd.services.protonvpn-password = {
-           description = "Create ProtonVPN password file";
-           wantedBy = [ "multi-user.target" ];
-           before = [ "openvpn-protonvpn.service" ];
-           serviceConfig = {
-             Type = "oneshot";
-             RemainAfterExit = true;
-             ExecStart = ''
-               /bin/sh -c 'echo "${config.shb.sops.secret."THEBATTLESHIP/protonvpn/password".result}" > /run/secrets/protonvpn-password && chmod 600 /run/secrets/protonvpn-password'
-             '';
-           };
-         };
-
-         # SOPS secret for ProtonVPN password
-         shb.sops.secret."THEBATTLESHIP/protonvpn/password" = {
-           settings.key = "THEBATTLESHIP/protonvpn/password";
-         };
-
-         # VPN configuration
-         myModules.vpn = {
-           enable = true;
-           username = "your_protonvpn_username"; # TODO: Set your ProtonVPN username
-           passwordFile = "/run/secrets/protonvpn-password";
-           killswitch = {
-             enable = true;
-             allowedSubnets = [ "192.168.0.0/16" "10.0.0.0/8" ];
-             exemptPorts = [ 22 ];
-           };
-         };
 
          # Self-hosting services configuration is handled by the starcommand user
          # See users/starcommand/starcommand.nix for all service configuration
