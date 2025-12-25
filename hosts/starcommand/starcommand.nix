@@ -87,10 +87,11 @@
         };
         boot.loader.efi.canTouchEfiVariables = false;
 
-        # MergerFS and NTFS packages
+        # MergerFS, NTFS, and SMB packages
         environment.systemPackages = with pkgs; [
           mergerfs
           ntfs3g
+          cifs-utils
         ];
 
         # Data drives (NTFS via ntfs-3g) - full read/write access for everyone
@@ -121,6 +122,26 @@
           ];
         };
 
+        # SMB mount to Synology NAS "TheVault"
+        # Using IP address since NetBIOS name resolution failed
+        # vers=1.0 required for older Synology DSM versions
+        fileSystems."/mnt/synology-vault" = {
+          device = "//192.168.0.114/Media";  # Using IP address
+          fsType = "cifs";
+          options = [
+            "username=soundaddiction"
+            "password=C#major7"  # Corrected password
+            "vers=1.0"  # Required for older Synology NAS
+            "uid=0"
+            "gid=0"
+            "dir_mode=0755"
+            "file_mode=0644"
+            "nofail"
+            "x-systemd.automount"
+            "x-systemd.mount-timeout=10"
+          ];
+        };
+
         # Create service data directories on merged storage
         # These directories will hold user content (media, torrents, photos, etc.)
         # NOTE: NTFS mounted with uid=0 gid=0 (root) and 777 permissions (world-writable)
@@ -135,6 +156,8 @@
           "d /mnt/storage/media/tv 0777 root root -"
           "d /mnt/storage/media/music 0777 root root -"
           "d /mnt/storage/media/audiobooks 0777 root root -"
+          # SMB credentials directory
+          "d /etc/smb-credentials 0750 root root -"
         ];
 
         # Automatic cleanup
