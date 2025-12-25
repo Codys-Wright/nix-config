@@ -4,7 +4,9 @@
   ...
 }:
 {
-  flake-file.inputs.selfhostblocks.url = lib.mkDefault "github:ibizaman/selfhostblocks";
+  # Using local fork with Jellyfin SSO fixes (DisablePushedAuthorization, scopes, auth method)
+  # TODO: Switch back to upstream once PR is merged
+  flake-file.inputs.selfhostblocks.url = lib.mkDefault "path:/home/cody/Documents/Development/nix/selfhostblocks";
   
   # DON'T follow our nixpkgs - let selfhostblocks use its own patched version
   # This gives us access to patched modules via inputs.selfhostblocks

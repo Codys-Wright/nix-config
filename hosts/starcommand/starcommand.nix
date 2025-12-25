@@ -94,20 +94,23 @@
         ];
 
         # Data drives (NTFS via ntfs-3g) - full read/write access for everyone
-        fileSystems."/mnt/disks/sda" = {
-          device = "/dev/sda2";
+        # Using UUIDs instead of device names to handle device name changes
+        # sdb2: "THE ARCHIVE" - 10.9TB
+        fileSystems."/mnt/disks/archive" = {
+          device = "/dev/disk/by-uuid/36C0F5ACC0F5730B";
           fsType = "ntfs-3g";
           options = ["rw" "uid=0" "gid=0" "dmask=000" "fmask=000" "nofail"];
         };
-        fileSystems."/mnt/disks/sdb" = {
-          device = "/dev/sdc2";
+        # sdc2: "THE COLLECTION" - 10.9TB
+        fileSystems."/mnt/disks/collection" = {
+          device = "/dev/disk/by-uuid/02A01CC8A01CC3D7";
           fsType = "ntfs-3g";
           options = ["rw" "uid=0" "gid=0" "dmask=000" "fmask=000" "nofail"];
         };
 
         # MergerFS mount combining all disks
         fileSystems."/mnt/storage" = {
-          device = "/mnt/disks/sda:/mnt/disks/sdc";
+          device = "/mnt/disks/archive:/mnt/disks/collection";
           fsType = "fuse.mergerfs";
           options = [
             "cache.files=partial"
@@ -118,6 +121,22 @@
           ];
         };
 
+        # Create service data directories on merged storage
+        # These directories will hold user content (media, torrents, photos, etc.)
+        # NOTE: NTFS mounted with uid=0 gid=0 (root) and 777 permissions (world-writable)
+        # Services can read/write but files appear owned by root
+        systemd.tmpfiles.rules = [
+          "d /mnt/storage/torrents 0777 root root -" # Deluge downloads
+          "d /mnt/storage/youtube 0777 root root -" # YouTube downloads
+          "d /mnt/storage/photos 0777 root root -" # Immich photo library
+          "d /mnt/storage/nextcloud-data 0777 root root -" # Nextcloud External Storage
+          "d /mnt/storage/media 0777 root root -" # Jellyfin media libraries
+          "d /mnt/storage/media/movies 0777 root root -"
+          "d /mnt/storage/media/tv 0777 root root -"
+          "d /mnt/storage/media/music 0777 root root -"
+          "d /mnt/storage/media/audiobooks 0777 root root -"
+        ];
+
         # Automatic cleanup
         nix.gc = {
           automatic = true;
@@ -126,6 +145,23 @@
         };
 
         programs.nh.enable = true;
+
+        # Disable all sleep/suspend/hibernate for this server
+        systemd.sleep.extraConfig = ''
+          AllowSuspend=no
+          AllowHibernation=no
+          AllowSuspendThenHibernate=no
+          AllowHybridSleep=no
+        '';
+
+        # Prevent power button from suspending
+        services.logind = {
+          powerKey = "ignore";
+          powerKeyLongPress = "poweroff";
+          lidSwitch = "ignore";
+          lidSwitchDocked = "ignore";
+          lidSwitchExternalPower = "ignore";
+        };
       };
     };
   };

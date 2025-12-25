@@ -63,6 +63,22 @@
         # Include the FTS.selfhost module which has all the SelfHostBlocks configuration
         (FTS.selfhost {})
       ];
+
+      # Override hypridle to prevent system suspend (this is a server)
+      homeManager = {
+        services.hypridle.settings.listener = lib.mkForce [
+          {
+            timeout = 300; # 5 minutes
+            on-timeout = "loginctl lock-session"; # Lock screen
+          }
+          {
+            timeout = 330; # 5.5 minutes
+            on-timeout = "hyprctl dispatch dpms off"; # Turn off display
+            on-resume = "hyprctl dispatch dpms on"; # Turn on display
+          }
+          # Removed suspend listener - server should never sleep
+        ];
+      };
     };
   };
 }

@@ -34,6 +34,9 @@
         enable = true;
         inherit domain subdomain;
 
+        # Enable debug logging for SSO troubleshooting
+        debug = true;
+
         # Reference SSL certs from config (already set up by letsencrypt-certs aspect)
         # The certificate name matches the domain
         ssl = config.shb.certs.certs.letsencrypt.${domain};

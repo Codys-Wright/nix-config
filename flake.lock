@@ -1290,17 +1290,14 @@
         "nmdsrc": "nmdsrc"
       },
       "locked": {
-        "lastModified": 1766525623,
-        "narHash": "sha256-3WBZ7zmkFWxGIoVmIK4z/BiQ2SfSTjI4k9Al7u/1YZ4=",
-        "owner": "ibizaman",
-        "repo": "selfhostblocks",
-        "rev": "f17e9885d27709d311f458f902fa3c3061ab675d",
-        "type": "github"
+        "lastModified": 1766626263,
+        "narHash": "sha256-p4zedkuvbteBG/7rPA5RmNoRJCcIVxQV56zs+qAXscQ=",
+        "path": "/home/cody/Documents/Development/nix/selfhostblocks",
+        "type": "path"
       },
       "original": {
-        "owner": "ibizaman",
-        "repo": "selfhostblocks",
-        "type": "github"
+        "path": "/home/cody/Documents/Development/nix/selfhostblocks",
+        "type": "path"
       }
     },
     "sf-arabic": {
