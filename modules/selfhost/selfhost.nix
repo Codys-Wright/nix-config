@@ -254,11 +254,17 @@
           dataDir = "/var/lib/nextcloud";
           adminPasswordKey = "starcommand/selfhost/apps/nextcloud/admin_password";
 
-          # External Storage - entire merged storage accessible
+          # External Storage - merged storage and Synology NAS
           externalStorage = {
             userLocalMount = {
               directory = "/mnt/storage";
               mountName = "storage"; # Appears as "storage" folder in Nextcloud
+            };
+            localMounts = {
+              synologyMedia = {
+                directory = "/mnt/synology-vault";
+                mountName = "synology-media"; # Appears as "synology-media" folder in Nextcloud
+              };
             };
           };
 
@@ -468,9 +474,15 @@
               "192.168.0.0/16"
               "10.0.0.0/8"
             ];
+            allowedIPs = [
+              "192.168.0.114" # Synology NAS
+            ];
             exemptPorts = [22];
           };
         })
+
+        # Samba Client Tools - SMB/CIFS utilities for network shares
+        (FTS.selfhost._.samba-client {})
       ];
 
       nixos = {
