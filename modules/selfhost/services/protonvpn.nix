@@ -23,6 +23,9 @@
           "192.168.0.0/16"
           "10.0.0.0/8"
         ];
+        allowedIPs = [
+          "192.168.0.114"  # Synology NAS
+        ];
         exemptPorts = [ 22 ];
       },
       # Optional proxy

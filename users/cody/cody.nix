@@ -99,6 +99,9 @@
         cody.dots
         cody.fish
 
+        # Samba client tools for network shares
+        (FTS.selfhost._.samba-client { })
+
         # Theme and fonts
         FTS.mactahoe
         FTS.apple-fonts
