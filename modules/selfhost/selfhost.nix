@@ -122,6 +122,30 @@
               hostname = "photos.${domain}"; # Immich
               service = "https://localhost";
             }
+            {
+              hostname = "radarr.${domain}"; # Radarr
+              service = "https://localhost";
+            }
+            {
+              hostname = "sonarr.${domain}"; # Sonarr
+              service = "https://localhost";
+            }
+            {
+              hostname = "bazarr.${domain}"; # Bazarr
+              service = "https://localhost";
+            }
+            {
+              hostname = "readarr.${domain}"; # Readarr
+              service = "https://localhost";
+            }
+            {
+              hostname = "lidarr.${domain}"; # Lidarr
+              service = "https://localhost";
+            }
+            {
+              hostname = "jackett.${domain}"; # Jackett
+              service = "https://localhost";
+            }
           ];
         })
 
@@ -226,7 +250,17 @@
         (FTS.selfhost._.nextcloud {
           inherit domain;
           subdomain = nextcloudSubdomain;
+          # App/config stays on btrfs for proper permissions
+          dataDir = "/var/lib/nextcloud";
           adminPasswordKey = "starcommand/selfhost/apps/nextcloud/admin_password";
+
+          # External Storage - entire merged storage accessible
+          externalStorage = {
+            userLocalMount = {
+              directory = "/mnt/storage";
+              mountName = "storage"; # Appears as "storage" folder in Nextcloud
+            };
+          };
 
           # LDAP integration
           ldap = {
@@ -279,6 +313,13 @@
         })
 
         # Jellyfin Media Server
+        # NOTE: Media libraries must be configured via web UI at https://media.starcommand.live
+        # Recommended library paths (pre-created on /mnt/storage):
+        #   Movies: /mnt/storage/media/movies
+        #   TV Shows: /mnt/storage/media/tv
+        #   Music: /mnt/storage/media/music
+        #   Audiobooks: /mnt/storage/media/audiobooks
+        # See docs/jellyfin-setup.md for detailed setup instructions
         (FTS.selfhost._.jellyfin {
           inherit domain;
           subdomain = jellyfinSubdomain;
@@ -310,8 +351,9 @@
         (FTS.selfhost._.deluge {
           inherit domain;
           subdomain = delugeSubdomain;
-          downloadLocation = "/srv/torrents";
+          downloadLocation = "/mnt/storage/torrents"; # Torrents on merged storage
           localclientPasswordKey = "starcommand/selfhost/apps/deluge/localclient_password";
+          prometheusScraperPasswordKey = "starcommand/selfhost/apps/deluge/prometheus_scraper_password";
           authEndpoint = "https://${authSubdomain}.${domain}";
         })
 
@@ -386,10 +428,16 @@
         })
 
         # Pinchflat - YouTube downloader
+        # NOTE: Videos saved to /mnt/storage/youtube
+        # To watch in Jellyfin: Add /mnt/storage/youtube as a library
+        # Or configure Pinchflat via web UI to save to specific Jellyfin folders:
+        #   - Music videos → /mnt/storage/media/music
+        #   - Documentaries → /mnt/storage/media/movies
+        #   - Podcasts → /mnt/storage/media/tv
         (FTS.selfhost._.pinchflat {
           inherit domain;
           subdomain = pinchflatSubdomain;
-          mediaDir = "/srv/youtube";
+          mediaDir = "/mnt/storage/youtube"; # Downloaded videos on merged storage
           timeZone = "America/Chicago";
           secretKeyBaseKey = "starcommand/selfhost/apps/pinchflat/secret_key_base";
           sso = {
@@ -401,11 +449,27 @@
         (FTS.selfhost._.immich {
           inherit domain;
           subdomain = immichSubdomain;
-          mediaLocation = "/srv/photos";
+          # App state on btrfs, photos on merged storage
+          mediaLocation = "/mnt/storage/photos"; # Photo library on merged storage
           # SSO
           authEndpoint = "https://${authSubdomain}.${domain}";
           ssoSecretKey = "starcommand/selfhost/apps/immich/sso_secret";
           ssoSecretForAutheliaKey = "starcommand/selfhost/auth/authelia/immich_sso_secret";
+        })
+
+        # ProtonVPN - VPN service with kill switch
+        (FTS.selfhost._.protonvpn {
+          inherit domain;
+          usernameKey = "starcommand/selfhost/openvpn/username";
+          passwordKey = "starcommand/selfhost/openvpn/password";
+          killswitch = {
+            enable = true;
+            allowedSubnets = [
+              "192.168.0.0/16"
+              "10.0.0.0/8"
+            ];
+            exemptPorts = [22];
+          };
         })
       ];
 
@@ -541,16 +605,6 @@
         # ============================================
 
         # Deluge secrets
-        shb.sops.secret."starcommand/selfhost/apps/deluge/localclient_password" = {
-          request = config.shb.deluge.localclientPassword.request;
-          settings = {
-            key = "starcommand/selfhost/apps/deluge/localclient_password";
-            owner = "deluge";
-            group = "deluge";
-            mode = "0440";
-          };
-        };
-
         # Forgejo secrets
         shb.sops.secret."starcommand/selfhost/apps/forgejo/database_password" = {
           request = config.shb.forgejo.databasePassword.request;
@@ -640,6 +694,24 @@
         shb.sops.secret."starcommand/selfhost/auth/authelia/immich_sso_secret" = {
           request = config.shb.immich.sso.sharedSecretForAuthelia.request;
           settings.key = "starcommand/selfhost/apps/immich/sso_secret";
+        };
+
+        # ProtonVPN credentials
+        shb.sops.secret."starcommand/selfhost/openvpn/username" = {
+          settings = {
+            key = "starcommand/selfhost/openvpn/username";
+            owner = "root";
+            group = "root";
+            mode = "0400";
+          };
+        };
+        shb.sops.secret."starcommand/selfhost/openvpn/password" = {
+          settings = {
+            key = "starcommand/selfhost/openvpn/password";
+            owner = "root";
+            group = "root";
+            mode = "0400";
+          };
         };
       };
     };

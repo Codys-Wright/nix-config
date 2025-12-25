@@ -78,7 +78,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
       url = "github:oxalica/rust-overlay";
     };
-    selfhostblocks.url = "github:ibizaman/selfhostblocks";
+    selfhostblocks.url = "path:/home/cody/Documents/Development/nix/selfhostblocks";
     sops-nix.url = "github:Mic92/sops-nix";
     stylix = {
       inputs.nixpkgs.follows = "nixpkgs";

@@ -99,18 +99,13 @@
             # Extra users (empty by default)
             extraUsers = extraUsers;
 
-            # Prometheus monitoring (optional)
-            prometheusScraperPassword = lib.mkIf (prometheusScraperPasswordKey != null) {
-              result = config.shb.sops.secret."${prometheusScraperPasswordKey}".result;
-            };
+            # Prometheus monitoring
+            prometheusScraperPassword.result = config.shb.sops.secret."${prometheusScraperPasswordKey}".result;
           };
 
           # SOPS secrets
           shb.sops.secret."${localclientPasswordKey}".request = config.shb.deluge.localclientPassword.request;
-        }
-        // lib.optionalAttrs (prometheusScraperPasswordKey != null) {
-          shb.sops.secret."${prometheusScraperPasswordKey}".request =
-            config.shb.deluge.prometheusScraperPassword.request;
+          shb.sops.secret."${prometheusScraperPasswordKey}".request = config.shb.deluge.prometheusScraperPassword.request;
         };
     };
 }
