@@ -189,6 +189,7 @@
             pinchflat_user = {};
             immich_user = {};
             immich_admin = {};
+            grocy_user = {};
           };
 
           # Define users
@@ -225,6 +226,45 @@
               passwordKey = "cody/personal/password";
               passwordSopsFile = ../../users/cody/secrets.yaml;
             };
+
+             amy = {
+               email = "amy.wright@example.com"; # TODO: Update with real email
+               firstName = "Amy";
+               lastName = "Wright";
+               groups = [
+                 "nextcloud_user"
+                 "jellyfin_user"
+                 "grocy_user"
+               ];
+               passwordKey = "starcommand/selfhost/users/amy/password";
+               passwordSopsFile = ../../users/starcommand/secrets.yaml;
+             };
+
+             tommy = {
+               email = "tommy.wright@example.com"; # TODO: Update with real email
+               firstName = "Tommy";
+               lastName = "Wright";
+               groups = [
+                 "nextcloud_user"
+                 "jellyfin_user"
+                 "grocy_user"
+               ];
+               passwordKey = "starcommand/selfhost/users/tommy/password";
+               passwordSopsFile = ../../users/starcommand/secrets.yaml;
+             };
+
+             bri = {
+               email = "bri.zacharias@example.com"; # TODO: Update with real email
+               firstName = "Bri";
+               lastName = "Zacharias";
+               groups = [
+                 "nextcloud_user"
+                 "jellyfin_user"
+                 "grocy_user"
+               ];
+               passwordKey = "starcommand/selfhost/users/bri/password";
+               passwordSopsFile = ../../users/starcommand/secrets.yaml;
+             };
           };
         })
 
@@ -526,6 +566,24 @@
             key = "cody/personal/password";
           };
         };
+
+        # SOPS secrets for new users
+        shb.sops.secret."starcommand/selfhost/users/amy/password" = {
+          request = config.shb.lldap.ensureUsers.amy.password.request;
+          settings.key = "starcommand/selfhost/users/amy/password";
+        };
+
+        shb.sops.secret."starcommand/selfhost/users/tommy/password" = {
+          request = config.shb.lldap.ensureUsers.tommy.password.request;
+          settings.key = "starcommand/selfhost/users/tommy/password";
+        };
+
+        shb.sops.secret."starcommand/selfhost/users/bri/password" = {
+          request = config.shb.lldap.ensureUsers.bri.password.request;
+          settings.key = "starcommand/selfhost/users/bri/password";
+        };
+
+
 
         # Secret sharing configuration
         # Set up secrets that need to be shared between services
