@@ -7,8 +7,7 @@
 
     settings = {
       animations = {
-        enabled = true;
-
+        # Override specific bezier and animations from global settings
         bezier = [
           "myBezier, 0.05, 0.9, 0.1, 1.05"
         ];
