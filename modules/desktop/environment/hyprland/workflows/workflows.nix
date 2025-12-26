@@ -156,12 +156,88 @@ in {
             # Dynamically discover all animation preset files
             animationsDir = ../presets/animations;
             animationFiles = builtins.attrNames (builtins.readDir animationsDir);
-            animationPresets = builtins.filter (name: lib.hasSuffix ".nix" name) animationFiles;
+            animationPresets = builtins.filter (name: lib.hasSuffix ".nix" name && name != "global.nix") animationFiles;
 
             # Dynamically discover all shader files
             shadersDir = ../presets/shaders/_shaderfiles;
             shaderFiles = builtins.attrNames (builtins.readDir shadersDir);
             shaderPresets = builtins.filter (name: lib.hasSuffix ".frag" name) shaderFiles;
+
+            # Generate global preset config files first
+            globalConfigs = builtins.listToAttrs [
+              # Global animations
+              {
+                name = "hypr/presets/animations/global.conf";
+                value = {
+                  text = let
+                    globalAnimModule = import (animationsDir + "/global.nix") {inherit FTS;};
+                    globalSettings = globalAnimModule.FTS.desktop._.environment._.hyprland._.presets._.animations._.global.settings;
+                    animSettings = globalSettings.animations or {};
+                    beziers = animSettings.bezier or [];
+                    animations = animSettings.animation or [];
+                    enabled = animSettings.enabled or true;
+                  in ''
+                    # Global Animation Settings
+                    ${lib.concatMapStringsSep "\n" (b: "bezier = ${b}") beziers}
+
+                    animations {
+                      enabled = ${if enabled then "true" else "false"}
+                      ${lib.concatMapStringsSep "\n  " (a: "animation = ${a}") animations}
+                    }
+                  '';
+                };
+              }
+              # Global decorations
+              {
+                name = "hypr/presets/decorations/global.conf";
+                value = {
+                  text = let
+                    globalDecorModule = import (decorationsDir + "/global.nix");
+                    globalSettings = globalDecorModule.settings;
+                  in lib.hm.generators.toHyprconf { attrs = globalSettings; };
+                };
+              }
+              # Global layouts
+              {
+                name = "hypr/presets/layouts/global.conf";
+                value = {
+                  text = let
+                    globalLayoutModule = import (layoutsDir + "/global.nix");
+                    globalSettings = globalLayoutModule.settings;
+                  in lib.hm.generators.toHyprconf { attrs = globalSettings; };
+                };
+              }
+              # Global cursor
+              {
+                name = "hypr/presets/cursor/global.conf";
+                value = {
+                  text = let
+                    globalCursorModule = import (cursorDir + "/global.nix");
+                    globalSettings = globalCursorModule.settings;
+                  in lib.hm.generators.toHyprconf { attrs = globalSettings; };
+                };
+              }
+              # Global window-rules
+              {
+                name = "hypr/presets/window-rules/global.conf";
+                value = {
+                  text = let
+                    globalWindowRulesModule = import (windowRulesDir + "/global.nix");
+                    globalSettings = globalWindowRulesModule.settings;
+                  in lib.hm.generators.toHyprconf { attrs = globalSettings; };
+                };
+              }
+              # Global workspace-rules
+              {
+                name = "hypr/presets/workspace-rules/global.conf";
+                value = {
+                  text = let
+                    globalWorkspaceRulesModule = import (workspaceRulesDir + "/global.nix");
+                    globalSettings = globalWorkspaceRulesModule.settings;
+                  in lib.hm.generators.toHyprconf { attrs = globalSettings; };
+                };
+              }
+            ];
 
             # Generate animation preset config files
             # Note: Beziers must be defined at root level, not inside animations block
@@ -170,7 +246,7 @@ in {
                 presetName = lib.removeSuffix ".nix" filename;
                 presetModule = import (animationsDir + "/${filename}") {inherit FTS;};
                 settings = presetModule.FTS.desktop._.environment._.hyprland._.presets._.animations._.${presetName}.settings;
-                
+
                 # Extract beziers and animations from nested structure
                 animSettings = settings.animations or {};
                 beziers = animSettings.bezier or [];
@@ -214,8 +290,8 @@ in {
             # Dynamically discover and generate decoration presets
             decorationsDir = ../presets/_decorations;
             decorationFiles = builtins.attrNames (builtins.readDir decorationsDir);
-            decorationPresets = builtins.filter (name: lib.hasSuffix ".nix" name) decorationFiles;
-            
+            decorationPresets = builtins.filter (name: lib.hasSuffix ".nix" name && name != "global.nix") decorationFiles;
+
             decorationConfigs = builtins.listToAttrs (
               map (filename: let
                 presetData = import (decorationsDir + "/${filename}");
@@ -234,8 +310,8 @@ in {
             # Dynamically discover and generate layout presets
             layoutsDir = ../presets/_layouts;
             layoutFiles = builtins.attrNames (builtins.readDir layoutsDir);
-            layoutPresets = builtins.filter (name: lib.hasSuffix ".nix" name) layoutFiles;
-            
+            layoutPresets = builtins.filter (name: lib.hasSuffix ".nix" name && name != "global.nix") layoutFiles;
+
             layoutConfigs = builtins.listToAttrs (
               map (filename: let
                 presetData = import (layoutsDir + "/${filename}");
@@ -254,8 +330,8 @@ in {
             # Dynamically discover and generate cursor presets
             cursorDir = ../presets/_cursor;
             cursorFiles = builtins.attrNames (builtins.readDir cursorDir);
-            cursorPresets = builtins.filter (name: lib.hasSuffix ".nix" name) cursorFiles;
-            
+            cursorPresets = builtins.filter (name: lib.hasSuffix ".nix" name && name != "global.nix") cursorFiles;
+
             cursorConfigs = builtins.listToAttrs (
               map (filename: let
                 presetData = import (cursorDir + "/${filename}");
@@ -274,8 +350,8 @@ in {
             # Dynamically discover and generate window-rules presets
             windowRulesDir = ../presets/_window-rules;
             windowRulesFiles = builtins.attrNames (builtins.readDir windowRulesDir);
-            windowRulesPresets = builtins.filter (name: lib.hasSuffix ".nix" name) windowRulesFiles;
-            
+            windowRulesPresets = builtins.filter (name: lib.hasSuffix ".nix" name && name != "global.nix") windowRulesFiles;
+
             windowRulesConfigs = builtins.listToAttrs (
               map (filename: let
                 presetData = import (windowRulesDir + "/${filename}");
@@ -294,8 +370,8 @@ in {
             # Dynamically discover and generate workspace-rules presets
             workspaceRulesDir = ../presets/_workspace-rules;
             workspaceRulesFiles = builtins.attrNames (builtins.readDir workspaceRulesDir);
-            workspaceRulesPresets = builtins.filter (name: lib.hasSuffix ".nix" name) workspaceRulesFiles;
-            
+            workspaceRulesPresets = builtins.filter (name: lib.hasSuffix ".nix" name && name != "global.nix") workspaceRulesFiles;
+
             workspaceRulesConfigs = builtins.listToAttrs (
               map (filename: let
                 presetData = import (workspaceRulesDir + "/${filename}");
@@ -324,8 +400,9 @@ in {
             };
           in
             lib.mkMerge [
-              defaultProfile 
-              animationConfigs 
+              defaultProfile
+              globalConfigs
+              animationConfigs
               shaderConfigs
               decorationConfigs
               layoutConfigs
@@ -413,16 +490,22 @@ in {
           ];
 
           # Source profile and runtime files in main Hyprland config
-          # Order matters: profile base → decoration → layout → animation → shader → cursor → rules
+          # Order matters: global → profile base → decoration → layout → animation → shader → cursor → rules
           wayland.windowManager.hyprland.settings.source = [
-            "./profile.conf"                # Workflow base settings
-            "./runtime-decoration.conf"     # Decoration preset (runtime modifiable)
-            "./runtime-layout.conf"         # Layout preset (runtime modifiable)
-            "./runtime-animation.conf"      # Animation preset (runtime modifiable)
-            "./runtime-shader.conf"         # Shader effect (runtime modifiable)
-            "./runtime-cursor.conf"         # Cursor behavior (runtime modifiable)
-            "./runtime-window-rules.conf"   # Window rules (runtime modifiable)
-            "./runtime-workspace-rules.conf" # Workspace rules (runtime modifiable)
+            "./presets/animations/global.conf"      # Global animation presets
+            "./presets/decorations/global.conf"     # Global decoration presets
+            "./presets/layouts/global.conf"         # Global layout presets
+            "./presets/cursor/global.conf"          # Global cursor presets
+            "./presets/window-rules/global.conf"    # Global window rules
+            "./presets/workspace-rules/global.conf" # Global workspace rules
+            "./profile.conf"                        # Workflow base settings
+            "./runtime-decoration.conf"             # Decoration preset (runtime modifiable)
+            "./runtime-layout.conf"                 # Layout preset (runtime modifiable)
+            "./runtime-animation.conf"              # Animation preset (runtime modifiable)
+            "./runtime-shader.conf"                 # Shader effect (runtime modifiable)
+            "./runtime-cursor.conf"                 # Cursor behavior (runtime modifiable)
+            "./runtime-window-rules.conf"           # Window rules (runtime modifiable)
+            "./runtime-workspace-rules.conf"        # Workspace rules (runtime modifiable)
           ];
 
           # Generate profile files (this will override the default profile created above)
