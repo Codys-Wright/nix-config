@@ -64,16 +64,16 @@
         # Deployment configuration (SSH, networking, secrets, VM/ISO generation)
         (<FTS.deployment> {})
 
-         # Standalone VPN for desktop use
-         (FTS.selfhost._.protonvpn-standalone {
-           username = "your_protonvpn_username"; # TODO: Set your ProtonVPN username
-           passwordFile = "/run/secrets/protonvpn-password";
-           killswitch = {
-             enable = true;
-             allowedSubnets = [ "192.168.0.0/16" "10.0.0.0/8" ];
-             exemptPorts = [ 22 ];
-           };
-         })
+          # Standalone VPN for desktop use
+          (FTS.selfhost._.protonvpn-standalone {
+            usernameFile = "/run/secrets/cody/openvpn/username";
+            passwordFile = "/run/secrets/cody/openvpn/password";
+            killswitch = {
+              enable = true;
+              allowedSubnets = [ "192.168.0.0/16" "10.0.0.0/8" ];
+              exemptPorts = [ 22 ];
+            };
+          })
 
          # Self-hosting services are provided by the starcommand user
          # See users/starcommand/starcommand.nix for service configuration
@@ -114,9 +114,32 @@
 
 
 
-         # Self-hosting services configuration is handled by the starcommand user
-         # See users/starcommand/starcommand.nix for all service configuration
-      };
+        # Import SOPS module
+        imports = [
+          inputs.sops-nix.nixosModules.default
+        ];
+
+        # SOPS configuration for secrets
+        sops = {
+          defaultSopsFile = ../../users/cody/secrets.yaml;
+          age.sshKeyPaths = ["/etc/ssh/ssh_host_ed25519_key"];
+          secrets = {
+            "cody/openvpn/username" = {
+              owner = "root";
+              group = "root";
+              mode = "0400";
+            };
+            "cody/openvpn/password" = {
+              owner = "root";
+              group = "root";
+              mode = "0400";
+            };
+          };
+        };
+
+        # Self-hosting services configuration is handled by the starcommand user
+        # See users/starcommand/starcommand.nix for all service configuration
+       };
     };
   };
 }
