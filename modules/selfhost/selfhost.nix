@@ -190,6 +190,7 @@
             immich_user = {};
             immich_admin = {};
             grocy_user = {};
+            deluge_user = {};
           };
 
           # Define users
@@ -203,6 +204,7 @@
                 "nextcloud_admin"
                 "grafana_user"
                 "grafana_admin"
+                "deluge_user"
                 "vaultwarden_admin"
                 "jellyfin_user"
                 "jellyfin_admin"
@@ -276,6 +278,93 @@
           ldapPort = 3890; # Same as LLDAP
           ldapHostname = "127.0.0.1";
           dcdomain = "dc=${builtins.replaceStrings ["."] [",dc="] domain}";
+
+          # Access control rules for protected services
+          accessControl = {
+            defaultPolicy = "deny";
+            rules = [
+              {
+                domain = "*.${domain}";
+                policy = "two_factor";
+                subject = ["group:nextcloud_user"];
+              }
+              {
+                domain = "*.${domain}";
+                policy = "two_factor";
+                subject = ["group:jellyfin_user"];
+              }
+              {
+                domain = "*.${domain}";
+                policy = "two_factor";
+                subject = ["group:grocy_user"];
+              }
+              {
+                domain = "torrents.${domain}";
+                policy = "two_factor";
+                subject = ["group:deluge_user"];
+              }
+              {
+                domain = "*.${domain}";
+                policy = "two_factor";
+                subject = ["group:arr_user"];
+              }
+              {
+                domain = "*.${domain}";
+                policy = "two_factor";
+                subject = ["group:lldap_admin"];
+              }
+              {
+                domain = "*.${domain}";
+                policy = "two_factor";
+                subject = ["group:vaultwarden_admin"];
+              }
+              {
+                domain = "*.${domain}";
+                policy = "two_factor";
+                subject = ["group:grafana_user"];
+              }
+              {
+                domain = "*.${domain}";
+                policy = "two_factor";
+                subject = ["group:forgejo_user"];
+              }
+              {
+                domain = "*.${domain}";
+                policy = "two_factor";
+                subject = ["group:karakeep_user"];
+              }
+              {
+                domain = "*.${domain}";
+                policy = "two_factor";
+                subject = ["group:audiobookshelf_user"];
+              }
+              {
+                domain = "*.${domain}";
+                policy = "two_factor";
+                subject = ["group:hledger_user"];
+              }
+              {
+                domain = "*.${domain}";
+                policy = "two_factor";
+                subject = ["group:homeassistant_user"];
+              }
+              {
+                domain = "*.${domain}";
+                policy = "two_factor";
+                subject = ["group:open-webui_user"];
+              }
+              {
+                domain = "*.${domain}";
+                policy = "two_factor";
+                subject = ["group:pinchflat_user"];
+              }
+              {
+                domain = "*.${domain}";
+                policy = "two_factor";
+                subject = ["group:immich_user"];
+              }
+            ];
+          };
 
           # Secret keys
           jwtSecretKey = "starcommand/selfhost/auth/authelia/jwt_secret";
