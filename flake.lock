@@ -1290,8 +1290,8 @@
         "nmdsrc": "nmdsrc"
       },
       "locked": {
-        "lastModified": 1766627466,
-        "narHash": "sha256-j6pmjfDchJm+1GXrq/9vThiTBlv/i0l/TPnJZD48Uhc=",
+        "lastModified": 1766629039,
+        "narHash": "sha256-TppIZ6pz/DYOsBAf5BmLv7tWQN0bePmN7+BFVEIp0jQ=",
         "path": "/home/cody/Documents/Development/nix/selfhostblocks",
         "type": "path"
       },
