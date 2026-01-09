@@ -21,7 +21,6 @@
       orientation = "left";
       special_scale_factor = 0.8;
       new_on_top = false;
-      inherit_fullscreen = true;
     };
 
     # Default general layout settings
@@ -30,7 +29,6 @@
       gaps_in = 5;
       gaps_out = 10;
       border_size = 2;
-      no_border_on_floating = false;
       no_focus_fallback = false;
       resize_on_border = true;
       extend_border_grab_area = 15;
