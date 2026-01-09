@@ -597,6 +597,7 @@
           inherit domain;
           usernameKey = "starcommand/selfhost/openvpn/username";
           passwordKey = "starcommand/selfhost/openvpn/password";
+          remoteServerIP = "149.40.62.62";
           killswitch = {
             enable = true;
             allowedSubnets = [
@@ -870,6 +871,9 @@
             mode = "0400";
           };
         };
+
+        # ProtonVPN remote server IP
+        shb.vpn.protonvpn.remoteServerIP = "149.40.62.62";
       };
     };
   };
