@@ -83,6 +83,9 @@
         <FTS.apps/notes>
         <FTS.apps/misc>
 
+        # Music production
+        <FTS.music/production>
+
         # Coding environment - all tools included by default
         <FTS.coding/cli>
         <FTS.coding/editors>
