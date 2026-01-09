@@ -85,11 +85,12 @@
     ];
     
     # Layer rules (for overlays like notifications, rofi, etc.)
+    # Updated for Hyprland 0.53+ syntax
     layerrule = [
-      "blur, rofi"
-      "ignorezero, rofi"
-      "blur, notifications"
-      "ignorezero, notifications"
+      "blur on, match:namespace rofi"
+      "ignore_alpha 1, match:namespace rofi"
+      "blur on, match:namespace notifications"
+      "ignore_alpha 1, match:namespace notifications"
     ];
   };
 }
