@@ -32,7 +32,7 @@
       }:
       {
         # Disable wpa_supplicant in favor of iwd
-        networking.wireless.enable = false;
+        networking.wireless.enable = lib.mkForce false;
 
         # Use iwd instead of wpa_supplicant
         networking.wireless.iwd = {

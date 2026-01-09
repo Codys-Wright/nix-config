@@ -47,7 +47,7 @@
 
           # Window management
           "$mod, Q, killactive," # Close window
-          "$mod, T, togglefloating," # Toggle Floating
+          "SUPER_SHIFT, F, togglefloating," # Toggle Floating
           "$mod, F, fullscreen" # Toggle Fullscreen
 
           # Focus movement (vim keys)

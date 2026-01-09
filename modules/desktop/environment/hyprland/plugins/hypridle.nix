@@ -6,7 +6,7 @@
     homeManager = {
       services.hypridle = {
         enable = true;
-        
+
         settings = {
           general = {
             lock_cmd = "pidof hyprlock || hyprlock"; # Avoid starting multiple hyprlock instances
@@ -14,21 +14,21 @@
             after_sleep_cmd = "hyprctl dispatch dpms on"; # Turn on display after resume
           };
 
-          listener = [
-            {
-              timeout = 300; # 5 minutes
-              on-timeout = "loginctl lock-session"; # Lock screen
-            }
-            {
-              timeout = 330; # 5.5 minutes
-              on-timeout = "hyprctl dispatch dpms off"; # Turn off display
-              on-resume = "hyprctl dispatch dpms on"; # Turn on display
-            }
-            {
-              timeout = 600; # 10 minutes
-              on-timeout = "systemctl suspend"; # Suspend system
-            }
-          ];
+          # listener = [
+          #   {
+          #     timeout = 300; # 5 minutes
+          #     on-timeout = "loginctl lock-session"; # Lock screen
+          #   }
+          #   {
+          #     timeout = 330; # 5.5 minutes
+          #     on-timeout = "hyprctl dispatch dpms off"; # Turn off display
+          #     on-resume = "hyprctl dispatch dpms on"; # Turn on display
+          #   }
+          #   {
+          #     timeout = 600; # 10 minutes
+          #     on-timeout = "systemctl suspend"; # Suspend system
+          #   }
+          # ];
         };
       };
     };
