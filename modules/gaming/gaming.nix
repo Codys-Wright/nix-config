@@ -13,6 +13,8 @@
       FTS.apps._.gaming._.minecraft
       FTS.apps._.gaming._.lutris
       FTS.apps._.gaming._.proton
+      FTS.apps._.gaming._.melonloader
+      FTS.apps._.gaming._.r2modman
     ];
   };
 }
