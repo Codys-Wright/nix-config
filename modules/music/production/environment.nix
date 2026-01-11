@@ -34,13 +34,14 @@
     };
 
     homeManager = { pkgs, config, ... }: {
-      # Create user plugin directories
-      home.file.".clap/.keep".text = "";
-      home.file.".lv2/.keep".text = "";
-      home.file.".vst/.keep".text = "";
-      home.file.".vst3/.keep".text = "";
-      home.file.".ladspa/.keep".text = "";
-      home.file.".dssi/.keep".text = "";
+      # Create plugin directories with nixos/ subdirectory for Nix-managed plugins
+      # This keeps the parent directories writable for user-installed plugins
+      home.file.".clap/nixos".source = config.lib.file.mkOutOfStoreSymlink "${config.home.profileDirectory}/lib/clap";
+      home.file.".lv2/nixos".source = config.lib.file.mkOutOfStoreSymlink "${config.home.profileDirectory}/lib/lv2";
+      home.file.".vst/nixos".source = config.lib.file.mkOutOfStoreSymlink "${config.home.profileDirectory}/lib/vst";
+      home.file.".vst3/nixos".source = config.lib.file.mkOutOfStoreSymlink "${config.home.profileDirectory}/lib/vst3";
+      home.file.".ladspa/nixos".source = config.lib.file.mkOutOfStoreSymlink "${config.home.profileDirectory}/lib/ladspa";
+      home.file.".dssi/nixos".source = config.lib.file.mkOutOfStoreSymlink "${config.home.profileDirectory}/lib/dssi";
     };
   };
 }
