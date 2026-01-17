@@ -4,7 +4,8 @@
   cody,
   __findFile,
   ...
-}: {
+}:
+{
   den = {
     homes = {
       # Darwin (macOS) home configuration
@@ -24,53 +25,64 @@
     aspects.cody = {
       description = "Cody user configuration";
 
-      homeManager = {...}: {
-        # SSH host aliases for easy access to deployed machines
-        programs.ssh = {
-          enable = true;
-          matchBlocks = {
-            "starcommand" = {
-              hostname = "192.168.0.102";
-              user = "root";
-              identityFile = "~/.ssh/starcommand-deploy";
+      homeManager =
+        { ... }:
+        {
+          # SSH host aliases for easy access to deployed machines
+          programs.ssh = {
+            enable = true;
+            matchBlocks = {
+              "starcommand" = {
+                hostname = "192.168.0.102";
+                user = "root";
+                identityFile = "~/.ssh/starcommand-deploy";
+              };
+              # Add more hosts here as needed
             };
-            # Add more hosts here as needed
+          };
+
+          # Firefox WebApps configuration
+          programs.firefox.webapps = {
+            # YouTube
+            youtube = {
+              url = "https://youtube.com";
+              id = 1;
+              name = "YouTube";
+              icon = "youtube";
+              categories = [
+                "AudioVideo"
+                "Video"
+              ];
+              theme = "dark";
+            };
+
+            # ChatGPT
+            chatgpt = {
+              url = "https://chatgpt.com";
+              id = 2;
+              name = "ChatGPT";
+              icon = "chatgpt";
+              categories = [
+                "Office"
+                "Utility"
+              ];
+              theme = "dark";
+            };
+
+            # Gmail
+            gmail = {
+              url = "https://gmail.com";
+              id = 3;
+              name = "Gmail";
+              icon = "gmail";
+              categories = [
+                "Office"
+                "Email"
+              ];
+              theme = "light";
+            };
           };
         };
-
-        # Firefox WebApps configuration
-        programs.firefox.webapps = {
-          # YouTube
-          youtube = {
-            url = "https://youtube.com";
-            id = 1;
-            name = "YouTube";
-            icon = "youtube";
-            categories = ["AudioVideo" "Video"];
-            theme = "dark";
-          };
-
-          # ChatGPT
-          chatgpt = {
-            url = "https://chatgpt.com";
-            id = 2;
-            name = "ChatGPT";
-            icon = "chatgpt";
-            categories = ["Office" "Utility"];
-            theme = "dark";
-          };
-
-          # Gmail
-          gmail = {
-            url = "https://gmail.com";
-            id = 3;
-            name = "Gmail";
-            icon = "gmail";
-            categories = ["Office" "Email"];
-            theme = "light";
-          };
-        };
-      };
 
       includes = [
         # Home-manager backup system
@@ -82,6 +94,7 @@
         <FTS.apps/gaming>
         <FTS.apps/notes>
         <FTS.apps/misc>
+        <FTS.apps/flatpaks>
 
         # Music production
         <FTS.music/production>
@@ -96,7 +109,7 @@
         # User configuration
         <FTS.user/admin> # Admin privileges and user configuration
         <FTS.user/autologin> # Autologin configuration (enabled when display manager is present)
-        (<FTS.user/shell> {default = "fish";}) # Set fish as default shell
+        (<FTS.user/shell> { default = "fish"; }) # Set fish as default shell
 
         # Cody-specific configurations
         cody.dots
@@ -115,6 +128,9 @@
 
         # Keyboard configuration (Kanata)
         <FTS.keyboard>
+
+        # VPN
+        <FTS/hardware/networking/tailscale>
       ];
     };
   };
