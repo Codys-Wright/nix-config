@@ -1,0 +1,57 @@
+{
+  "reposDirectory": "~/.local/share/btca/repos",
+  "port": 3420,
+  "maxInstances": 5,
+  "repos": [
+    {
+      "name": "svelte",
+      "url": "https://github.com/sveltejs/svelte.dev",
+      "branch": "main",
+      "specialNotes": "This is the svelte docs website repo, not the actual svelte repo. Use the docs to answer questions about svelte."
+    },
+    {
+      "name": "tailwindcss",
+      "url": "https://github.com/tailwindlabs/tailwindcss.com",
+      "branch": "main",
+      "specialNotes": "This is the tailwindcss docs website repo, not the actual tailwindcss repo. Use the docs to answer questions about tailwindcss."
+    },
+    {
+      "name": "nextjs",
+      "url": "https://github.com/vercel/next.js",
+      "branch": "canary"
+    },
+    {
+      "name": "tanstack-start",
+      "url": "https://github.com/tanstack/router",
+      "branch": "main",
+      "specialNotes": "Source code for Tanstack Start and Tanstack Router"
+    },
+    {
+      "name": "effect",
+      "url": "https://github.com/Effect-TS/ effect",
+      "branch": "main"
+    },
+    {
+      "name": "opencode",
+      "url": "https://github.com/sst/opencode",
+      "branch": "dev"
+    },
+    {
+      "name": "react",
+      "url": "https://github.com/facebook/react",
+      "branch": "main"
+    },
+    {
+      "name": "btca",
+      "url": "https://github.com/davis7dotsh/better-context",
+      "branch": "main"
+    },
+    {
+      "name": "better-auth",
+      "url": "https://github.com/better-auth/better-auth",
+      "branch": "canary"
+    }
+  ],
+  "model": "big-pickle",
+  "provider": "opencode"
+}
