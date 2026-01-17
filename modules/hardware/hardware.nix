@@ -9,6 +9,7 @@
       FTS.hardware._.bluetooth
       FTS.hardware._.cuda
       FTS.hardware._.networking
+      FTS.hardware._.networking._.tailscale
       FTS.hardware._.nvidia
       FTS.hardware._.storage
     ];
