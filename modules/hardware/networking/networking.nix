@@ -1,13 +1,9 @@
 # Networking hardware aspect
-{
-  FTS,
-  ...
-}:
-{
+{FTS, ...}: {
   FTS.hardware._.networking = {
     description = "NetworkManager networking support";
 
-    nixos = { ... }: {
+    nixos = {...}: {
       networking = {
         networkmanager.enable = true;
       };
@@ -30,4 +26,3 @@
     };
   };
 }
-
