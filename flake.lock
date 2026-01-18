@@ -1278,17 +1278,14 @@
         "nmdsrc": "nmdsrc"
       },
       "locked": {
-        "lastModified": 1766725848,
-        "narHash": "sha256-XIgsYhZ+yM4Wr23iWEr3TGggimes6Grt0yooMMZdf5M=",
-        "owner": "Codys-Wright",
-        "repo": "selfhostblocks",
-        "rev": "3d87c590542dd678ac8a604e60d5402f9dd561e1",
-        "type": "github"
+        "lastModified": 1766985298,
+        "narHash": "sha256-3wCM/AuVj8j0gB0GQk7PHh3u1kCrpl3ZB9pO7w7OxiQ=",
+        "path": "/home/cody/Documents/Development/nix/selfhostblocks",
+        "type": "path"
       },
       "original": {
-        "owner": "Codys-Wright",
-        "repo": "selfhostblocks",
-        "type": "github"
+        "path": "/home/cody/Documents/Development/nix/selfhostblocks",
+        "type": "path"
       }
     },
     "sf-arabic": {
