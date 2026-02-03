@@ -4,29 +4,29 @@
   name = "global";
   settings = {
     # Basic window behavior rules
-    windowrulev2 = [
+    windowrule = [
       # Floating windows
-      "float, class:(pavucontrol)"
-      "float, class:(blueman-manager)"
-      "float, class:(nm-connection-editor)"
-      "float, title:(Save File)"
-      "float, title:(Open File)"
-      "float, title:(Select File)"
+      "class:(pavucontrol), float"
+      "class:(blueman-manager), float"
+      "class:(nm-connection-editor), float"
+      "title:(Save File), float"
+      "title:(Open File), float"
+      "title:(Select File), float"
 
       # Picture-in-picture and popups
-      "float, title:(Picture-in-Picture)"
-      "pin, title:(Picture-in-Picture)"
-      "float, class:(xdg-desktop-portal-gtk)"
+      "title:(Picture-in-Picture), float"
+      "title:(Picture-in-Picture), pin"
+      "class:(xdg-desktop-portal-gtk), float"
 
       # Utility windows
-      "float, class:(zenity)"
-      "float, class:(org.gnome.Calculator)"
-      "float, class:(gnome-calculator)"
+      "class:(zenity), float"
+      "class:(org.gnome.Calculator), float"
+      "class:(gnome-calculator), float"
 
       # Gaming and media
-      "fullscreen, class:(steam_app.*)"
-      "float, class:(steam), title:(Friends List)"
-      "float, class:(steam), title:(Steam Settings)"
+      "class:(steam_app.*), fullscreen"
+      "class:(steam), title:(Friends List), float"
+      "class:(steam), title:(Steam Settings), float"
     ];
   };
 }
