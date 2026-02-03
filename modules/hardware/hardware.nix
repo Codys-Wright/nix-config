@@ -7,7 +7,7 @@
       FTS.hardware._.facter # Hardware detection using nixos-facter
       FTS.hardware._.audio
       FTS.hardware._.bluetooth
-      FTS.hardware._.cuda
+      # FTS.hardware._.cuda
       FTS.hardware._.networking
       FTS.hardware._.networking._.tailscale
       FTS.hardware._.nvidia

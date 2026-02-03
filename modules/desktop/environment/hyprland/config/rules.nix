@@ -9,29 +9,29 @@
         "$primaryMonitor" = "DP-4";
         "$secondaryMonitor" = "DP-5";
         "$tertiaryMonitor" = "HDMI-A-2";
-        # Window rules (v2 format recommended)
-        windowrulev2 = [
+        # Window rules
+        windowrule = [
           # Workspace assignments based on application
-          "workspace name:Notes, class:(obsidian)"
-          "workspace name:Media, title:(.*YouTube.*)"
-          "workspace name:AI, title:(.*ChatGPT.*)"
-          "workspace name:Communication, title:(.*Gmail.*)"
+          "class:(obsidian), workspace name:Notes"
+          "title:(.*YouTube.*), workspace name:Media"
+          "title:(.*ChatGPT.*), workspace name:AI"
+          "title:(.*Gmail.*), workspace name:Communication"
 
           # Floating windows
-          "float, class:(pavucontrol)"
-          "float, class:(blueman-manager)"
-          "float, class:(nm-connection-editor)"
-          "float, title:(Save File)"
-          "float, title:(Open File)"
+          "class:(pavucontrol), float"
+          "class:(blueman-manager), float"
+          "class:(nm-connection-editor), float"
+          "title:(Save File), float"
+          "title:(Open File), float"
 
           # Picture-in-picture and popups
-          "float, title:(Picture-in-Picture)"
-          "pin, title:(Picture-in-Picture)"
+          "title:(Picture-in-Picture), float"
+          "title:(Picture-in-Picture), pin"
 
           # Gaming and media applications
-          "fullscreen, class:(steam_app.*)"
-          "workspace name:VideoGame, class:(steam)"
-          "workspace name:VideoGameLauncher, class:(steam), title:(Steam)$"
+          "class:(steam_app.*), fullscreen"
+          "class:(steam), workspace name:VideoGame"
+          "class:(steam), title:(Steam)$, workspace name:VideoGameLauncher"
         ];
 
         # Workspace rules with monitor assignments
