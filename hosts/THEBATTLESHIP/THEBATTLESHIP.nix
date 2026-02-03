@@ -14,24 +14,9 @@
       # users.starcommand = {}; # Service user for self-hosting infrastructure
       aspect = "THEBATTLESHIP";
 
-      # Use nixpkgs-unstable with selfhostblocks patches applied
-      # This gives us the latest packages plus LLDAP/borgbackup enhancements
-      instantiate =
-        args:
-        let
-          system = "x86_64-linux";
-          # Get pkgs from nixpkgs for applyPatches
-          pkgs' = inputs.nixpkgs.legacyPackages.${system};
-          # Apply selfhostblocks patches to our unstable nixpkgs
-          shbPatches = inputs.selfhostblocks.lib.${system}.patches;
-          patchedNixpkgs = pkgs'.applyPatches {
-            name = "nixpkgs-unstable-shb-patched";
-            src = inputs.nixpkgs; # Use our nixpkgs-unstable
-            patches = shbPatches;
-          };
-          nixosSystem' = import "${patchedNixpkgs}/nixos/lib/eval-config.nix";
-        in
-        nixosSystem' (args // { inherit system; });
+      # Use standard nixos-rebuild without patches
+      # (starcommand user with lldap and other patched services is disabled)
+      # Don't apply selfhostblocks patches since THEBATTLESHIP doesn't use lldap
     };
   };
 
@@ -59,9 +44,17 @@
           persistFolder = "/persist";
         })
 
-        # Hardware and kernel
+        # Hardware and kernel - manually include hardware sub-aspects except CUDA
+        # (CUDA downloads fail due to SSL issues with NVIDIA servers)
         <FTS.kernel>
-        <FTS.hardware>
+        <FTS.hardware._.facter>
+        <FTS.hardware._.audio>
+        <FTS.hardware._.bluetooth>
+        # SKIP: <FTS.hardware._.cuda>  - Disabled due to download failures
+        <FTS.hardware._.networking>
+        <FTS.hardware._.networking._.tailscale>
+        <FTS.hardware._.nvidia>
+        <FTS.hardware._.storage>
         <FTS.keyboard>
 
         # Deployment configuration (SSH, networking, secrets, VM/ISO generation)
@@ -100,9 +93,9 @@
           # Set Hyprland as the default session for cody instead of GNOME
           services.displayManager.defaultSession = lib.mkForce "hyprland";
 
+
           # Note: Overlays for stable/unstable package access are already configured
-          # globally in modules/nix/nix.nix. The base nixpkgs is already unstable
-          # with selfhostblocks patches applied via the instantiate function above.
+          # globally in modules/nix/nix.nix. The base nixpkgs is already unstable.
           # You can access stable packages via pkgs.stable and unstable via pkgs.unstable.
 
           # Limit number of generations in boot partition (critical with 512MB boot)
