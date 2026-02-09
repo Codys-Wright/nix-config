@@ -6,7 +6,8 @@
   FTS,
   pkgs,
   ...
-}: {
+}:
+{
   # see also defaults.nix where static settings are set.
   den.default = {
     # parametric defaults for host/user/home. see aspects/dependencies.nix
@@ -25,7 +26,7 @@
       <FTS/system> # Essential system utilities
       <FTS/fonts>
       <FTS/phoenix>
-      <FTS/experimental-features> # Enable nix-command and flakes
+      <FTS/nix-settings> # Shared nix settings (experimental-features, gc, trusted users)
       # <FTS/secrets>  # SOPS secrets management - disabled, using SelfHostBlocks SOPS instead
       # Allow unfree packages
       (<den/unfree> true)
