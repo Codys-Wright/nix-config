@@ -4,6 +4,7 @@
   den,
   lib,
   FTS,
+  __findFile,
   ...
 }:
 let
@@ -26,7 +27,8 @@ let
   '';
 
   # Extract configuration from arguments
-  getConfig = arg:
+  getConfig =
+    arg:
     if arg == null || arg == { } then
       {
         user = null;
@@ -43,25 +45,26 @@ let
       throw "config: argument must be an attribute set";
 in
 {
-  FTS.config = den.lib.parametric {
+  FTS.config = <den.lib.parametric> {
     inherit description;
     includes = [
-      ({ nixos, ... }: arg:
+      (
+        { nixos, ... }:
+        arg:
         let
           config = getConfig arg;
         in
         [
           # Include user configuration if specified
-          (lib.optional (config.user != null)
-            ({ nixos, ... }: (FTS.user config.user).includes nixos))
+          (lib.optional (config.user != null) ({ nixos, ... }: (FTS.user config.user).includes nixos))
 
           # Include password configuration if specified
-          (lib.optional (config.password != null)
-            ({ nixos, ... }: (FTS.password config.password).includes nixos))
+          (lib.optional (config.password != null) (
+            { nixos, ... }: (FTS.user._.password config.password).includes nixos
+          ))
 
           # Include system configuration if specified
-          (lib.optional (config.system != null)
-            ({ nixos, ... }: (FTS.system config.system).includes nixos))
+          (lib.optional (config.system != null) ({ nixos, ... }: (FTS.system config.system).includes nixos))
         ]
       )
     ];
