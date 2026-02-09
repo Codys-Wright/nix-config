@@ -1,49 +1,11 @@
-# Default aspect configuration
-# see also: aspects/developer.nix, aspects/example/
+{ __findFile, ... }:
 {
-  den,
-  __findFile,
-  FTS,
-  pkgs,
-  ...
-}: {
-  # see also defaults.nix where static settings are set.
-  den.default = {
-    # parametric defaults for host/user/home. see aspects/dependencies.nix
-    # `_` is shorthand alias for `provides`.
-    includes = [
-      <den/home-manager> # den.provides.home-manager
-      den.aspects.dendritic._.routes # Mutual dependency routing
-      den.aspects.dendritic._.user # User account setup
-      den.aspects.dendritic._.host # Hostname configuration
-      den.aspects.dendritic._.home # Home directory setup
-      FTS.coding._.cli
-    ];
-    host.includes = [
-      <FTS/nh>
-      # System aspects
-      <FTS/system> # Essential system utilities
-      <FTS/fonts>
-      <FTS/phoenix>
-      <FTS/experimental-features> # Enable nix-command and flakes
-      # <FTS/secrets>  # SOPS secrets management - disabled, using SelfHostBlocks SOPS instead
-      # Allow unfree packages
-      (<den/unfree> true)
-      # Boot loader - disabled by default, enable per-host as needed
-      # (<FTS/grub> { })
-      # Nix configuration (includes nixpkgs overlays, unfree-default, etc.)
-      <FTS/nix>
-    ];
-
-    user.includes = [
-      # User-specific modules can be added here
-    ];
-    home.includes = [
-      # Nix tools (nix-index, nix-registry, npins, search are included via FTS.nix)
-      <FTS/nix>
-      # Also include search directly to test
-      # <FTS/secrets>  # SOPS secrets infrastructure (home-manager part) - disabled, using SelfHostBlocks SOPS instead
-      <FTS/user-secrets> # User secrets from SOPS with environment variables
-    ];
-  };
+  den.default.includes = [
+    <den/define-user>
+    <FTS/base-host>
+    <FTS/base-home>
+    <FTS/nix-settings>
+    <FTS/state-version>
+    <FTS/hostname>
+  ];
 }
