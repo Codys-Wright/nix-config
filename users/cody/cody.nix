@@ -107,9 +107,9 @@
         <FTS.coding/lang>
         <FTS.coding/tools>
         # User configuration
-        <FTS.user/admin> # Admin privileges and user configuration
+        <den/primary-user> # Admin privileges and user configuration
         <FTS.user/autologin> # Autologin configuration (enabled when display manager is present)
-        (<FTS.user/shell> { default = "fish"; }) # Set fish as default shell
+        (<den/user-shell> "fish") # Set fish as default shell
 
         # Cody-specific configurations
         cody.dots

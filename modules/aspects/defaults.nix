@@ -6,17 +6,16 @@
   FTS,
   pkgs,
   ...
-}: {
+}:
+{
   # see also defaults.nix where static settings are set.
   den.default = {
     # parametric defaults for host/user/home. see aspects/dependencies.nix
     # `_` is shorthand alias for `provides`.
     includes = [
       <den/home-manager> # den.provides.home-manager
-      den.aspects.dendritic._.routes # Mutual dependency routing
-      den.aspects.dendritic._.user # User account setup
-      den.aspects.dendritic._.host # Hostname configuration
-      den.aspects.dendritic._.home # Home directory setup
+      <den/define-user> # Built-in user + home wiring
+      <FTS/hostname> # Hostname configuration
       FTS.coding._.cli
     ];
     host.includes = [
