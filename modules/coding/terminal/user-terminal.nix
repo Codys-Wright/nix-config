@@ -1,5 +1,10 @@
-{ lib, den,
-  FTS, ... }:
+{
+  lib,
+  den,
+  FTS,
+  __findFile,
+  ...
+}:
 let
 
   description = ''
@@ -17,7 +22,7 @@ let
     let
       envVars = {
         TERMINAL = terminal;
-        TERM = "xterm-256color";  # Default TERM value, can be overridden if needed
+        TERM = "xterm-256color"; # Default TERM value, can be overridden if needed
       };
       nixos =
         { ... }:
@@ -39,7 +44,7 @@ in
 {
   FTS.coding._.user-terminal =
     terminal:
-    den.lib.parametric {
+    <den.lib.parametric> {
       inherit description;
       includes = [
         ({ user, ... }: userTerminal terminal user)
@@ -47,4 +52,3 @@ in
       ];
     };
 }
-
