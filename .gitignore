@@ -36,3 +36,14 @@ host_key
 Development/
 
 .aider*
+
+# Generated tracking/session files
+.beads/beads.db
+.beads/.jsonl.lock
+.beads/.local_version
+.beads/daemon.log
+.beads/last-touched
+.beads/sync-state.json
+.ralph-tui/
+.tmp/
+.cache/
