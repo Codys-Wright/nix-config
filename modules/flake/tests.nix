@@ -17,14 +17,23 @@
       nixosConfigs = inputs.self.nixosConfigurations or { };
       darwinConfigs = inputs.self.darwinConfigurations or { };
       
-      # Filter configs for current system
-      systemNixosConfigs = lib.filterAttrs
-        (name: config: config.pkgs.stdenv.hostPlatform.system == system)
-        nixosConfigs;
-      
-      systemDarwinConfigs = lib.filterAttrs
-        (name: config: config.pkgs.stdenv.hostPlatform.system == system)
-        darwinConfigs;
+      # Filter configs for current system (skip cross-platform eval entirely)
+      isLinux = lib.hasSuffix "-linux" system;
+      isDarwin = lib.hasSuffix "-darwin" system;
+
+      systemNixosConfigs =
+        if !isLinux then
+          { }
+        else
+          lib.filterAttrs (name: config: config.pkgs.stdenv.hostPlatform.system == system) nixosConfigs;
+
+      systemDarwinConfigs =
+        if !isDarwin then
+          { }
+        else
+          lib.filterAttrs
+            (name: config: config.pkgs.stdenv.hostPlatform.system == system)
+            darwinConfigs;
       
       # Check that NixOS hosts build
       nixosBuildChecks = builtins.mapAttrs
