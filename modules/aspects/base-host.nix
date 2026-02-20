@@ -10,8 +10,6 @@
     includes = [
       <FTS/nh>
       <FTS/system>
-      <FTS/fonts>
-      <FTS/phoenix>
     ];
   };
 }

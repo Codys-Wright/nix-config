@@ -15,6 +15,9 @@
     template = {
       # Include basic aspects for testing
       includes = [
+        <FTS/fonts>
+        <FTS/phoenix>
+
         <FTS.hardware>
         # <FTS.deployment>  # Deployment configuration (optional - uncomment when needed)
       ];

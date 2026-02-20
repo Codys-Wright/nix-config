@@ -20,6 +20,9 @@
   den.aspects = {
     example = {
       includes = [
+        <FTS/fonts>
+        <FTS/phoenix>
+
         # Hardware and kernel
         <FTS.hardware>
         <FTS.kernel>

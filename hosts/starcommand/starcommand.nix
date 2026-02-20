@@ -36,6 +36,9 @@
   den.aspects = {
     starcommand-host = {
       includes = [
+        <FTS/fonts>
+        <FTS/phoenix>
+
         # Hardware and kernel
         <FTS.hardware>
         <FTS.kernel>

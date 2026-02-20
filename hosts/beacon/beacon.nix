@@ -20,6 +20,9 @@
     description = "Universal bootable installation beacon";
 
     includes = [
+      <FTS/fonts>
+      <FTS/phoenix>
+
       # Include deployment configuration for beacon
       (FTS.deployment {
         ip = "192.168.0.100"; # Default beacon IP (can be overridden by DHCP)
