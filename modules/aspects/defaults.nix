@@ -14,6 +14,9 @@
     # `_` is shorthand alias for `provides`.
     includes = [
       <den/home-manager> # den.provides.home-manager
+      den.aspects.hm
+      den._.inputs'
+      den._.self'
       <den/define-user> # Built-in user + home wiring
       <FTS/hostname> # Hostname configuration
       <FTS/state-version> # Centralized state versions
