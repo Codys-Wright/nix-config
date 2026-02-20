@@ -16,6 +16,7 @@
       <den/home-manager> # den.provides.home-manager
       <den/define-user> # Built-in user + home wiring
       <FTS/hostname> # Hostname configuration
+      <FTS/state-version> # Centralized state versions
       FTS.coding._.cli
     ];
     host.includes = [
