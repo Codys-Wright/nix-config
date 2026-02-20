@@ -5,12 +5,7 @@ This folder contains legacy infrastructure modules used before migrating to den'
 ## Modules
 
 ### `host.nix`
-Legacy hostname provider.
-
-```nix
-# Automatically sets networking.hostName from den.hosts definition
-Replaced by: `<FTS/hostname>`
-```
+Legacy hostname provider. Hostname is now provided by `FTS.hostname`.
 
 ### `home.nix`
 Legacy home provider.
@@ -44,6 +39,7 @@ den.default = {
   includes = [
     <den/define-user>
     <FTS/hostname>
+    <FTS/state-version>
     # ... other defaults
   ];
 };
