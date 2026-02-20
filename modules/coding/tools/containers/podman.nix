@@ -25,6 +25,12 @@
         podman-tui
       ];
 
+      # Suppress the external compose provider warning message
+      environment.etc."containers/containers.conf.d/compose.conf".text = ''
+        [engine]
+        compose_warning_logs = false
+      '';
+
       # Create podman group for rootless container access
       users.groups.podman = {};
     };
