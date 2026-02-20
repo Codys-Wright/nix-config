@@ -32,9 +32,10 @@
         ninja
         pkg-config
 
-        # Debugging tools (cross-platform)
-        gdb
+        # Debugging tools
         lldb
+      ] ++ lib.optionals pkgs.stdenv.isLinux [
+        gdb
 
         # Performance tools
         hyperfine
