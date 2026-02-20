@@ -1,6 +1,7 @@
 {
   FTS,
   den,
+  lib,
   cody,
   __findFile,
   ...
@@ -88,49 +89,53 @@
         # Home-manager backup system
         den.aspects.hm-backup
 
-        # Applications - all included by default
+        # Applications
         <FTS.apps/browsers>
         <FTS.apps/communications>
-        <FTS.apps/gaming>
         <FTS.apps/notes>
-        <FTS.apps/misc>
-        <FTS.apps/flatpaks>
 
-        # Music production
-        <FTS.music/production>
-
-        # Coding environment - all tools included by default
+        # Coding environment
         <FTS.coding/cli>
         <FTS.coding/editors>
         <FTS.coding/terminals>
         <FTS.coding/shells>
         <FTS.coding/lang>
         <FTS.coding/tools>
+
         # User configuration
-        <den/primary-user> # Admin privileges and user configuration
-        <FTS.user/autologin> # Autologin configuration (enabled when display manager is present)
-        (<den/user-shell> "fish") # Set fish as default shell
+        <den/primary-user>
+        <FTS.user/autologin>
+        (<den/user-shell> "fish")
 
         # Cody-specific configurations
         cody.dots
         cody.fish
 
-        # Samba client tools for network shares
-        (FTS.selfhost._.samba-client { })
-
-        # Theme and fonts
-        FTS.mactahoe
-        FTS.apple-fonts
+        # Theming
         FTS.stylix
 
-        # Desktop environment
-        <FTS.desktop/environment/hyprland>
-
-        # Keyboard configuration (Kanata)
+        # Keyboard configuration (Kanata - cross-platform)
         <FTS.keyboard>
 
         # VPN
         <FTS/hardware/networking/tailscale>
+
+        # Linux-only aspects
+        (
+          { host, ... }:
+          lib.optionalAttrs (lib.hasSuffix "linux" host.system) {
+            includes = [
+              <FTS.desktop/environment/hyprland>
+              <FTS.music/production>
+              <FTS.apps/gaming>
+              <FTS.apps/misc>
+              <FTS.apps/flatpaks>
+              (FTS.selfhost._.samba-client { })
+              FTS.mactahoe
+              FTS.apple-fonts
+            ];
+          }
+        )
       ];
     };
   };
