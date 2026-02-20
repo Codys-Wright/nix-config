@@ -1,6 +1,8 @@
 {
   FTS,
+  den,
   pkgs,
+  __findFile,
   ...
 }:
 let
@@ -31,8 +33,19 @@ let
 in
 {
   FTS.nix-settings = {
-    description = "Shared nix settings for NixOS and nix-darwin";
+    description = "Shared nix settings and package policy";
+    includes = [
+      <FTS/nix>
+      (<den/unfree> true)
+    ];
     nixos = nixSettings;
     darwin = nixSettings;
   };
+
+  flake.modules.nixos.nixpkgs.config.permittedInsecurePackages = [
+    "dotnet-runtime-6.0.36"
+  ];
+  flake.modules.homeManager.nixpkgs.config.permittedInsecurePackages = [
+    "dotnet-runtime-6.0.36"
+  ];
 }
