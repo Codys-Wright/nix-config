@@ -166,16 +166,20 @@
           }
         );
 
-      # Generate packages for all hosts (filter by system)
-      allHostPackages = lib.foldl' (
-        acc: hostname:
-        let
-          hostConfig = nixosConfigs.${hostname};
-          # Only generate packages for hosts matching this system
-          hostSystem = hostConfig.pkgs.stdenv.hostPlatform.system or null;
-        in
-        if hostSystem == system then acc // (mkHostPackages hostname hostConfig) else acc
-      ) { } (builtins.attrNames nixosConfigs);
+      # Generate packages for all hosts (NixOS only — skip on darwin)
+      isLinux = lib.hasSuffix "-linux" system;
+      allHostPackages =
+        if !isLinux then
+          { }
+        else
+          lib.foldl' (
+            acc: hostname:
+            let
+              hostConfig = nixosConfigs.${hostname};
+              hostSystem = hostConfig.pkgs.stdenv.hostPlatform.system or null;
+            in
+            if hostSystem == system then acc // (mkHostPackages hostname hostConfig) else acc
+          ) { } (builtins.attrNames nixosConfigs);
 
     in
     {
