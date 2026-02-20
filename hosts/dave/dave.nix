@@ -20,6 +20,9 @@
     dave = {
       # Include role-based aspects
       includes = [
+        <FTS/fonts>
+        <FTS/phoenix>
+
         # Complete desktop setup with GNOME
 
         <FTS.kernel>

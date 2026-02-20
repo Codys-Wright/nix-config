@@ -6,7 +6,8 @@
   FTS,
   __findFile,
   ...
-}: {
+}:
+{
   den = {
     homes = {
       # Darwin (macOS) home configuration
@@ -47,21 +48,28 @@
         <FTS.coding/lang>
         <FTS.coding/tools>
 
-        <FTS.user/admin> # Admin privileges and user configuration
+        <den/primary-user> # Admin privileges and user configuration
         <FTS.user/autologin> # Autologin configuration (enabled when display manager is present)
 
-        (<FTS.user/shell> {default = "fish";}) # Set fish as default shell
+        (<den/user-shell> "fish") # Set fish as default shell
 
         # Theme and fonts
         # FTS.mactahoe
         # FTS.apple-fonts
         # FTS.stylix
 
-        # Desktop environment
-        <FTS.desktop/environment/hyprland>
+        # Desktop environment (Linux-only — Hyprland requires Wayland)
+        (
+          { host, ... }:
+          lib.optionalAttrs (lib.hasSuffix "linux" host.system) {
+            includes = [
+              <FTS.desktop/environment/hyprland>
+            ];
+          }
+        )
 
         # Include the FTS.selfhost module which has all the SelfHostBlocks configuration
-        (FTS.selfhost {})
+        (FTS.selfhost { })
       ];
 
       # Override hypridle to prevent system suspend (this is a server)
