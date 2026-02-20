@@ -30,15 +30,10 @@ in
   flake-file.inputs.nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.11";
   flake-file.inputs.nixpkgs-unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable";
 
-  # Nixpkgs aspect - provides stable and unstable overlays
   FTS.nix._.nixpkgs = {
     description = "Nixpkgs stable and unstable overlays (pkgs.stable, pkgs.unstable)";
-    # This aspect configures flake-level overlays, so it applies to all classes
-    # The overlays are configured at the flake module level
+    nixos.nixpkgs = { inherit overlays; };
+    darwin.nixpkgs = { inherit overlays; };
+    homeManager.nixpkgs = { inherit overlays; };
   };
-
-  # Overlays for accessing stable and unstable nixpkgs
-  flake.modules.nixos.nixpkgs = { inherit overlays; };
-  flake.modules.darwin.nixpkgs = { inherit overlays; };
-  flake.modules.homeManager.nixpkgs = { inherit overlays; };
 }

@@ -40,11 +40,4 @@ in
     nixos = nixSettings;
     darwin = nixSettings;
   };
-
-  flake.modules.nixos.nixpkgs.config.permittedInsecurePackages = [
-    "dotnet-runtime-6.0.36"
-  ];
-  flake.modules.homeManager.nixpkgs.config.permittedInsecurePackages = [
-    "dotnet-runtime-6.0.36"
-  ];
 }

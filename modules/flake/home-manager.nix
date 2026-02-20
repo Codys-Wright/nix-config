@@ -98,13 +98,17 @@ in
     homeManager =
       {
         pkgs,
+        lib,
         inputs',
         ...
       }:
       {
-        home.packages = [
-          inputs'.home-manager.packages.${pkgs.stdenv.hostPlatform.system}.default
-        ];
+        home.packages =
+          let
+            system = pkgs.stdenv.hostPlatform.system;
+            hmPackages = inputs'.home-manager.packages or { };
+          in
+          lib.optional (hmPackages ? ${system}) hmPackages.${system}.default;
       };
   };
 
