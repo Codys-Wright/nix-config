@@ -44,8 +44,9 @@
           pkg-config
           cmake
           ninja
-          gdb
           lldb
+        ] ++ lib.optionals pkgs.stdenv.isLinux [
+          gdb
           llvmPackages.bintools
           sccache
 

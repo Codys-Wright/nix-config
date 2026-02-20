@@ -58,8 +58,15 @@
         # FTS.apple-fonts
         # FTS.stylix
 
-        # Desktop environment
-        <FTS.desktop/environment/hyprland>
+        # Desktop environment (Linux-only — Hyprland requires Wayland)
+        (
+          { host, ... }:
+          lib.optionalAttrs (lib.hasSuffix "linux" host.system) {
+            includes = [
+              <FTS.desktop/environment/hyprland>
+            ];
+          }
+        )
 
         # Include the FTS.selfhost module which has all the SelfHostBlocks configuration
         (FTS.selfhost { })
