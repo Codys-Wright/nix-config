@@ -9,29 +9,29 @@
         "$primaryMonitor" = "DP-4";
         "$secondaryMonitor" = "DP-5";
         "$tertiaryMonitor" = "HDMI-A-2";
-        # Window rules
+        # Window rules (Hyprland 0.53+ syntax)
         windowrule = [
           # Workspace assignments based on application
-          "class:(obsidian), workspace name:Notes"
-          "title:(.*YouTube.*), workspace name:Media"
-          "title:(.*ChatGPT.*), workspace name:AI"
-          "title:(.*Gmail.*), workspace name:Communication"
+          "workspace name:Notes, match:class obsidian"
+          "workspace name:Media, match:title .*YouTube.*"
+          "workspace name:AI, match:title .*ChatGPT.*"
+          "workspace name:Communication, match:title .*Gmail.*"
 
           # Floating windows
-          "class:(pavucontrol), float"
-          "class:(blueman-manager), float"
-          "class:(nm-connection-editor), float"
-          "title:(Save File), float"
-          "title:(Open File), float"
+          "float on, match:class pavucontrol"
+          "float on, match:class blueman-manager"
+          "float on, match:class nm-connection-editor"
+          "float on, match:title Save File"
+          "float on, match:title Open File"
 
           # Picture-in-picture and popups
-          "title:(Picture-in-Picture), float"
-          "title:(Picture-in-Picture), pin"
+          "float on, match:title Picture-in-Picture"
+          "pin on, match:title Picture-in-Picture"
 
           # Gaming and media applications
-          "class:(steam_app.*), fullscreen"
-          "class:(steam), workspace name:VideoGame"
-          "class:(steam), title:(Steam)$, workspace name:VideoGameLauncher"
+          "fullscreen on, match:class steam_app.*"
+          "workspace name:VideoGame, match:class steam"
+          "workspace name:VideoGameLauncher, match:class steam, match:title Steam$"
         ];
 
         # Workspace rules with monitor assignments
@@ -61,10 +61,9 @@
           "name:Dev-Preview, monitor:$primaryMonitor, persistent:true"
         ];
 
-        # Layer rules
-        # Example: layerrule = blur, waybar
+        # Layer rules (Hyprland 0.53+ syntax)
         layerrule = [
-          # Add your layer rules here
+          # Example: "blur on, match:namespace waybar"
         ];
       };
     };

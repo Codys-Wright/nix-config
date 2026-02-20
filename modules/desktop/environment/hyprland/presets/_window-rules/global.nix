@@ -1,32 +1,33 @@
 # Global Window Rules
 # Applied to all window-rules presets
+# Updated for Hyprland 0.53+ syntax
 {
   name = "global";
   settings = {
     # Basic window behavior rules
     windowrule = [
       # Floating windows
-      "class:(pavucontrol), float"
-      "class:(blueman-manager), float"
-      "class:(nm-connection-editor), float"
-      "title:(Save File), float"
-      "title:(Open File), float"
-      "title:(Select File), float"
+      "float on, match:class pavucontrol"
+      "float on, match:class blueman-manager"
+      "float on, match:class nm-connection-editor"
+      "float on, match:title (Save File)"
+      "float on, match:title (Open File)"
+      "float on, match:title (Select File)"
 
       # Picture-in-picture and popups
-      "title:(Picture-in-Picture), float"
-      "title:(Picture-in-Picture), pin"
-      "class:(xdg-desktop-portal-gtk), float"
+      "float on, match:title Picture-in-Picture"
+      "pin on, match:title Picture-in-Picture"
+      "float on, match:class xdg-desktop-portal-gtk"
 
       # Utility windows
-      "class:(zenity), float"
-      "class:(org.gnome.Calculator), float"
-      "class:(gnome-calculator), float"
+      "float on, match:class zenity"
+      "float on, match:class org.gnome.Calculator"
+      "float on, match:class gnome-calculator"
 
       # Gaming and media
-      "class:(steam_app.*), fullscreen"
-      "class:(steam), title:(Friends List), float"
-      "class:(steam), title:(Steam Settings), float"
+      "fullscreen on, match:class steam_app.*"
+      "float on, match:class steam, match:title Friends List"
+      "float on, match:class steam, match:title Steam Settings"
     ];
   };
 }
