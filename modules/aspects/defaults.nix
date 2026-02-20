@@ -11,6 +11,7 @@
       <FTS/nix-settings>
       <FTS/state-version>
       <FTS/hostname>
+      <FTS/no-man-cache>
     ];
     home.includes = [
       <FTS/nix>
