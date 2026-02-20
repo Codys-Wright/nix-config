@@ -1,13 +1,12 @@
 {
   FTS,
   den,
-  pkgs,
   __findFile,
   ...
 }:
 let
   nixSettings =
-    { config, ... }:
+    { config, lib, ... }:
     {
       nix = {
         optimise.automatic = true;
@@ -24,7 +23,7 @@ let
             "https://cache.nixos.org/"
           ];
         };
-        gc = pkgs.lib.optionalAttrs config.nix.enable {
+        gc = lib.optionalAttrs config.nix.enable {
           automatic = true;
           options = "--delete-older-than 7d";
         };
