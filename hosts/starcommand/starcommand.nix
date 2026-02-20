@@ -75,6 +75,7 @@
           openssh.authorizedKeys.keys = [
             "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO8y8AMfYQnvu3BvjJ54/qYJcedNkMHmnjexine1ypda cody"
             "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILBJxxU1TXbV1IvGFm67X7jX+C7uRtLcgimcoDGxapNP starcommand-deploy"
+            "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBDSw8Dx6n7gfGztnPQxq4Pp58k/n5JGZE/omfrB3yDp starcommand-deploy-mac"
           ];
         };
 
@@ -162,6 +163,28 @@
           # SMB credentials directory
           "d /etc/smb-credentials 0750 root root -"
         ];
+
+        # 10G direct link (enp33s0) — static IP + DHCP server for local switch
+        # Serves IPs to any device connected to the 10G switch (e.g. Mac via Thunderbolt dock)
+        networking.interfaces.enp33s0.ipv4.addresses = [
+          {
+            address = "10.10.10.1";
+            prefixLength = 24;
+          }
+        ];
+
+        services.dnsmasq = {
+          enable = true;
+          settings = {
+            interface = "enp33s0";
+            bind-interfaces = true;
+            dhcp-range = "10.10.10.100,10.10.10.200,24h";
+            # Don't act as a DNS server — DHCP only
+            port = 0;
+          };
+        };
+
+        networking.firewall.interfaces.enp33s0.allowedUDPPorts = [ 67 ];
 
         # Automatic cleanup
         nix.gc = {
