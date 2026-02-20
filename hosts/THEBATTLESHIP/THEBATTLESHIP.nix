@@ -25,6 +25,9 @@
     THEBATTLESHIP = {
       # Include role-based aspects
       includes = [
+        <FTS/fonts>
+        <FTS/phoenix>
+
         # System-wide theme (bootloader, default appearance)
 
         # Complete desktop setup (environment + display manager + bootloader)

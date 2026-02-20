@@ -10,10 +10,9 @@
     '';
 
     includes = [
-      FTS.user._.admin
+      <den/primary-user>
       FTS.user._.autologin
-      FTS.user._.shell
+      (<den/user-shell> "fish")
     ];
   };
 }
-

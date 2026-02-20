@@ -38,8 +38,4 @@ in {
     };
   };
 
-  # Export keys for use by other modules
-  FTS.system._.ssh.personalKeys = personalKeys;
-  FTS.system._.ssh.fleetKeys = fleetKeys;
-  FTS.system._.ssh.allFleetKeys = allFleetKeys;
 }

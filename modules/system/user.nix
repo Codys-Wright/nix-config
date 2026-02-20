@@ -1,7 +1,7 @@
 # System user configuration aspect
 # Works with den's user context system to configure users on hosts
 {
-  den,
+  FTS,
   lib,
   ...
 }:
@@ -23,7 +23,8 @@ let
   userContext =
     { user, host, ... }:
     let
-      homeDir = if lib.hasSuffix "darwin" host.system then "/Users/${user.userName}" else "/home/${user.userName}";
+      homeDir =
+        if lib.hasSuffix "darwin" host.system then "/Users/${user.userName}" else "/home/${user.userName}";
     in
     {
       # Basic user setup for NixOS
@@ -42,17 +43,22 @@ let
     };
 
   # Fallback user creation when no users are defined
-  defaultUserContext = { host, ... }: lib.mkIf (host.users or {} == {}) {
-    nixos.users.users.nixos = {
-      isNormalUser = true;
-      extraGroups = [ "wheel" "networkmanager" ];
-      initialPassword = "nixos";
-      description = "Default NixOS user";
+  defaultUserContext =
+    { host, ... }:
+    lib.mkIf (host.users or { } == { }) {
+      nixos.users.users.nixos = {
+        isNormalUser = true;
+        extraGroups = [
+          "wheel"
+          "networkmanager"
+        ];
+        initialPassword = "nixos";
+        description = "Default NixOS user";
+      };
     };
-  };
 in
 {
-  den.provides.user = den.lib.parametric {
+  FTS.user._.base = {
     inherit description;
     includes = [
       userContext

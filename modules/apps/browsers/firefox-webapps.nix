@@ -180,7 +180,7 @@ in {
           profiles = make-app-profiles config.programs.firefox.webapps;
         };
 
-        xdg.desktopEntries =
+        xdg.desktopEntries = lib.mkIf pkgs.stdenv.isLinux (
           mapAttrs (name: cfg: {
             inherit (cfg) genericName comment categories icon mimeType prefersNonDefaultGPU;
 
@@ -209,7 +209,7 @@ in {
               StartupWMClass = "WebApp-${name}";
             };
           })
-          config.programs.firefox.webapps;
+          config.programs.firefox.webapps);
       };
     };
   };

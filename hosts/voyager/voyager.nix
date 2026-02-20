@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{ inputs, FTS, __findFile, ... }:
 
 {
 
@@ -12,11 +12,12 @@
     };
   };
 
-  # voyager host-specific aspect
   den.aspects = {
     voyager = {
-      # No includes yet - add system-level config here when needed
-      includes = [ ];
+      includes = [
+        <FTS/fonts>
+        <FTS/phoenix>
+      ];
     };
   };
 
