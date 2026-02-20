@@ -101,10 +101,7 @@
           "SUPER_SHIFT, right, layoutmsg, removemaster" # Remove from master
 
           # Screenshots
-          "$mod, PRINT, exec, screenshot window" # Screenshot window
-          ", PRINT, exec, screenshot monitor" # Screenshot monitor
-          "SUPER_SHIFT, PRINT, exec, screenshot region" # Screenshot region
-          "ALT, PRINT, exec, screenshot region swappy" # Screenshot region then edit
+          "SUPER_SHIFT, S, exec, flameshot gui" # Flameshot screenshot
 
           # Utilities
           "SUPER_SHIFT, S, exec, night-shift" # Toggle night shift
