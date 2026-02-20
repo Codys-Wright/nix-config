@@ -3,7 +3,8 @@
   den,
   __findFile,
   ...
-}: {
+}:
+{
   den = {
     homes = {
       # NixOS home configuration
@@ -20,19 +21,21 @@
       includes = [
         # Home-manager backup system
         den.aspects.hm-backup
-        
+
         # Basic user setup (no secrets required)
-        <FTS.user/admin>
+        <den/primary-user>
       ];
 
       # Minimal home-manager config
-      homeManager = {pkgs, ...}: {
-        home.packages = with pkgs; [
-          vim
-          htop
-          git
-        ];
-      };
+      homeManager =
+        { pkgs, ... }:
+        {
+          home.packages = with pkgs; [
+            vim
+            htop
+            git
+          ];
+        };
     };
   };
 }
