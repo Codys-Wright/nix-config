@@ -122,6 +122,37 @@
             ];
           };
 
+          # Mount starcommand storage over 10G network via SSHFS
+          fileSystems."/mnt/starcommand" = {
+            device = "root@10.10.10.1:/mnt/storage";
+            fsType = "fuse.sshfs";
+            options = [
+              "IdentityFile=/etc/ssh/ssh_host_ed25519_key"
+              "StrictHostKeyChecking=accept-new"
+              "UserKnownHostsFile=/etc/ssh/ssh_known_hosts"
+              "allow_other"
+              "default_permissions"
+              "uid=1000"
+              "gid=100"
+              "reconnect"
+              "ServerAliveInterval=15"
+              "ServerAliveCountMax=3"
+              "_netdev"
+              "x-systemd.automount"
+              "x-systemd.idle-timeout=60"
+              "x-systemd.mount-timeout=30"
+              "nofail"
+            ];
+          };
+
+          # Add starcommand 10G host key to known hosts
+          programs.ssh.knownHosts."10.10.10.1" = {
+            publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIENFHgs8JqCE4/dO58AN8W4M2SRgetgar94m2ntI9xb8";
+          };
+
+          # SSHFS package
+          environment.systemPackages = [ pkgs.sshfs ];
+
           # Import SOPS module
           imports = [
             inputs.sops-nix.nixosModules.default
