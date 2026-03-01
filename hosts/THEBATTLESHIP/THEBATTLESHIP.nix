@@ -60,6 +60,9 @@
         <FTS.hardware._.storage>
         <FTS.keyboard>
 
+        # Virtualization for Windows VMs (EASEUS backup recovery, etc.)
+        <FTS.system._.virtualization>
+
         # Deployment configuration (SSH, networking, secrets, VM/ISO generation)
         (<FTS.deployment> { })
 
@@ -101,8 +104,8 @@
           # globally in modules/nix/nix.nix. The base nixpkgs is already unstable.
           # You can access stable packages via pkgs.stable and unstable via pkgs.unstable.
 
-          # Limit number of generations in boot partition (critical with 512MB boot)
-          boot.loader.grub.configurationLimit = 2; # Only keep last 2 generations in GRUB
+          # Limit number of generations in boot partition
+          boot.loader.grub.configurationLimit = 15;
 
           # Automatic cleanup
           nix.gc = {
@@ -152,6 +155,9 @@
 
           # SSHFS package
           environment.systemPackages = [ pkgs.sshfs ];
+
+          # Add cody to libvirtd group for VM management
+          users.users.cody.extraGroups = [ "libvirtd" ];
 
           # Import SOPS module
           imports = [
