@@ -1,6 +1,11 @@
+# Switch to current host's configuration (auto-detects hostname)
+# Automatically detects NixOS or Darwin and uses the appropriate command
+switch:
+    @just switch-host "$(hostname)"
+
 # Switch to a specific host configuration
 # Automatically detects NixOS or Darwin and uses the appropriate command
-switch host:
+switch-host host:
     @if command -v nixos-rebuild >/dev/null 2>&1 || [ -f /etc/nixos/configuration.nix ]; then \
         echo "Switching to NixOS configuration: {{host}}"; \
         NIX_CONFIG="experimental-features = nix-command flakes" nix develop --extra-experimental-features 'nix-command flakes' --command bash -c "nh os switch 'path:.#' -H {{host}}"; \
@@ -23,9 +28,14 @@ switch-bootloader host:
         exit 1; \
     fi
 
-# Build a host configuration without switching
+# Build current host's configuration (auto-detects hostname)
 # Automatically detects NixOS or Darwin and uses the appropriate command
-build host:
+build:
+    @just build-host "$(hostname)"
+
+# Build a specific host configuration without switching
+# Automatically detects NixOS or Darwin and uses the appropriate command
+build-host host:
     @if command -v nixos-rebuild >/dev/null 2>&1 || [ -f /etc/nixos/configuration.nix ]; then \
         echo "Building NixOS configuration: {{host}}"; \
         NIX_CONFIG="experimental-features = nix-command flakes" nix develop --extra-experimental-features 'nix-command flakes' --command bash -c "nh os build 'path:.#' -H {{host}}"; \
