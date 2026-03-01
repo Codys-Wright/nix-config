@@ -1,7 +1,6 @@
 {
   FTS,
   den,
-  lib,
   cody,
   __findFile,
   ...
@@ -92,7 +91,13 @@
         # Applications
         <FTS.apps/browsers>
         <FTS.apps/communications>
+        <FTS.apps/gaming>
         <FTS.apps/notes>
+        <FTS.apps/misc>
+        <FTS.apps/flatpaks>
+
+        # Music production
+        <FTS.music/production>
 
         # Coding environment
         <FTS.coding/cli>
@@ -104,6 +109,7 @@
 
         # User configuration
         <den/primary-user>
+        (<FTS.user/password> { method = "initial"; value = "password"; })
         <FTS.user/autologin>
         (<den/user-shell> "fish")
 
@@ -111,31 +117,22 @@
         cody.dots
         cody.fish
 
-        # Theming
+        # Samba client tools for network shares
+        (FTS.selfhost._.samba-client { })
+
+        # Theme and fonts
+        FTS.mactahoe
+        FTS.apple-fonts
         FTS.stylix
+
+        # Desktop environment
+        <FTS.desktop/environment/hyprland>
 
         # Keyboard configuration (Kanata - cross-platform)
         <FTS.keyboard>
 
         # VPN
         <FTS/hardware/networking/tailscale>
-
-        # Linux-only aspects
-        (
-          { host, ... }:
-          lib.optionalAttrs (lib.hasSuffix "linux" host.system) {
-            includes = [
-              <FTS.desktop/environment/hyprland>
-              <FTS.music/production>
-              <FTS.apps/gaming>
-              <FTS.apps/misc>
-              <FTS.apps/flatpaks>
-              (FTS.selfhost._.samba-client { })
-              FTS.mactahoe
-              FTS.apple-fonts
-            ];
-          }
-        )
       ];
     };
   };
