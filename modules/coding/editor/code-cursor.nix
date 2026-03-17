@@ -6,9 +6,9 @@
     description = "Code Cursor AI-powered editor";
 
     homeManager = { config, pkgs, lib, ... }: {
-      home.packages = with pkgs; [
+      home.packages = lib.mkIf pkgs.stdenv.isLinux (with pkgs; [
         code-cursor
-      ];
+      ]);
 
       # Set up desktop entry and file associations
       xdg.desktopEntries = lib.mkIf pkgs.stdenv.isLinux {
