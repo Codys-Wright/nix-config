@@ -3,6 +3,7 @@
   # Personal SSH public keys - these users can SSH into any fleet machine
   personalKeys = {
     cody = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO8y8AMfYQnvu3BvjJ54/qYJcedNkMHmnjexine1ypda cody";
+    voyager = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEExJ9+wtbBN4v9uWZwZKK+K83/ZscpIyuVMCQkuMY2c cody@voyager";
   };
 
   # Fleet SSH public keys - allows any of our machines to SSH into any other
