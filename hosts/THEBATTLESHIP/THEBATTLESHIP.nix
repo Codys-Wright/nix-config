@@ -30,7 +30,18 @@
 
         # System-wide theme (bootloader, default appearance)
 
+        # Linux-only user aspects (moved from cody user for cross-platform compat)
+        <FTS.apps/gaming>
+        <FTS.apps/flatpaks>
+        <FTS.music/production>
+        (<FTS.user/password> { method = "initial"; value = "password"; })
+        <FTS.user/autologin>
+        (FTS.selfhost._.samba-client { })
+        FTS.mactahoe
+        FTS.stylix
+
         # Complete desktop setup (environment + display manager + bootloader)
+        <FTS.desktop/environment/hyprland>
         <FTS.desktop/environment/gnome>
         FTS.gdm
         (FTS.grub {

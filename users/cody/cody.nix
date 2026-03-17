@@ -2,42 +2,9 @@
   FTS,
   den,
   cody,
-  lib,
   __findFile,
   ...
 }:
-let
-  # Linux-only aspects - conditional on host platform
-  linux-only =
-    { host, ... }:
-    if !lib.hasSuffix "darwin" host.system then
-      {
-        includes = [
-          # Applications (Linux-only)
-          <FTS.apps/gaming>
-          <FTS.apps/flatpaks>
-
-          # Music production
-          <FTS.music/production>
-
-          # User configuration (Linux-only)
-          (<FTS.user/password> { method = "initial"; value = "password"; })
-          <FTS.user/autologin>
-
-          # Samba client tools for network shares
-          (FTS.selfhost._.samba-client { })
-
-          # Theme and fonts
-          FTS.mactahoe
-          FTS.stylix
-
-          # Desktop environment
-          <FTS.desktop/environment/hyprland>
-        ];
-      }
-    else
-      { includes = [ ]; };
-in
 {
   den = {
     homes = {
@@ -156,9 +123,6 @@ in
 
         # VPN
         <FTS/hardware/networking/tailscale>
-
-        # Linux-only aspects (guarded by host.system)
-        linux-only
       ];
     };
   };
