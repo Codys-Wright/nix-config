@@ -11,8 +11,8 @@
       environment.systemPackages = with pkgs; [
         steam
         mangohud
-        steam-tui
-        steamcmd
+        # steam-tui   # temporarily disabled - Steam CDN rate limiting
+        # steamcmd    # temporarily disabled - Steam CDN rate limiting
       ];
 
       # Enable Steam with gamescope session
