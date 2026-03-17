@@ -37,8 +37,9 @@
                 user = "root";
                 identityFile = "~/.ssh/starcommand-deploy";
               };
-              "thebattleship" = {
-                hostname = "100.74.250.99";
+              "THEBATTLESHIP" = {
+                host = "THEBATTLESHIP thebattleship thebattleship-1";
+                hostname = "thebattleship-1";
                 user = "cody";
                 identityFile = "~/.ssh/id_ed25519";
               };
