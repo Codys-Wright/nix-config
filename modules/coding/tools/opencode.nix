@@ -12,17 +12,16 @@
       {
         home.packages = with pkgs; [
           opencode
-
-          amazon-q-cli
-          aider-chat
           claude-code
-          codex
-          copilot-cli
-          crush
-          cursor-cli
-          gemini-cli
-          qwen-code
 
+          # amazon-q-cli
+          # aider-chat
+          # codex
+          # copilot-cli
+          # crush
+          # cursor-cli
+          # gemini-cli
+          # qwen-code
         ];
       };
   };
