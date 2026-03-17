@@ -47,3 +47,7 @@ Development/
 .ralph-tui/
 .tmp/
 .cache/
+
+# Dolt database files (added by bd init)
+.dolt/
+*.db
