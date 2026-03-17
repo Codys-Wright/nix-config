@@ -11,28 +11,17 @@
 
     homeManager = {pkgs, ...}: {
       home.packages = with inputs.apple-fonts.packages.${pkgs.system}; [
-        # San Francisco Pro (Display and Text)
         sf-pro
-        sf-pro-nerd # With Nerd Font symbols for terminal use
-
-        # San Francisco Mono (Monospaced for code)
         sf-mono
-        sf-mono-nerd # With Nerd Font symbols
-
-        # San Francisco Compact (Compact variant)
         sf-compact
-        sf-compact-nerd # With Nerd Font symbols
       ];
     };
 
     nixos = {pkgs, ...}: {
       fonts.packages = with inputs.apple-fonts.packages.${pkgs.system}; [
         sf-pro
-        sf-pro-nerd
         sf-mono
-        sf-mono-nerd
         sf-compact
-        sf-compact-nerd
       ];
     };
   };
