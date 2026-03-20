@@ -60,8 +60,18 @@
           };
         };
       };
-      # Default image for wallpaper/backgrounds (can be overridden)
-      # stylix.image = lib.mkDefault ./path/to/wallpaper.jpg;
+      # Enable Qt theming via Stylix (NixOS level)
+      stylix.targets.qt.enable = true;
+    };
+
+    homeManager = { pkgs, lib, ... }: {
+      # KDE theming is handled by the MacTahoe KDE theme aspect (whitesur.nix)
+      # Stylix KDE target is disabled because it creates its own look-and-feel
+      # that conflicts with the MacTahoe look-and-feel package
+      stylix.targets.kde.enable = false;
+
+      # Enable Qt app theming via Stylix (HM level)
+      stylix.targets.qt.enable = true;
     };
   };
 }

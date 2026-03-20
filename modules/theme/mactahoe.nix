@@ -1,5 +1,5 @@
 # MacTahoe Theme Packages
-# Installs MacTahoe GTK theme, icon theme, cursor theme, and required GNOME extensions
+# Installs MacTahoe GTK theme, icon theme, cursor theme, KDE theme, and required GNOME extensions
 {
   FTS.mactahoe = {
     description = "MacTahoe theme packages - macOS Tahoe-inspired theming with GNOME extensions";
@@ -18,6 +18,9 @@
             themeVariants = [ "blue" ];
           })
           (pkgs.callPackage ../../packages/mactahoe/cursor-theme.nix { })
+          (pkgs.callPackage ../../packages/mactahoe/kde-theme.nix {
+            colorVariants = [ "dark" ];
+          })
 
           # Required GNOME Shell extensions
           pkgs.gnomeExtensions.user-themes
@@ -51,6 +54,9 @@
             themeVariants = [ "blue" ];
           })
           (pkgs.callPackage ../../packages/mactahoe/cursor-theme.nix { })
+          (pkgs.callPackage ../../packages/mactahoe/kde-theme.nix {
+            colorVariants = [ "dark" ];
+          })
 
           # GNOME extensions and tweaks
           pkgs.gnomeExtensions.user-themes

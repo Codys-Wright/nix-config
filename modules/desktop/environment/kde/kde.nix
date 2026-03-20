@@ -8,8 +8,11 @@
 }:
 {
   # Base KDE desktop environment
-  # Usage: (FTS.desktop._.environment._.kde { theme = "whitesur"; })
-  FTS.desktop._.environment._.kde =
+  # Usage: (<FTS.desktop/environment/kde> { theme = "whitesur"; })
+  FTS.desktop._.environment._.kde.description = "KDE Plasma 6 desktop environment";
+
+  FTS.desktop._.environment._.kde.__functor =
+    _self:
     {
       theme ? null,
       ...
@@ -30,8 +33,6 @@
         else [];
     in
     {
-      description = "KDE Plasma 6 desktop environment";
-      
       includes = themeIncludes;
 
       nixos = {

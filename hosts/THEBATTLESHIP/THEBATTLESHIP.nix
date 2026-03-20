@@ -34,7 +34,7 @@
         <FTS.apps/gaming>
         <FTS.apps/flatpaks>
         <FTS.music/production>
-        (<FTS.user/password> { method = "initial"; value = "password"; })
+        (<FTS.user/password> { method = "hashed"; value = "$6$0C2OSNBUmq/740g7$VfDQJvfYnxCwlV/KlmAIz.z5jYpIVc7Qa.1pzL/Fu3UGprNVLSKljI310/gyeCiYOPhJ.TVijW62wTmY54Ols1"; })
         <FTS.user/autologin>
         (FTS.selfhost._.samba-client { })
         FTS.mactahoe
@@ -43,7 +43,8 @@
         # Complete desktop setup (environment + display manager + bootloader)
         <FTS.desktop/environment/hyprland>
         <FTS.desktop/environment/gnome>
-        FTS.gdm
+        (<FTS.desktop/environment/kde> { })
+        FTS.sddm
         (FTS.grub {
           uefi = true;
           # theme is set by system theme preset
@@ -107,8 +108,11 @@
           # Hardware detection is handled by FTS.hardware (includes FTS.hardware.facter)
           # The facter report path is auto-derived as hosts/THEBATTLESHIP/facter.json
 
-          # Set Hyprland as the default session for cody instead of GNOME
-          services.displayManager.defaultSession = lib.mkForce "hyprland";
+          # Set KDE Plasma as the default session
+          services.displayManager.defaultSession = lib.mkForce "plasma";
+
+          # Timezone
+          time.timeZone = "America/Los_Angeles";
 
 
           # Note: Overlays for stable/unstable package access are already configured
@@ -169,6 +173,7 @@
 
           # Add cody to libvirtd group for VM management
           users.users.cody.extraGroups = [ "libvirtd" ];
+          users.users.cody.hashedPassword = "$6$0C2OSNBUmq/740g7$VfDQJvfYnxCwlV/KlmAIz.z5jYpIVc7Qa.1pzL/Fu3UGprNVLSKljI310/gyeCiYOPhJ.TVijW62wTmY54Ols1";
 
           # Import SOPS module
           imports = [
