@@ -7,7 +7,6 @@
         "wheel"
         "networkmanager"
       ];
-      initialPassword = "password";
       description = user.userName;
     };
   };

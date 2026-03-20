@@ -33,7 +33,7 @@
       home = {
         packages = with pkgs; [
           # Node.js and package managers
-          nodejs_24
+          (lib.hiPrio nodejs_24)
           pnpm
           yarn
 

@@ -123,6 +123,9 @@
 
         # VPN
         <FTS/hardware/networking/tailscale>
+
+        # AI assistant
+        FTS.apps._.ai
       ];
     };
   };
