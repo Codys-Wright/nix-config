@@ -5,6 +5,7 @@
 
     includes = [
       FTS.apps._.communications._.discord
+      FTS.apps._.communications._.telegram
       # FTS.apps._.browsers._.zen  # Disabled for now - has module conflicts
     ];
   };
