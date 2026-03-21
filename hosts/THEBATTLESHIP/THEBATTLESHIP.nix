@@ -34,7 +34,10 @@
         <FTS.apps/gaming>
         <FTS.apps/flatpaks>
         <FTS.music/production>
-        (<FTS.user/password> { method = "hashed"; value = "$6$0C2OSNBUmq/740g7$VfDQJvfYnxCwlV/KlmAIz.z5jYpIVc7Qa.1pzL/Fu3UGprNVLSKljI310/gyeCiYOPhJ.TVijW62wTmY54Ols1"; })
+        (<FTS.user/password> {
+          method = "hashed";
+          value = "$6$0C2OSNBUmq/740g7$VfDQJvfYnxCwlV/KlmAIz.z5jYpIVc7Qa.1pzL/Fu3UGprNVLSKljI310/gyeCiYOPhJ.TVijW62wTmY54Ols1";
+        })
         <FTS.user/autologin>
         (FTS.selfhost._.samba-client { })
         FTS.mactahoe
@@ -71,6 +74,9 @@
         <FTS.hardware._.nvidia>
         <FTS.hardware._.storage>
         <FTS.keyboard>
+
+        # mDNS/DNS-SD service discovery
+        <FTS.system._.avahi>
 
         # Virtualization for Windows VMs (EASEUS backup recovery, etc.)
         <FTS.system._.virtualization>
@@ -114,7 +120,6 @@
           # Timezone
           time.timeZone = "America/Los_Angeles";
 
-
           # Note: Overlays for stable/unstable package access are already configured
           # globally in modules/nix/nix.nix. The base nixpkgs is already unstable.
           # You can access stable packages via pkgs.stable and unstable via pkgs.unstable.
@@ -140,36 +145,53 @@
             ];
           };
 
-          # Mount starcommand storage over 10G network via SSHFS
+          # Mount starcommand storage over 10G network via NFS
           fileSystems."/mnt/starcommand" = {
-            device = "root@10.10.10.1:/mnt/storage";
-            fsType = "fuse.sshfs";
+            device = "10.10.10.1:/mnt/storage";
+            fsType = "nfs";
             options = [
-              "IdentityFile=/etc/ssh/ssh_host_ed25519_key"
-              "StrictHostKeyChecking=accept-new"
-              "UserKnownHostsFile=/etc/ssh/ssh_known_hosts"
-              "allow_other"
-              "default_permissions"
-              "uid=1000"
-              "gid=100"
-              "reconnect"
-              "ServerAliveInterval=15"
-              "ServerAliveCountMax=3"
+              "nfsvers=4.2"
+              "rsize=1048576"
+              "wsize=1048576"
               "_netdev"
               "x-systemd.automount"
-              "x-systemd.idle-timeout=60"
+              "x-systemd.idle-timeout=600"
               "x-systemd.mount-timeout=30"
               "nofail"
+              "soft"
+              "timeo=150"
+              "retrans=3"
             ];
           };
 
-          # Add starcommand 10G host key to known hosts
+          # Keep starcommand 10G host key for SSH access
           programs.ssh.knownHosts."10.10.10.1" = {
             publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIENFHgs8JqCE4/dO58AN8W4M2SRgetgar94m2ntI9xb8";
           };
 
-          # SSHFS package
-          environment.systemPackages = [ pkgs.sshfs ];
+          # 10G network interface tuning - jumbo frames
+          systemd.network.networks."20-10g" = {
+            matchConfig.Name = "enp12s0 enp11s0";
+            networkConfig.DHCP = "ipv4";
+            linkConfig = {
+              RequiredForOnline = false;
+              MTUBytes = "9000";
+            };
+          };
+
+          # TCP buffer tuning for 10G throughput
+          boot.kernel.sysctl = {
+            "net.core.rmem_max" = 16777216;
+            "net.core.wmem_max" = 16777216;
+            "net.core.rmem_default" = 1048576;
+            "net.core.wmem_default" = 1048576;
+            "net.ipv4.tcp_rmem" = "4096 1048576 16777216";
+            "net.ipv4.tcp_wmem" = "4096 1048576 16777216";
+            "net.core.netdev_max_backlog" = 5000;
+          };
+
+          # NFS client support
+          environment.systemPackages = [ pkgs.nfs-utils ];
 
           # Add cody to libvirtd group for VM management
           users.users.cody.extraGroups = [ "libvirtd" ];

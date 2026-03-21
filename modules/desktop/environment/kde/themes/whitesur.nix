@@ -51,8 +51,9 @@
       # Force overwrite gtkrc-2.0 to prevent backup clobbering on switch
       home.file.".gtkrc-2.0".force = true;
 
-      # KDE global settings
-      xdg.configFile."kdeglobals".text = lib.mkForce ''
+      # KDE defaults (merged as fallbacks, don't clobber user config)
+      # These go to ~/.config/kdedefaults/ which KDE reads as system defaults
+      xdg.configFile."kdedefaults/kdeglobals".text = ''
         [General]
         ColorScheme=MacTahoeDark
 
@@ -64,14 +65,12 @@
         widgetStyle=kvantum-dark
       '';
 
-      # Plasma desktop theme
-      xdg.configFile."plasmarc".text = lib.mkForce ''
+      xdg.configFile."kdedefaults/plasmarc".text = ''
         [Theme]
         name=MacTahoe-Dark
       '';
 
-      # KWin window decoration and forceblur
-      xdg.configFile."kwinrc".text = lib.mkForce ''
+      xdg.configFile."kdedefaults/kwinrc".text = ''
         [org.kde.kdecoration2]
         BorderSize=Tiny
         ButtonsOnLeft=XAI
@@ -88,29 +87,24 @@
 
         [Windows]
         BorderlessMaximizedWindows=true
-
-        [Xwayland]
-        Scale=1
       '';
 
-      # Splash screen
-      xdg.configFile."ksplashrc".text = lib.mkForce ''
+      xdg.configFile."kdedefaults/ksplashrc".text = ''
         [KSplash]
         Engine=KSplashQML
         Theme=com.github.vinceliuice.MacTahoe-Dark
       '';
 
-      # Kvantum theme
-      xdg.configFile."Kvantum/kvantum.kvconfig".text = ''
-        [General]
-        theme=MacTahoe
-      '';
-
-      # Cursor settings for KDE
-      xdg.configFile."kcminputrc".text = lib.mkForce ''
+      xdg.configFile."kdedefaults/kcminputrc".text = ''
         [Mouse]
         cursorTheme=MacTahoe-dark-cursors
         cursorSize=24
+      '';
+
+      # Kvantum theme (this one is safe to own fully)
+      xdg.configFile."Kvantum/kvantum.kvconfig".text = ''
+        [General]
+        theme=MacTahoe
       '';
 
       # Apply look-and-feel on activation
