@@ -24,7 +24,7 @@
       stylix = {
         enable = true;
         autoEnable = false;
-        base16Scheme = import ./_assets/stylix/ayu-dark/default.nix;
+        base16Scheme = import ./_assets/stylix/tokyonight/default.nix;
         image = null;
         polarity = "dark";
 
@@ -51,8 +51,8 @@
             name = "SFProDisplay Nerd Font";
           };
           monospace = {
-            package = inputs.apple-fonts.packages.${pkgs.system}.sf-mono-nerd;
-            name = "SFMono Nerd Font";
+            package = pkgs.nerd-fonts.jetbrains-mono;
+            name = "JetBrainsMono Nerd Font Mono";
           };
           emoji = {
             package = pkgs.noto-fonts-color-emoji;
@@ -60,18 +60,31 @@
           };
         };
       };
-      # Enable Qt theming via Stylix (NixOS level)
-      stylix.targets.qt.enable = true;
+      # Qt theming disabled — Stylix sets style=kvantum in qt6ct.conf but
+      # doesn't ensure the kvantum plugin is in Qt's plugin path, causing
+      # plasmashell to black-screen (module "kvantum" is not installed)
+      stylix.targets.qt.enable = false;
+
+      # Install the monospace font system-wide via fontconfig
+      fonts.packages = [
+        pkgs.nerd-fonts.jetbrains-mono
+      ];
     };
 
     homeManager = { pkgs, lib, ... }: {
+      # Terminal theming via Stylix (colors + JetBrains Mono font)
+      stylix.targets.kitty.enable = true;
+      stylix.targets.kitty.fonts.enable = true;
+      stylix.targets.ghostty.enable = true;
+      stylix.targets.ghostty.fonts.enable = true;
+
       # KDE theming is handled by the MacTahoe KDE theme aspect (whitesur.nix)
       # Stylix KDE target is disabled because it creates its own look-and-feel
       # that conflicts with the MacTahoe look-and-feel package
       stylix.targets.kde.enable = false;
 
-      # Enable Qt app theming via Stylix (HM level)
-      stylix.targets.qt.enable = true;
+      # Qt theming disabled — same kvantum/plasmashell issue as NixOS level
+      stylix.targets.qt.enable = false;
     };
   };
 }
