@@ -149,6 +149,11 @@
               set -g @resurrect-strategy-vim 'session'
               set -g @resurrect-strategy-nvim 'session'
               set -g @resurrect-capture-pane-contents 'on'
+
+              # Guard against empty save files overwriting the last symlink.
+              # After each save, check if the file is empty and revert the
+              # symlink to the previous good save if so.
+              set -g @resurrect-hook-post-save-all 'f="$HOME/.tmux/resurrect/last"; if [ ! -s "$(readlink -f "$f")" ]; then prev="$(ls -t "$HOME/.tmux/resurrect"/tmux_resurrect_*.txt | while read l; do [ -s "$l" ] && echo "$l" && break; done)"; [ -n "$prev" ] && ln -sf "$(basename "$prev")" "$f"; fi'
             '';
           }
           {

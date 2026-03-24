@@ -1,8 +1,22 @@
 {
   den.aspects.hm-backup = {
-    nixos.home-manager.backupFileExtension = "hm-backup";
-    # Use extension-based backup for Darwin (simpler and more reliable)
-    # If a backup already exists, it will be overwritten (user should clean up old backups)
-    darwin.home-manager.backupFileExtension = "hm-backup";
+    nixos = { pkgs, ... }:
+      let
+        hm-backup = pkgs.writeShellScript "hm-backup" ''
+          mv -- "$1" "$1.hm-backup-$(date +%Y%m%d%H%M%S)"
+        '';
+      in
+      {
+        home-manager.backupCommand = "${hm-backup}";
+      };
+    darwin = { pkgs, ... }:
+      let
+        hm-backup = pkgs.writeShellScript "hm-backup" ''
+          mv -- "$1" "$1.hm-backup-$(date +%Y%m%d%H%M%S)"
+        '';
+      in
+      {
+        home-manager.backupCommand = "${hm-backup}";
+      };
   };
 }

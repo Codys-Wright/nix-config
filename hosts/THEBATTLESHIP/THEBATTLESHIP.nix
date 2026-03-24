@@ -46,7 +46,7 @@
         # Complete desktop setup (environment + display manager + bootloader)
         <FTS.desktop/environment/hyprland>
         <FTS.desktop/environment/gnome>
-        (<FTS.desktop/environment/kde> { })
+        (<FTS.desktop/environment/kde> { theme = "whitesur"; })
         FTS.sddm
         (FTS.grub {
           uefi = true;
@@ -147,13 +147,14 @@
 
           # Mount starcommand storage over 10G network via NFS
           fileSystems."/mnt/starcommand" = {
-            device = "10.10.10.1:/mnt/storage";
+            device = "10.10.10.1:/";
             fsType = "nfs";
             options = [
               "nfsvers=4.2"
               "rsize=1048576"
               "wsize=1048576"
               "_netdev"
+              "noauto"
               "x-systemd.automount"
               "x-systemd.idle-timeout=600"
               "x-systemd.mount-timeout=30"
@@ -169,14 +170,17 @@
             publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIENFHgs8JqCE4/dO58AN8W4M2SRgetgar94m2ntI9xb8";
           };
 
-          # 10G network interface tuning - jumbo frames
-          systemd.network.networks."20-10g" = {
-            matchConfig.Name = "enp12s0 enp11s0";
-            networkConfig.DHCP = "ipv4";
-            linkConfig = {
-              RequiredForOnline = false;
-              MTUBytes = "9000";
+          # 10G network interface tuning - jumbo frames via NetworkManager
+          networking.networkmanager.ensureProfiles.profiles."10g-jumbo" = {
+            connection = {
+              id = "10G Jumbo";
+              type = "ethernet";
+              interface-name = "enp12s0";
+              autoconnect = "true";
             };
+            ethernet.mtu = 9000;
+            ipv4.method = "auto";
+            ipv6.method = "auto";
           };
 
           # TCP buffer tuning for 10G throughput
@@ -194,7 +198,7 @@
           environment.systemPackages = [ pkgs.nfs-utils ];
 
           # Add cody to libvirtd group for VM management
-          users.users.cody.extraGroups = [ "libvirtd" ];
+          users.users.cody.extraGroups = [ "audio" "libvirtd" ];
           users.users.cody.hashedPassword = "$6$0C2OSNBUmq/740g7$VfDQJvfYnxCwlV/KlmAIz.z5jYpIVc7Qa.1pzL/Fu3UGprNVLSKljI310/gyeCiYOPhJ.TVijW62wTmY54Ols1";
 
           # Import SOPS module

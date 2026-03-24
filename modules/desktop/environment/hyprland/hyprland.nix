@@ -67,7 +67,7 @@
         "org/gnome/desktop/interface" = {
           color-scheme = "prefer-dark";
           gtk-theme = "MacTahoe-Dark-Blue";
-          icon-theme = "MacTahoe-Blue";
+          icon-theme = "MacTahoe-blue";
         };
       };
 
@@ -78,7 +78,7 @@
           name = lib.mkForce "MacTahoe-Dark-Blue";
         };
         iconTheme = {
-          name = lib.mkForce "MacTahoe-Blue";
+          name = lib.mkForce "MacTahoe-blue";
         };
         cursorTheme = {
           name = lib.mkForce "MacTahoe-dark-cursors";

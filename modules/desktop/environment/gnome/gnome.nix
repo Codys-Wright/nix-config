@@ -26,13 +26,6 @@
       # Enable sensor support for automatic screen rotation
       hardware.sensor.iio.enable = true;
 
-      # Qt integration for better GNOME look
-      qt = {
-        enable = true;
-        platformTheme = lib.mkDefault "gnome";
-        style = lib.mkDefault "adwaita-dark";
-      };
-
       # Don't set SSH askPassword (override default from gnome module)
       programs.ssh.askPassword = lib.mkForce "";
     };

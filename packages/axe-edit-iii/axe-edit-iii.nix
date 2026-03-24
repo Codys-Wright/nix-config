@@ -7,8 +7,8 @@
   makeDesktopIcon,
   copyDesktopItems,
   copyDesktopIcons,
-  requireFile,
-  xorg,
+  fetchurl,
+  libx11,
 }:
 let
   version = "1.14.30";
@@ -22,8 +22,8 @@ let
 
     dontUnpack = true;
 
-    nativeBuildInputs = [ xorg.libX11 ];
-    buildInputs = [ xorg.libX11 ];
+    nativeBuildInputs = [ libx11 ];
+    buildInputs = [ libx11 ];
 
     buildPhase = ''
       cat > cursor-fix.c << 'CEOF'
@@ -48,10 +48,9 @@ mkWindowsApp rec {
 
   pname = "axe-edit-iii";
 
-  src = requireFile {
-    name = "Axe-Edit-III-Win-${versionSlug}.exe";
-    url = "https://www.fractalaudio.com/axe-edit/";
-    hash = lib.fakeHash;
+  src = fetchurl {
+    url = "https://www.fractalaudio.com/downloads/Axe-Edit-III/Axe-Edit-III-Win-${versionSlug}.exe";
+    hash = "sha256-PDpUo0D7dhv6sjZgGcUwA4/DAIXbFtKiMmW+gA4tErA=";
   };
 
   dontUnpack = true;
@@ -60,7 +59,7 @@ mkWindowsApp rec {
   enableMonoBootPrompt = false;
   enableInstallNotification = true;
   persistRegistry = true;
-  persistRuntimeLayer = false;
+  persistRuntimeLayer = true;
   inputHashMethod = "store-path";
 
   # Persist Axe-Edit settings and presets between launches
@@ -70,15 +69,22 @@ mkWindowsApp rec {
 
   nativeBuildInputs = [ copyDesktopItems copyDesktopIcons ];
 
-  # Install Axe-Edit III using the Windows installer
+  # Install Axe-Edit III silently (Inno Setup)
+  # /VERYSILENT prevents the post-install "Launch app" step that breaks mkWindowsApp layer finalization
+  # Disable Wine audio to prevent PulseAudio channel enumeration hang with multi-channel interfaces
   winAppInstall = ''
-    wine "${src}" /S
+    wine reg add 'HKCU\Software\Wine\Drivers' /v Audio /d "" /f
+    wine "${src}" /VERYSILENT /SUPPRESSMSGBOXES /NORESTART
   '';
 
   # Launch with cursor fix and dwrite override (needed for saving presets)
+  # Audio disabled: Wine's PulseAudio driver hangs on multi-channel interfaces (Axe-Fx USB audio).
+  # Axe-Edit communicates via USB/MIDI, not audio, so Wine audio is unnecessary.
   winAppRun = ''
     export LD_PRELOAD="${cursorFix}/lib/libaxe-edit-cursor-fix.so"
     export WINEDLLOVERRIDES="dwrite=d"
+    export WINEDEBUG=-all
+    wine reg add 'HKCU\Software\Wine\Drivers' /v Audio /d "" /f
     wine "$WINEPREFIX/drive_c/Program Files/Fractal Audio/Axe-Edit III/Axe-Edit III.exe" "$ARGS"
   '';
 
