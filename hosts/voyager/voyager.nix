@@ -21,8 +21,11 @@
       darwin = { pkgs, ... }: {
         environment.systemPackages = [
           pkgs.tailwindcss_4
+          pkgs.cachix
         ];
         nix.settings = {
+          cores = 10;
+          max-jobs = 3;
           trusted-users = [ "root" "@admin" "CodyWright" ];
           substituters = [
             "https://cache.nixos.org/"
