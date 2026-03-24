@@ -18,7 +18,10 @@
         <FTS/fonts>
         <FTS/phoenix>
       ];
-      darwin = { ... }: {
+      darwin = { pkgs, ... }: {
+        environment.systemPackages = [
+          pkgs.tailwindcss_4
+        ];
         nix.settings = {
           trusted-users = [ "root" "@admin" "CodyWright" ];
           substituters = [
