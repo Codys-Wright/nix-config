@@ -12,6 +12,8 @@
       FTS.apps._.gaming._.steam
       FTS.apps._.gaming._.minecraft
       FTS.apps._.gaming._.lutris
+      FTS.apps._.gaming._.bottles
+      FTS.apps._.gaming._.winboat
       FTS.apps._.gaming._.proton
       FTS.apps._.gaming._.melonloader
       FTS.apps._.gaming._.r2modman

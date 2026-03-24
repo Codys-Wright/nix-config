@@ -34,11 +34,16 @@
       url = "github:doomemacs/doomemacs";
     };
     elephant.url = "github:abenz1267/elephant";
+    erosanix.url = "github:emmanuelrosa/erosanix";
     flake-aspects.url = "github:vic/flake-aspects";
     flake-file.url = "github:vic/flake-file";
     flake-parts = {
       inputs.nixpkgs-lib.follows = "nixpkgs-lib";
       url = "github:hercules-ci/flake-parts";
+    };
+    fts-flake = {
+      inputs.nixpkgs.follows = "nixpkgs";
+      url = "path:/home/cody/Development/FastTrackStudio/fts-flake";
     };
     home-manager = {
       inputs.nixpkgs.follows = "nixpkgs";
