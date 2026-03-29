@@ -1,11 +1,11 @@
 {
-  den,
   lib,
   FTS,
+  __findFile,
   ...
 }:
 {
-  FTS.hostname = den.lib.parametric {
+  FTS.hostname = <den.lib.parametric> {
     description = "Set hostname from den host context";
 
     includes = [

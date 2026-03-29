@@ -45,7 +45,6 @@ in
       <FTS/nix>
       (<den/unfree> true)
     ];
-    nixos = nixSettings;
-    darwin = nixSettings;
+    os = nixSettings;
   };
 }

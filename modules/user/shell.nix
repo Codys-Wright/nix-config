@@ -10,14 +10,7 @@ let
   '';
 
   userShell = shell: user: {
-    nixos =
-      { pkgs, ... }:
-      {
-        programs.${shell}.enable = true;
-        users.users.${user.userName}.shell = pkgs.${shell};
-      };
-
-    darwin =
+    os =
       { pkgs, ... }:
       {
         programs.${shell}.enable = true;
