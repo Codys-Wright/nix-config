@@ -8,7 +8,7 @@
 {
   FTS.desktop._.environment._.niri = {
     description = ''
-      Niri scrollable-tiling Wayland compositor.
+      Niri scrollable-tiling Wayland compositor with Noctalia shell.
 
       A Wayland compositor where windows are arranged in an infinite
       horizontal scrollable strip of columns.
@@ -39,17 +39,15 @@
           ];
         };
 
-        # Polkit agent needed for privilege escalation dialogs
         security.polkit.enable = true;
 
         environment.systemPackages = with pkgs; [
           xwayland-satellite # XWayland support for legacy apps
-          waybar # Status bar
-          fuzzel # App launcher
+          noctalia-shell # Desktop shell (bar + launcher + notifications)
+          wlr-which-key # Which-key popup for keybind hints
           swaybg # Wallpaper setter
           swaylock # Screen locker
           swayidle # Idle management
-          mako # Notification daemon
           wl-clipboard # Clipboard utilities
           grim # Screenshot capture
           slurp # Region selection for screenshots
@@ -62,6 +60,74 @@
       {
         imports = [ inputs.niri-flake.homeModules.niri ];
 
+        # Noctalia colors — Catppuccin Mocha with blue as primary accent
+        xdg.configFile."noctalia/colors.json".text = builtins.toJSON {
+          mPrimary = "#89b4fa"; # blue
+          mOnPrimary = "#11111b";
+          mSecondary = "#cba6f7"; # mauve
+          mOnSecondary = "#11111b";
+          mTertiary = "#94e2d5"; # teal
+          mOnTertiary = "#11111b";
+          mError = "#f38ba8"; # red
+          mOnError = "#11111b";
+          mSurface = "#1e1e2e"; # base
+          mOnSurface = "#cdd6f4"; # text
+          mSurfaceVariant = "#313244"; # surface1
+          mOnSurfaceVariant = "#a3b4eb";
+          mOutline = "#4c4f69";
+          mShadow = "#11111b";
+          mHover = "#89dceb"; # sky
+          mOnHover = "#11111b";
+        };
+
+        # wlr-which-key menu — Mod+Space shows keybind hints
+        xdg.configFile."wlr-which-key/config.yaml".text = ''
+          font: "JetBrainsMono Nerd Font 12"
+          background: "#1e1e2ed0"
+          color: "#cdd6f4"
+          border: "#89b4fa"
+          separator: " ➜ "
+          border_width: 2
+          corner_r: 12
+          padding: 15
+          column_padding: 25
+          rows_per_column: 6
+          anchor: "bottom-right"
+          margin_bottom: 5
+          margin_right: 5
+          menu:
+            - key: "f"
+              desc: "Firefox"
+              cmd: "firefox"
+            - key: "d"
+              desc: "Discord"
+              cmd: "vesktop"
+            - key: "b"
+              desc: "Bluetooth"
+              cmd: "noctalia-shell ipc call bluetooth togglePanel"
+            - key: "w"
+              desc: "WiFi"
+              cmd: "noctalia-shell ipc call wifi togglePanel"
+            - key: "s"
+              desc: "Sound (pavucontrol)"
+              cmd: "pavucontrol"
+            - key: "p"
+              desc: "Power"
+              submenu:
+                - key: "l"
+                  desc: "Lock"
+                  cmd: "swaylock"
+                - key: "r"
+                  desc: "Reboot"
+                  cmd: "reboot"
+                - key: "p"
+                  desc: "Poweroff"
+                  cmd: "poweroff"
+                - key: "e"
+                  desc: "Logout (niri)"
+                  cmd: "niri msg action quit"
+        '';
+
         programs.niri = {
           enable = true;
 
@@ -70,7 +136,7 @@
               keyboard = {
                 xkb = {
                   layout = "us";
-                  options = "caps:escape"; # Caps Lock acts as Escape
+                  options = "caps:escape";
                 };
                 repeat-rate = 40;
                 repeat-delay = 250;
@@ -89,10 +155,9 @@
               center-focused-column = "never";
               default-column-width.proportion = 0.5;
 
-              # Focus ring (active window highlight) — no border on inactive windows
               focus-ring = {
                 width = 2;
-                active.color = "#89b4fa"; # Catppuccin blue
+                active.color = "#89b4fa";
                 inactive.color = "#313244";
               };
 
@@ -102,7 +167,6 @@
             animations.enable = true;
             prefer-no-csd = true;
 
-            # Named workspaces (w0–w9)
             workspaces = {
               w0 = { };
               w1 = { };
@@ -117,15 +181,14 @@
             };
 
             environment = {
-              DISPLAY = ":0"; # for xwayland-satellite
+              DISPLAY = ":0";
               NIXOS_OZONE_WL = "1";
               MOZ_ENABLE_WAYLAND = "1";
             };
 
             spawn-at-startup = [
               { command = [ "xwayland-satellite" ]; }
-              { command = [ "mako" ]; }
-              { command = [ "waybar" ]; }
+              { command = [ "noctalia-shell" ]; }
             ];
 
             binds =
@@ -139,9 +202,12 @@
                 wpctl = "wpctl";
               in
               {
-                # Terminal / launcher
+                # Terminal
                 "${mod}+Return".action.spawn = "kitty";
-                "${mod}+D".action.spawn = "fuzzel";
+
+                # Launcher (Noctalia) / which-key
+                "${mod}+D".action.spawn-sh = "noctalia-shell ipc call launcher toggle";
+                "${mod}+Space".action.spawn = "wlr-which-key";
 
                 # Window management
                 "${mod}+Q".action.close-window = { };
@@ -150,7 +216,7 @@
                 "${mod}+Shift+F".action.toggle-window-floating = { };
                 "${mod}+C".action.center-column = { };
 
-                # Focus movement (Vi keys + arrows)
+                # Focus (Vi + arrows)
                 "${mod}+H".action.focus-column-left = { };
                 "${mod}+L".action.focus-column-right = { };
                 "${mod}+K".action.focus-window-up = { };
@@ -160,19 +226,19 @@
                 "${mod}+Up".action.focus-window-up = { };
                 "${mod}+Down".action.focus-window-down = { };
 
-                # Move windows
+                # Move
                 "${mod}+Shift+H".action.move-column-left = { };
                 "${mod}+Shift+L".action.move-column-right = { };
                 "${mod}+Shift+K".action.move-window-up = { };
                 "${mod}+Shift+J".action.move-window-down = { };
 
-                # Resize columns/windows
+                # Resize
                 "${mod}+Ctrl+H".action.set-column-width = "-5%";
                 "${mod}+Ctrl+L".action.set-column-width = "+5%";
                 "${mod}+Ctrl+J".action.set-window-height = "-5%";
                 "${mod}+Ctrl+K".action.set-window-height = "+5%";
 
-                # Workspaces (named w0–w9)
+                # Workspaces (named w0–w9, keyed 1–0)
                 "${mod}+1".action.focus-workspace = "w0";
                 "${mod}+2".action.focus-workspace = "w1";
                 "${mod}+3".action.focus-workspace = "w2";
@@ -194,22 +260,22 @@
                 "${mod}+Shift+9".action.move-column-to-workspace = "w8";
                 "${mod}+Shift+0".action.move-column-to-workspace = "w9";
 
-                # Mouse wheel: scroll through columns / workspaces
+                # Mouse wheel navigation
                 "${mod}+WheelScrollDown".action.focus-column-right = { };
                 "${mod}+WheelScrollUp".action.focus-column-left = { };
                 "${mod}+Ctrl+WheelScrollDown".action.focus-workspace-down = { };
                 "${mod}+Ctrl+WheelScrollUp".action.focus-workspace-up = { };
 
-                # Volume (pipewire / wpctl)
+                # Volume
                 "XF86AudioRaiseVolume".action.spawn-sh = "${wpctl} set-volume -l 1.4 @DEFAULT_AUDIO_SINK@ 5%+";
                 "XF86AudioLowerVolume".action.spawn-sh = "${wpctl} set-volume @DEFAULT_AUDIO_SINK@ 5%-";
                 "XF86AudioMute".action.spawn-sh = "${wpctl} set-mute @DEFAULT_AUDIO_SINK@ toggle";
 
                 # Screenshots
-                "Print".action.screenshot = { }; # niri built-in interactive screenshot
-                "${mod}+Ctrl+S".action.spawn-sh = "${grim} -l 0 - | ${wlCopy}"; # full screen → clipboard
-                "${mod}+Shift+S".action.spawn-sh = "${grim} -g \"$(${slurp} -w 0)\" - | ${wlCopy}"; # region → clipboard
-                "${mod}+Shift+E".action.spawn-sh = "${wlPaste} | ${swappy} -f -"; # clipboard → swappy editor
+                "Print".action.screenshot = { };
+                "${mod}+Ctrl+S".action.spawn-sh = "${grim} -l 0 - | ${wlCopy}";
+                "${mod}+Shift+S".action.spawn-sh = "${grim} -g \"$(${slurp} -w 0)\" - | ${wlCopy}";
+                "${mod}+Shift+E".action.spawn-sh = "${wlPaste} | ${swappy} -f -";
 
                 # Session
                 "${mod}+Alt+L".action.spawn = "swaylock";
