@@ -9,7 +9,7 @@
     nixos =
       { ... }:
       {
-        documentation.man.generateCaches = false;
+        documentation.man.cache.enable = false;
       };
 
     # Darwin system-level (if applicable)
