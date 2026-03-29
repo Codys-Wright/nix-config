@@ -1,7 +1,8 @@
 # Animation Preset: Standard
 # From HyDE Project
 # Standard balanced animations
-{FTS, ...}: {
+{ FTS, ... }:
+{
   FTS.desktop._.environment._.hyprland._.presets._.animations._.standard = {
     description = "Standard animations (from HyDE)";
 

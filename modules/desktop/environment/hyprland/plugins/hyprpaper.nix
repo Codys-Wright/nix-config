@@ -1,16 +1,17 @@
 # Hyprpaper - Hyprland wallpaper daemon configuration
-{FTS, ...}: {
+{ FTS, ... }:
+{
   FTS.desktop._.environment._.hyprland._.plugins._.hyprpaper = {
     description = "Hyprpaper wallpaper daemon configuration for Hyprland";
 
     homeManager = {
       services.hyprpaper = {
         enable = true;
-        
+
         settings = {
           ipc = "on";
           splash = false;
-          
+
           # Preload wallpapers
           preload = [
             # Add your wallpaper paths here

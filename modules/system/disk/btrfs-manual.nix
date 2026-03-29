@@ -55,7 +55,8 @@
           "${device}${toString bootPartition}";
     in
     {
-      nixos = { pkgs, lib, ... }:
+      nixos =
+        { pkgs, lib, ... }:
         {
           # Enable Btrfs support
           boot.supportedFilesystems = [ "btrfs" ];

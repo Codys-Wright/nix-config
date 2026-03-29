@@ -4,24 +4,26 @@
   flake-file.inputs.flake-aspects.url = lib.mkDefault "github:vic/flake-aspects";
   flake-file.inputs.nixos-generators.url = lib.mkDefault "github:nix-community/nixos-generators";
   flake-file.inputs.nixos-generators.inputs.nixpkgs.follows = "nixpkgs";
-  
+  flake-file.inputs.microvm.url = lib.mkDefault "github:microvm-nix/microvm.nix";
+  flake-file.inputs.microvm.inputs.nixpkgs.follows = "nixpkgs";
+
   imports = [
     (inputs.flake-file.flakeModules.dendritic)
     (inputs.den.flakeModules.dendritic)
   ];
 
   flake-file = {
-      description = "A flake for Cody's Entire Computing World";
-      outputs = lib.mkForce ''
-        inputs:
-          inputs.flake-parts.lib.mkFlake { inherit inputs; } {
-            imports = [
-              (inputs.import-tree ./modules)
-              (inputs.import-tree ./hosts)
-              (inputs.import-tree ./users)
-            ];
-          }
-      '';
+    description = "A flake for Cody's Entire Computing World";
+    outputs = lib.mkForce ''
+      inputs:
+        inputs.flake-parts.lib.mkFlake { inherit inputs; } {
+          imports = [
+            (inputs.import-tree ./modules)
+            (inputs.import-tree ./hosts)
+            (inputs.import-tree ./users)
+          ];
+        }
+    '';
   };
 
 }

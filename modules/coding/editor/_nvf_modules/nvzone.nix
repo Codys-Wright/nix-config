@@ -1,7 +1,8 @@
 # Nvzone plugins configuration - All nvzone plugins in one module
 # Returns config.vim settings directly
 # Takes lib as parameter for consistency (even if not used)
-{lib, ...}: {
+{ lib, ... }:
+{
   # Floaterm plugin configuration
   extraPlugins = {
     floaterm = {
@@ -109,19 +110,28 @@
   keymaps = [
     {
       key = "<leader>tf";
-      mode = ["n" "t"];
+      mode = [
+        "n"
+        "t"
+      ];
       action = "<cmd>FloatermToggle<cr>";
       desc = "Toggle Floating Terminal (Floaterm)";
     }
     {
       key = "<leader>tn";
-      mode = ["n" "t"];
+      mode = [
+        "n"
+        "t"
+      ];
       action = "<cmd>FloatermNew<cr>";
       desc = "New Floating Terminal (Floaterm)";
     }
     {
       key = "<C-p>";
-      mode = ["n" "t"];
+      mode = [
+        "n"
+        "t"
+      ];
       action = "<cmd>FloatermToggle<cr>";
       desc = "Toggle Floating Terminal (Floaterm)";
     }

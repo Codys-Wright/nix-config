@@ -6,14 +6,8 @@
 }:
 
 {
-  # Define the host
-  den.hosts.x86_64-linux = {
-    template = {
-      description = "Template host for testing deployment";
-      users.cody = { };
-      aspect = "template";
-    };
-  };
+  # Template host — not registered as an active host to avoid assertion failures
+  # Copy this structure and rename to define a new host.
 
   # Template host-specific aspect
   den.aspects = {

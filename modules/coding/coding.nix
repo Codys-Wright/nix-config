@@ -7,7 +7,7 @@
 {
   FTS.coding.description = ''
     Coding tools and environments facet.
-    
+
     Usage:
       # Include full coding setup
       (<FTS/coding> {
@@ -49,7 +49,7 @@
       toolIncludes = lib.optionals (tools != null) [ (FTS.coding._.tools tools) ];
     in
     {
-      includes = cliIncludes ++ editorIncludes ++ langIncludes ++ shellIncludes ++ terminalIncludes ++ toolIncludes;
+      includes =
+        cliIncludes ++ editorIncludes ++ langIncludes ++ shellIncludes ++ terminalIncludes ++ toolIncludes;
     };
 }
-

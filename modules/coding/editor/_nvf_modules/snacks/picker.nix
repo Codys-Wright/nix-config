@@ -1,7 +1,8 @@
 # Snacks.nvim picker configuration
 # Returns config.vim settings directly
 # Takes lib as parameter for mkLuaInline
-{lib, ...}: {
+{ lib, ... }:
+{
   # Configure snacks picker
   utility.snacks-nvim.setupOpts = {
     picker = {
@@ -231,7 +232,10 @@
     }
     {
       key = "<leader>sw";
-      mode = ["n" "x"];
+      mode = [
+        "n"
+        "x"
+      ];
       action = "function() require('snacks').picker.grep_word() end";
       lua = true;
       desc = "Visual selection or word";

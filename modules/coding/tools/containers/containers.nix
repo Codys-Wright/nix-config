@@ -1,5 +1,6 @@
 # Container tools facet - Podman and related tools
-{FTS, ...}: {
+{ FTS, ... }:
+{
   FTS.coding._.tools._.containers = {
     description = "Container tools - Podman with Docker compatibility";
 

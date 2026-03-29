@@ -1,24 +1,33 @@
 # r2modman mod manager aspect
-{FTS, ...}: {
+{ FTS, ... }:
+{
   FTS.gaming._.r2modman = {
     description = "r2modman mod manager for Thunderstore mods";
 
-    homeManager = {
-      pkgs,
-      lib,
-      ...
-    }:
+    homeManager =
+      {
+        pkgs,
+        lib,
+        ...
+      }:
       lib.mkIf (!pkgs.stdenv.isDarwin) {
-        home.packages = [pkgs.r2modman pkgs.gale];
+        home.packages = [
+          pkgs.r2modman
+          pkgs.gale
+        ];
       };
 
-    nixos = {
-      pkgs,
-      lib,
-      ...
-    }:
+    nixos =
+      {
+        pkgs,
+        lib,
+        ...
+      }:
       lib.mkIf (!pkgs.stdenv.isDarwin) {
-        environment.systemPackages = [pkgs.r2modman pkgs.gale];
+        environment.systemPackages = [
+          pkgs.r2modman
+          pkgs.gale
+        ];
       };
   };
 }

@@ -1,7 +1,8 @@
 # Editor enhancements (aerial, dial, harpoon, etc.)
 # Returns config.vim settings directly
 # Takes lib as parameter for consistency (even if not used)
-{lib, ...}: {
+{ lib, ... }:
+{
   # Set global variables (matching LazyVim defaults)
   globals = {
     # LazyVim auto format (enabled by default)
@@ -9,7 +10,7 @@
     # Snacks animations (enabled by default)
     snacks_animate = true;
     # LSP servers to ignore when detecting root (matching LazyVim)
-    root_lsp_ignore = ["copilot"];
+    root_lsp_ignore = [ "copilot" ];
     # LazyVim picker to use (not used in nvf, but set for compatibility)
     lazyvim_picker = "auto";
     # LazyVim completion engine (not used in nvf, but set for compatibility)
@@ -164,7 +165,10 @@
     # Better up/down (use gj/gk for wrapped lines)
     {
       key = "j";
-      mode = ["n" "x"];
+      mode = [
+        "n"
+        "x"
+      ];
       action = "v:count == 0 ? 'gj' : 'j'";
       expr = true;
       silent = true;
@@ -172,7 +176,10 @@
     }
     {
       key = "<Down>";
-      mode = ["n" "x"];
+      mode = [
+        "n"
+        "x"
+      ];
       action = "v:count == 0 ? 'gj' : 'j'";
       expr = true;
       silent = true;
@@ -180,7 +187,10 @@
     }
     {
       key = "k";
-      mode = ["n" "x"];
+      mode = [
+        "n"
+        "x"
+      ];
       action = "v:count == 0 ? 'gk' : 'k'";
       expr = true;
       silent = true;
@@ -188,7 +198,10 @@
     }
     {
       key = "<Up>";
-      mode = ["n" "x"];
+      mode = [
+        "n"
+        "x"
+      ];
       action = "v:count == 0 ? 'gk' : 'k'";
       expr = true;
       silent = true;
@@ -397,7 +410,12 @@
     # Save file
     {
       key = "<C-s>";
-      mode = ["i" "x" "n" "s"];
+      mode = [
+        "i"
+        "x"
+        "n"
+        "s"
+      ];
       action = "<cmd>w<cr><esc>";
       desc = "Save File";
     }
@@ -437,7 +455,11 @@
     # Note: We can't easily stop snippets without LazyVim's cmp module, so we'll just clear search
     {
       key = "<esc>";
-      mode = ["i" "n" "s"];
+      mode = [
+        "i"
+        "n"
+        "s"
+      ];
       action = "function() vim.cmd('noh'); return '<esc>' end";
       lua = true;
       expr = true;
@@ -582,14 +604,20 @@
     }
     {
       key = "<c-/>";
-      mode = ["n" "t"];
+      mode = [
+        "n"
+        "t"
+      ];
       action = "function() require('snacks').terminal(nil, { cwd = vim.fn.getcwd() }) end";
       lua = true;
       desc = "Terminal (Root Dir)";
     }
     {
       key = "<c-_>";
-      mode = ["n" "t"];
+      mode = [
+        "n"
+        "t"
+      ];
       action = "function() require('snacks').terminal(nil, { cwd = vim.fn.getcwd() }) end";
       lua = true;
       desc = "which_key_ignore";
@@ -599,7 +627,10 @@
     # For a full LazyVim.format replacement, we'd need conform.nvim, but LSP formatting works for now
     {
       key = "<leader>cf";
-      mode = ["n" "x"];
+      mode = [
+        "n"
+        "x"
+      ];
       action = "function() vim.lsp.buf.format({ async = false }) end";
       lua = true;
       desc = "Format";
@@ -781,7 +812,11 @@
     }
     {
       key = "<c-f>";
-      mode = ["i" "n" "s"];
+      mode = [
+        "i"
+        "n"
+        "s"
+      ];
       action = "function() if not require('noice.lsp').scroll(4) then return '<c-f>' end end";
       lua = true;
       expr = true;
@@ -790,7 +825,11 @@
     }
     {
       key = "<c-b>";
-      mode = ["i" "n" "s"];
+      mode = [
+        "i"
+        "n"
+        "s"
+      ];
       action = "function() if not require('noice.lsp').scroll(-4) then return '<c-b>' end end";
       lua = true;
       expr = true;
@@ -962,7 +1001,7 @@
     todo-comments = {
       enable = true;
       # LazyVim-style todo-comments configuration
-      setupOpts = {};
+      setupOpts = { };
     };
   };
 
@@ -993,11 +1032,14 @@
             # These control the width of the aerial window.
             # They can be integers or a float between 0 and 1 (e.g. 0.4 for 40%)
             # min_width and max_width can be a list of mixed types.
-            max_width = [40 0.2];
+            max_width = [
+              40
+              0.2
+            ];
             width = null;
             min_width = 10;
             # key-value pairs of window-local options for aerial window (e.g. wrap, number, etc.)
-            win_opts = {};
+            win_opts = { };
             # Determines the default direction to open the aerial window. The 'prefer'
             # options will open the window in the other direction *if* there is a
             # different buffer in the way of the preferred direction
@@ -1057,7 +1099,11 @@
   autocmds = [
     # Check if we need to reload the file when it changed
     {
-      event = ["FocusGained" "TermClose" "TermLeave"];
+      event = [
+        "FocusGained"
+        "TermClose"
+        "TermLeave"
+      ];
       group = "lazyvim_checktime";
       desc = "Check if file changed externally";
       callback = lib.generators.mkLuaInline ''
@@ -1070,7 +1116,7 @@
     }
     # Highlight on yank
     {
-      event = ["TextYankPost"];
+      event = [ "TextYankPost" ];
       group = "lazyvim_highlight_yank";
       desc = "Highlight yanked text";
       callback = lib.generators.mkLuaInline ''
@@ -1081,7 +1127,7 @@
     }
     # Resize splits if window got resized
     {
-      event = ["VimResized"];
+      event = [ "VimResized" ];
       group = "lazyvim_resize_splits";
       desc = "Resize splits when window resized";
       callback = lib.generators.mkLuaInline ''
@@ -1094,7 +1140,7 @@
     }
     # Go to last loc when opening a buffer
     {
-      event = ["BufReadPost"];
+      event = [ "BufReadPost" ];
       group = "lazyvim_last_loc";
       desc = "Go to last location when opening buffer";
       callback = lib.generators.mkLuaInline ''
@@ -1115,7 +1161,7 @@
     }
     # Close some filetypes with <q>
     {
-      event = ["FileType"];
+      event = [ "FileType" ];
       pattern = [
         "PlenaryTestPopup"
         "checkhealth"
@@ -1153,8 +1199,8 @@
     }
     # Make it easier to close man-files when opened inline
     {
-      event = ["FileType"];
-      pattern = ["man"];
+      event = [ "FileType" ];
+      pattern = [ "man" ];
       group = "lazyvim_man_unlisted";
       desc = "Unlist man buffers";
       callback = lib.generators.mkLuaInline ''
@@ -1165,8 +1211,14 @@
     }
     # Wrap and check for spell in text filetypes
     {
-      event = ["FileType"];
-      pattern = ["text" "plaintex" "typst" "gitcommit" "markdown"];
+      event = [ "FileType" ];
+      pattern = [
+        "text"
+        "plaintex"
+        "typst"
+        "gitcommit"
+        "markdown"
+      ];
       group = "lazyvim_wrap_spell";
       desc = "Enable wrap and spell for text filetypes";
       callback = lib.generators.mkLuaInline ''
@@ -1178,8 +1230,12 @@
     }
     # Fix conceallevel for json files
     {
-      event = ["FileType"];
-      pattern = ["json" "jsonc" "json5"];
+      event = [ "FileType" ];
+      pattern = [
+        "json"
+        "jsonc"
+        "json5"
+      ];
       group = "lazyvim_json_conceal";
       desc = "Disable conceal for json files";
       callback = lib.generators.mkLuaInline ''
@@ -1190,7 +1246,7 @@
     }
     # Auto create dir when saving a file
     {
-      event = ["BufWritePre"];
+      event = [ "BufWritePre" ];
       group = "lazyvim_auto_create_dir";
       desc = "Auto create directory when saving file";
       callback = lib.generators.mkLuaInline ''

@@ -1,5 +1,6 @@
 # Hardware facet - All hardware support
-{FTS, ...}: {
+{ FTS, ... }:
+{
   FTS.hardware = {
     description = "All hardware support - facter, audio, bluetooth, cuda, networking, nvidia";
 

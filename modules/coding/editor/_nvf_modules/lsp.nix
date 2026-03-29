@@ -1,7 +1,8 @@
 # LSP configuration and features
 # Returns config.vim settings directly
 # Takes lib as parameter for consistency (even if not used)
-{lib, ...}: {
+{ lib, ... }:
+{
   # Enable mini.snippets as the snippet provider
   # Configure it to load snippets from friendly-snippets (like LazyVim does)
   mini = {
@@ -149,19 +150,24 @@
         sources = {
           # Put snippets first in the list to prioritize them
           # Combined with custom fuzzy.sorts, this ensures snippets appear at the top
-          default = ["snippets" "lsp" "buffer" "path"];
+          default = [
+            "snippets"
+            "lsp"
+            "buffer"
+            "path"
+          ];
           providers = {
           };
         };
         keymap = {
           preset = "enter"; # LazyVim uses "enter" preset (Enter to accept)
-          "<C-y>" = ["select_and_accept"]; # LazyVim adds C-y for select_and_accept
+          "<C-y>" = [ "select_and_accept" ]; # LazyVim adds C-y for select_and_accept
           # Force Tab to ONLY do snippet_forward (override nvf's default which has select_next first)
           # nvf's config.nix sets mappings.next (Tab) to ["select_next" "snippet_forward" ...]
           # We need to completely override this to remove select_next
-          "<Tab>" = lib.mkForce ["snippet_forward"];
+          "<Tab>" = lib.mkForce [ "snippet_forward" ];
           # Force Shift+Tab to ONLY do snippet_backward (override nvf's default)
-          "<S-Tab>" = lib.mkForce ["snippet_backward"];
+          "<S-Tab>" = lib.mkForce [ "snippet_backward" ];
         };
         signature = {
           enabled = true;
@@ -176,7 +182,7 @@
           menu = {
             auto_show = true; # Show menu automatically (set to false to only show on manual <C-space>)
             draw = {
-              treesitter = ["lsp"]; # LazyVim enables treesitter in menu draw
+              treesitter = [ "lsp" ]; # LazyVim enables treesitter in menu draw
             };
           };
           ghost_text = {

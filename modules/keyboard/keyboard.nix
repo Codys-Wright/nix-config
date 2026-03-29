@@ -1,6 +1,8 @@
 # CLI tools meta-aspect - includes all CLI tool modules
 {
-  FTS, ... }:
+  FTS,
+  ...
+}:
 {
   FTS.keyboard = {
     description = "Keyboard Configuration";
@@ -9,7 +11,6 @@
       FTS.kanata
       FTS.karabiner-elements
     ];
-    
+
   };
 }
-

@@ -1,5 +1,6 @@
 # Hyprland window rules, workspace rules, and layer rules
-{FTS, ...}: {
+{ FTS, ... }:
+{
   FTS.desktop._.environment._.hyprland._.config._.rules = {
     description = "Hyprland window rules, workspace rules, and layer rules";
 

@@ -14,10 +14,10 @@
   FTS.grub.__functor =
     _self:
     {
-      devices ? [],
+      devices ? [ ],
       uefi ? true,
       useOSProber ? false,
-      mirroredBoots ? [],
+      mirroredBoots ? [ ],
       theme ? null,
       ...
     }@args:
@@ -25,34 +25,55 @@
     let
       inherit (lib) mkIf mkMerge optionals;
       # Normalize devices to a list (accept string or list)
-      devicesList = if lib.isString devices then [ devices ]
-                    else if lib.isList devices then devices
-                    else [];
-      useUefi = if uefi != null then uefi
-                else if devicesList != [] && lib.elem "nodev" devicesList then true
-                else if devicesList == [] then true  # Default to UEFI if no devices specified
-                else false;
-      hasMirroredBoots = mirroredBoots != [];
+      devicesList =
+        if lib.isString devices then
+          [ devices ]
+        else if lib.isList devices then
+          devices
+        else
+          [ ];
+      useUefi =
+        if uefi != null then
+          uefi
+        else if devicesList != [ ] && lib.elem "nodev" devicesList then
+          true
+        else if devicesList == [ ] then
+          true # Default to UEFI if no devices specified
+        else
+          false;
+      hasMirroredBoots = mirroredBoots != [ ];
       grubDevices = devicesList;
-      
+
       # Available themes
-      availableThemes = ["minegrub" "minegrub-world-sel" "minegrub-double-menu"];
-      
+      availableThemes = [
+        "minegrub"
+        "minegrub-world-sel"
+        "minegrub-double-menu"
+      ];
+
       # Validate theme
-      _ = if theme != null && !(builtins.elem theme availableThemes)
-        then throw "grub: unknown theme '${theme}'. Available: ${builtins.concatStringsSep ", " availableThemes}"
-        else null;
-      
+      _ =
+        if theme != null && !(builtins.elem theme availableThemes) then
+          throw "grub: unknown theme '${theme}'. Available: ${builtins.concatStringsSep ", " availableThemes}"
+        else
+          null;
+
       # Theme includes
-      themeIncludes = if theme == "minegrub" then [ FTS.grub._.themes._.minegrub ]
-        else if theme == "minegrub-world-sel" then [ FTS.grub._.themes._.minegrub-world-sel ]
-        else if theme == "minegrub-double-menu" then [ FTS.grub._.themes._.minegrub-double-menu ]
-        else [];
+      themeIncludes =
+        if theme == "minegrub" then
+          [ FTS.grub._.themes._.minegrub ]
+        else if theme == "minegrub-world-sel" then
+          [ FTS.grub._.themes._.minegrub-world-sel ]
+        else if theme == "minegrub-double-menu" then
+          [ FTS.grub._.themes._.minegrub-double-menu ]
+        else
+          [ ];
     in
     {
       includes = themeIncludes;
 
-      nixos = { pkgs, lib, ... }:
+      nixos =
+        { pkgs, lib, ... }:
         {
           boot.loader.grub = lib.mkMerge [
             {
@@ -69,7 +90,7 @@
             # For UEFI without mirrored boots: use devices = ["nodev"] and canTouchEfiVariables
             (lib.mkIf (useUefi && !hasMirroredBoots) {
               devices = lib.mkForce [ "nodev" ];
-              efiInstallAsRemovable = false;  # Use canTouchEfiVariables instead
+              efiInstallAsRemovable = false; # Use canTouchEfiVariables instead
             })
             # For BIOS: use devices = list of device paths
             (lib.mkIf (!useUefi && !hasMirroredBoots) {
@@ -79,8 +100,7 @@
           # Enable EFI variable management for UEFI systems (only when not using efiInstallAsRemovable)
           # efiInstallAsRemovable and canTouchEfiVariables are mutually exclusive
           boot.loader.efi.canTouchEfiVariables = mkIf useUefi (
-            if hasMirroredBoots then (lib.mkForce false)
-            else (lib.mkForce true)
+            if hasMirroredBoots then (lib.mkForce false) else (lib.mkForce true)
           );
         };
     };

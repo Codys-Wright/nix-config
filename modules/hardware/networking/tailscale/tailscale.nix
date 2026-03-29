@@ -19,7 +19,7 @@
           useRoutingFeatures = "client";
         };
 
-        networking.firewall.allowedUDPPorts = config.services.tailscale.port;
+        networking.firewall.allowedUDPPorts = [ config.services.tailscale.port ];
       };
 
     homeManager =

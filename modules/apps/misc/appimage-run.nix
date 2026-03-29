@@ -1,5 +1,6 @@
 # AppImage Run - Run AppImage files on NixOS
-{FTS, ...}: {
+{ FTS, ... }:
+{
   FTS.apps._.misc._.appimage = {
     description = "AppImage runtime and binfmt support for NixOS";
 
@@ -9,18 +10,19 @@
       ];
     };
 
-    nixos = {pkgs, ...}: {
-      # Install appimage-run system-wide
-      environment.systemPackages = [
-        pkgs.appimage-run
-      ];
+    nixos =
+      { pkgs, ... }:
+      {
+        # Install appimage-run system-wide
+        environment.systemPackages = [
+          pkgs.appimage-run
+        ];
 
-      # Enable AppImage support with binfmt registration
-      programs.appimage = {
-        enable = true;
-        binfmt = true;
+        # Enable AppImage support with binfmt registration
+        programs.appimage = {
+          enable = true;
+          binfmt = true;
+        };
       };
-    };
   };
 }
-

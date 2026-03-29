@@ -1,5 +1,6 @@
 # Hyprland monitor configuration
-{FTS, ...}: {
+{ FTS, ... }:
+{
   FTS.desktop._.environment._.hyprland._.config._.monitors = {
     description = "Hyprland monitor configuration";
 

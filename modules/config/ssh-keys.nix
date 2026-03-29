@@ -1,6 +1,7 @@
 # Centralized SSH public keys for the fleet
 # Usage: import from other modules as `ssh-keys` via _module.args
-{ lib, ... }: {
+{ lib, ... }:
+{
   _module.args.ssh-keys = {
     # Personal SSH public keys
     personal = {

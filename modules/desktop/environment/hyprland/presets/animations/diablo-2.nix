@@ -2,14 +2,15 @@
 # From HyDE Project
 # Credit: https://github.com/Itz-Abhishek-Tiwari
 # Bouncy sliding animations variant
-{FTS, ...}: {
+{ FTS, ... }:
+{
   FTS.desktop._.environment._.hyprland._.presets._.animations._.diablo-2 = {
     description = "Diablo-2 animations (from HyDE - bouncy slide variant)";
 
     settings = {
       animations = {
         enabled = true;
-        
+
         bezier = [
           "linear, 0, 0, 1, 1"
           "wind, 0.05, 0.9, 0.1, 1.05"
@@ -18,7 +19,7 @@
           "liner, 1, 1, 1, 1"
           "overshot, 0.13, 0.99, 0.29, 1.1"
         ];
-        
+
         animation = [
           "windowsIn, 1, 6, winIn, slide"
           "windowsOut, 1, 5, winOut, slide"

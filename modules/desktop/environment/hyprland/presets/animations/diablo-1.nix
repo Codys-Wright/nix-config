@@ -2,14 +2,15 @@
 # From HyDE Project
 # Credit: https://github.com/Itz-Abhishek-Tiwari
 # Vertical sliding animations with bounce
-{FTS, ...}: {
+{ FTS, ... }:
+{
   FTS.desktop._.environment._.hyprland._.presets._.animations._.diablo-1 = {
     description = "Diablo-1 animations (from HyDE - vertical slide style)";
 
     settings = {
       animations = {
         enabled = true;
-        
+
         bezier = [
           "default, 0.05, 0.9, 0.1, 1.05"
           "wind, 0.05, 0.9, 0.1, 1.05"
@@ -19,7 +20,7 @@
           "snappyReturn, 0.4, 0.9, 0.6, 1.0"
           "slideInFromRight, 0.5, 0.0, 0.5, 1.0"
         ];
-        
+
         animation = [
           "windows, 1, 5, snappyReturn, slidevert"
           "windowsIn, 1, 5, snappyReturn, slidevert"

@@ -30,31 +30,33 @@
         Used for connecting to Windows shares, NAS devices, and other SMB servers.
       '';
 
-      nixos = {
-        config,
-        lib,
-        pkgs,
-        ...
-      }: {
-        # Samba client packages
-        environment.systemPackages = with pkgs; [
-          samba
-          cifs-utils
-        ];
+      nixos =
+        {
+          config,
+          lib,
+          pkgs,
+          ...
+        }:
+        {
+          # Samba client packages
+          environment.systemPackages = with pkgs; [
+            samba
+            cifs-utils
+          ];
 
-        # Firewall rules for SMB discovery (NetBIOS name service)
-        networking.firewall.extraCommands = ''
-          iptables -t raw -A OUTPUT -p udp -m udp --dport 137 -j CT --helper netbios-ns || true
-        '';
+          # Firewall rules for SMB discovery (NetBIOS name service)
+          networking.firewall.extraCommands = ''
+            iptables -t raw -A OUTPUT -p udp -m udp --dport 137 -j CT --helper netbios-ns || true
+          '';
 
-        # Allow SMB ports through firewall
-        networking.firewall.allowedTCPPorts = [
-          445  # SMB over TCP
-        ];
-        networking.firewall.allowedUDPPorts = [
-          137  # NetBIOS name service
-          138  # NetBIOS datagram service
-        ];
-      };
+          # Allow SMB ports through firewall
+          networking.firewall.allowedTCPPorts = [
+            445 # SMB over TCP
+          ];
+          networking.firewall.allowedUDPPorts = [
+            137 # NetBIOS name service
+            138 # NetBIOS datagram service
+          ];
+        };
     };
 }

@@ -1,7 +1,8 @@
 # Git integration (gitsigns, git navigation, etc.)
 # Returns config.vim settings directly
 # Takes lib as parameter for consistency (even if not used)
-{lib, ...}: {
+{ lib, ... }:
+{
   # Git integration with gitsigns
   git = {
     enable = true;
@@ -10,19 +11,41 @@
       # LazyVim-style gitsigns configuration
       setupOpts = {
         signs = {
-          add = { text = "│"; };
-          change = { text = "│"; };
-          delete = { text = ""; };
-          topdelete = { text = ""; };
-          changedelete = { text = "▎"; };
-          untracked = { text = "▎"; };
+          add = {
+            text = "│";
+          };
+          change = {
+            text = "│";
+          };
+          delete = {
+            text = "";
+          };
+          topdelete = {
+            text = "";
+          };
+          changedelete = {
+            text = "▎";
+          };
+          untracked = {
+            text = "▎";
+          };
         };
         signs_staged = {
-          add = { text = "│"; };
-          change = { text = "│"; };
-          delete = { text = ""; };
-          topdelete = { text = ""; };
-          changedelete = { text = "│"; };
+          add = {
+            text = "│";
+          };
+          change = {
+            text = "│";
+          };
+          delete = {
+            text = "";
+          };
+          topdelete = {
+            text = "";
+          };
+          changedelete = {
+            text = "│";
+          };
         };
         on_attach = lib.generators.mkLuaInline ''
           function(buffer)
@@ -69,10 +92,6 @@
       };
     };
   };
-
-
-
-
 
   # Gitsigns toggle integration with Snacks
   # This sets up a toggle for gitsigns that works with Snacks.toggle

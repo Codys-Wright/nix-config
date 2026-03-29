@@ -105,7 +105,8 @@
 
           # SOPS secrets
           shb.sops.secret."${localclientPasswordKey}".request = config.shb.deluge.localclientPassword.request;
-          shb.sops.secret."${prometheusScraperPasswordKey}".request = config.shb.deluge.prometheusScraperPassword.request;
+          shb.sops.secret."${prometheusScraperPasswordKey}".request =
+            config.shb.deluge.prometheusScraperPassword.request;
         };
     };
 }

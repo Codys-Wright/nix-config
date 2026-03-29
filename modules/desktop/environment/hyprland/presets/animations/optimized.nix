@@ -1,14 +1,15 @@
 # Animation Preset: Optimized
 # From HyDE Project
 # Highly optimized, smooth animations with extensive bezier curves
-{FTS, ...}: {
+{ FTS, ... }:
+{
   FTS.desktop._.environment._.hyprland._.presets._.animations._.optimized = {
     description = "Optimized animations (from HyDE)";
 
     settings = {
       animations = {
         enabled = true;
-        
+
         bezier = [
           "wind, 0.05, 0.85, 0.03, 0.97"
           "winIn, 0.07, 0.88, 0.04, 0.99"
@@ -29,7 +30,7 @@
           "md2, 0.30, 0, 0.15, 1"
           "OutBack, 0.28, 1.40, 0.58, 1"
         ];
-        
+
         animation = [
           "border, 1, 1.6, liner"
           "borderangle, 1, 82, liner, loop"

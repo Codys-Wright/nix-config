@@ -1,7 +1,8 @@
 # Snacks.nvim git-related plugins configuration
 # Returns config.vim settings directly
 # Takes lib as parameter for consistency
-{lib, ...}: {
+{ lib, ... }:
+{
   # Configure git-related plugins
   utility.snacks-nvim.setupOpts = {
     # GitHub CLI integration
