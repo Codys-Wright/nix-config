@@ -76,6 +76,11 @@
           ];
         };
 
+        # nix daemon + temproots dir — home-manager activation calls nix-store --add-root
+        # which requires /nix/var/nix/temproots and a running daemon
+        nix.enable = true;
+        systemd.tmpfiles.rules = [ "d /nix/var/nix/temproots 1777 root root -" ];
+
         # cody user — simple password, no SOPS (VM-only, not through den pipeline)
         users.users.cody = {
           isNormalUser = true;
