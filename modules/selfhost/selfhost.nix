@@ -3,9 +3,28 @@
   inputs,
   lib,
   FTS,
-  den,
   ...
-}: {
+}:
+let
+  domain = "starcommand.live";
+  nextcloudSubdomain = "cloud";
+  lldapSubdomain = "ldap";
+  authSubdomain = "auth";
+  grafanaSubdomain = "grafana";
+  vaultwardenSubdomain = "vault";
+  jellyfinSubdomain = "media";
+  grocySubdomain = "grocy";
+  delugeSubdomain = "torrents";
+  forgejoSubdomain = "git";
+  karakeepSubdomain = "bookmarks";
+  audiobookshelfSubdomain = "audiobooks";
+  hledgerSubdomain = "finance";
+  homeAssistantSubdomain = "home";
+  openWebuiSubdomain = "chat";
+  pinchflatSubdomain = "youtube";
+  immichSubdomain = "photos";
+in
+{
   FTS.selfhost = {
     description = ''
       Self-hosting services stack using SelfHostBlocks.
@@ -22,605 +41,574 @@
       Secrets managed via users/starcommand/secrets.yaml
     '';
 
-    # Make this a parametric aspect (even if we don't use parameters yet)
-    __functor = _: args: {
-      class,
-      aspect-chain,
-      ...
-    } @ aspectArgs: let
-      domain = "starcommand.live";
-      nextcloudSubdomain = "cloud";
-      lldapSubdomain = "ldap";
-      authSubdomain = "auth";
-      grafanaSubdomain = "grafana";
-      vaultwardenSubdomain = "vault";
-      jellyfinSubdomain = "media";
-      grocySubdomain = "grocy";
-      delugeSubdomain = "torrents";
-      forgejoSubdomain = "git";
-      karakeepSubdomain = "bookmarks";
-      audiobookshelfSubdomain = "audiobooks";
-      hledgerSubdomain = "finance";
-      homeAssistantSubdomain = "home";
-      openWebuiSubdomain = "chat";
-      pinchflatSubdomain = "youtube";
-      immichSubdomain = "photos";
+    includes = [
+      # Let's Encrypt certificates with Cloudflare DNS
+      (FTS.selfhost._.letsencrypt-certs {
+        inherit domain;
+        adminEmail = "admin@${domain}";
+        cloudflareTokenKey = "starcommand/selfhost/proxy/cloudflare/zone_dns_key";
+      })
 
-      # Extract host information from aspect-chain if available
-      # This allows us to configure the host's instantiate function
-      hostInfo = aspectArgs.host or null;
-    in {
-      # Note: Hosts that include this aspect should set:
-      #   den.hosts.<system>.<hostname>.instantiate =
-      #     inputs.selfhostblocks.lib.<system>.patchedNixpkgs.nixosSystem;
-      # This ensures the patched nixpkgs (with LLDAP enhancements) is used.
+      # Cloudflare Tunnel - Exposes services without port forwarding
+      (FTS.selfhost._.cloudflare-tunnel {
+        inherit domain;
+        tunnelId = "803700ac-6ca2-4041-94c7-3d1c9ef05e52";
+        accountTagKey = "starcommand/selfhost/proxy/cloudflare/account_tag";
+        tunnelSecretKey = "starcommand/selfhost/proxy/cloudflare/starcommand_tunnel/secret";
+        dnsApiTokenKey = "starcommand/selfhost/proxy/cloudflare/starcommand_dns_key";
+        noTLSVerify = true; # Let's Encrypt certs are trusted, but internal routing uses HTTP
+        autoRouteDNS = true; # Automatically route DNS through tunnel
+        # Manual ingress rules for services served directly by nginx (not proxied)
+        manualIngress = [
+          {
+            hostname = "cloud.${domain}"; # Nextcloud
+            service = "https://localhost";
+          }
+          {
+            hostname = "media.${domain}"; # Jellyfin
+            service = "https://localhost";
+          }
+          {
+            hostname = "grocy.${domain}"; # Grocy
+            service = "https://localhost";
+          }
+          {
+            hostname = "torrents.${domain}"; # Deluge
+            service = "https://localhost";
+          }
+          {
+            hostname = "git.${domain}"; # Forgejo
+            service = "https://localhost";
+          }
+          {
+            hostname = "bookmarks.${domain}"; # Karakeep
+            service = "https://localhost";
+          }
+          {
+            hostname = "audiobooks.${domain}"; # Audiobookshelf
+            service = "https://localhost";
+          }
+          {
+            hostname = "finance.${domain}"; # Hledger
+            service = "https://localhost";
+          }
+          {
+            hostname = "home.${domain}"; # Home-Assistant
+            service = "https://localhost";
+          }
+          {
+            hostname = "chat.${domain}"; # Open-WebUI
+            service = "https://localhost";
+          }
+          {
+            hostname = "youtube.${domain}"; # Pinchflat
+            service = "https://localhost";
+          }
+          {
+            hostname = "photos.${domain}"; # Immich
+            service = "https://localhost";
+          }
+          {
+            hostname = "radarr.${domain}"; # Radarr
+            service = "https://localhost";
+          }
+          {
+            hostname = "sonarr.${domain}"; # Sonarr
+            service = "https://localhost";
+          }
+          {
+            hostname = "bazarr.${domain}"; # Bazarr
+            service = "https://localhost";
+          }
+          {
+            hostname = "readarr.${domain}"; # Readarr
+            service = "https://localhost";
+          }
+          {
+            hostname = "lidarr.${domain}"; # Lidarr
+            service = "https://localhost";
+          }
+          {
+            hostname = "jackett.${domain}"; # Jackett
+            service = "https://localhost";
+          }
+        ];
+      })
 
-      includes = [
-        # Let's Encrypt certificates with Cloudflare DNS
-        (FTS.selfhost._.letsencrypt-certs {
-          inherit domain;
-          adminEmail = "admin@${domain}";
-          cloudflareTokenKey = "starcommand/selfhost/proxy/cloudflare/zone_dns_key";
-        })
+      # LLDAP Identity Provider
+      (FTS.selfhost._.lldap {
+        inherit domain;
+        subdomain = lldapSubdomain;
+        adminPasswordKey = "starcommand/selfhost/auth/lldap/admin_password";
+        jwtSecretKey = "starcommand/selfhost/auth/lldap/jwt_secret";
 
-        # Cloudflare Tunnel - Exposes services without port forwarding
-        (FTS.selfhost._.cloudflare-tunnel {
-          inherit domain;
-          tunnelId = "803700ac-6ca2-4041-94c7-3d1c9ef05e52";
-          accountTagKey = "starcommand/selfhost/proxy/cloudflare/account_tag";
-          tunnelSecretKey = "starcommand/selfhost/proxy/cloudflare/starcommand_tunnel/secret";
-          dnsApiTokenKey = "starcommand/selfhost/proxy/cloudflare/starcommand_dns_key";
-          noTLSVerify = true; # Let's Encrypt certs are trusted, but internal routing uses HTTP
-          autoRouteDNS = true; # Automatically route DNS through tunnel
-          # Manual ingress rules for services served directly by nginx (not proxied)
-          manualIngress = [
+        # Service-specific groups
+        # TODO: These should be automatically registered by each service module
+        # For now, they're defined here but logically belong to their respective services:
+        # - nextcloud_user, nextcloud_admin (from Nextcloud)
+        # - grafana_user, grafana_admin (from Monitoring)
+        # - vaultwarden_admin (from Vaultwarden)
+        # - jellyfin_user, jellyfin_admin (from Jellyfin)
+        # - arr_user (from Arr stack)
+        # - lldap_admin, lldap_password_manager (from LLDAP)
+        groups = {
+          nextcloud_user = { };
+          nextcloud_admin = { };
+          grafana_user = { };
+          grafana_admin = { };
+          vaultwarden_admin = { };
+          jellyfin_user = { };
+          jellyfin_admin = { };
+          arr_user = { };
+          lldap_admin = { };
+          lldap_password_manager = { };
+          # New service groups
+          forgejo_user = { };
+          forgejo_admin = { };
+          karakeep_user = { };
+          audiobookshelf_user = { };
+          audiobookshelf_admin = { };
+          hledger_user = { };
+          homeassistant_user = { };
+          open-webui_user = { };
+          open-webui_admin = { };
+          pinchflat_user = { };
+          immich_user = { };
+          immich_admin = { };
+          grocy_user = { };
+          deluge_user = { };
+        };
+
+        # Define users
+        users = {
+          codywright = {
+            email = "acodywright@gmail.com";
+            firstName = "Cody";
+            lastName = "Wright";
+            groups = [
+              "nextcloud_user"
+              "nextcloud_admin"
+              "grafana_user"
+              "grafana_admin"
+              "deluge_user"
+              "vaultwarden_admin"
+              "jellyfin_user"
+              "jellyfin_admin"
+              "arr_user"
+              "lldap_admin"
+              "lldap_password_manager"
+              # New service groups
+              "forgejo_user"
+              "forgejo_admin"
+              "karakeep_user"
+              "audiobookshelf_user"
+              "audiobookshelf_admin"
+              "hledger_user"
+              "homeassistant_user"
+              "open-webui_user"
+              "open-webui_admin"
+              "pinchflat_user"
+              "immich_user"
+              "immich_admin"
+            ];
+            passwordKey = "cody/personal/password";
+            passwordSopsFile = ../../users/cody/secrets.yaml;
+          };
+
+          amywright = {
+            email = "amy.wright@example.com"; # TODO: Update with real email
+            firstName = "Amy";
+            lastName = "Wright";
+            groups = [
+              "nextcloud_user"
+              "jellyfin_user"
+              "grocy_user"
+            ];
+            passwordKey = "starcommand/selfhost/users/amy_wright/password";
+            passwordSopsFile = ../../users/starcommand/secrets.yaml;
+          };
+
+          tommywright = {
+            email = "tommy.wright@example.com"; # TODO: Update with real email
+            firstName = "Tommy";
+            lastName = "Wright";
+            groups = [
+              "nextcloud_user"
+              "jellyfin_user"
+              "grocy_user"
+            ];
+            passwordKey = "starcommand/selfhost/users/tommy_wright/password";
+            passwordSopsFile = ../../users/starcommand/secrets.yaml;
+          };
+
+          brizacharias = {
+            email = "bri.zacharias@example.com"; # TODO: Update with real email
+            firstName = "Bri";
+            lastName = "Zacharias";
+            groups = [
+              "nextcloud_user"
+              "jellyfin_user"
+              "grocy_user"
+            ];
+            passwordKey = "starcommand/selfhost/users/bri_zacharias/password";
+            passwordSopsFile = ../../users/starcommand/secrets.yaml;
+          };
+        };
+      })
+
+      # Authelia SSO Provider
+      (FTS.selfhost._.authelia {
+        inherit domain;
+        subdomain = authSubdomain;
+        # LDAP connection info - will be read from config.shb.lldap
+        ldapPort = 3890; # Same as LLDAP
+        ldapHostname = "127.0.0.1";
+        dcdomain = "dc=${builtins.replaceStrings [ "." ] [ ",dc=" ] domain}";
+
+        # Access control rules for protected services
+        accessControl = {
+          defaultPolicy = "deny";
+          rules = [
             {
-              hostname = "cloud.${domain}"; # Nextcloud
-              service = "https://localhost";
+              domain = "*.${domain}";
+              policy = "two_factor";
+              subject = [ "group:nextcloud_user" ];
             }
             {
-              hostname = "media.${domain}"; # Jellyfin
-              service = "https://localhost";
+              domain = "*.${domain}";
+              policy = "two_factor";
+              subject = [ "group:jellyfin_user" ];
             }
             {
-              hostname = "grocy.${domain}"; # Grocy
-              service = "https://localhost";
+              domain = "*.${domain}";
+              policy = "two_factor";
+              subject = [ "group:grocy_user" ];
             }
             {
-              hostname = "torrents.${domain}"; # Deluge
-              service = "https://localhost";
+              domain = "torrents.${domain}";
+              policy = "two_factor";
+              subject = [ "group:deluge_user" ];
             }
             {
-              hostname = "git.${domain}"; # Forgejo
-              service = "https://localhost";
+              domain = "*.${domain}";
+              policy = "two_factor";
+              subject = [ "group:arr_user" ];
             }
             {
-              hostname = "bookmarks.${domain}"; # Karakeep
-              service = "https://localhost";
+              domain = "*.${domain}";
+              policy = "two_factor";
+              subject = [ "group:lldap_admin" ];
             }
             {
-              hostname = "audiobooks.${domain}"; # Audiobookshelf
-              service = "https://localhost";
+              domain = "*.${domain}";
+              policy = "two_factor";
+              subject = [ "group:vaultwarden_admin" ];
             }
             {
-              hostname = "finance.${domain}"; # Hledger
-              service = "https://localhost";
+              domain = "*.${domain}";
+              policy = "two_factor";
+              subject = [ "group:grafana_user" ];
             }
             {
-              hostname = "home.${domain}"; # Home-Assistant
-              service = "https://localhost";
+              domain = "*.${domain}";
+              policy = "two_factor";
+              subject = [ "group:forgejo_user" ];
             }
             {
-              hostname = "chat.${domain}"; # Open-WebUI
-              service = "https://localhost";
+              domain = "*.${domain}";
+              policy = "two_factor";
+              subject = [ "group:karakeep_user" ];
             }
             {
-              hostname = "youtube.${domain}"; # Pinchflat
-              service = "https://localhost";
+              domain = "*.${domain}";
+              policy = "two_factor";
+              subject = [ "group:audiobookshelf_user" ];
             }
             {
-              hostname = "photos.${domain}"; # Immich
-              service = "https://localhost";
+              domain = "*.${domain}";
+              policy = "two_factor";
+              subject = [ "group:hledger_user" ];
             }
             {
-              hostname = "radarr.${domain}"; # Radarr
-              service = "https://localhost";
+              domain = "*.${domain}";
+              policy = "two_factor";
+              subject = [ "group:homeassistant_user" ];
             }
             {
-              hostname = "sonarr.${domain}"; # Sonarr
-              service = "https://localhost";
+              domain = "*.${domain}";
+              policy = "two_factor";
+              subject = [ "group:open-webui_user" ];
             }
             {
-              hostname = "bazarr.${domain}"; # Bazarr
-              service = "https://localhost";
+              domain = "*.${domain}";
+              policy = "two_factor";
+              subject = [ "group:pinchflat_user" ];
             }
             {
-              hostname = "readarr.${domain}"; # Readarr
-              service = "https://localhost";
-            }
-            {
-              hostname = "lidarr.${domain}"; # Lidarr
-              service = "https://localhost";
-            }
-            {
-              hostname = "jackett.${domain}"; # Jackett
-              service = "https://localhost";
+              domain = "*.${domain}";
+              policy = "two_factor";
+              subject = [ "group:immich_user" ];
             }
           ];
-        })
+        };
 
-        # LLDAP Identity Provider
-        (FTS.selfhost._.lldap {
-          inherit domain;
-          subdomain = lldapSubdomain;
-          adminPasswordKey = "starcommand/selfhost/auth/lldap/admin_password";
-          jwtSecretKey = "starcommand/selfhost/auth/lldap/jwt_secret";
+        # Secret keys
+        jwtSecretKey = "starcommand/selfhost/auth/authelia/jwt_secret";
+        ldapAdminPasswordKey = "starcommand/selfhost/auth/authelia/ldap_admin_password";
+        sessionSecretKey = "starcommand/selfhost/auth/authelia/session_secret";
+        storageEncryptionKey = "starcommand/selfhost/auth/authelia/storage_encryption_key";
+        oidcHmacSecretKey = "starcommand/selfhost/auth/authelia/oidc_hmac_secret";
+        oidcIssuerPrivateKey = "starcommand/selfhost/auth/authelia/oidc_issuer_private_key";
+      })
 
-          # Service-specific groups
-          # TODO: These should be automatically registered by each service module
-          # For now, they're defined here but logically belong to their respective services:
-          # - nextcloud_user, nextcloud_admin (from Nextcloud)
-          # - grafana_user, grafana_admin (from Monitoring)
-          # - vaultwarden_admin (from Vaultwarden)
-          # - jellyfin_user, jellyfin_admin (from Jellyfin)
-          # - arr_user (from Arr stack)
-          # - lldap_admin, lldap_password_manager (from LLDAP)
-          groups = {
-            nextcloud_user = {};
-            nextcloud_admin = {};
-            grafana_user = {};
-            grafana_admin = {};
-            vaultwarden_admin = {};
-            jellyfin_user = {};
-            jellyfin_admin = {};
-            arr_user = {};
-            lldap_admin = {};
-            lldap_password_manager = {};
-            # New service groups
-            forgejo_user = {};
-            forgejo_admin = {};
-            karakeep_user = {};
-            audiobookshelf_user = {};
-            audiobookshelf_admin = {};
-            hledger_user = {};
-            homeassistant_user = {};
-            open-webui_user = {};
-            open-webui_admin = {};
-            pinchflat_user = {};
-            immich_user = {};
-            immich_admin = {};
-            grocy_user = {};
-            deluge_user = {};
+      # Nextcloud Server
+      (FTS.selfhost._.nextcloud {
+        inherit domain;
+        subdomain = nextcloudSubdomain;
+        # App/config stays on btrfs for proper permissions
+        dataDir = "/var/lib/nextcloud";
+        adminPasswordKey = "starcommand/selfhost/apps/nextcloud/admin_password";
+
+        # External Storage - merged storage and Synology NAS
+        externalStorage = {
+          userLocalMount = {
+            directory = "/mnt/storage";
+            mountName = "storage"; # Appears as "storage" folder in Nextcloud
           };
-
-          # Define users
-          users = {
-            codywright = {
-              email = "acodywright@gmail.com";
-              firstName = "Cody";
-              lastName = "Wright";
-              groups = [
-                "nextcloud_user"
-                "nextcloud_admin"
-                "grafana_user"
-                "grafana_admin"
-                "deluge_user"
-                "vaultwarden_admin"
-                "jellyfin_user"
-                "jellyfin_admin"
-                "arr_user"
-                "lldap_admin"
-                "lldap_password_manager"
-                # New service groups
-                "forgejo_user"
-                "forgejo_admin"
-                "karakeep_user"
-                "audiobookshelf_user"
-                "audiobookshelf_admin"
-                "hledger_user"
-                "homeassistant_user"
-                "open-webui_user"
-                "open-webui_admin"
-                "pinchflat_user"
-                "immich_user"
-                "immich_admin"
-              ];
-              passwordKey = "cody/personal/password";
-              passwordSopsFile = ../../users/cody/secrets.yaml;
-            };
-
-            amywright = {
-              email = "amy.wright@example.com"; # TODO: Update with real email
-              firstName = "Amy";
-              lastName = "Wright";
-              groups = [
-                "nextcloud_user"
-                "jellyfin_user"
-                "grocy_user"
-              ];
-              passwordKey = "starcommand/selfhost/users/amy_wright/password";
-              passwordSopsFile = ../../users/starcommand/secrets.yaml;
-            };
-
-            tommywright = {
-              email = "tommy.wright@example.com"; # TODO: Update with real email
-              firstName = "Tommy";
-              lastName = "Wright";
-              groups = [
-                "nextcloud_user"
-                "jellyfin_user"
-                "grocy_user"
-              ];
-              passwordKey = "starcommand/selfhost/users/tommy_wright/password";
-              passwordSopsFile = ../../users/starcommand/secrets.yaml;
-            };
-
-            brizacharias = {
-              email = "bri.zacharias@example.com"; # TODO: Update with real email
-              firstName = "Bri";
-              lastName = "Zacharias";
-              groups = [
-                "nextcloud_user"
-                "jellyfin_user"
-                "grocy_user"
-              ];
-              passwordKey = "starcommand/selfhost/users/bri_zacharias/password";
-              passwordSopsFile = ../../users/starcommand/secrets.yaml;
+          localMounts = {
+            synologyMedia = {
+              directory = "/mnt/synology-vault";
+              mountName = "synology-media"; # Appears as "synology-media" folder in Nextcloud
             };
           };
-        })
+        };
 
-        # Authelia SSO Provider
-        (FTS.selfhost._.authelia {
-          inherit domain;
-          subdomain = authSubdomain;
-          # LDAP connection info - will be read from config.shb.lldap
-          ldapPort = 3890; # Same as LLDAP
-          ldapHostname = "127.0.0.1";
-          dcdomain = "dc=${builtins.replaceStrings ["."] [",dc="] domain}";
+        # LDAP integration
+        ldap = {
+          enable = true;
+          port = 3890; # Same as LLDAP
+          dcdomain = "dc=${builtins.replaceStrings [ "." ] [ ",dc=" ] domain}";
+          adminPasswordKey = "starcommand/selfhost/apps/nextcloud/ldap_admin_password";
+          userGroup = "nextcloud_user";
+        };
 
-          # Access control rules for protected services
-          accessControl = {
-            defaultPolicy = "deny";
-            rules = [
-              {
-                domain = "*.${domain}";
-                policy = "two_factor";
-                subject = ["group:nextcloud_user"];
-              }
-              {
-                domain = "*.${domain}";
-                policy = "two_factor";
-                subject = ["group:jellyfin_user"];
-              }
-              {
-                domain = "*.${domain}";
-                policy = "two_factor";
-                subject = ["group:grocy_user"];
-              }
-              {
-                domain = "torrents.${domain}";
-                policy = "two_factor";
-                subject = ["group:deluge_user"];
-              }
-              {
-                domain = "*.${domain}";
-                policy = "two_factor";
-                subject = ["group:arr_user"];
-              }
-              {
-                domain = "*.${domain}";
-                policy = "two_factor";
-                subject = ["group:lldap_admin"];
-              }
-              {
-                domain = "*.${domain}";
-                policy = "two_factor";
-                subject = ["group:vaultwarden_admin"];
-              }
-              {
-                domain = "*.${domain}";
-                policy = "two_factor";
-                subject = ["group:grafana_user"];
-              }
-              {
-                domain = "*.${domain}";
-                policy = "two_factor";
-                subject = ["group:forgejo_user"];
-              }
-              {
-                domain = "*.${domain}";
-                policy = "two_factor";
-                subject = ["group:karakeep_user"];
-              }
-              {
-                domain = "*.${domain}";
-                policy = "two_factor";
-                subject = ["group:audiobookshelf_user"];
-              }
-              {
-                domain = "*.${domain}";
-                policy = "two_factor";
-                subject = ["group:hledger_user"];
-              }
-              {
-                domain = "*.${domain}";
-                policy = "two_factor";
-                subject = ["group:homeassistant_user"];
-              }
-              {
-                domain = "*.${domain}";
-                policy = "two_factor";
-                subject = ["group:open-webui_user"];
-              }
-              {
-                domain = "*.${domain}";
-                policy = "two_factor";
-                subject = ["group:pinchflat_user"];
-              }
-              {
-                domain = "*.${domain}";
-                policy = "two_factor";
-                subject = ["group:immich_user"];
-              }
-            ];
-          };
+        # SSO integration
+        sso = {
+          enable = true;
+          endpoint = "https://${authSubdomain}.${domain}";
+          clientID = "nextcloud";
+          secretKey = "starcommand/selfhost/apps/nextcloud/sso_secret";
+          secretForAutheliaKey = "starcommand/selfhost/auth/authelia/nextcloud_sso_secret";
+        };
+      })
 
-          # Secret keys
-          jwtSecretKey = "starcommand/selfhost/auth/authelia/jwt_secret";
-          ldapAdminPasswordKey = "starcommand/selfhost/auth/authelia/ldap_admin_password";
-          sessionSecretKey = "starcommand/selfhost/auth/authelia/session_secret";
-          storageEncryptionKey = "starcommand/selfhost/auth/authelia/storage_encryption_key";
-          oidcHmacSecretKey = "starcommand/selfhost/auth/authelia/oidc_hmac_secret";
-          oidcIssuerPrivateKey = "starcommand/selfhost/auth/authelia/oidc_issuer_private_key";
-        })
+      # Monitoring Stack
+      (FTS.selfhost._.monitoring {
+        inherit domain;
+        subdomain = grafanaSubdomain;
+        adminPasswordKey = "starcommand/selfhost/monitoring/grafana/admin_password";
+        secretKeyKey = "starcommand/selfhost/monitoring/grafana/secret_key";
+        contactPoints = [ "acodywright@gmail.com" ];
 
-        # Nextcloud Server
-        (FTS.selfhost._.nextcloud {
-          inherit domain;
-          subdomain = nextcloudSubdomain;
-          # App/config stays on btrfs for proper permissions
-          dataDir = "/var/lib/nextcloud";
-          adminPasswordKey = "starcommand/selfhost/apps/nextcloud/admin_password";
+        # LDAP integration
+        ldap = {
+          userGroup = "grafana_user";
+          adminGroup = "grafana_admin";
+        };
 
-          # External Storage - merged storage and Synology NAS
-          externalStorage = {
-            userLocalMount = {
-              directory = "/mnt/storage";
-              mountName = "storage"; # Appears as "storage" folder in Nextcloud
-            };
-            localMounts = {
-              synologyMedia = {
-                directory = "/mnt/synology-vault";
-                mountName = "synology-media"; # Appears as "synology-media" folder in Nextcloud
-              };
-            };
-          };
-
-          # LDAP integration
-          ldap = {
-            enable = true;
-            port = 3890; # Same as LLDAP
-            dcdomain = "dc=${builtins.replaceStrings ["."] [",dc="] domain}";
-            adminPasswordKey = "starcommand/selfhost/apps/nextcloud/ldap_admin_password";
-            userGroup = "nextcloud_user";
-          };
-
-          # SSO integration
-          sso = {
-            enable = true;
-            endpoint = "https://${authSubdomain}.${domain}";
-            clientID = "nextcloud";
-            secretKey = "starcommand/selfhost/apps/nextcloud/sso_secret";
-            secretForAutheliaKey = "starcommand/selfhost/auth/authelia/nextcloud_sso_secret";
-          };
-        })
-
-        # Monitoring Stack
-        (FTS.selfhost._.monitoring {
-          inherit domain;
-          subdomain = grafanaSubdomain;
-          adminPasswordKey = "starcommand/selfhost/monitoring/grafana/admin_password";
-          secretKeyKey = "starcommand/selfhost/monitoring/grafana/secret_key";
-          contactPoints = ["acodywright@gmail.com"];
-
-          # LDAP integration
-          ldap = {
-            userGroup = "grafana_user";
-            adminGroup = "grafana_admin";
-          };
-
-          # SSO integration
-          sso = {
-            enable = true;
-            authEndpoint = "https://${authSubdomain}.${domain}";
-            sharedSecretKey = "starcommand/selfhost/monitoring/grafana/oidc_secret";
-            sharedSecretForAutheliaKey = "starcommand/selfhost/monitoring/grafana/oidc_secret_for_authelia";
-          };
-        })
-
-        # Vaultwarden Password Manager
-        (FTS.selfhost._.vaultwarden {
-          inherit domain;
-          subdomain = vaultwardenSubdomain;
-          databasePasswordKey = "starcommand/selfhost/apps/vaultwarden/database_password";
+        # SSO integration
+        sso = {
+          enable = true;
           authEndpoint = "https://${authSubdomain}.${domain}";
-        })
+          sharedSecretKey = "starcommand/selfhost/monitoring/grafana/oidc_secret";
+          sharedSecretForAutheliaKey = "starcommand/selfhost/monitoring/grafana/oidc_secret_for_authelia";
+        };
+      })
 
-        # Jellyfin Media Server
-        # NOTE: Media libraries must be configured via web UI at https://media.starcommand.live
-        # Recommended library paths (pre-created on /mnt/storage):
-        #   Movies: /mnt/storage/media/movies
-        #   TV Shows: /mnt/storage/media/tv
-        #   Music: /mnt/storage/media/music
-        #   Audiobooks: /mnt/storage/media/audiobooks
-        # See docs/jellyfin-setup.md for detailed setup instructions
-        (FTS.selfhost._.jellyfin {
-          inherit domain;
-          subdomain = jellyfinSubdomain;
-          dcdomain = "dc=${builtins.replaceStrings ["."] [",dc="] domain}";
-          ldapAdminPasswordKey = "starcommand/selfhost/apps/jellyfin/ldap_admin_password";
-          ssoSecretKey = "starcommand/selfhost/apps/jellyfin/sso_secret";
-          ssoSecretForAutheliaKey = "starcommand/selfhost/auth/authelia/jellyfin_sso_secret";
+      # Vaultwarden Password Manager
+      (FTS.selfhost._.vaultwarden {
+        inherit domain;
+        subdomain = vaultwardenSubdomain;
+        databasePasswordKey = "starcommand/selfhost/apps/vaultwarden/database_password";
+        authEndpoint = "https://${authSubdomain}.${domain}";
+      })
+
+      # Jellyfin Media Server
+      # NOTE: Media libraries must be configured via web UI at https://media.starcommand.live
+      # Recommended library paths (pre-created on /mnt/storage):
+      #   Movies: /mnt/storage/media/movies
+      #   TV Shows: /mnt/storage/media/tv
+      #   Music: /mnt/storage/media/music
+      #   Audiobooks: /mnt/storage/media/audiobooks
+      # See docs/jellyfin-setup.md for detailed setup instructions
+      (FTS.selfhost._.jellyfin {
+        inherit domain;
+        subdomain = jellyfinSubdomain;
+        dcdomain = "dc=${builtins.replaceStrings [ "." ] [ ",dc=" ] domain}";
+        ldapAdminPasswordKey = "starcommand/selfhost/apps/jellyfin/ldap_admin_password";
+        ssoSecretKey = "starcommand/selfhost/apps/jellyfin/sso_secret";
+        ssoSecretForAutheliaKey = "starcommand/selfhost/auth/authelia/jellyfin_sso_secret";
+        authEndpoint = "https://${authSubdomain}.${domain}";
+      })
+
+      # Arr Stack - Media management (Radarr, Sonarr, Bazarr, Readarr, Lidarr, Jackett)
+      (FTS.selfhost._.arr {
+        inherit domain;
+        authEndpoint = "https://${authSubdomain}.${domain}";
+        radarrApiKey = "starcommand/selfhost/apps/arr/radarr/api_key";
+        sonarrApiKey = "starcommand/selfhost/apps/arr/sonarr/api_key";
+        jackettApiKey = "starcommand/selfhost/apps/arr/jackett/api_key";
+      })
+
+      # Grocy - Grocery and household management
+      (FTS.selfhost._.grocy {
+        inherit domain;
+        subdomain = grocySubdomain;
+        currency = "USD";
+        culture = "en";
+      })
+
+      # Deluge - BitTorrent client
+      (FTS.selfhost._.deluge {
+        inherit domain;
+        subdomain = delugeSubdomain;
+        downloadLocation = "/mnt/storage/torrents"; # Torrents on merged storage
+        localclientPasswordKey = "starcommand/selfhost/apps/deluge/localclient_password";
+        prometheusScraperPasswordKey = "starcommand/selfhost/apps/deluge/prometheus_scraper_password";
+        authEndpoint = "https://${authSubdomain}.${domain}";
+      })
+
+      # Forgejo - Git hosting
+      (FTS.selfhost._.forgejo {
+        inherit domain;
+        subdomain = forgejoSubdomain;
+        databasePasswordKey = "starcommand/selfhost/apps/forgejo/database_password";
+        # LDAP
+        ldapDcdomain = "dc=${builtins.replaceStrings [ "." ] [ ",dc=" ] domain}";
+        ldapAdminPasswordKey = "starcommand/selfhost/apps/forgejo/ldap_admin_password";
+        ldapUserGroup = "forgejo_user";
+        ldapAdminGroup = "forgejo_admin";
+        # SSO
+        authEndpoint = "https://${authSubdomain}.${domain}";
+        ssoSecretKey = "starcommand/selfhost/apps/forgejo/sso_secret";
+        ssoSecretForAutheliaKey = "starcommand/selfhost/auth/authelia/forgejo_sso_secret";
+      })
+
+      # Karakeep - AI-powered bookmarking
+      (FTS.selfhost._.karakeep {
+        inherit domain;
+        subdomain = karakeepSubdomain;
+        nextauthSecretKey = "starcommand/selfhost/apps/karakeep/nextauth_secret";
+        meilisearchMasterKeyKey = "starcommand/selfhost/apps/karakeep/meilisearch_master_key";
+        # SSO
+        authEndpoint = "https://${authSubdomain}.${domain}";
+        ssoSecretKey = "starcommand/selfhost/apps/karakeep/sso_secret";
+        ssoSecretForAutheliaKey = "starcommand/selfhost/auth/authelia/karakeep_sso_secret";
+      })
+
+      # Audiobookshelf - Audiobook server
+      (FTS.selfhost._.audiobookshelf {
+        inherit domain;
+        subdomain = audiobookshelfSubdomain;
+        # SSO
+        authEndpoint = "https://${authSubdomain}.${domain}";
+        ssoSecretKey = "starcommand/selfhost/apps/audiobookshelf/sso_secret";
+        ssoSecretForAutheliaKey = "starcommand/selfhost/auth/authelia/audiobookshelf_sso_secret";
+      })
+
+      # Hledger - Plain-text accounting
+      (FTS.selfhost._.hledger {
+        inherit domain;
+        subdomain = hledgerSubdomain;
+        authEndpoint = "https://${authSubdomain}.${domain}";
+      })
+
+      # Home-Assistant - Home automation
+      (FTS.selfhost._.home-assistant {
+        inherit domain;
+        subdomain = homeAssistantSubdomain;
+        name = "Star Command Home";
+        country = "US";
+        latitude = "0.0";
+        longitude = "0.0";
+        time_zone = "America/Chicago";
+        unit_system = "us_customary";
+        ldap = {
+          userGroup = "homeassistant_user";
+        };
+      })
+
+      # Open-WebUI - LLM chat interface
+      (FTS.selfhost._.open-webui {
+        inherit domain;
+        subdomain = openWebuiSubdomain;
+        # SSO
+        authEndpoint = "https://${authSubdomain}.${domain}";
+        ssoSecretKey = "starcommand/selfhost/apps/open-webui/sso_secret";
+        ssoSecretForAutheliaKey = "starcommand/selfhost/auth/authelia/open-webui_sso_secret";
+      })
+
+      # Pinchflat - YouTube downloader
+      # NOTE: Videos saved to /mnt/storage/youtube
+      # To watch in Jellyfin: Add /mnt/storage/youtube as a library
+      # Or configure Pinchflat via web UI to save to specific Jellyfin folders:
+      #   - Music videos → /mnt/storage/media/music
+      #   - Documentaries → /mnt/storage/media/movies
+      #   - Podcasts → /mnt/storage/media/tv
+      (FTS.selfhost._.pinchflat {
+        inherit domain;
+        subdomain = pinchflatSubdomain;
+        mediaDir = "/mnt/storage/youtube"; # Downloaded videos on merged storage
+        timeZone = "America/Chicago";
+        secretKeyBaseKey = "starcommand/selfhost/apps/pinchflat/secret_key_base";
+        sso = {
           authEndpoint = "https://${authSubdomain}.${domain}";
-        })
+        };
+      })
 
-        # Arr Stack - Media management (Radarr, Sonarr, Bazarr, Readarr, Lidarr, Jackett)
-        (FTS.selfhost._.arr {
-          inherit domain;
-          authEndpoint = "https://${authSubdomain}.${domain}";
-          radarrApiKey = "starcommand/selfhost/apps/arr/radarr/api_key";
-          sonarrApiKey = "starcommand/selfhost/apps/arr/sonarr/api_key";
-          jackettApiKey = "starcommand/selfhost/apps/arr/jackett/api_key";
-        })
+      # Immich - Photo and video backup
+      (FTS.selfhost._.immich {
+        inherit domain;
+        subdomain = immichSubdomain;
+        # App state on btrfs, photos on merged storage
+        mediaLocation = "/mnt/storage/photos"; # Photo library on merged storage
+        # SSO
+        authEndpoint = "https://${authSubdomain}.${domain}";
+        ssoSecretKey = "starcommand/selfhost/apps/immich/sso_secret";
+        ssoSecretForAutheliaKey = "starcommand/selfhost/auth/authelia/immich_sso_secret";
+      })
 
-        # Grocy - Grocery and household management
-        (FTS.selfhost._.grocy {
-          inherit domain;
-          subdomain = grocySubdomain;
-          currency = "USD";
-          culture = "en";
-        })
+      # ProtonVPN - VPN service with kill switch
+      (FTS.selfhost._.protonvpn {
+        inherit domain;
+        usernameKey = "starcommand/selfhost/openvpn/username";
+        passwordKey = "starcommand/selfhost/openvpn/password";
+        remoteServerIP = "149.40.62.62";
+        killswitch = {
+          enable = true;
+          allowedSubnets = [
+            "192.168.0.0/16"
+            "10.0.0.0/8"
+          ];
+          allowedIPs = [
+            "192.168.0.114" # Synology NAS
+          ];
+          exemptPorts = [ 22 ];
+        };
+      })
 
-        # Deluge - BitTorrent client
-        (FTS.selfhost._.deluge {
-          inherit domain;
-          subdomain = delugeSubdomain;
-          downloadLocation = "/mnt/storage/torrents"; # Torrents on merged storage
-          localclientPasswordKey = "starcommand/selfhost/apps/deluge/localclient_password";
-          prometheusScraperPasswordKey = "starcommand/selfhost/apps/deluge/prometheus_scraper_password";
-          authEndpoint = "https://${authSubdomain}.${domain}";
-        })
+      # Samba Client Tools - SMB/CIFS utilities for network shares
+      (FTS.selfhost._.samba-client { })
+    ];
 
-        # Forgejo - Git hosting
-        (FTS.selfhost._.forgejo {
-          inherit domain;
-          subdomain = forgejoSubdomain;
-          databasePasswordKey = "starcommand/selfhost/apps/forgejo/database_password";
-          # LDAP
-          ldapDcdomain = "dc=${builtins.replaceStrings ["."] [",dc="] domain}";
-          ldapAdminPasswordKey = "starcommand/selfhost/apps/forgejo/ldap_admin_password";
-          ldapUserGroup = "forgejo_user";
-          ldapAdminGroup = "forgejo_admin";
-          # SSO
-          authEndpoint = "https://${authSubdomain}.${domain}";
-          ssoSecretKey = "starcommand/selfhost/apps/forgejo/sso_secret";
-          ssoSecretForAutheliaKey = "starcommand/selfhost/auth/authelia/forgejo_sso_secret";
-        })
-
-        # Karakeep - AI-powered bookmarking
-        (FTS.selfhost._.karakeep {
-          inherit domain;
-          subdomain = karakeepSubdomain;
-          nextauthSecretKey = "starcommand/selfhost/apps/karakeep/nextauth_secret";
-          meilisearchMasterKeyKey = "starcommand/selfhost/apps/karakeep/meilisearch_master_key";
-          # SSO
-          authEndpoint = "https://${authSubdomain}.${domain}";
-          ssoSecretKey = "starcommand/selfhost/apps/karakeep/sso_secret";
-          ssoSecretForAutheliaKey = "starcommand/selfhost/auth/authelia/karakeep_sso_secret";
-        })
-
-        # Audiobookshelf - Audiobook server
-        (FTS.selfhost._.audiobookshelf {
-          inherit domain;
-          subdomain = audiobookshelfSubdomain;
-          # SSO
-          authEndpoint = "https://${authSubdomain}.${domain}";
-          ssoSecretKey = "starcommand/selfhost/apps/audiobookshelf/sso_secret";
-          ssoSecretForAutheliaKey = "starcommand/selfhost/auth/authelia/audiobookshelf_sso_secret";
-        })
-
-        # Hledger - Plain-text accounting
-        (FTS.selfhost._.hledger {
-          inherit domain;
-          subdomain = hledgerSubdomain;
-          authEndpoint = "https://${authSubdomain}.${domain}";
-        })
-
-        # Home-Assistant - Home automation
-        (FTS.selfhost._.home-assistant {
-          inherit domain;
-          subdomain = homeAssistantSubdomain;
-          name = "Star Command Home";
-          country = "US";
-          latitude = "0.0";
-          longitude = "0.0";
-          time_zone = "America/Chicago";
-          unit_system = "us_customary";
-          ldap = {
-            userGroup = "homeassistant_user";
-          };
-        })
-
-        # Open-WebUI - LLM chat interface
-        (FTS.selfhost._.open-webui {
-          inherit domain;
-          subdomain = openWebuiSubdomain;
-          # SSO
-          authEndpoint = "https://${authSubdomain}.${domain}";
-          ssoSecretKey = "starcommand/selfhost/apps/open-webui/sso_secret";
-          ssoSecretForAutheliaKey = "starcommand/selfhost/auth/authelia/open-webui_sso_secret";
-        })
-
-        # Pinchflat - YouTube downloader
-        # NOTE: Videos saved to /mnt/storage/youtube
-        # To watch in Jellyfin: Add /mnt/storage/youtube as a library
-        # Or configure Pinchflat via web UI to save to specific Jellyfin folders:
-        #   - Music videos → /mnt/storage/media/music
-        #   - Documentaries → /mnt/storage/media/movies
-        #   - Podcasts → /mnt/storage/media/tv
-        (FTS.selfhost._.pinchflat {
-          inherit domain;
-          subdomain = pinchflatSubdomain;
-          mediaDir = "/mnt/storage/youtube"; # Downloaded videos on merged storage
-          timeZone = "America/Chicago";
-          secretKeyBaseKey = "starcommand/selfhost/apps/pinchflat/secret_key_base";
-          sso = {
-            authEndpoint = "https://${authSubdomain}.${domain}";
-          };
-        })
-
-        # Immich - Photo and video backup
-        (FTS.selfhost._.immich {
-          inherit domain;
-          subdomain = immichSubdomain;
-          # App state on btrfs, photos on merged storage
-          mediaLocation = "/mnt/storage/photos"; # Photo library on merged storage
-          # SSO
-          authEndpoint = "https://${authSubdomain}.${domain}";
-          ssoSecretKey = "starcommand/selfhost/apps/immich/sso_secret";
-          ssoSecretForAutheliaKey = "starcommand/selfhost/auth/authelia/immich_sso_secret";
-        })
-
-        # ProtonVPN - VPN service with kill switch
-        (FTS.selfhost._.protonvpn {
-          inherit domain;
-          usernameKey = "starcommand/selfhost/openvpn/username";
-          passwordKey = "starcommand/selfhost/openvpn/password";
-          remoteServerIP = "149.40.62.62";
-          killswitch = {
-            enable = true;
-            allowedSubnets = [
-              "192.168.0.0/16"
-              "10.0.0.0/8"
-            ];
-            allowedIPs = [
-              "192.168.0.114" # Synology NAS
-            ];
-            exemptPorts = [22];
-          };
-        })
-
-        # Samba Client Tools - SMB/CIFS utilities for network shares
-        (FTS.selfhost._.samba-client {})
-      ];
-
-      nixos = {
+    nixos =
+      {
         config,
         lib,
         pkgs,
         ...
-      }: {
+      }:
+      {
         # Import SelfHostBlocks modules
         # default imports everything except sops
         imports = [
@@ -633,7 +621,7 @@
         sops = {
           defaultSopsFile = lib.mkDefault ../../users/starcommand/secrets.yaml;
           # Use host's SSH key for decryption during build
-          age.sshKeyPaths = ["/etc/ssh/ssh_host_ed25519_key"];
+          age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
         };
 
         # Nginx reverse proxy
@@ -677,7 +665,8 @@
         # Set up secrets that need to be shared between services
 
         # Authelia LDAP admin password - reuse LLDAP admin password
-        shb.sops.secret."starcommand/selfhost/auth/authelia/ldap_admin_password".settings.key = "starcommand/selfhost/auth/lldap/admin_password";
+        shb.sops.secret."starcommand/selfhost/auth/authelia/ldap_admin_password".settings.key =
+          "starcommand/selfhost/auth/lldap/admin_password";
 
         # Nextcloud LDAP admin password - reuse LLDAP admin password
         shb.sops.secret."starcommand/selfhost/apps/nextcloud/ldap_admin_password" = {
@@ -875,6 +864,5 @@
         # ProtonVPN remote server IP
         shb.vpn.protonvpn.remoteServerIP = "149.40.62.62";
       };
-    };
   };
 }

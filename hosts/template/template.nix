@@ -1,4 +1,9 @@
-{ inputs, den, pkgs, FTS, __findFile, ... }:
+{
+  inputs,
+  FTS,
+  __findFile,
+  ...
+}:
 
 {
   # Define the host
@@ -23,24 +28,30 @@
       ];
 
       # NixOS configuration for this host
-      nixos = { config, lib, pkgs, ... }: {
-        # Import nixos-facter-modules for hardware detection
-        imports = [
-          inputs.nixos-facter-modules.nixosModules.facter
-        ];
+      nixos =
+        {
+          config,
+          lib,
+          pkgs,
+          ...
+        }:
+        {
+          # Import nixos-facter-modules for hardware detection
+          imports = [
+            inputs.nixos-facter-modules.nixosModules.facter
+          ];
 
-        # Use facter report for hardware detection (auto-derived from hosts/template/facter.json)
-        # facter.reportPath = ./facter.json;
+          # Use facter report for hardware detection (auto-derived from hosts/template/facter.json)
+          # facter.reportPath = ./facter.json;
 
-        # deployment = {
-        #   enable = true;
-          
-        #   ip = "192.168.1.XXX";  # Update with your actual IP address
-          
-        # };
+          # deployment = {
+          #   enable = true;
 
-      };
+          #   ip = "192.168.1.XXX";  # Update with your actual IP address
+
+          # };
+
+        };
     };
   };
 }
-

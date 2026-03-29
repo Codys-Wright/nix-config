@@ -1,7 +1,6 @@
 let
   my.nix._.search = {
-    nixos = search-system-packages;
-    darwin = search-system-packages;
+    os = search-system-packages;
     inherit homeManager;
   };
 

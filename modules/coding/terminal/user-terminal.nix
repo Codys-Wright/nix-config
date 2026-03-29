@@ -24,12 +24,11 @@ let
         TERMINAL = terminal;
         TERM = "xterm-256color"; # Default TERM value, can be overridden if needed
       };
-      nixos =
+      os =
         { ... }:
         {
           environment.sessionVariables = envVars;
         };
-      darwin = nixos;
       homeManager =
         { ... }:
         {
@@ -37,7 +36,7 @@ let
         };
     in
     {
-      inherit nixos darwin homeManager;
+      inherit os homeManager;
     };
 
 in

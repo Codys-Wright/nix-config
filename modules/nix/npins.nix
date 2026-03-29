@@ -1,7 +1,6 @@
 let
   my.nix._.npins = {
-    nixos = npins-system;
-    darwin = npins-system;
+    os = npins-system;
     homeManager =
       { pkgs, ... }:
       {

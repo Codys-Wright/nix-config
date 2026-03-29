@@ -1,10 +1,9 @@
 # Gaming facet - All gaming platforms and tools
 {
   FTS,
-  lib,
-  pkgs,
   ...
-}: {
+}:
+{
   FTS.gaming = {
     description = "All gaming platforms and tools - steam, minecraft, lutris, proton";
 
