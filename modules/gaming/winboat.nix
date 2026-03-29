@@ -4,7 +4,7 @@
   ...
 }:
 {
-  FTS.apps._.gaming._.winboat = {
+  FTS.gaming._.winboat = {
     description = "Winboat - run Windows apps on Linux with seamless integration";
 
     homeManager = { pkgs, lib, ... }: lib.mkIf (!pkgs.stdenv.isDarwin) {

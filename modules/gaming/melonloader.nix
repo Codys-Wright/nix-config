@@ -4,7 +4,7 @@
   ...
 }:
 {
-  FTS.apps._.gaming._.melonloader = {
+  FTS.gaming._.melonloader = {
     description = "MelonLoader installer for Unity game modding";
 
     homeManager =

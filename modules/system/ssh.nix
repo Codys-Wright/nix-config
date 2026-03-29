@@ -1,21 +1,5 @@
 # SSH server configuration
-{FTS, ...}: let
-  # Personal SSH public keys - these users can SSH into any fleet machine
-  personalKeys = {
-    cody = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO8y8AMfYQnvu3BvjJ54/qYJcedNkMHmnjexine1ypda cody";
-    voyager = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEExJ9+wtbBN4v9uWZwZKK+K83/ZscpIyuVMCQkuMY2c cody@voyager";
-  };
-
-  # Fleet SSH public keys - allows any of our machines to SSH into any other
-  # These are the deploy keys from hosts/<hostname>/ssh.pub
-  fleetKeys = {
-    THEBATTLESHIP = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICGTCYWYifaiPcQVQnebV/cFVnvGULPJ2+jVEkPIEgXg THEBATTLESHIP-deploy";
-    starcommand = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILBJxxU1TXbV1IvGFm67X7jX+C7uRtLcgimcoDGxapNP starcommand-deploy";
-  };
-
-  # All keys (personal + fleet) as a list
-  allFleetKeys = (builtins.attrValues personalKeys) ++ (builtins.attrValues fleetKeys);
-in {
+{FTS, ssh-keys, ...}: {
   FTS.system._.ssh = {
     description = "SSH server configuration with secure defaults and fleet access";
 
@@ -28,14 +12,14 @@ in {
       services.openssh = {
         enable = lib.mkDefault true;
         settings = {
-          PermitRootLogin = lib.mkDefault "prohibit-password";
+          PermitRootLogin = lib.mkOverride 1500 "prohibit-password";
           PasswordAuthentication = lib.mkDefault true;
         };
         ports = [22];
       };
 
       # Allow all fleet machines to SSH into root
-      users.users.root.openssh.authorizedKeys.keys = allFleetKeys;
+      users.users.root.openssh.authorizedKeys.keys = ssh-keys.all;
     };
   };
 

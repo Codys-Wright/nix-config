@@ -58,7 +58,10 @@
       url = "github:Davi-S/sddm-theme-minesddm";
     };
     musnix.url = "github:musnix/musnix";
-    nix-index-database.url = "github:nix-community/nix-index-database";
+    nix-index-database = {
+      inputs.nixpkgs.follows = "nixpkgs";
+      url = "github:nix-community/nix-index-database";
+    };
     nix-openclaw.url = "github:openclaw/nix-openclaw";
     nixos-facter-modules.url = "github:numtide/nixos-facter-modules";
     nixos-generators = {
@@ -75,7 +78,6 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     nixpkgs-lib.follows = "nixpkgs";
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.11";
-    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     nvf = {
       inputs.nixpkgs.follows = "nixpkgs";
       url = "github:notashelf/nvf";
