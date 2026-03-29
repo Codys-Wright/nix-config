@@ -3,6 +3,8 @@
 #   - niri.nix nixos block (evaluates wrapper for programs.niri.package)
 #   - niri-package.nix (nix run .#niri)
 { config, lib, ... }:
+# v2-settings = true opts into the new action format (_: {} instead of null)
+# and silences all deprecation warnings.
 let
   p = config.pkgs;
   noctaliaExe = lib.getExe p.noctalia-shell;
@@ -61,11 +63,13 @@ let
   '';
 in
 {
+  config.v2-settings = true;
+
   config.settings = {
-    prefer-no-csd = null;
+    prefer-no-csd = _: { };
 
     input = {
-      focus-follows-mouse = null;
+      focus-follows-mouse = _: { };
       keyboard = {
         xkb = {
           layout = "us";
@@ -75,8 +79,8 @@ in
         repeat-delay = 250;
       };
       touchpad = {
-        natural-scroll = null;
-        tap = null;
+        natural-scroll = _: { };
+        tap = _: { };
       };
       mouse.accel-profile = "flat";
     };
@@ -126,27 +130,27 @@ in
       ];
 
       # Window management
-      "Mod+Q".close-window = null;
-      "Mod+F".maximize-column = null;
-      "Mod+G".fullscreen-window = null;
-      "Mod+Shift+F".toggle-window-floating = null;
-      "Mod+C".center-column = null;
+      "Mod+Q".close-window = _: { };
+      "Mod+F".maximize-column = _: { };
+      "Mod+G".fullscreen-window = _: { };
+      "Mod+Shift+F".toggle-window-floating = _: { };
+      "Mod+C".center-column = _: { };
 
       # Focus (Vi-keys + arrows)
-      "Mod+H".focus-column-left = null;
-      "Mod+L".focus-column-right = null;
-      "Mod+K".focus-window-up = null;
-      "Mod+J".focus-window-down = null;
-      "Mod+Left".focus-column-left = null;
-      "Mod+Right".focus-column-right = null;
-      "Mod+Up".focus-window-up = null;
-      "Mod+Down".focus-window-down = null;
+      "Mod+H".focus-column-left = _: { };
+      "Mod+L".focus-column-right = _: { };
+      "Mod+K".focus-window-up = _: { };
+      "Mod+J".focus-window-down = _: { };
+      "Mod+Left".focus-column-left = _: { };
+      "Mod+Right".focus-column-right = _: { };
+      "Mod+Up".focus-window-up = _: { };
+      "Mod+Down".focus-window-down = _: { };
 
       # Move windows
-      "Mod+Shift+H".move-column-left = null;
-      "Mod+Shift+L".move-column-right = null;
-      "Mod+Shift+K".move-window-up = null;
-      "Mod+Shift+J".move-window-down = null;
+      "Mod+Shift+H".move-column-left = _: { };
+      "Mod+Shift+L".move-column-right = _: { };
+      "Mod+Shift+K".move-window-up = _: { };
+      "Mod+Shift+J".move-window-down = _: { };
 
       # Resize
       "Mod+Ctrl+H".set-column-width = "-5%";
@@ -177,10 +181,10 @@ in
       "Mod+Shift+0".move-column-to-workspace = "w9";
 
       # Mouse wheel navigation
-      "Mod+WheelScrollDown".focus-column-right = null;
-      "Mod+WheelScrollUp".focus-column-left = null;
-      "Mod+Ctrl+WheelScrollDown".focus-workspace-down = null;
-      "Mod+Ctrl+WheelScrollUp".focus-workspace-up = null;
+      "Mod+WheelScrollDown".focus-column-right = _: { };
+      "Mod+WheelScrollUp".focus-column-left = _: { };
+      "Mod+Ctrl+WheelScrollDown".focus-workspace-down = _: { };
+      "Mod+Ctrl+WheelScrollUp".focus-workspace-up = _: { };
 
       # Volume
       "XF86AudioRaiseVolume".spawn-sh = "wpctl set-volume -l 1.4 @DEFAULT_AUDIO_SINK@ 5%+";
@@ -188,14 +192,14 @@ in
       "XF86AudioMute".spawn-sh = "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle";
 
       # Screenshots
-      "Print".screenshot = null;
+      "Print".screenshot = _: { };
       "Mod+Ctrl+S".spawn-sh = "${grim} -l 0 - | ${wlCopy}";
       "Mod+Shift+S".spawn-sh = ''${grim} -g "$(${slurp} -w 0)" - | ${wlCopy}'';
       "Mod+Shift+E".spawn-sh = "${wlPaste} | ${swappy} -f -";
 
       # Session
       "Mod+Alt+L".spawn = "swaylock";
-      "Mod+Shift+Q".quit = null;
+      "Mod+Shift+Q".quit = _: { };
     };
   };
 }
