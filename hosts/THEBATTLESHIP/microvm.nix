@@ -25,7 +25,7 @@
     ];
 
     nixos =
-      { pkgs, lib, ... }:
+      { pkgs, ... }:
       {
         imports = [
           inputs.microvm.nixosModules.microvm
@@ -58,19 +58,8 @@
               guest.port = 22;
             }
           ];
-          # Use full qemu (not qemu_kvm) for GTK display support
-          qemu.package = pkgs.qemu;
-          # Open a GTK window with GPU acceleration
-          qemu.extraArgs = [
-            "-device"
-            "virtio-vga-gl"
-            "-display"
-            "gtk,gl=on"
-            "-device"
-            "virtio-keyboard-pci"
-            "-device"
-            "virtio-mouse-pci"
-          ];
+          # Enable GTK display window — microvm uses full qemu (not qemu-for-vm-tests) when this is set
+          graphics.enable = true;
         };
 
         networking.hostName = "THEBATTLESHIP-vm";
