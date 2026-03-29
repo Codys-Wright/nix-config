@@ -1,9 +1,10 @@
 # LazyVim utility functions ported to nvf
 # Returns config.vim settings directly
 # Takes lib as parameter for consistency (even if not used)
-{lib, ...}: {
+{ lib, ... }:
+{
   # Add plenary.nvim as a start plugin (common dependency for many Lua plugins)
-  startPlugins = ["plenary-nvim"];
+  startPlugins = [ "plenary-nvim" ];
 
   # Port LazyVim utility functions via luaConfigPre
   # These functions are used throughout the config (lualine, root detection, etc.)
@@ -492,7 +493,7 @@
 
     -- LazyVim.format module (matching LazyVim's util.format)
     _G.LazyVim.format = {}
-    
+
     -- formatexpr function (matching LazyVim.format.formatexpr)
     function _G.LazyVim.format.formatexpr()
       -- Check for conform.nvim first (LazyVim's default formatter)

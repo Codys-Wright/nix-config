@@ -31,7 +31,7 @@
       boot.loader.grub = {
         # Set timeout style to menu (required for double menu)
         timeoutStyle = "menu";
-        
+
         # Use world-selection theme for the main grub.cfg
         # The main menu theme is set in mainmenu.cfg
         theme = "minegrub-world-selection";

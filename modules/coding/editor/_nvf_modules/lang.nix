@@ -2,7 +2,8 @@
 # Returns config.vim settings directly
 # Takes lib as parameter for consistency (even if not used)
 # Based on nvf's default and maximal configurations
-{lib, ...}: {
+{ lib, ... }:
+{
   # Language support
   # Global language options (enable features for all languages)
   languages = {
@@ -17,17 +18,20 @@
       # Use nixd LSP (like lazyvim) instead of nil (nvf default)
       lsp = {
         enable = true;
-        servers = ["nixd"]; # Use nixd instead of nil (now plural)
+        servers = [ "nixd" ]; # Use nixd instead of nil (now plural)
       };
       # Formatting with alejandra (nvf default, matches lazyvim)
       format = {
         enable = true;
-        type = ["alejandra"]; # alejandra is nvf's default
+        type = [ "alejandra" ]; # alejandra is nvf's default
       };
       # Extra diagnostics (statix and deadnix)
       extraDiagnostics = {
         enable = true;
-        types = ["statix" "deadnix"]; # statix and deadnix linters
+        types = [
+          "statix"
+          "deadnix"
+        ]; # statix and deadnix linters
       };
     };
     markdown.enable = true;
@@ -39,7 +43,7 @@
       # Use ts_ls LSP server
       lsp = {
         enable = true;
-        servers = ["ts_ls"];
+        servers = [ "ts_ls" ];
       };
     };
     html = {

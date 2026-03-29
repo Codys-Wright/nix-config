@@ -24,7 +24,7 @@
           "10.0.0.0/8"
         ];
         allowedIPs = [
-          "192.168.0.114"  # Synology NAS
+          "192.168.0.114" # Synology NAS
         ];
         exemptPorts = [ 22 ];
       },
@@ -69,13 +69,13 @@
             enable = true;
             provider = "protonvpn";
             inherit dev routingNumber;
-            
+
             # Auth file will be created by systemd ExecStartPre
             authFile = authFilePath;
-            
+
             # Kill switch configuration
             inherit killswitch;
-            
+
             # Optional proxy
             inherit proxyPort;
           };

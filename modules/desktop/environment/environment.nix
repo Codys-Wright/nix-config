@@ -1,5 +1,6 @@
 # Desktop environment facet - Provides access to different desktop environments
-{FTS, ...}: {
+{ FTS, ... }:
+{
   FTS.desktop._.environment.description = ''
     Desktop environment configuration with support for multiple DEs.
 
@@ -13,5 +14,5 @@
   '';
 
   # Make environment callable as a router function
-  FTS.desktop._.environment = {};
+  FTS.desktop._.environment = { };
 }

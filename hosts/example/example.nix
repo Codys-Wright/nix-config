@@ -4,14 +4,16 @@
   ...
 }:
 {
-  # Define the host
-  den.hosts.x86_64-linux = {
-    example = {
-      description = "example host";
-      users.admin = { }; # Add users as needed
-      aspect = "example";
-    };
-  };
+  # Template host — not registered as an active host to avoid assertion failures
+  # Copy this aspect to define a new host:
+  #
+  # den.hosts.x86_64-linux = {
+  #   myhostname = {
+  #     description = "my host";
+  #     users.admin = { };
+  #     aspect = "myhostname";
+  #   };
+  # };
 
   # example host-specific aspect
   den.aspects = {

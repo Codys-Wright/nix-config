@@ -1,5 +1,6 @@
 # Music production facet - DAWs and audio tools
-{FTS, ...}: {
+{ FTS, ... }:
+{
   FTS.music._.production = {
     description = "Music production tools - Reaper DAW, plugins, and extensions";
 
@@ -11,4 +12,3 @@
     ];
   };
 }
-

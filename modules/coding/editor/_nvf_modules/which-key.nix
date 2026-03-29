@@ -1,7 +1,8 @@
 # Which-key configuration with LazyVim-style categories and UI
 # Returns config.vim settings directly
 # Takes lib as parameter for consistency (even if not used)
-{lib, ...}: {
+{ lib, ... }:
+{
   # Enable which-key
   binds.whichKey.enable = true;
 

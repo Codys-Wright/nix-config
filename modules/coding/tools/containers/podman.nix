@@ -1,62 +1,67 @@
 # Podman container tools aspect
-{FTS, ...}: {
+{ FTS, ... }:
+{
   FTS.coding._.tools._.containers._.podman = {
     description = "Podman container tools with Docker compatibility";
 
-    nixos = {pkgs, ...}: {
-      # Enable containers
-      virtualisation.containers.enable = true;
+    nixos =
+      { pkgs, ... }:
+      {
+        # Enable containers
+        virtualisation.containers.enable = true;
 
-      # Enable Podman with Docker compatibility
-      virtualisation.podman = {
-        enable = true;
-        dockerCompat = true;
-        dockerSocket.enable = true;
-        defaultNetwork.settings.dns_enabled = true;
+        # Enable Podman with Docker compatibility
+        virtualisation.podman = {
+          enable = true;
+          dockerCompat = true;
+          dockerSocket.enable = true;
+          defaultNetwork.settings.dns_enabled = true;
+        };
+
+        # Set Podman as the OCI containers backend
+        virtualisation.oci-containers.backend = "podman";
+
+        # Enable Podman Compose and Docker Compose for compatibility
+        environment.systemPackages = with pkgs; [
+          docker-compose
+          podman-compose
+          podman-tui
+        ];
+
+        # Suppress the external compose provider warning message
+        environment.etc."containers/containers.conf.d/compose.conf".text = ''
+          [engine]
+          compose_warning_logs = false
+        '';
+
+        # Create podman group for rootless container access
+        users.groups.podman = { };
       };
 
-      # Set Podman as the OCI containers backend
-      virtualisation.oci-containers.backend = "podman";
+    homeManager =
+      {
+        pkgs,
+        lib,
+        ...
+      }:
+      {
+        home.packages = with pkgs; [
+          lazydocker
+        ];
 
-      # Enable Podman Compose and Docker Compose for compatibility
-      environment.systemPackages = with pkgs; [
-        docker-compose
-        podman-compose
-        podman-tui
-      ];
+        # Set DOCKER_HOST environment variable for Docker Compose compatibility
+        home.sessionVariables = {
+          DOCKER_HOST = "unix://$XDG_RUNTIME_DIR/podman/podman.sock";
+        };
 
-      # Suppress the external compose provider warning message
-      environment.etc."containers/containers.conf.d/compose.conf".text = ''
-        [engine]
-        compose_warning_logs = false
-      '';
+        # Configure shells to set DOCKER_HOST
+        programs.fish.shellInit = ''
+          set -x DOCKER_HOST unix://$XDG_RUNTIME_DIR/podman/podman.sock
+        '';
 
-      # Create podman group for rootless container access
-      users.groups.podman = {};
-    };
-
-    homeManager = {
-      pkgs,
-      lib,
-      ...
-    }: {
-      home.packages = with pkgs; [
-        lazydocker
-      ];
-
-      # Set DOCKER_HOST environment variable for Docker Compose compatibility
-      home.sessionVariables = {
-        DOCKER_HOST = "unix://$XDG_RUNTIME_DIR/podman/podman.sock";
+        programs.zsh.initExtra = ''
+          export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock
+        '';
       };
-
-      # Configure shells to set DOCKER_HOST
-      programs.fish.shellInit = ''
-        set -x DOCKER_HOST unix://$XDG_RUNTIME_DIR/podman/podman.sock
-      '';
-
-      programs.zsh.initExtra = ''
-        export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock
-      '';
-    };
   };
 }

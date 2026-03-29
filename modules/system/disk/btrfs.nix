@@ -20,7 +20,8 @@
     }@args:
     { class, aspect-chain }:
     {
-      nixos = { pkgs, lib, ... }:
+      nixos =
+        { pkgs, lib, ... }:
         {
           # Import disko module to generate fileSystems from disko.devices
           imports = [ inputs.disko.nixosModules.disko ];
@@ -106,4 +107,3 @@
         };
     };
 }
-

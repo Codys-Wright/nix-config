@@ -1,4 +1,13 @@
 #!/usr/bin/env sh
+
+# Format staged .nix files with nixfmt-rfc-style before committing
+nix_staged=$(git diff --cached --name-only --diff-filter=ACMR 2>/dev/null | grep '\.nix$' || true)
+if [ -n "$nix_staged" ]; then
+  echo "Formatting staged .nix files..."
+  # shellcheck disable=SC2086
+  nix run nixpkgs#nixfmt-rfc-style -- $nix_staged && git add $nix_staged
+fi
+
 # --- BEGIN BEADS INTEGRATION v0.61.0 ---
 # This section is managed by beads. Do not remove these markers.
 if command -v bd >/dev/null 2>&1; then

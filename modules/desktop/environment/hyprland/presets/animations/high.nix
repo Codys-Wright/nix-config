@@ -1,21 +1,22 @@
 # Animation Preset: High
 # From HyDE Project
 # High energy animations
-{FTS, ...}: {
+{ FTS, ... }:
+{
   FTS.desktop._.environment._.hyprland._.presets._.animations._.high = {
     description = "High energy animations (from HyDE)";
 
     settings = {
       animations = {
         enabled = true;
-        
+
         bezier = [
           "wind, 0.05, 0.9, 0.1, 1.05"
           "winIn, 0.1, 1.1, 0.1, 1.1"
           "winOut, 0.3, -0.3, 0, 1"
           "liner, 1, 1, 1, 1"
         ];
-        
+
         animation = [
           "windows, 1, 6, wind, slide"
           "windowsIn, 1, 6, winIn, slide"

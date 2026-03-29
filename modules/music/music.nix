@@ -1,5 +1,6 @@
 # Music facet - All music-related tools
-{FTS, ...}: {
+{ FTS, ... }:
+{
   FTS.music = {
     description = "Music production and audio tools";
 

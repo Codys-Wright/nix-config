@@ -1,6 +1,8 @@
 # Git configuration aspect
 {
-  FTS, ... }:
+  FTS,
+  ...
+}:
 {
   FTS.coding._.tools._.git = {
     description = "Git version control with delta and LFS support";
@@ -39,4 +41,3 @@
       };
   };
 }
-

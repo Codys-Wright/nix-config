@@ -8,5 +8,5 @@
   cursor = "default";
   window-rules = "default";
   workspace-rules = "default";
-  settings = {};
+  settings = { };
 }

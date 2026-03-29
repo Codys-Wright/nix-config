@@ -1,14 +1,15 @@
 # Animation Preset: Minimal-1
 # From HyDE Project
 # Minimal, subtle animations
-{FTS, ...}: {
+{ FTS, ... }:
+{
   FTS.desktop._.environment._.hyprland._.presets._.animations._.minimal-1 = {
     description = "Minimal-1 animations (from HyDE)";
 
     settings = {
       animations = {
         enabled = true;
-        
+
         bezier = [
           "linear, 0.0, 0.0, 1.0, 1.0"
           "wind, 0.05, 0.9, 0.1, 1.05"
@@ -16,7 +17,7 @@
           "winOut, 0.3, -0.3, 0, 1"
           "liner, 1, 1, 1, 1"
         ];
-        
+
         animation = [
           "windows, 1, 6, wind, slide"
           "windowsIn, 1, 6, winIn, slide"

@@ -1,5 +1,6 @@
 # Hypridle - Hyprland idle daemon configuration
-{FTS, ...}: {
+{ FTS, ... }:
+{
   FTS.desktop._.environment._.hyprland._.plugins._.hypridle = {
     description = "Hypridle idle daemon configuration for Hyprland";
 

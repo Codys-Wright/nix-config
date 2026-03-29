@@ -18,7 +18,7 @@
 
         # Path to user-specific secrets file
         userSecretsPath = ../../users/${username}/secrets.yaml;
-        
+
         # Check if the secrets file exists
         secretsFileExists = builtins.pathExists userSecretsPath;
       in

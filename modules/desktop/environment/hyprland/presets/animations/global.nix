@@ -1,6 +1,7 @@
 # Global Animation Settings
 # Applied to all animation presets
-{FTS, ...}: {
+{ FTS, ... }:
+{
   FTS.desktop._.environment._.hyprland._.presets._.animations._.global = {
     description = "Global animation settings applied to all presets";
 

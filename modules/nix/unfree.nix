@@ -1,5 +1,9 @@
-{ lib, den,
-  FTS, ... }:
+{
+  lib,
+  den,
+  FTS,
+  ...
+}:
 {
   den.provides.unfree.description = ''
     A class generic aspect that enables unfree packages by name or all unfree packages.
@@ -21,14 +25,15 @@
     _self: arg:
     { class, aspect-chain }:
     let
-      config = if arg == true then
-        # Enable all unfree packages
-        { allowUnfree = true; }
-      else if lib.isList arg then
-        # Enable specific packages by name
-        { allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) arg; }
-      else
-        throw "unfree: argument must be either 'true' or a list of package names";
+      config =
+        if arg == true then
+          # Enable all unfree packages
+          { allowUnfree = true; }
+        else if lib.isList arg then
+          # Enable specific packages by name
+          { allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) arg; }
+        else
+          throw "unfree: argument must be either 'true' or a list of package names";
     in
     den.lib.take.unused aspect-chain {
       ${class}.nixpkgs.config = config;

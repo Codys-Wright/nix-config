@@ -1,5 +1,6 @@
 # Tools facet - All development tools
-{FTS, ...}: {
+{ FTS, ... }:
+{
   FTS.coding._.tools = {
     description = "All development tools - containers, git, lazygit, opencode, dev-tools";
 

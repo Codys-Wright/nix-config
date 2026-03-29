@@ -5,15 +5,17 @@
   lib,
   nvf ? null,
   ...
-}: let
+}:
+let
   # Path to custom themes directory (contains lua/themes/*.lua files)
   # This will be added to runtime path so base46 can find themes via require("themes.tokyonight_moon")
   themesDir = ./themes;
-in {
+in
+{
   # Add themes directory to runtime path so base46 can find custom themes
   # base46 looks for themes via require("themes.{name}") which searches runtimepath
   # This is pure/reproducible since the theme file is in the Nix store
-  additionalRuntimePaths = [themesDir];
+  additionalRuntimePaths = [ themesDir ];
 
   # UI features
   # Disable nvim-tree in favor of snacks explorer (configured in snacks.nix)
@@ -23,7 +25,7 @@ in {
 
   # Add NUI (UI component library) - required by many plugins
   # NUI is available in nvf as "nui-nvim" but doesn't have a module yet
-  startPlugins = ["nui-nvim"];
+  startPlugins = [ "nui-nvim" ];
 
   # Mini.icons configuration (LazyVim-style)
   # Provides icons and mocks nvim-web-devicons
@@ -340,9 +342,9 @@ in {
             filter = {
               event = "msg_show";
               any = [
-                {find = "%d+L, %d+B";}
-                {find = "; after #%d+";}
-                {find = "; before #%d+";}
+                { find = "%d+L, %d+B"; }
+                { find = "; after #%d+"; }
+                { find = "; before #%d+"; }
               ];
             };
             view = "mini";
@@ -362,20 +364,20 @@ in {
   # Base46 setup - must run very early, before plugins load
   # Use luaConfigRC with entryBefore to run before pluginConfigs
   luaConfigRC.nvchad-base46-cache =
-    if nvf != null
-    then
-      nvf.lib.nvim.dag.entryBefore ["pluginConfigs"] ''
+    if nvf != null then
+      nvf.lib.nvim.dag.entryBefore [ "pluginConfigs" ] ''
         -- Initialize base46 cache path (required by nvchad-ui and base46)
         -- This must be set before base46 loads (before lazy.setup)
         vim.g.base46_cache = vim.fn.stdpath("data") .. "/base46_cache/"
-        
+
       ''
-    else ''
-      -- Initialize base46 cache path (required by nvchad-ui and base46)
-      -- This must be set before base46 loads
-      vim.g.base46_cache = vim.fn.stdpath("data") .. "/base46_cache/"
-      
-    '';
+    else
+      ''
+        -- Initialize base46 cache path (required by nvchad-ui and base46)
+        -- This must be set before base46 loads
+        vim.g.base46_cache = vim.fn.stdpath("data") .. "/base46_cache/"
+
+      '';
 
   # Theme file is now written in nvchad-base46-cache (above) to ensure it exists before plugins load
 
@@ -386,9 +388,8 @@ in {
   # Enable lzn-auto-require as late as possible (after all plugins are configured)
   # This allows lazy-loading of optional modules like nvchad.cheatsheet.grid
   luaConfigRC.lzn-auto-require-enable =
-    if nvf != null
-    then
-      nvf.lib.nvim.dag.entryAfter ["mappings"] ''
+    if nvf != null then
+      nvf.lib.nvim.dag.entryAfter [ "mappings" ] ''
         -- Enable lzn-auto-require as late as possible
         -- This allows lazy-loading of optional modules from opt plugins
         if package.loaded["lzn-auto-require"] then
@@ -401,29 +402,29 @@ in {
           pcall(require, "nvchad.themes")
         end
       ''
-    else ''
-      -- Enable lzn-auto-require as late as possible
-      vim.defer_fn(function()
-        if package.loaded["lzn-auto-require"] then
-          require("lzn-auto-require").enable()
-        end
-        -- Ensure nvchad.themes module is available
-        if package.loaded["volt"] and package.loaded["nvchad-ui"] then
-          pcall(require, "nvchad.themes")
-        end
-        -- Ensure nvchad.blink module is available for blink.cmp
-        if package.loaded["nvchad-ui"] then
-          pcall(require, "nvchad.blink")
-        end
-      end, 100)
-    '';
+    else
+      ''
+        -- Enable lzn-auto-require as late as possible
+        vim.defer_fn(function()
+          if package.loaded["lzn-auto-require"] then
+            require("lzn-auto-require").enable()
+          end
+          -- Ensure nvchad.themes module is available
+          if package.loaded["volt"] and package.loaded["nvchad-ui"] then
+            pcall(require, "nvchad.themes")
+          end
+          -- Ensure nvchad.blink module is available for blink.cmp
+          if package.loaded["nvchad-ui"] then
+            pcall(require, "nvchad.blink")
+          end
+        end, 100)
+      '';
 
   # NvChad UI configuration - must run before base46 loads
   # Use entryBefore to ensure chadrc is configured before base46's setup function runs
   luaConfigRC.nvchad-ui-config =
-    if nvf != null
-    then
-      nvf.lib.nvim.dag.entryBefore ["pluginConfigs"] ''
+    if nvf != null then
+      nvf.lib.nvim.dag.entryBefore [ "pluginConfigs" ] ''
         -- Create chadrc configuration for nvchad-ui
         -- This provides the configuration that nvchad-ui expects (similar to chadrc.lua)
         -- Structure matches nvconfig.lua from nvchad-ui
@@ -527,34 +528,35 @@ in {
         _G.chadrc = chadrc
         _G.nvconfig = chadrc
       ''
-    else ''
-      -- Create chadrc configuration for nvchad-ui
-      local chadrc = {
-        base46 = {
-          theme = "tokyonight_moon",
-          hl_add = {},
-          hl_override = {},
-          integrations = {},
-          changed_themes = {},
-          transparency = false,
-          theme_toggle = { "tokyonight_moon", "onedark" },
-        },
-        ui = {
-          cmp = { style = "atom_colored" },
-          telescope = { style = "borderless" },
-          statusline = { enabled = true, theme = "default" },
-          tabufline = { enabled = true, lazyload = true },
-        },
-        lsp = { signature = true },
-        cheatsheet = { theme = "grid" },
-        mason = { pkgs = {}, skip = {} },
-        colorify = { enabled = true, mode = "virtual" },
-      }
-      package.preload["chadrc"] = function() return chadrc end
-      package.preload["nvconfig"] = function() return chadrc end
-      _G.chadrc = chadrc
-      _G.nvconfig = chadrc
-    '';
+    else
+      ''
+        -- Create chadrc configuration for nvchad-ui
+        local chadrc = {
+          base46 = {
+            theme = "tokyonight_moon",
+            hl_add = {},
+            hl_override = {},
+            integrations = {},
+            changed_themes = {},
+            transparency = false,
+            theme_toggle = { "tokyonight_moon", "onedark" },
+          },
+          ui = {
+            cmp = { style = "atom_colored" },
+            telescope = { style = "borderless" },
+            statusline = { enabled = true, theme = "default" },
+            tabufline = { enabled = true, lazyload = true },
+          },
+          lsp = { signature = true },
+          cheatsheet = { theme = "grid" },
+          mason = { pkgs = {}, skip = {} },
+          colorify = { enabled = true, mode = "virtual" },
+        }
+        package.preload["chadrc"] = function() return chadrc end
+        package.preload["nvconfig"] = function() return chadrc end
+        _G.chadrc = chadrc
+        _G.nvconfig = chadrc
+      '';
 
   # Noice init function (clear messages when filetype is lazy)
   luaConfigRC.noice-init = ''

@@ -6,7 +6,7 @@
     workspace = [
       # Special workspace with scratchpad terminal
       "special:scratchpad, on-created-empty:kitty"
-      
+
       # Workflows should add monitor assignments in their settings block
       # Example:
       # workspace = [

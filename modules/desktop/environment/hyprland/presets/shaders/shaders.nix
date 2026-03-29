@@ -5,7 +5,8 @@
   FTS,
   pkgs,
   ...
-}: {
+}:
+{
   FTS.desktop._.environment._.hyprland._.presets._.shaders = {
     description = "Hyprland screen shader presets from HyDE Project";
 

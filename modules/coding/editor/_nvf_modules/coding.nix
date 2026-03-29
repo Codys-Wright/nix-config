@@ -1,7 +1,8 @@
 # Coding utilities (mini.ai, mini.pairs, treesitter textobjects, flash, etc.)
 # Returns config.vim settings directly
 # Takes lib as parameter for consistency (even if not used)
-{lib, ...}: {
+{ lib, ... }:
+{
   # Flash.nvim configuration (LazyVim-style)
   # Enhanced search functionality with labels for quick jumping
   # TEMPORARILY DISABLED to test if it's causing x key timeout
@@ -104,7 +105,7 @@
         # skip autopair when next character is one of these
         skip_next = lib.generators.mkLuaInline "[=[[%w%%%'%[%\"%.%`%$]]=]";
         # skip autopair when the cursor is inside these treesitter nodes
-        skip_ts = ["string"];
+        skip_ts = [ "string" ];
         # skip autopair when next character is closing pair
         # and there are more closing pairs than opening pairs
         skip_unbalanced = true;
@@ -318,7 +319,11 @@
     # Flash treesitter incremental selection (LazyVim-style)
     {
       key = "<c-space>";
-      mode = ["n" "o" "x"];
+      mode = [
+        "n"
+        "o"
+        "x"
+      ];
       action = ''
         function()
           require("flash").treesitter({
@@ -335,7 +340,10 @@
     # Grug-far keymap (LazyVim-style)
     {
       key = "<leader>sr";
-      mode = ["n" "x"];
+      mode = [
+        "n"
+        "x"
+      ];
       action = ''
         function()
           local grug = require("grug-far")

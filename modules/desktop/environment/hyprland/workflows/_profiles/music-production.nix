@@ -27,18 +27,18 @@
     };
 
     misc = {
-      vfr = false;  # Fixed FPS for audio sync
+      vfr = false; # Fixed FPS for audio sync
       disable_hyprland_logo = true;
       disable_splash_rendering = true;
     };
 
     # Workspace behavior overrides for music production
     workspace = [
-      "name:MusicProduction-Primary, default:true, gapsin:3, gapsout:5"    # Main DAW workspace
-      "name:MusicProduction-Secondary, gapsin:2, gapsout:4"               # Mixer/effects (compact)
-      "name:MusicProduction-Tertiary, gapsin:4, gapsout:6"                # Instruments/samples
-      "name:AI, gapsin:3, gapsout:5"                                     # AI tools/music generation
-      "name:Notes, gapsin:4, gapsout:8"                                  # Song notes/lyrics (spacious)
+      "name:MusicProduction-Primary, default:true, gapsin:3, gapsout:5" # Main DAW workspace
+      "name:MusicProduction-Secondary, gapsin:2, gapsout:4" # Mixer/effects (compact)
+      "name:MusicProduction-Tertiary, gapsin:4, gapsout:6" # Instruments/samples
+      "name:AI, gapsin:3, gapsout:5" # AI tools/music generation
+      "name:Notes, gapsin:4, gapsout:8" # Song notes/lyrics (spacious)
     ];
   };
 }

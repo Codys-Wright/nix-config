@@ -6,7 +6,7 @@
     general = {
       layout = "dwindle";
     };
-    
+
     dwindle = {
       pseudotile = false;
       preserve_split = false;

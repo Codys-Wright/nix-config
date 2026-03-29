@@ -2,14 +2,15 @@
 # From HyDE Project
 # Credit: https://github.com/mahaveergurjar
 # Smooth wind-style sliding animations
-{FTS, ...}: {
+{ FTS, ... }:
+{
   FTS.desktop._.environment._.hyprland._.presets._.animations._.me-1 = {
     description = "Me-1 animations (from HyDE - mahaveergurjar style)";
 
     settings = {
       animations = {
         enabled = true;
-        
+
         bezier = [
           "wind, 0.05, 0.9, 0.1, 1.05"
           "winIn, 0.1, 1.1, 0.1, 1.1"
@@ -29,7 +30,7 @@
           "softAcDecel, 0.26, 0.26, 0.15, 1"
           "md2, 0.4, 0, 0.2, 1"
         ];
-        
+
         animation = [
           "border, 1, 1, liner"
           "borderangle, 1, 30, liner, loop"

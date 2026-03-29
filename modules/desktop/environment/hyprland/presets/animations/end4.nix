@@ -1,14 +1,15 @@
 # Animation Preset: End4
 # From HyDE Project
 # Credit: https://github.com/end-4/dots-hyprland
-{FTS, ...}: {
+{ FTS, ... }:
+{
   FTS.desktop._.environment._.hyprland._.presets._.animations._.end4 = {
     description = "End4 animations (from HyDE - end-4 style)";
 
     settings = {
       animations = {
         enabled = true;
-        
+
         bezier = [
           "linear, 0, 0, 1, 1"
           "md3_standard, 0.2, 0, 0, 1"
@@ -25,7 +26,7 @@
           "softAcDecel, 0.26, 0.26, 0.15, 1"
           "md2, 0.4, 0, 0.2, 1"
         ];
-        
+
         animation = [
           "windows, 1, 3, md3_decel, popin 60%"
           "windowsIn, 1, 3, md3_decel, popin 60%"

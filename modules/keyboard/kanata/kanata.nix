@@ -19,30 +19,32 @@
       };
     };
 
-    darwin = {pkgs, ...}: {
-      # Install Kanata package
-      environment.systemPackages = [pkgs.kanata];
+    darwin =
+      { pkgs, ... }:
+      {
+        # Install Kanata package
+        environment.systemPackages = [ pkgs.kanata ];
 
-      # Create launchd service for Kanata on Darwin
-      launchd.user.agents.kanata = {
-        serviceConfig = {
-          ProgramArguments = [
-            "${pkgs.kanata}/bin/kanata"
-            "--cfg"
-            "${./kanata.kbd}"
-          ];
+        # Create launchd service for Kanata on Darwin
+        launchd.user.agents.kanata = {
+          serviceConfig = {
+            ProgramArguments = [
+              "${pkgs.kanata}/bin/kanata"
+              "--cfg"
+              "${./kanata.kbd}"
+            ];
 
-          RunAtLoad = true;
-          KeepAlive = true;
+            RunAtLoad = true;
+            KeepAlive = true;
 
-          StandardOutPath = "/tmp/kanata.log";
-          StandardErrorPath = "/tmp/kanata.log";
+            StandardOutPath = "/tmp/kanata.log";
+            StandardErrorPath = "/tmp/kanata.log";
+          };
         };
-      };
 
-      # Grant necessary permissions for input access on macOS
-      # Note: Users may need to grant Accessibility permissions manually
-      # in System Preferences > Security & Privacy > Privacy > Accessibility
-    };
+        # Grant necessary permissions for input access on macOS
+        # Note: Users may need to grant Accessibility permissions manually
+        # in System Preferences > Security & Privacy > Privacy > Accessibility
+      };
   };
 }

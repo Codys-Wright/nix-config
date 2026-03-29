@@ -2,7 +2,7 @@
 
 {
 
-den.hosts.x86_64-linux = {
+  den.hosts.x86_64-linux = {
     outrider = {
       description = "WSL system that goes where no other system has gone before (Windows)";
       users.cody = { };

@@ -4,7 +4,8 @@
   inputs,
   pkgs,
   ...
-}: {
+}:
+{
   FTS.desktop._.environment._.niri = {
     description = ''
       Niri scrollable-tiling Wayland compositor.
