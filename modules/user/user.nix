@@ -1,5 +1,6 @@
 {
   FTS,
+  __findFile,
   ...
 }:
 {

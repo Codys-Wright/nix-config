@@ -1,7 +1,4 @@
 {
-  inputs,
-  den,
-  pkgs,
   FTS,
   __findFile,
   ...

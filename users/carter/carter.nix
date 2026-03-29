@@ -24,7 +24,7 @@
       # Home-manager backup system
       den.aspects.hm-backup
 
-      FTS.coding
+      <FTS/coding>
       <FTS.user/admin>
       <FTS.user/autologin>
       (<FTS.user/shell> { default = "fish"; })

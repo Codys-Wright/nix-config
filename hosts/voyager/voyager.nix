@@ -1,4 +1,9 @@
-{ inputs, FTS, __findFile, ... }:
+{
+  inputs,
+  FTS,
+  __findFile,
+  ...
+}:
 
 {
 
@@ -18,27 +23,23 @@
         <FTS/fonts>
         <FTS/phoenix>
       ];
-      darwin = { pkgs, ... }: {
-        environment.systemPackages = [
-          pkgs.tailwindcss_4
-          pkgs.cachix
-        ];
-        nix.settings = {
-          cores = 10;
-          max-jobs = 3;
-          trusted-users = [ "root" "@admin" "CodyWright" ];
-          substituters = [
-            "https://cache.nixos.org/"
-            "https://devenv.cachix.org"
-            "https://fasttrackstudio.cachix.org"
+      darwin =
+        { pkgs, ... }:
+        {
+          environment.systemPackages = [
+            pkgs.tailwindcss_4
+            pkgs.cachix
           ];
-          trusted-public-keys = [
-            "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-            "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="
-            "fasttrackstudio.cachix.org-1:r7v7WXBeSZ7m5meL6w0wttnvsOltRvTpXeVNItcy9f4="
-          ];
+          nix.settings = {
+            cores = 10;
+            max-jobs = 3;
+            trusted-users = [
+              "root"
+              "@admin"
+              "CodyWright"
+            ];
+          };
         };
-      };
     };
   };
 
