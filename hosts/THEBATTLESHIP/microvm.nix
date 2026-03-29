@@ -65,6 +65,17 @@
         networking.hostName = "THEBATTLESHIP-vm";
         time.timeZone = "America/Los_Angeles";
 
+        # Writable tmpfs for home — required for home-manager activation
+        # (microvm root is ephemeral; without this, ~/.config symlinks can't be created)
+        fileSystems."/home/cody" = {
+          device = "tmpfs";
+          fsType = "tmpfs";
+          options = [
+            "size=512M"
+            "mode=0755"
+          ];
+        };
+
         # cody user — simple password, no SOPS (VM-only, not through den pipeline)
         users.users.cody = {
           isNormalUser = true;
