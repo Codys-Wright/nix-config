@@ -99,10 +99,74 @@
         networking.firewall.allowedTCPPorts = [ 22 ];
 
         # Configure niri for cody directly via home-manager (bypasses den pipeline → no SOPS)
-        # Settings mirror the FTS.desktop.environment.niri homeManager block
+        # Uses Alt as mod key (instead of Super) so it doesn't conflict with the host compositor
         home-manager.users.cody =
           { pkgs, ... }:
           {
+            # Noctalia colors — Catppuccin Mocha with blue as primary
+            xdg.configFile."noctalia/colors.json".text = builtins.toJSON {
+              mPrimary = "#89b4fa";
+              mOnPrimary = "#11111b";
+              mSecondary = "#cba6f7";
+              mOnSecondary = "#11111b";
+              mTertiary = "#94e2d5";
+              mOnTertiary = "#11111b";
+              mError = "#f38ba8";
+              mOnError = "#11111b";
+              mSurface = "#1e1e2e";
+              mOnSurface = "#cdd6f4";
+              mSurfaceVariant = "#313244";
+              mOnSurfaceVariant = "#a3b4eb";
+              mOutline = "#4c4f69";
+              mShadow = "#11111b";
+              mHover = "#89dceb";
+              mOnHover = "#11111b";
+            };
+
+            xdg.configFile."wlr-which-key/config.yaml".text = ''
+              font: "JetBrainsMono Nerd Font 12"
+              background: "#1e1e2ed0"
+              color: "#cdd6f4"
+              border: "#89b4fa"
+              separator: " ➜ "
+              border_width: 2
+              corner_r: 12
+              padding: 15
+              column_padding: 25
+              rows_per_column: 6
+              anchor: "bottom-right"
+              margin_bottom: 5
+              margin_right: 5
+              menu:
+                - key: "f"
+                  desc: "Firefox"
+                  cmd: "firefox"
+                - key: "b"
+                  desc: "Bluetooth"
+                  cmd: "noctalia-shell ipc call bluetooth togglePanel"
+                - key: "w"
+                  desc: "WiFi"
+                  cmd: "noctalia-shell ipc call wifi togglePanel"
+                - key: "s"
+                  desc: "Sound (pavucontrol)"
+                  cmd: "pavucontrol"
+                - key: "p"
+                  desc: "Power"
+                  submenu:
+                    - key: "l"
+                      desc: "Lock"
+                      cmd: "swaylock"
+                    - key: "r"
+                      desc: "Reboot"
+                      cmd: "reboot"
+                    - key: "p"
+                      desc: "Poweroff"
+                      cmd: "poweroff"
+                    - key: "e"
+                      desc: "Logout (niri)"
+                      cmd: "niri msg action quit"
+            '';
+
             programs.niri.settings = {
               input = {
                 keyboard = {
@@ -151,12 +215,11 @@
               };
               spawn-at-startup = [
                 { command = [ "xwayland-satellite" ]; }
-                { command = [ "mako" ]; }
-                { command = [ "waybar" ]; }
+                { command = [ "noctalia-shell" ]; }
               ];
               binds =
                 let
-                  mod = "Super";
+                  mod = "Alt"; # Alt instead of Super to avoid conflict with host compositor
                   grim = "${pkgs.grim}/bin/grim";
                   slurp = "${pkgs.slurp}/bin/slurp";
                   swappy = "${pkgs.swappy}/bin/swappy";
@@ -165,7 +228,8 @@
                 in
                 {
                   "${mod}+Return".action.spawn = "kitty";
-                  "${mod}+D".action.spawn = "fuzzel";
+                  "${mod}+D".action.spawn-sh = "noctalia-shell ipc call launcher toggle";
+                  "${mod}+Space".action.spawn = "wlr-which-key";
                   "${mod}+Q".action.close-window = { };
                   "${mod}+F".action.maximize-column = { };
                   "${mod}+G".action.fullscreen-window = { };
@@ -211,14 +275,10 @@
                   "${mod}+WheelScrollUp".action.focus-column-left = { };
                   "${mod}+Ctrl+WheelScrollDown".action.focus-workspace-down = { };
                   "${mod}+Ctrl+WheelScrollUp".action.focus-workspace-up = { };
-                  "XF86AudioRaiseVolume".action.spawn-sh = "wpctl set-volume -l 1.4 @DEFAULT_AUDIO_SINK@ 5%+";
-                  "XF86AudioLowerVolume".action.spawn-sh = "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-";
-                  "XF86AudioMute".action.spawn-sh = "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle";
                   "Print".action.screenshot = { };
                   "${mod}+Ctrl+S".action.spawn-sh = "${grim} -l 0 - | ${wlCopy}";
                   "${mod}+Shift+S".action.spawn-sh = "${grim} -g \"$(${slurp} -w 0)\" - | ${wlCopy}";
                   "${mod}+Shift+E".action.spawn-sh = "${wlPaste} | ${swappy} -f -";
-                  "${mod}+Alt+L".action.spawn = "swaylock";
                   "${mod}+Shift+Q".action.quit = { };
                 };
             };
