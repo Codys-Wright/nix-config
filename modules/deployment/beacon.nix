@@ -5,6 +5,7 @@
   den,
   lib,
   FTS,
+  ssh-keys,
   ...
 }: {
   FTS.deployment._.beacon = {
@@ -31,15 +32,8 @@
       username = "installer";
       hostname = "nixos-beacon";
 
-      # Hardcoded trusted SSH keys
-      sshKeys = [
-        # THEBATTLESHIP deploy key
-        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICGTCYWYifaiPcQVQnebV/cFVnvGULPJ2+jVEkPIEgXg THEBATTLESHIP-deploy"
-        # starcommand deploy key
-        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILBJxxU1TXbV1IvGFm67X7jX+C7uRtLcgimcoDGxapNP starcommand-deploy"
-        # cody personal key
-        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO8y8AMfYQnvu3BvjJ54/qYJcedNkMHmnjexine1ypda cody@THEBATTLESHIP"
-      ];
+      # Trusted SSH keys from centralized config (modules/config/ssh-keys.nix)
+      sshKeys = ssh-keys.all;
 
       helptext = ''
         Run 'beacon-display' to see connection info with QR code

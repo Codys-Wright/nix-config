@@ -4,8 +4,7 @@
   cody,
   __findFile,
   ...
-}:
-{
+}: {
   den = {
     homes = {
       # Darwin (macOS) home configuration
@@ -25,69 +24,67 @@
     aspects.cody = {
       description = "Cody user configuration";
 
-      homeManager =
-        { ... }:
-        {
-          # SSH host aliases for easy access to deployed machines
-          programs.ssh = {
-            enable = true;
-            matchBlocks = {
-              "starcommand" = {
-                hostname = "192.168.0.102";
-                user = "root";
-                identityFile = "~/.ssh/starcommand-deploy";
-              };
-              "THEBATTLESHIP" = {
-                host = "THEBATTLESHIP thebattleship thebattleship-1";
-                hostname = "thebattleship-1";
-                user = "cody";
-                identityFile = "~/.ssh/id_ed25519";
-              };
+      homeManager = {...}: {
+        # SSH host aliases for easy access to deployed machines
+        programs.ssh = {
+          enable = true;
+          matchBlocks = {
+            "starcommand" = {
+              hostname = "192.168.0.102";
+              user = "root";
+              identityFile = "~/.ssh/starcommand-deploy";
             };
-          };
-
-          # Firefox WebApps configuration
-          programs.firefox.webapps = {
-            # YouTube
-            youtube = {
-              url = "https://youtube.com";
-              id = 1;
-              name = "YouTube";
-              icon = "youtube";
-              categories = [
-                "AudioVideo"
-                "Video"
-              ];
-              theme = "dark";
-            };
-
-            # ChatGPT
-            chatgpt = {
-              url = "https://chatgpt.com";
-              id = 2;
-              name = "ChatGPT";
-              icon = "chatgpt";
-              categories = [
-                "Office"
-                "Utility"
-              ];
-              theme = "dark";
-            };
-
-            # Gmail
-            gmail = {
-              url = "https://gmail.com";
-              id = 3;
-              name = "Gmail";
-              icon = "gmail";
-              categories = [
-                "Office"
-                "Email"
-              ];
-              theme = "light";
+            "THEBATTLESHIP" = {
+              host = "THEBATTLESHIP thebattleship thebattleship-1";
+              hostname = "thebattleship-1";
+              user = "cody";
+              identityFile = "~/.ssh/id_ed25519";
             };
           };
         };
+
+        # Firefox WebApps configuration
+        programs.firefox.webapps = {
+          # YouTube
+          youtube = {
+            url = "https://youtube.com";
+            id = 1;
+            name = "YouTube";
+            icon = "youtube";
+            categories = [
+              "AudioVideo"
+              "Video"
+            ];
+            theme = "dark";
+          };
+
+          # ChatGPT
+          chatgpt = {
+            url = "https://chatgpt.com";
+            id = 2;
+            name = "ChatGPT";
+            icon = "chatgpt";
+            categories = [
+              "Office"
+              "Utility"
+            ];
+            theme = "dark";
+          };
+
+          # Gmail
+          gmail = {
+            url = "https://gmail.com";
+            id = 3;
+            name = "Gmail";
+            icon = "gmail";
+            categories = [
+              "Office"
+              "Email"
+            ];
+            theme = "light";
+          };
+        };
+      };
 
       includes = [
         # Home-manager backup system
@@ -119,7 +116,7 @@
         FTS.apple-fonts
 
         # Keyboard configuration (Kanata - cross-platform)
-        <FTS.keyboard>
+        # <FTS.keyboard>
 
         # VPN
         <FTS/hardware/networking/tailscale>
