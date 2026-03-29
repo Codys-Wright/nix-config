@@ -1964,16 +1964,16 @@
     },
     "nixpkgs_19": {
       "locked": {
-        "lastModified": 1764667669,
-        "narHash": "sha256-7WUCZfmqLAssbDqwg9cUDAXrSoXN79eEEq17qhTNM/Y=",
+        "lastModified": 1774610258,
+        "narHash": "sha256-HaThtroVD9wRdx7KQk0B75JmFcXlMUoEdDFNOMOlsOs=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "418468ac9527e799809c900eda37cbff999199b6",
+        "rev": "832efc09b4caf6b4569fbf9dc01bec3082a00611",
         "type": "github"
       },
       "original": {
         "owner": "NixOS",
-        "ref": "nixos-unstable",
+        "ref": "nixpkgs-unstable",
         "repo": "nixpkgs",
         "type": "github"
       }
@@ -1995,6 +1995,22 @@
       }
     },
     "nixpkgs_20": {
+      "locked": {
+        "lastModified": 1764667669,
+        "narHash": "sha256-7WUCZfmqLAssbDqwg9cUDAXrSoXN79eEEq17qhTNM/Y=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "418468ac9527e799809c900eda37cbff999199b6",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_21": {
       "locked": {
         "lastModified": 1773389992,
         "narHash": "sha256-wvfdLLWJ2I9oEpDd9PfMA8osfIZicoQ5MT1jIwNs9Tk=",
@@ -2306,6 +2322,7 @@
         "stylix": "stylix",
         "systems": "systems_11",
         "walker": "walker",
+        "wrapper-modules": "wrapper-modules",
         "wrappers": "wrappers",
         "zellij-nix": "zellij-nix",
         "zen-browser": "zen-browser"
@@ -2928,9 +2945,27 @@
         "type": "github"
       }
     },
-    "wrappers": {
+    "wrapper-modules": {
       "inputs": {
         "nixpkgs": "nixpkgs_19"
+      },
+      "locked": {
+        "lastModified": 1774756303,
+        "narHash": "sha256-uRSm7jK46XZaOwLR62k5DsX1nNZozzWR6mMLjKzeE/0=",
+        "owner": "BirdeeHub",
+        "repo": "nix-wrapper-modules",
+        "rev": "01cb23e9dcaca447099b3b1a1079633ed2bc8c81",
+        "type": "github"
+      },
+      "original": {
+        "owner": "BirdeeHub",
+        "repo": "nix-wrapper-modules",
+        "type": "github"
+      }
+    },
+    "wrappers": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_20"
       },
       "locked": {
         "lastModified": 1772137435,
@@ -3000,7 +3035,7 @@
         "flake-compat": "flake-compat_7",
         "flake-utils": "flake-utils_6",
         "multitask": "multitask",
-        "nixpkgs": "nixpkgs_20",
+        "nixpkgs": "nixpkgs_21",
         "rust-overlay": "rust-overlay_4",
         "zellij": "zellij"
       },

@@ -6,6 +6,7 @@
   flake-file.inputs.nixos-generators.inputs.nixpkgs.follows = "nixpkgs";
   flake-file.inputs.microvm.url = lib.mkDefault "github:microvm-nix/microvm.nix";
   flake-file.inputs.microvm.inputs.nixpkgs.follows = "nixpkgs";
+  flake-file.inputs.wrapper-modules.url = lib.mkDefault "github:BirdeeHub/nix-wrapper-modules";
 
   imports = [
     (inputs.flake-file.flakeModules.dendritic)

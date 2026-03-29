@@ -105,6 +105,7 @@
       inputs.elephant.follows = "elephant";
       url = "github:abenz1267/walker";
     };
+    wrapper-modules.url = "github:BirdeeHub/nix-wrapper-modules";
     wrappers.url = "github:lassulus/wrappers";
     zellij-nix.url = "github:a-kenji/zellij-nix";
     zen-browser = {
