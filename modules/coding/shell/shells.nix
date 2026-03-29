@@ -6,7 +6,7 @@
 {
   FTS.coding._.shells = {
     description = "All shell environments - fish, zsh, nushell, oh-my-posh";
-    
+
     includes = [
       FTS.coding._.shells._.fish
       FTS.coding._.shells._.zsh
@@ -15,4 +15,3 @@
     ];
   };
 }
-

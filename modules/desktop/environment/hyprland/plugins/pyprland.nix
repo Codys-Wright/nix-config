@@ -1,19 +1,22 @@
 # Pyprland - Python plugin system for Hyprland
-{FTS, pkgs, ...}: {
+{ FTS, pkgs, ... }:
+{
   FTS.desktop._.environment._.hyprland._.plugins._.pyprland = {
     description = "Pyprland Python plugin system for Hyprland";
 
-    nixos = {pkgs, ...}: {
-      environment.systemPackages = with pkgs; [
-        pyprland
-      ];
-    };
+    nixos =
+      { pkgs, ... }:
+      {
+        environment.systemPackages = with pkgs; [
+          pyprland
+        ];
+      };
 
     homeManager = {
       # Pyprland configuration
       # Currently pyprland doesn't have a dedicated home-manager module
       # Configuration would typically go in ~/.config/hypr/pyprland.toml
-      
+
       home.file.".config/hypr/pyprland.toml".text = ''
         [pyprland]
         plugins = [

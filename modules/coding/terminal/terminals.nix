@@ -1,5 +1,6 @@
 # Terminals facet - All terminal emulators
-{FTS, ...}: {
+{ FTS, ... }:
+{
   FTS.coding._.terminals = {
     description = "All terminal emulators - ghostty, kitty, tmux, wezterm";
 

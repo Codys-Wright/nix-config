@@ -6,12 +6,12 @@
     inputs.flake-compat.follows = "";
   };
 
-den.aspects = {
- # aspect for outrider host using github:nix-community/NixOS-WSL
-  wsl.nixos = {
-    imports = [ inputs.nixos-wsl.nixosModules.default ];
-    wsl.enable = true;
+  den.aspects = {
+    # aspect for outrider host using github:nix-community/NixOS-WSL
+    wsl.nixos = {
+      imports = [ inputs.nixos-wsl.nixosModules.default ];
+      wsl.enable = true;
+    };
   };
-};
- 
+
 }

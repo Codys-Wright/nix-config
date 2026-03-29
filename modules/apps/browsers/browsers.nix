@@ -6,7 +6,7 @@
 {
   FTS.apps._.browsers = {
     description = "All web browsers - brave, firefox, webapps";
-    
+
     includes = [
       FTS.apps._.browsers._.brave
       FTS.apps._.browsers._.firefox
@@ -15,4 +15,3 @@
     ];
   };
 }
-

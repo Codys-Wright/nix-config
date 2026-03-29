@@ -1,12 +1,13 @@
 # Hyprlock - Hyprland screen locker configuration
-{FTS, ...}: {
+{ FTS, ... }:
+{
   FTS.desktop._.environment._.hyprland._.plugins._.hyprlock = {
     description = "Hyprlock screen locker configuration for Hyprland";
 
     homeManager = {
       programs.hyprlock = {
         enable = true;
-        
+
         settings = {
           general = {
             disable_loading_bar = false;

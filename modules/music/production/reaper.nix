@@ -12,7 +12,8 @@
   FTS.music._.production._.reaper = {
     description = "Reaper digital audio workstation with SWS and ReaPack extensions (v7.66 via fts-flake)";
 
-    nixos = { pkgs, ... }:
+    nixos =
+      { pkgs, ... }:
       let
         ftsPkgs = inputs.fts-flake.lib.mkFtsPackages {
           inherit pkgs;
@@ -29,7 +30,8 @@
         ];
       };
 
-    homeManager = { pkgs, ... }:
+    homeManager =
+      { pkgs, ... }:
       let
         ftsPkgs = inputs.fts-flake.lib.mkFtsPackages {
           inherit pkgs;

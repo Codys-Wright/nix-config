@@ -1,5 +1,6 @@
 # Browsers facet - All web browsers
-{FTS, ...}: {
+{ FTS, ... }:
+{
   FTS.apps._.misc = {
     description = "misc apps";
 

@@ -5,13 +5,12 @@
   lib,
   nvf ? null,
   ...
-}: let
+}:
+let
   # Use DAG functions if nvf is available, otherwise fall back to plain string
-  dagEntry =
-    if nvf != null
-    then nvf.lib.nvim.dag.entryBefore ["pluginConfigs"]
-    else (x: x);
-in {
+  dagEntry = if nvf != null then nvf.lib.nvim.dag.entryBefore [ "pluginConfigs" ] else (x: x);
+in
+{
   # Enable snacks-nvim utility
   utility.snacks-nvim.enable = true;
 
@@ -48,7 +47,7 @@ in {
   # Configure snacks explorer (basic setup, picker config is in picker.nix)
   # Note: setupOpts will be merged with picker.nix's setupOpts
   utility.snacks-nvim.setupOpts = {
-    explorer = {};
+    explorer = { };
 
     # Bigfile: Automatically prevents LSP and Treesitter from attaching to large files
     bigfile = {
@@ -95,7 +94,7 @@ in {
     # Quickfile: Renders files quickly before loading plugins when doing `nvim somefile.txt`
     quickfile = {
       enabled = true;
-      exclude = ["latex"]; # any treesitter langs to exclude
+      exclude = [ "latex" ]; # any treesitter langs to exclude
     };
 
     # Scroll: Smooth scrolling
@@ -316,7 +315,7 @@ in {
       };
       # Options for the `Snacks.zen.zoom()`
       zoom = {
-        toggles = {};
+        toggles = { };
         center = false;
         show = {
           statusline = true;

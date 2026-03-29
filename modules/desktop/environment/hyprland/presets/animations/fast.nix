@@ -1,14 +1,15 @@
 # Animation Preset: Fast
 # From HyDE Project
 # Quick, snappy animations (3-3.5s duration)
-{FTS, ...}: {
+{ FTS, ... }:
+{
   FTS.desktop._.environment._.hyprland._.presets._.animations._.fast = {
     description = "Fast animations (from HyDE)";
 
     settings = {
       animations = {
         enabled = true;
-        
+
         bezier = [
           "linear, 0, 0, 1, 1"
           "md3_standard, 0.2, 0, 0, 1"
@@ -22,7 +23,7 @@
           "easeOutCirc, 0, 0.55, 0.45, 1"
           "easeOutExpo, 0.16, 1, 0.3, 1"
         ];
-        
+
         animation = [
           "windows, 1, 3, md3_decel, popin 60%"
           "border, 1, 10, default"

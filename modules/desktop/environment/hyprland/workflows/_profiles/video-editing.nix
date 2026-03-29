@@ -28,11 +28,11 @@
 
     # Workspace behavior overrides for video editing
     workspace = [
-      "name:VideoEditing-Primary, default:true, gapsin:2, gapsout:4"    # Main editing workspace
-      "name:VideoEditing-Secondary, gapsin:0, gapsout:2"               # Preview workspace (compact)
-      "name:VideoEditing-Tertiary, gapsin:4, gapsout:8"                # Tools workspace (spacious)
-      "name:Media, gapsin:2, gapsout:4"                                # Media library
-      "name:Research, gapsin:3, gapsout:6"                             # Reference materials
+      "name:VideoEditing-Primary, default:true, gapsin:2, gapsout:4" # Main editing workspace
+      "name:VideoEditing-Secondary, gapsin:0, gapsout:2" # Preview workspace (compact)
+      "name:VideoEditing-Tertiary, gapsin:4, gapsout:8" # Tools workspace (spacious)
+      "name:Media, gapsin:2, gapsout:4" # Media library
+      "name:Research, gapsin:3, gapsout:6" # Reference materials
     ];
   };
 }

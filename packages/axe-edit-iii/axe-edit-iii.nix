@@ -67,7 +67,10 @@ mkWindowsApp rec {
     "$HOME/.config/axe-edit-iii" = "drive_c/users/$USER/AppData/Roaming/Fractal Audio";
   };
 
-  nativeBuildInputs = [ copyDesktopItems copyDesktopIcons ];
+  nativeBuildInputs = [
+    copyDesktopItems
+    copyDesktopIcons
+  ];
 
   # Install Axe-Edit III silently (Inno Setup)
   # /VERYSILENT prevents the post-install "Launch app" step that breaks mkWindowsApp layer finalization

@@ -20,17 +20,26 @@
     { class, aspect-chain }:
     let
       # Available KDE themes
-      availableThemes = ["whitesur" "breeze"];
-      
+      availableThemes = [
+        "whitesur"
+        "breeze"
+      ];
+
       # Validate theme if provided
-      _ = if theme != null && !(builtins.elem theme availableThemes)
-        then throw "kde: unknown theme '${theme}'. Available: ${builtins.concatStringsSep ", " availableThemes}"
-        else null;
-      
+      _ =
+        if theme != null && !(builtins.elem theme availableThemes) then
+          throw "kde: unknown theme '${theme}'. Available: ${builtins.concatStringsSep ", " availableThemes}"
+        else
+          null;
+
       # Theme includes
-      themeIncludes = if theme == "whitesur" then [ FTS.desktop._.environment._.kde._.themes._.whitesur ]
-        else if theme == "breeze" then [ FTS.desktop._.environment._.kde._.themes._.breeze ]
-        else [];
+      themeIncludes =
+        if theme == "whitesur" then
+          [ FTS.desktop._.environment._.kde._.themes._.whitesur ]
+        else if theme == "breeze" then
+          [ FTS.desktop._.environment._.kde._.themes._.breeze ]
+        else
+          [ ];
     in
     {
       includes = themeIncludes;
@@ -38,7 +47,7 @@
       nixos = {
         # Enable KDE Plasma 6 desktop manager
         services.desktopManager.plasma6.enable = true;
-        
+
         # Don't set SSH askPassword (override default from plasma6 module)
         programs.ssh.askPassword = lib.mkForce "";
 
@@ -56,8 +65,10 @@
         programs.xwayland.enable = true;
       };
 
-      homeManager = { pkgs, lib, ... }: {
-        # KDE-specific home-manager configuration
-      };
+      homeManager =
+        { pkgs, lib, ... }:
+        {
+          # KDE-specific home-manager configuration
+        };
     };
 }

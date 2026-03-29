@@ -2,14 +2,15 @@
 # From HyDE Project
 # Credit: https://github.com/mahaveergurjar
 # Variant of Me-1 with different timings
-{FTS, ...}: {
+{ FTS, ... }:
+{
   FTS.desktop._.environment._.hyprland._.presets._.animations._.me-2 = {
     description = "Me-2 animations (from HyDE - mahaveergurjar variant)";
 
     settings = {
       animations = {
         enabled = true;
-        
+
         bezier = [
           "linear, 0, 0, 1, 1"
           "md3_standard, 0.2, 0, 0, 1"
@@ -26,7 +27,7 @@
           "softAcDecel, 0.26, 0.26, 0.15, 1"
           "md2, 0.4, 0, 0.2, 1"
         ];
-        
+
         animation = [
           "windows, 1, 3, md3_decel, popin 60%"
           "windowsIn, 1, 3, md3_decel, popin 60%"

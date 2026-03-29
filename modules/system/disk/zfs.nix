@@ -19,43 +19,53 @@
     }@args:
     { class, aspect-chain }:
     let
-      inherit (lib) mkIf optionals optionalString optionalAttrs;
+      inherit (lib)
+        mkIf
+        optionals
+        optionalString
+        optionalAttrs
+        ;
       hasRaid = rootPool.disk2 != null;
       dataPoolEnabled = dataPool != null && (dataPool.enable or true);
-      
-      mkRoot = { disk, id ? "" }: {
-        type = "disk";
-        device = disk;
-        content = {
-          type = "gpt";
-          partitions = {
-            ESP = {
-              size = "500M";
-              type = "EF00";
-              content = {
-                type = "filesystem";
-                format = "vfat";
-                mountpoint = "/boot${id}";
-                # Otherwise you get https://discourse.nixos.org/t/security-warning-when-installing-nixos-23-11/37636/2
-                mountOptions = [ "umask=0077" ];
-                # Copy the host_key needed for initrd in a location accessible on boot.
-                # It's prefixed by /mnt because we're installing and everything is mounted under /mnt.
-                # We're using the same host key because, well, it's the same host!
-                postMountHook = ''
-                  cp /tmp/host_key /mnt/boot${id}/host_key
-                '';
+
+      mkRoot =
+        {
+          disk,
+          id ? "",
+        }:
+        {
+          type = "disk";
+          device = disk;
+          content = {
+            type = "gpt";
+            partitions = {
+              ESP = {
+                size = "500M";
+                type = "EF00";
+                content = {
+                  type = "filesystem";
+                  format = "vfat";
+                  mountpoint = "/boot${id}";
+                  # Otherwise you get https://discourse.nixos.org/t/security-warning-when-installing-nixos-23-11/37636/2
+                  mountOptions = [ "umask=0077" ];
+                  # Copy the host_key needed for initrd in a location accessible on boot.
+                  # It's prefixed by /mnt because we're installing and everything is mounted under /mnt.
+                  # We're using the same host key because, well, it's the same host!
+                  postMountHook = ''
+                    cp /tmp/host_key /mnt/boot${id}/host_key
+                  '';
+                };
               };
-            };
-            zfs = {
-              size = "100%";
-              content = {
-                type = "zfs";
-                pool = rootPool.name;
+              zfs = {
+                size = "100%";
+                content = {
+                  type = "zfs";
+                  pool = rootPool.name;
+                };
               };
             };
           };
         };
-      };
 
       mkDataDisk = dataDisk: {
         type = "disk";
@@ -77,7 +87,8 @@
     {
       description = "ZFS disk configuration with root pool and optional data pool";
 
-      nixos = { pkgs, lib, ... }:
+      nixos =
+        { pkgs, lib, ... }:
         {
           # Import disko module to generate fileSystems from disko.devices
           imports = [ inputs.disko.nixosModules.disko ];
@@ -86,7 +97,10 @@
             disk = {
               root = mkRoot { disk = rootPool.disk1; };
               # Second root must have id=-backup.
-              root1 = mkIf hasRaid (mkRoot { disk = rootPool.disk2; id = "-backup"; });
+              root1 = mkIf hasRaid (mkRoot {
+                disk = rootPool.disk2;
+                id = "-backup";
+              });
               data1 = mkIf dataPoolEnabled (mkDataDisk dataPool.disk1);
               data2 = mkIf dataPoolEnabled (mkDataDisk dataPool.disk2);
             };
@@ -198,7 +212,8 @@
                     };
                     type = "zfs_fs";
                   };
-                } // optionalAttrs initialBackupDataset {
+                }
+                // optionalAttrs initialBackupDataset {
                   "backup" = {
                     type = "zfs_fs";
                     mountpoint = "/srv/backup";
@@ -243,4 +258,3 @@
         };
     };
 }
-

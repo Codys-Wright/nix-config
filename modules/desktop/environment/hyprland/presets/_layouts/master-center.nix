@@ -6,7 +6,7 @@
     general = {
       layout = "master";
     };
-    
+
     master = {
       orientation = "center";
       new_status = "master";

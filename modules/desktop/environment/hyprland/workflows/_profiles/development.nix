@@ -31,11 +31,11 @@
 
     # Workspace behavior overrides for development
     workspace = [
-      "name:Dev-Preview, default:true, gapsin:5, gapsout:8, bordersize:2"    # Main coding workspace
-      "name:Notes, gapsin:4, gapsout:6, bordersize:1"                       # Documentation/notes
-      "name:Communication, gapsin:3, gapsout:5"                            # Chat/communication
-      "name:AI, gapsin:4, gapsout:6"                                       # AI assistance/tools
-      "name:Research, gapsin:5, gapsout:8"                                 # Research/documentation
+      "name:Dev-Preview, default:true, gapsin:5, gapsout:8, bordersize:2" # Main coding workspace
+      "name:Notes, gapsin:4, gapsout:6, bordersize:1" # Documentation/notes
+      "name:Communication, gapsin:3, gapsout:5" # Chat/communication
+      "name:AI, gapsin:4, gapsout:6" # AI assistance/tools
+      "name:Research, gapsin:5, gapsout:8" # Research/documentation
     ];
   };
 }

@@ -1,7 +1,8 @@
 # Formatters configuration (conform.nvim - LazyVim-style)
 # Returns config.vim settings directly
 # Takes lib as parameter for consistency (even if not used)
-{lib, ...}: {
+{ lib, ... }:
+{
   # Conform.nvim configuration (LazyVim-style)
   # LazyVim uses conform.nvim as the primary formatter
   formatter = {
@@ -17,9 +18,9 @@
         };
         # LazyVim-style formatters by filetype
         formatters_by_ft = {
-          lua = ["stylua"];
-          fish = ["fish_indent"];
-          sh = ["shfmt"];
+          lua = [ "stylua" ];
+          fish = [ "fish_indent" ];
+          sh = [ "shfmt" ];
         };
         # Custom formatters and overrides
         formatters = {
@@ -37,7 +38,10 @@
   keymaps = [
     {
       key = "<leader>cF";
-      mode = ["n" "x"];
+      mode = [
+        "n"
+        "x"
+      ];
       action = ''
         function()
           require("conform").format({ formatters = { "injected" }, timeout_ms = 3000 })

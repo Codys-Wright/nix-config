@@ -1,6 +1,8 @@
 # LazyGit configuration aspect
 {
-  FTS, ... }:
+  FTS,
+  ...
+}:
 {
   FTS.coding._.tools._.lazygit = {
     description = "LazyGit terminal UI for git";
@@ -30,4 +32,3 @@
       };
   };
 }
-

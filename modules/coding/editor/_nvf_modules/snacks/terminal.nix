@@ -1,7 +1,8 @@
 # Snacks.nvim terminal configuration
 # Returns config.vim settings directly
 # Takes lib as parameter for consistency
-{lib, ...}: {
+{ lib, ... }:
+{
   # Configure terminal plugin
   utility.snacks-nvim.setupOpts.terminal = {
     # Terminal navigation keymaps (navigate windows from terminal mode)

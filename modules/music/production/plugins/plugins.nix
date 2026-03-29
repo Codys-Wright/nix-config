@@ -1,5 +1,6 @@
 # Audio plugins facet - effects and instruments
-{FTS, ...}: {
+{ FTS, ... }:
+{
   FTS.music._.production._.plugins = {
     description = "Audio plugins - effects and virtual instruments";
 

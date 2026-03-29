@@ -44,6 +44,20 @@
           # User configuration is now provided by den.aspects.cody.provides.hostUser
           # No need to define it here - it's automatically applied when users.cody = { } is set
 
+          # Filesystem — /dev/vda for QEMU virtual disk (can be changed for bare metal)
+          fileSystems."/" = {
+            device = "/dev/vda2";
+            fsType = "ext4";
+          };
+          fileSystems."/boot" = {
+            device = "/dev/vda1";
+            fsType = "vfat";
+          };
+          boot.loader.grub = {
+            enable = true;
+            device = "/dev/vda";
+          };
+
           # Enable sudo for wheel group
           security.sudo.wheelNeedsPassword = false;
 

@@ -1,5 +1,6 @@
 # Editors facet - All code editors
-{FTS, ...}: {
+{ FTS, ... }:
+{
   FTS.coding._.editors = {
     description = "All code editors - cursor, neovim, nvf, lazyvim, zed";
 

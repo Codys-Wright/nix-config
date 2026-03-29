@@ -1,4 +1,3 @@
-
 { inputs, ... }:
 {
   imports = [
@@ -25,5 +24,5 @@
     (inputs.import-tree ./deployment)
 
     (inputs.import-tree ./selfhost)
-     ];
+  ];
 }

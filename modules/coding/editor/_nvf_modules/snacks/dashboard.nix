@@ -1,7 +1,8 @@
 # Snacks.nvim dashboard configuration
 # Returns config.vim settings directly
 # Takes lib as parameter for mkLuaInline
-{lib, ...}: {
+{ lib, ... }:
+{
   # Configure snacks dashboard
   # The dashboard will automatically open on startup when enabled
   utility.snacks-nvim.setupOpts.dashboard = {

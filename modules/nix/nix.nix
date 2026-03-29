@@ -1,6 +1,7 @@
 # Nix collection facet
 # Collects all nix-related configuration aspects
-{FTS, ...}: {
+{ FTS, ... }:
+{
   FTS.nix = {
     description = ''
       Nix configuration facet.

@@ -7,15 +7,16 @@
   FTS.hardware._.bluetooth = {
     description = "Bluetooth hardware support";
 
-    nixos = { pkgs, ... }: {
-      hardware.bluetooth = {
-        enable = true;
-        package = pkgs.bluez;
-        powerOnBoot = true;
-      };
+    nixos =
+      { pkgs, ... }:
+      {
+        hardware.bluetooth = {
+          enable = true;
+          package = pkgs.bluez;
+          powerOnBoot = true;
+        };
 
-      services.blueman.enable = true;
-    };
+        services.blueman.enable = true;
+      };
   };
 }
-

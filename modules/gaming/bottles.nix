@@ -7,12 +7,21 @@
   FTS.gaming._.bottles = {
     description = "Bottles - run Windows applications and games with Wine";
 
-    homeManager = { pkgs, lib, ... }: lib.mkIf (!pkgs.stdenv.isDarwin) {
-      home.packages = [ pkgs.bottles ];
-    };
+    homeManager =
+      { pkgs, lib, ... }:
+      lib.mkIf (!pkgs.stdenv.isDarwin) {
+        home.packages = [ pkgs.bottles ];
+      };
 
-    nixos = { config, pkgs, lib, ... }: {
-      environment.systemPackages = [ pkgs.bottles ];
-    };
+    nixos =
+      {
+        config,
+        pkgs,
+        lib,
+        ...
+      }:
+      {
+        environment.systemPackages = [ pkgs.bottles ];
+      };
   };
 }

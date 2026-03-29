@@ -26,7 +26,7 @@
       ssl ? null,
       sslCertName ? domain,
       repositoryRoot ? null,
-      localActionRunner ? false,  # Disabled due to nixpkgs rename: forgejo-actions-runner -> forgejo-runner
+      localActionRunner ? false, # Disabled due to nixpkgs rename: forgejo-actions-runner -> forgejo-runner
       debug ? false,
       ssoClientID ? "forgejo",
       ...

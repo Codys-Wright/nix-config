@@ -51,6 +51,10 @@
     };
     import-tree.url = "github:vic/import-tree";
     lazyvim.url = "github:Codys-Wright/lazyvim-nix";
+    microvm = {
+      inputs.nixpkgs.follows = "nixpkgs";
+      url = "github:microvm-nix/microvm.nix";
+    };
     minegrub-theme.url = "github:Lxtharia/minegrub-theme";
     minegrub-world-sel-theme.url = "github:Lxtharia/minegrub-world-sel-theme";
     minesddm = {

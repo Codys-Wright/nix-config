@@ -1,6 +1,7 @@
 # Deployment facet - All deployment and bootstrap tools
 # Parametric aspect that accepts deployment configuration
-{FTS, ...}: {
+{ FTS, ... }:
+{
   FTS.deployment.description = ''
     Deployment and system bootstrap facet.
 
@@ -25,34 +26,38 @@
   '';
 
   # Make deployment callable as a parametric aspect
-  FTS.deployment.__functor = _self: {
-    # Deploy-rs parameters (passed to config)
-    ip ? "",
-    sshPort ? 22,
-    sshUser ? "admin",
-    # Network configuration
-    staticNetwork ? null,
-    # User configuration
-    username ? "admin",
-    ...
-  } @ args: {
-    class,
-    aspect-chain,
-  }: {
-    includes = [
-      # Base deployment configuration with parameters
-      (FTS.deployment._.config args)
-      # Boot SSH for remote unlocking (auto-detects host keys)
-      (FTS.deployment._.bootssh {})
-      # WiFi hotspot (disabled by default, set deployment.hotspot.enable = true)
-      FTS.deployment._.hotspot
-      FTS.deployment._.wifi
-      FTS.deployment._.tor-ssh
-      FTS.deployment._.restore-remote-access
-      # Beacon is for creating installation ISOs - include it separately when needed:
-      # (<FTS.deployment/beacon> {})  # Uses deployment.config defaults
-      # Note: VM and ISO generation are defined in den.provides (modules/deployment/vm.nix and iso.nix)
-      # They're perSystem modules that generate packages, included via den.default
-    ];
-  };
+  FTS.deployment.__functor =
+    _self:
+    {
+      # Deploy-rs parameters (passed to config)
+      ip ? "",
+      sshPort ? 22,
+      sshUser ? "admin",
+      # Network configuration
+      staticNetwork ? null,
+      # User configuration
+      username ? "admin",
+      ...
+    }@args:
+    {
+      class,
+      aspect-chain,
+    }:
+    {
+      includes = [
+        # Base deployment configuration with parameters
+        (FTS.deployment._.config args)
+        # Boot SSH for remote unlocking (auto-detects host keys)
+        (FTS.deployment._.bootssh { })
+        # WiFi hotspot (disabled by default, set deployment.hotspot.enable = true)
+        FTS.deployment._.hotspot
+        FTS.deployment._.wifi
+        FTS.deployment._.tor-ssh
+        FTS.deployment._.restore-remote-access
+        # Beacon is for creating installation ISOs - include it separately when needed:
+        # (<FTS.deployment/beacon> {})  # Uses deployment.config defaults
+        # Note: VM and ISO generation are defined in den.provides (modules/deployment/vm.nix and iso.nix)
+        # They're perSystem modules that generate packages, included via den.default
+      ];
+    };
 }

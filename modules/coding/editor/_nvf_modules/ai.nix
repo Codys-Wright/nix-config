@@ -6,7 +6,8 @@
   lib,
   nvf ? null,
   ...
-}: {
+}:
+{
   # Enable GitHub Copilot AI autocompletion
   # Configured to work with blink.cmp (similar to LazyVim)
   assistant = {
@@ -156,7 +157,7 @@
             },
           },
         })
-        
+
         -- Accept inline suggestions or next edits (matching LazyVim)
         if _G.LazyVim and _G.LazyVim.cmp then
           _G.LazyVim.cmp.actions.ai_nes = function()
@@ -166,7 +167,7 @@
             end
           end
         end
-        
+
         -- Snacks toggle for Sidekick NES
         if Snacks and Snacks.toggle then
           Snacks.toggle({
@@ -206,13 +207,21 @@
     # <leader>a group definition (matching LazyVim)
     {
       key = "<leader>a";
-      mode = ["n" "v"];
+      mode = [
+        "n"
+        "v"
+      ];
       action = "";
       desc = "+ai";
     }
     {
       key = "<c-.>";
-      mode = ["n" "t" "i" "x"];
+      mode = [
+        "n"
+        "t"
+        "i"
+        "x"
+      ];
       action = "function() require('sidekick.cli').toggle() end";
       lua = true;
       desc = "Sidekick Toggle";
@@ -240,7 +249,10 @@
     }
     {
       key = "<leader>at";
-      mode = ["x" "n"];
+      mode = [
+        "x"
+        "n"
+      ];
       action = "function() require('sidekick.cli').send({ msg = '{this}' }) end";
       lua = true;
       desc = "Send This";
@@ -261,7 +273,10 @@
     }
     {
       key = "<leader>ap";
-      mode = ["n" "x"];
+      mode = [
+        "n"
+        "x"
+      ];
       action = "function() require('sidekick.cli').prompt() end";
       lua = true;
       desc = "Sidekick Select Prompt";
