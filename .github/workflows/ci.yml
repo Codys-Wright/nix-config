@@ -35,3 +35,31 @@ jobs:
 
       - name: Build microvm runner
         run: nix build .#THEBATTLESHIP-vm -L
+
+  build-THEBATTLESHIP:
+    name: Build THEBATTLESHIP
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: wimpysworld/nothing-but-nix@main
+
+      - uses: DeterminateSystems/nix-installer-action@main
+
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+
+      - name: Build NixOS system
+        run: nix build .#nixosConfigurations.THEBATTLESHIP.config.system.build.toplevel -L
+
+  build-voyager:
+    name: Build voyager
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: DeterminateSystems/nix-installer-action@main
+
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+
+      - name: Build Darwin system
+        run: nix build .#darwinConfigurations.voyager.config.system.build.toplevel -L
