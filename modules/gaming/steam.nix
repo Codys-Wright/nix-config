@@ -4,7 +4,7 @@
   ...
 }:
 {
-  FTS.apps._.gaming._.steam = {
+  FTS.gaming._.steam = {
     description = "Steam gaming platform with performance optimizations";
 
     nixos = { config, pkgs, lib, ... }: {

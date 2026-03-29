@@ -15,23 +15,15 @@ let
         config.allowUnfree = true;
       };
     })
-
-    # Add unstable packages as pkgs.unstable
-    # Note: inputs.nixpkgs is already nixpkgs-unstable
-    (final: prev: {
-      unstable = import inputs.nixpkgs {
-        system = final.stdenv.hostPlatform.system;
-        config.allowUnfree = true;
-      };
-    })
+    # pkgs is already nixpkgs-unstable, no overlay needed for pkgs.unstable
   ];
 in
 {
   flake-file.inputs.nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.11";
-  flake-file.inputs.nixpkgs-unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+  # nixpkgs-unstable removed — inputs.nixpkgs is already nixpkgs-unstable
 
   FTS.nix._.nixpkgs = {
-    description = "Nixpkgs stable and unstable overlays (pkgs.stable, pkgs.unstable)";
+    description = "Nixpkgs stable overlay (pkgs.stable) — pkgs is already unstable";
     nixos.nixpkgs = { inherit overlays; };
     darwin.nixpkgs = { inherit overlays; };
     homeManager.nixpkgs = { inherit overlays; };

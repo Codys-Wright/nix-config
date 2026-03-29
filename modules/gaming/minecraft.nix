@@ -4,7 +4,7 @@
   ...
 }:
 {
-  FTS.apps._.gaming._.minecraft = {
+  FTS.gaming._.minecraft = {
     description = "Minecraft with PrismLauncher";
 
     homeManager = { pkgs, ... }: {

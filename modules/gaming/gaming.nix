@@ -5,18 +5,18 @@
   pkgs,
   ...
 }: {
-  FTS.apps._.gaming = {
+  FTS.gaming = {
     description = "All gaming platforms and tools - steam, minecraft, lutris, proton";
 
     includes = [
-      FTS.apps._.gaming._.steam
-      FTS.apps._.gaming._.minecraft
-      FTS.apps._.gaming._.lutris
-      FTS.apps._.gaming._.bottles
-      FTS.apps._.gaming._.winboat
-      FTS.apps._.gaming._.proton
-      FTS.apps._.gaming._.melonloader
-      FTS.apps._.gaming._.r2modman
+      FTS.gaming._.steam
+      FTS.gaming._.minecraft
+      FTS.gaming._.lutris
+      FTS.gaming._.bottles
+      FTS.gaming._.winboat
+      FTS.gaming._.proton
+      FTS.gaming._.melonloader
+      FTS.gaming._.r2modman
     ];
   };
 }

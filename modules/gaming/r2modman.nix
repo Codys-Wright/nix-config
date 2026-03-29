@@ -1,6 +1,6 @@
 # r2modman mod manager aspect
 {FTS, ...}: {
-  FTS.apps._.gaming._.r2modman = {
+  FTS.gaming._.r2modman = {
     description = "r2modman mod manager for Thunderstore mods";
 
     homeManager = {

@@ -4,7 +4,7 @@
   ...
 }:
 {
-  FTS.apps._.gaming._.lutris = {
+  FTS.gaming._.lutris = {
     description = "Lutris gaming platform for managing Windows games on Linux";
 
     homeManager = { pkgs, lib, ... }: lib.mkIf (!pkgs.stdenv.isDarwin) {
