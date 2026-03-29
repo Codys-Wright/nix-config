@@ -58,6 +58,8 @@
               guest.port = 22;
             }
           ];
+          # Use full qemu (not qemu_kvm) for GTK display support
+          qemu.package = pkgs.qemu;
           # Open a GTK window with GPU acceleration
           qemu.extraArgs = [
             "-device"
