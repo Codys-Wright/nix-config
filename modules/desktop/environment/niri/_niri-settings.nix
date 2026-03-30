@@ -347,10 +347,10 @@ in
 
       # Window management
       "Mod+Q".close-window = _: { };
-      "Mod+M".maximize-column = _: { };
+      "Mod+F".maximize-column = _: { };
       "Mod+G".fullscreen-window = _: { };
-      "Mod+Shift+M".toggle-window-floating = _: { };
-      "Mod+Semicolon".center-column = _: { };
+      "Mod+Shift+F".toggle-window-floating = _: { };
+      "Mod+C".center-column = _: { };
 
       # Focus (Vi-keys + arrows) — crosses monitor boundaries
       "Mod+H".focus-column-or-monitor-left = _: { };
@@ -397,8 +397,8 @@ in
       "Mod+Shift+0".move-column-to-workspace = "w9";
 
       # Workspace navigation (current monitor)
-      "Mod+BracketRight".focus-workspace-down = _: { };
-      "Mod+BracketLeft".focus-workspace-up = _: { };
+      "Mod+N".focus-workspace-down = _: { };
+      "Mod+P".focus-workspace-up = _: { };
 
       # Mouse wheel navigation
       "Mod+WheelScrollDown".focus-column-right = _: { };
