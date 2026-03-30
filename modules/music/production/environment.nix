@@ -24,6 +24,13 @@
         # CLAP_PATH is already set by nixpkgs shells-environment.nix
         musnix.enable = true;
 
+        # Yabridge for Windows VST/VST3/CLAP plugin support
+        environment.systemPackages = with pkgs; [
+          wineWowPackages.stable # Wine for running Windows plugins
+          yabridge # Bridge between Wine plugins and Linux DAWs
+          yabridgectl # CLI to manage yabridge plugin directories
+        ];
+
         # Ensure plugin directories exist in profile
         environment.pathsToLink = [
           "/lib/clap"

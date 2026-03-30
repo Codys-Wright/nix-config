@@ -107,6 +107,7 @@
     };
     wrapper-modules.url = "github:BirdeeHub/nix-wrapper-modules";
     wrappers.url = "github:lassulus/wrappers";
+    xremap-flake.url = "github:xremap/nix-flake";
     zellij-nix.url = "github:a-kenji/zellij-nix";
     zen-browser = {
       inputs.nixpkgs.follows = "nixpkgs";

@@ -21,6 +21,10 @@
       Config format: github:BirdeeHub/nix-wrapper-modules (_niri-settings.nix)
     '';
 
+    includes = [
+      FTS.desktop._.environment._.niri._.xremap
+    ];
+
     nixos =
       { pkgs, ... }:
       {

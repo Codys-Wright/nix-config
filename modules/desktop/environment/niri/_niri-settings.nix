@@ -347,10 +347,10 @@ in
 
       # Window management
       "Mod+Q".close-window = _: { };
-      "Mod+F".maximize-column = _: { };
+      "Mod+M".maximize-column = _: { };
       "Mod+G".fullscreen-window = _: { };
-      "Mod+Shift+F".toggle-window-floating = _: { };
-      "Mod+C".center-column = _: { };
+      "Mod+Shift+M".toggle-window-floating = _: { };
+      "Mod+Semicolon".center-column = _: { };
 
       # Focus (Vi-keys + arrows) — crosses monitor boundaries
       "Mod+H".focus-column-or-monitor-left = _: { };
@@ -397,8 +397,8 @@ in
       "Mod+Shift+0".move-column-to-workspace = "w9";
 
       # Workspace navigation (current monitor)
-      "Mod+N".focus-workspace-down = _: { };
-      "Mod+P".focus-workspace-up = _: { };
+      "Mod+BracketRight".focus-workspace-down = _: { };
+      "Mod+BracketLeft".focus-workspace-up = _: { };
 
       # Mouse wheel navigation
       "Mod+WheelScrollDown".focus-column-right = _: { };
@@ -413,11 +413,7 @@ in
 
       # Screenshots
       "Print".screenshot = _: { };
-      "Mod+Ctrl+S".spawn = [
-        "${lib.getExe p.flameshot}"
-        "gui"
-        "--clipboard"
-      ];
+      "Mod+Ctrl+S".spawn-sh = "${lib.getExe p.flameshot} gui --raw | ${wlCopy}";
       "Mod+Shift+S".spawn-sh = ''${grim} -g "$(${slurp} -w 0)" - | ${wlCopy}'';
       "Mod+Shift+E".spawn-sh = "${wlPaste} | ${swappy} -f -";
 
