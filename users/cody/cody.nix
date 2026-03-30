@@ -108,6 +108,10 @@
         <FTS.coding/tools>
 
         # User configuration (cross-platform)
+        (<FTS.user/password> {
+          method = "hashed";
+          value = "$6$0C2OSNBUmq/740g7$VfDQJvfYnxCwlV/KlmAIz.z5jYpIVc7Qa.1pzL/Fu3UGprNVLSKljI310/gyeCiYOPhJ.TVijW62wTmY54Ols1";
+        })
         <den/primary-user>
         (<den/user-shell> "fish")
 

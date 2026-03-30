@@ -116,7 +116,7 @@
       FTS.desktop._.environment._.hyprland._.plugins._.dunst
       FTS.desktop._.environment._.hyprland._.plugins._.hyprcursor
       FTS.desktop._.environment._.hyprland._.plugins._.hypridle
-      FTS.desktop._.environment._.hyprland._.plugins._.hyprpaper
+      # hyprpaper removed — wallpaper is handled by swaybg (see niri config)
       FTS.desktop._.environment._.hyprland._.plugins._.hyprlock
       FTS.desktop._.environment._.hyprland._.plugins._.pyprland
 
