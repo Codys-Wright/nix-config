@@ -56,7 +56,8 @@
           source = ./ssh;
         };
 
-        home.file.".config/niri".source = dotsLink "config/niri";
+        # niri/config.kdl is managed via wrapper-modules in FTS.desktop.environment.niri
+        # home.file.".config/niri".source = dotsLink "config/niri";
         # home.file.".config/nvim".source = dotsLink "config/nvim";
         # home.file.".config/astrovim".source = dotsLink "config/astrovim";
 
