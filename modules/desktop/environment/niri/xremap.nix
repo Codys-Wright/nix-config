@@ -1,8 +1,8 @@
 # xremap — macOS-style keybindings via full modifier swap
 #
 # Physical key layout after remapping:
-#   Physical Alt   → Ctrl (Command)  — copy/paste/save/close/find
-#   Physical Super → Alt  (Option)   — word navigation, special characters
+#   Physical Super → Ctrl (Command)  — copy/paste/save/close/find
+#   Physical Alt   → Alt  (Option)   — word navigation, special characters
 #   Physical Ctrl  → Super (niri Mod) — window management
 #
 # Based on: github.com/Anas-Alhariri/Mac-Keyboard-Style-On-Linux
@@ -21,7 +21,7 @@
   FTS.desktop._.environment._.niri._.xremap = {
     description = ''
       macOS-style keyboard shortcuts via xremap with full modifier swap.
-      Physical Alt = Command, Physical Super = Option, Physical Ctrl = niri Mod.
+      Physical Super = Command, Physical Alt = Option, Physical Ctrl = niri Mod.
     '';
 
     homeManager =
@@ -38,12 +38,10 @@
               {
                 name = "Mac-style modifier swap";
                 remap = {
-                  Alt_L = "Ctrl_L";
+                  Super_L = "Ctrl_L";
                   Ctrl_L = "Super_L";
-                  Super_L = "Alt_L";
-                  Alt_R = "Ctrl_R";
+                  Super_R = "Ctrl_R";
                   Ctrl_R = "Super_R";
-                  Super_R = "Alt_R";
                 };
               }
             ];
