@@ -46,6 +46,7 @@
         environment.systemPackages = with pkgs; [
           xwayland-satellite # XWayland support for legacy apps
           noctalia-shell # Desktop shell (bar + launcher + notifications)
+          ghostty # Alternative terminal (Mod+E)
           wlr-which-key # Which-key popup for keybind hints
           swaybg # Wallpaper setter
           swaylock # Screen locker
