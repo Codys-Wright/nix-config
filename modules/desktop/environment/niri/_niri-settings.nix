@@ -226,6 +226,7 @@ in
       DISPLAY = ":0";
       NIXOS_OZONE_WL = "1";
       MOZ_ENABLE_WAYLAND = "1";
+      _JAVA_AWT_WM_NONREPARENTING = "1";
     };
 
     # Managed by wrapper — no spawn-at-startup needed
