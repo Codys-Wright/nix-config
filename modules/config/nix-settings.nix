@@ -47,7 +47,6 @@ in
     description = "Shared nix settings and package policy";
     includes = [
       <FTS/nix>
-      (<den/unfree> true)
     ];
     os = nixSettings;
   };
