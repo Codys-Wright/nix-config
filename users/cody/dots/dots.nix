@@ -61,6 +61,13 @@
         # home.file.".config/nvim".source = dotsLink "config/nvim";
         # home.file.".config/astrovim".source = dotsLink "config/astrovim";
 
+        home.file.".local/bin/wineloader.sh" = {
+          source = ./local/bin/wineloader.sh;
+          executable = true;
+        };
+
+        home.sessionVariables.WINELOADER = "${config.home.homeDirectory}/.local/bin/wineloader.sh";
+
         home.file.".config/vscode-vim".source = dotsLink "config/vscode-vim";
         home.file.".config/doom".source = dotsLink "config/doom";
         # home.file.".config/zed".source = dotsLink "config/zed";
