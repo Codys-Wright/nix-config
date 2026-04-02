@@ -76,6 +76,9 @@
         # Virtualization for Windows VMs (EASEUS backup recovery, etc.)
         <FTS.system._.virtualization>
 
+        # Reverse engineering and binary analysis
+        <FTS.coding._.tools._.reverse-engineering>
+
         # Deployment configuration (SSH, networking, secrets, VM/ISO generation)
         (<FTS.deployment> { })
 
