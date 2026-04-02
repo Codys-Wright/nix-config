@@ -66,6 +66,7 @@
         # SKIP: <FTS.hardware._.cuda>  - Disabled due to download failures
         <FTS.hardware._.networking>
         <FTS.hardware._.networking._.tailscale>
+        <FTS.hardware._.networking._.wireguard._.protonvpn>
         <FTS.hardware._.nvidia>
         <FTS.hardware._.storage>
         # <FTS.keyboard>
@@ -82,19 +83,7 @@
         # Deployment configuration (SSH, networking, secrets, VM/ISO generation)
         (<FTS.deployment> { })
 
-        # Standalone VPN for desktop use
-        (FTS.selfhost._.protonvpn-standalone {
-          usernameFile = "/run/secrets/cody/openvpn/username";
-          passwordFile = "/run/secrets/cody/openvpn/password";
-          killswitch = {
-            enable = true;
-            allowedSubnets = [
-              "192.168.0.0/16"
-              "10.0.0.0/8"
-            ];
-            exemptPorts = [ 22 ];
-          };
-        })
+        # WireGuard VPN for ProtonVPN
 
         # Self-hosting services are provided by the starcommand user
         # See users/starcommand/starcommand.nix for service configuration
@@ -211,12 +200,7 @@
             defaultSopsFile = ../../users/cody/secrets.yaml;
             age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
             secrets = {
-              "cody/openvpn/username" = {
-                owner = "root";
-                group = "root";
-                mode = "0400";
-              };
-              "cody/openvpn/password" = {
+              "cody/proton/privatekey" = {
                 owner = "root";
                 group = "root";
                 mode = "0400";

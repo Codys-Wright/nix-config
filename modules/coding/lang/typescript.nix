@@ -49,17 +49,17 @@
             tsx
 
             # Essential development tools
-            nodePackages.eslint
-            nodePackages.prettier
-            nodePackages.webpack-cli
+            eslint
+            prettier
+            webpack-cli
 
             # Build tools
             esbuild
             turbo
 
             # Linting and formatting
-            nodePackages.eslint_d
-            nodePackages.stylelint
+            eslint_d
+            stylelint
 
             bun
 
