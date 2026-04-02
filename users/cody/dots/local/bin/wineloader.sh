@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 YQ=$(command -v yq)
 if [ -z "$YQ" ]; then
   echo "Error: yq is not installed." >&2
