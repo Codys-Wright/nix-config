@@ -14,105 +14,89 @@
     };
 
   inputs = {
-    SPC.url = "github:vic/SPC";
     apple-fonts = {
-      inputs.nixpkgs.follows = "nixpkgs";
       url = "github:Lyndeno/apple-fonts.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     darwin = {
-      inputs.nixpkgs.follows = "nixpkgs";
       url = "github:nix-darwin/nix-darwin";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     den.url = "github:vic/den";
     deploy-rs.url = "github:serokell/deploy-rs";
     disko = {
-      inputs.nixpkgs.follows = "nixpkgs";
       url = "github:nix-community/disko";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
-    doom-emacs = {
-      flake = false;
-      url = "github:doomemacs/doomemacs";
-    };
-    elephant.url = "github:abenz1267/elephant";
     erosanix.url = "github:emmanuelrosa/erosanix";
     flake-aspects.url = "github:vic/flake-aspects";
     flake-file.url = "github:vic/flake-file";
     flake-parts = {
-      inputs.nixpkgs-lib.follows = "nixpkgs-lib";
       url = "github:hercules-ci/flake-parts";
+      inputs.nixpkgs-lib.follows = "nixpkgs-lib";
     };
     fts-flake = {
-      inputs.nixpkgs.follows = "nixpkgs";
       url = "path:/home/cody/Development/FastTrackStudio/fts-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     home-manager = {
-      inputs.nixpkgs.follows = "nixpkgs";
       url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     import-tree.url = "github:vic/import-tree";
     lazyvim.url = "github:Codys-Wright/lazyvim-nix";
     microvm = {
-      inputs.nixpkgs.follows = "nixpkgs";
       url = "github:microvm-nix/microvm.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     minegrub-theme.url = "github:Lxtharia/minegrub-theme";
     minegrub-world-sel-theme.url = "github:Lxtharia/minegrub-world-sel-theme";
-    minesddm = {
-      inputs.nixpkgs.follows = "nixpkgs";
-      url = "github:Davi-S/sddm-theme-minesddm";
-    };
     musnix.url = "github:musnix/musnix";
     niri-flake = {
-      inputs.nixpkgs.follows = "nixpkgs";
       url = "github:sodiboo/niri-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-index-database = {
-      inputs.nixpkgs.follows = "nixpkgs";
       url = "github:nix-community/nix-index-database";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-openclaw.url = "github:openclaw/nix-openclaw";
     nixos-facter-modules.url = "github:numtide/nixos-facter-modules";
     nixos-generators = {
-      inputs.nixpkgs.follows = "nixpkgs";
       url = "github:nix-community/nixos-generators";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     nixos-wsl = {
+      url = "github:nix-community/nixos-wsl";
       inputs = {
         flake-compat.follows = "";
         nixpkgs.follows = "nixpkgs-stable";
       };
-      url = "github:nix-community/nixos-wsl";
     };
-    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+    nixpkgs.url = "https://channels.nixos.org/nixpkgs-unstable/nixexprs.tar.xz";
     nixpkgs-lib.follows = "nixpkgs";
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.11";
     nvf = {
-      inputs.nixpkgs.follows = "nixpkgs";
       url = "github:notashelf/nvf";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     rust-overlay = {
-      inputs.nixpkgs.follows = "nixpkgs";
       url = "github:oxalica/rust-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     selfhostblocks.url = "github:Codys-Wright/selfhostblocks";
     sops-nix.url = "github:Mic92/sops-nix";
     stylix = {
-      inputs.nixpkgs.follows = "nixpkgs";
       url = "github:danth/stylix";
-    };
-    systems.url = "github:nix-systems/default";
-    walker = {
-      inputs.elephant.follows = "elephant";
-      url = "github:abenz1267/walker";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     wrapper-modules.url = "github:BirdeeHub/nix-wrapper-modules";
     wrappers.url = "github:lassulus/wrappers";
     xremap-flake.url = "github:xremap/nix-flake";
     zellij-nix.url = "github:a-kenji/zellij-nix";
     zen-browser = {
-      inputs.nixpkgs.follows = "nixpkgs";
       url = "github:0xc000022070/zen-browser-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
   };
-
 }
