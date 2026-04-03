@@ -30,25 +30,11 @@
         })
       ];
 
-    nixos =
-      { pkgs, ... }:
-      {
-        # Allow dotnet 6.0 (EOL but required for MelonLoader on Il2Cpp games)
-        nixpkgs.config.permittedInsecurePackages = [
-          "dotnet-runtime-6.0.36"
-        ];
-
-        environment.systemPackages = [
-          pkgs.protonup-ng
-          pkgs.protonup-rs # Install/update GE-Proton and Wine-GE
-          pkgs.protontricks # Run winetricks commands for Proton games
-          pkgs.dotnet-runtime_6 # Required for MelonLoader on Il2Cpp games
-        ];
-
-        # AFTER THIS OPTION IS SET, RUN PROTONUP
-        environment.sessionVariables = {
-          STEAM_EXTRA_COMPAT_TOOLS_PATHS = "\${HOME}/.steam/root/compatibilitytools.d";
-        };
-      };
+    nixos = _: {
+      # Allow dotnet 6.0 (EOL but required for MelonLoader on Il2Cpp games)
+      nixpkgs.config.permittedInsecurePackages = [
+        "dotnet-runtime-6.0.36"
+      ];
+    };
   };
 }

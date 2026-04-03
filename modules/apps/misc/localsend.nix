@@ -8,11 +8,5 @@
       {
         home.packages = [ pkgs.localsend ];
       };
-
-    nixos =
-      { pkgs, ... }:
-      {
-        environment.systemPackages = [ pkgs.localsend ];
-      };
   };
 }

@@ -7,11 +7,5 @@
       {
         home.packages = [ pkgs.brave ];
       };
-
-    nixos =
-      { pkgs, ... }:
-      {
-        environment.systemPackages = [ pkgs.brave ];
-      };
   };
 }

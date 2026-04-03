@@ -16,11 +16,5 @@
       {
         home.packages = lib.mkIf (!pkgs.stdenv.isDarwin) [ pkgs.telegram-desktop ];
       };
-
-    nixos =
-      { pkgs, ... }:
-      {
-        environment.systemPackages = [ pkgs.telegram-desktop ];
-      };
   };
 }

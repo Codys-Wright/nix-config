@@ -12,16 +12,5 @@
       lib.mkIf (!pkgs.stdenv.isDarwin) {
         home.packages = [ pkgs.lutris ];
       };
-
-    nixos =
-      {
-        config,
-        pkgs,
-        lib,
-        ...
-      }:
-      {
-        environment.systemPackages = [ pkgs.lutris ];
-      };
   };
 }
