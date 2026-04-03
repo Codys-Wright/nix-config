@@ -63,7 +63,7 @@
       };
 
     homeManager =
-      { pkgs, ... }:
+      { pkgs, lib, ... }:
       let
         # Evaluate the wrapper to get the baked config.kdl in the nix store.
         # This is the single source of truth for the niri config — defined in
@@ -74,7 +74,10 @@
         };
       in
       {
-        # Symlink config.kdl from the nix store — no niri-flake homeModule needed.
+        # Override niri-flake's homeModules.config which sets enable = (finalConfig != null).
+        # Since we use wrapper-modules instead of programs.niri.settings, finalConfig is null
+        # and niri-flake disables the xdg config file. Force it back on.
+        xdg.configFile."niri/config.kdl".enable = lib.mkForce true;
         xdg.configFile."niri/config.kdl".source = "${wrappedNiri}/niri-config.kdl";
 
         # Noctalia colors — Catppuccin Mocha with blue as primary accent.
