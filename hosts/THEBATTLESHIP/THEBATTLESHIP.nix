@@ -28,21 +28,25 @@
 
         # System-wide theme (bootloader, default appearance)
 
-        # Linux-only user aspects (moved from cody user for cross-platform compat)
-        <FTS/gaming>
+        # ── Gaming ──
+        <FTS.gaming/steam>
+        <FTS.gaming/minecraft>
+        <FTS.gaming/lutris>
+        <FTS.gaming/bottles>
+        <FTS.gaming/winboat>
+        <FTS.gaming/proton>
+        <FTS.gaming/melonloader>
+        <FTS.gaming/r2modman>
+
+        # ── Apps ──
         <FTS.apps/flatpaks>
         <FTS.music/production>
-        <FTS.user/autologin>
         (FTS.selfhost._.samba-client { })
         <FTS/mactahoe>
         <FTS/stylix>
 
-        # Complete desktop setup (environment + display manager + bootloader)
+        # Desktop environment and bootloader
         <FTS.desktop/environment/niri>
-        <FTS.desktop/environment/hyprland>
-        <FTS.desktop/environment/gnome>
-        (<FTS.desktop/environment/kde> { theme = "whitesur"; })
-        <FTS/sddm>
         (FTS.grub {
           uefi = true;
           # theme is set by system theme preset
@@ -66,7 +70,7 @@
         # SKIP: <FTS.hardware._.cuda>  - Disabled due to download failures
         <FTS.hardware._.networking>
         <FTS.hardware._.networking._.tailscale>
-        <FTS.hardware._.networking._.wireguard._.protonvpn>
+        # <FTS.hardware._.networking._.wireguard._.protonvpn>  # Disabled: broken iptables kill switch rules
         <FTS.hardware._.nvidia>
         <FTS.hardware._.storage>
         # <FTS.keyboard>
@@ -101,8 +105,14 @@
           # Hardware detection is handled by FTS.hardware (includes FTS.hardware.facter)
           # The facter report path is auto-derived as hosts/THEBATTLESHIP/facter.json
 
-          # Set niri as the default session
-          services.displayManager.defaultSession = lib.mkForce "niri";
+          # Autologin directly to niri via greetd
+          services.greetd = {
+            enable = true;
+            settings.default_session = {
+              command = "${pkgs.niri}/bin/niri-session";
+              user = "cody";
+            };
+          };
 
           # Timezone
           time.timeZone = "America/Los_Angeles";
@@ -187,6 +197,7 @@
           # Add cody to libvirtd group for VM management
           users.users.cody.extraGroups = [
             "audio"
+            "input"
             "libvirtd"
           ];
 

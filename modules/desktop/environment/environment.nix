@@ -1,18 +1,12 @@
-# Desktop environment facet - Provides access to different desktop environments
+# Desktop environment facet
 { FTS, ... }:
 {
   FTS.desktop._.environment.description = ''
-    Desktop environment configuration with support for multiple DEs.
+    Desktop environment configuration.
 
-    Usage as router:
-      (<FTS/desktop/environment> { default = "hyprland"; includes = ["gnome" "kde"]; })
-
-    Direct access to specific environments:
-      (<FTS/desktop/environment/gnome> { })
-      (<FTS/desktop/environment/hyprland> { })
-      (<FTS/desktop/environment/kde> { })
+    Direct access:
+      <FTS.desktop/environment/niri>
   '';
 
-  # Make environment callable as a router function
   FTS.desktop._.environment = { };
 }
