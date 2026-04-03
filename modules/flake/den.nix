@@ -9,5 +9,6 @@
 
   imports = [ inputs.den.flakeModule ];
 
-  den.default.host.includes = [ den._.home-manager ];
+  # den's built-in ctx pipeline handles home-manager integration.
+  # hm-host-forward (in home-manager.nix) forwards host homeManager blocks to users.
 }
