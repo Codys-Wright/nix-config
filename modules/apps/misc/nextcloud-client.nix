@@ -8,11 +8,5 @@
       {
         home.packages = [ pkgs.nextcloud-client ];
       };
-
-    nixos =
-      { pkgs, ... }:
-      {
-        environment.systemPackages = [ pkgs.nextcloud-client ];
-      };
   };
 }

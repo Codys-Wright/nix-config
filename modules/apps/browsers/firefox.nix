@@ -12,11 +12,5 @@
       {
         home.packages = [ pkgs.firefox ];
       };
-
-    nixos =
-      { pkgs, ... }:
-      {
-        environment.systemPackages = [ pkgs.firefox ];
-      };
   };
 }

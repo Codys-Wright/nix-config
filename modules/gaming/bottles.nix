@@ -12,16 +12,5 @@
       lib.mkIf (!pkgs.stdenv.isDarwin) {
         home.packages = [ pkgs.bottles ];
       };
-
-    nixos =
-      {
-        config,
-        pkgs,
-        lib,
-        ...
-      }:
-      {
-        environment.systemPackages = [ pkgs.bottles ];
-      };
   };
 }

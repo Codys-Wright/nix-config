@@ -4,15 +4,9 @@
   FTS.apps._.flatpaks = {
     description = "Flatpak runtime with Flathub";
 
-    nixos =
-      { pkgs, ... }:
-      {
-        services.flatpak.enable = true;
-
-        environment.systemPackages = with pkgs; [
-          flatpak
-        ];
-      };
+    nixos = _: {
+      services.flatpak.enable = true;
+    };
 
     homeManager =
       { pkgs, ... }:
