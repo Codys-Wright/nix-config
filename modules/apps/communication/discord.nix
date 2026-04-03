@@ -12,10 +12,5 @@
       {
         home.packages = lib.mkIf (!pkgs.stdenv.isDarwin) [ pkgs.equibop ];
       };
-    nixos =
-      { pkgs, ... }:
-      {
-        environment.systemPackages = [ pkgs.equibop ];
-      };
   };
 }

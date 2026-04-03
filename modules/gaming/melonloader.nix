@@ -14,13 +14,5 @@
           (pkgs.callPackage ../../packages/melonloader-installer/melonloader-installer.nix { })
         ];
       };
-
-    nixos =
-      { pkgs, lib, ... }:
-      lib.mkIf (!pkgs.stdenv.isDarwin) {
-        environment.systemPackages = [
-          (pkgs.callPackage ../../packages/melonloader-installer/melonloader-installer.nix { })
-        ];
-      };
   };
 }

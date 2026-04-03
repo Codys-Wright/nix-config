@@ -20,8 +20,8 @@
     nixos =
       { pkgs, ... }:
       {
+        # grim/slurp are Wayland screenshot dependencies needed system-wide
         environment.systemPackages = [
-          pkgs.flameshot
           pkgs.grim
           pkgs.slurp
         ];

@@ -16,18 +16,5 @@
           pkgs.gale
         ];
       };
-
-    nixos =
-      {
-        pkgs,
-        lib,
-        ...
-      }:
-      lib.mkIf (!pkgs.stdenv.isDarwin) {
-        environment.systemPackages = [
-          pkgs.r2modman
-          pkgs.gale
-        ];
-      };
   };
 }

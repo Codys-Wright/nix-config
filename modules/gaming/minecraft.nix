@@ -12,16 +12,5 @@
       {
         home.packages = [ pkgs.prismlauncher ];
       };
-
-    nixos =
-      {
-        config,
-        pkgs,
-        lib,
-        ...
-      }:
-      {
-        environment.systemPackages = [ pkgs.prismlauncher ];
-      };
   };
 }
