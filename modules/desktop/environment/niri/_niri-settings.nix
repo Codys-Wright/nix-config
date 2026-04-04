@@ -101,11 +101,14 @@ in
     prefer-no-csd = _: { };
 
     input = {
+      # niri Mod = Mod5 (ISO_Level3_Shift). xremap routes Caps Lock / Esc / Right Ctrl /
+      # Right Alt to ISO_Level3_Shift, and remaps physical Super to F20 for "Cmd" shortcuts.
+      mod-key = "Mod5";
       focus-follows-mouse = _: { };
       keyboard = {
         xkb = {
           layout = "us";
-          options = "caps:escape";
+          options = "lv3:ralt_switch";
         };
         repeat-rate = 40;
         repeat-delay = 250;
