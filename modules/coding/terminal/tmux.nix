@@ -53,7 +53,7 @@
           enable = true;
           mouse = true;
           shell = "${pkgs.fish}/bin/fish";
-          prefix = "C-a";
+          prefix = "M-Space";
           terminal = "tmux-256color";
           keyMode = "vi";
           baseIndex = 1;
