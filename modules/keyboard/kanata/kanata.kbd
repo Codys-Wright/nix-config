@@ -50,14 +50,14 @@
 )
 
 (defchords mbl $chord-timeout
-  (x  ) (t! charmod x ralt)
+  (x  ) x
   (  c) c
   (x c) tab
 )
 
 (defchords mbr $chord-timeout
   (,  ) ,
-  (  .) (t! charmod . ralt)
+  (  .) .
   (, .) ret
 )
 
@@ -66,23 +66,23 @@
   e (chord mtl e)
   i (chord mtr i)
   o (chord mtr o)
-  a (t! charmod a lmet)
-  s (t! charmod s lalt)
-  d (t! charmod d lctl)
-  f (t! charmod f lsft)
-  j (t! charmod j rshft)
-  k (t! charmod k lctl)
-  l (t! charmod l lalt)
-  ; (t! charmod ; rmet)
+  a a
+  s s
+  d d
+  f f
+  j j
+  k k
+  l l
+  ; ;
    lsft lsft
-   z (t! charmod z lctl)
+   z z
   x (chord mbl x)
   c (chord mbl c)
   v (t! charmod v (layer-while-held fumbol))
   m (t! charmod m (layer-while-held fumbol))
   , (chord mbr ,)
   . (chord mbr .)
-  / (t! charmod / rctl)
+  / /
    spc (t! charmod spc (multi (layer-switch extend) (on-release tap-virtualkey clear)))
    rmet (layer-while-held symbols)
    caps esc
@@ -141,14 +141,14 @@
 )
 
 (defchords fbl $chord-timeout
-  (x  ) (t! charmod ` ralt)
+  (x  ) `
   (  c) -
   (x c) tab
 )
 
 (defchords fbr $chord-timeout
   (,  ) [
-  (  .) (t! charmod ] ralt)
+  (  .) ]
   (, .) ret
 )
 
@@ -163,17 +163,17 @@
   i (chord ftr i)
   o (chord ftr o)
   p f10
-  a (t! charmod 1 lmet)
-  s (t! charmod 2 lalt)
-  d (t! charmod 3 lsft)
-  f (t! charmod 4 lctl)
+  a 1
+  s 2
+  d 3
+  f 4
   g 5
   h 6
-  j (t! charmod 7 rctl)
-  k (t! charmod 8 rsft)
-  l (t! charmod 9 lalt)
-  ; (t! charmod 0 rmet)
-  z (t! charmod lsgt lctl)
+  j 7
+  k 8
+  l 9
+  ; 0
+  z lsgt
   x (chord fbl x)
   c (chord fbl c)
   v =
@@ -182,7 +182,7 @@
   m '
   , (chord fbr ,)
   . (chord fbr .)
-   / (t! charmod \ lctl)
+   / \
 )
 
 (deflayermap (symbols)

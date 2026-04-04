@@ -2,22 +2,29 @@
   FTS.kanata = {
     description = "Kanata keyboard remapper for both NixOS and Darwin";
 
-    nixos = {
-      # Enable uinput hardware support.
-      # This loads the kernel module and sets up the necessary udev rule.
-      hardware.uinput.enable = true;
+    nixos =
+      { lib, ... }:
+      {
+        # Enable uinput hardware support.
+        # This loads the kernel module and sets up the necessary udev rule.
+        hardware.uinput.enable = true;
 
-      services.kanata = {
-        enable = true;
-        keyboards.default = {
-          devices = [
-            "/dev/input/by-id/usb-Keychron_Keychron_K2_HE-event-kbd"
-            "/dev/input/by-id/usb-Keychron_Keychron_Link-if02-event-kbd"
-          ];
-          configFile = ./kanata.kbd;
+        services.kanata = {
+          enable = true;
+          keyboards.default = {
+            devices = [
+              "/dev/input/by-id/usb-Keychron_Keychron_K2_HE-event-kbd"
+              "/dev/input/by-id/usb-Keychron_Keychron_Link-if02-event-kbd"
+            ];
+            configFile = ./kanata.kbd;
+          };
         };
+
+        # Steam's udev uaccess rule adds an ACL on /dev/uinput that zeroes the
+        # POSIX group entry, breaking DynamicUser group-based access.
+        # Run as root instead to bypass the permission issue entirely.
+        systemd.services.kanata-default.serviceConfig.DynamicUser = lib.mkForce false;
       };
-    };
 
     darwin =
       { pkgs, ... }:
