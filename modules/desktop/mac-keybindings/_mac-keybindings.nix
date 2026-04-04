@@ -130,10 +130,9 @@ let
     else
       [
         {
-          name = "Physical Super → F20 (Cmd virtual modifier)";
+          name = "Physical Super_L → F20 (Cmd virtual modifier)";
           remap = {
             Super_L = "F20";
-            Super_R = "F20";
           };
         }
       ];
@@ -153,20 +152,19 @@ let
 
     {
       name = "App and tab switching";
-      remap =
-        {
-          # Cmd+Tab = app switcher
-          "${c "Tab"}" = "Alt-Tab";
-          "${cs "Tab"}" = "Alt-Shift-Tab";
-          # Cmd+` = switch windows of same app
-          "${c "grave"}" = "Alt-grave";
-          "${cs "grave"}" = "Alt-Shift-grave";
-        }
-        // lib.optionalAttrs isAltCmd {
-          # Physical Ctrl+Tab = tab switching (only needed with modmap swap)
-          "Super-Tab" = "Ctrl-Tab";
-          "Super-Shift-Tab" = "Ctrl-Shift-Tab";
-        };
+      remap = {
+        # Cmd+Tab = app switcher
+        "${c "Tab"}" = "Alt-Tab";
+        "${cs "Tab"}" = "Alt-Shift-Tab";
+        # Cmd+` = switch windows of same app
+        "${c "grave"}" = "Alt-grave";
+        "${cs "grave"}" = "Alt-Shift-grave";
+      }
+      // lib.optionalAttrs isAltCmd {
+        # Physical Ctrl+Tab = tab switching (only needed with modmap swap)
+        "Super-Tab" = "Ctrl-Tab";
+        "Super-Shift-Tab" = "Ctrl-Shift-Tab";
+      };
     }
 
     # ════════════════════════════════════════════════════════════════════
@@ -223,44 +221,43 @@ let
     {
       name = "Cmd shortcuts (terminal)";
       application.only = terminals;
-      remap =
-        {
-          "${c "c"}" = "Ctrl-Shift-c"; # Copy
-          "${c "v"}" = "Ctrl-Shift-v"; # Paste
-          "${c "t"}" = "Ctrl-Shift-t"; # New tab
-          "${c "w"}" = "Ctrl-Shift-w"; # Close tab
-          "${c "n"}" = "Ctrl-Shift-n"; # New window
-          "${c "k"}" = "Ctrl-Shift-k"; # Clear
-          "${c "f"}" = "Ctrl-Shift-f"; # Find
-          "${c "q"}" = "Alt-F4"; # Quit
-          "${c "comma"}" = "Ctrl-comma"; # Preferences
-          "${c "equal"}" = "Ctrl-equal"; # Zoom in
-          "${c "minus"}" = "Ctrl-minus"; # Zoom out
-          "${c "0"}" = "Ctrl-0"; # Reset zoom
-        }
-        // lib.optionalAttrs isAltCmd {
-          # With the modmap swap, physical Ctrl sends Super.
-          # Re-route to actual Ctrl for terminal signals.
-          "${pc "c"}" = "Ctrl-c"; # SIGINT
-          "${pc "z"}" = "Ctrl-z"; # SIGTSTP (suspend)
-          "${pc "d"}" = "Ctrl-d"; # EOF
-          "${pc "l"}" = "Ctrl-l"; # Clear screen
-          "${pc "r"}" = "Ctrl-r"; # Reverse search
-          "${pc "a"}" = "Ctrl-a"; # Beginning of line
-          "${pc "e"}" = "Ctrl-e"; # End of line
-          "${pc "u"}" = "Ctrl-u"; # Kill line before cursor
-          "${pc "k"}" = "Ctrl-k"; # Kill line after cursor
-          "${pc "w"}" = "Ctrl-w"; # Delete word before cursor
-          "${pc "y"}" = "Ctrl-y"; # Yank (paste killed text)
-          "${pc "p"}" = "Ctrl-p"; # Previous command
-          "${pc "n"}" = "Ctrl-n"; # Next command
-          "${pc "f"}" = "Ctrl-f"; # Forward character
-          "${pc "b"}" = "Ctrl-b"; # Backward character
-          "${pc "t"}" = "Ctrl-t"; # Transpose characters
-          "${pc "h"}" = "Ctrl-h"; # Backspace
-          "${pc "g"}" = "Ctrl-g"; # Cancel
-          "${pc "backslash"}" = "Ctrl-backslash"; # SIGQUIT
-        };
+      remap = {
+        "${c "c"}" = "Ctrl-Shift-c"; # Copy
+        "${c "v"}" = "Ctrl-Shift-v"; # Paste
+        "${c "t"}" = "Ctrl-Shift-t"; # New tab
+        "${c "w"}" = "Ctrl-Shift-w"; # Close tab
+        "${c "n"}" = "Ctrl-Shift-n"; # New window
+        "${c "k"}" = "Ctrl-Shift-k"; # Clear
+        "${c "f"}" = "Ctrl-Shift-f"; # Find
+        "${c "q"}" = "Alt-F4"; # Quit
+        "${c "comma"}" = "Ctrl-comma"; # Preferences
+        "${c "equal"}" = "Ctrl-equal"; # Zoom in
+        "${c "minus"}" = "Ctrl-minus"; # Zoom out
+        "${c "0"}" = "Ctrl-0"; # Reset zoom
+      }
+      // lib.optionalAttrs isAltCmd {
+        # With the modmap swap, physical Ctrl sends Super.
+        # Re-route to actual Ctrl for terminal signals.
+        "${pc "c"}" = "Ctrl-c"; # SIGINT
+        "${pc "z"}" = "Ctrl-z"; # SIGTSTP (suspend)
+        "${pc "d"}" = "Ctrl-d"; # EOF
+        "${pc "l"}" = "Ctrl-l"; # Clear screen
+        "${pc "r"}" = "Ctrl-r"; # Reverse search
+        "${pc "a"}" = "Ctrl-a"; # Beginning of line
+        "${pc "e"}" = "Ctrl-e"; # End of line
+        "${pc "u"}" = "Ctrl-u"; # Kill line before cursor
+        "${pc "k"}" = "Ctrl-k"; # Kill line after cursor
+        "${pc "w"}" = "Ctrl-w"; # Delete word before cursor
+        "${pc "y"}" = "Ctrl-y"; # Yank (paste killed text)
+        "${pc "p"}" = "Ctrl-p"; # Previous command
+        "${pc "n"}" = "Ctrl-n"; # Next command
+        "${pc "f"}" = "Ctrl-f"; # Forward character
+        "${pc "b"}" = "Ctrl-b"; # Backward character
+        "${pc "t"}" = "Ctrl-t"; # Transpose characters
+        "${pc "h"}" = "Ctrl-h"; # Backspace
+        "${pc "g"}" = "Ctrl-g"; # Cancel
+        "${pc "backslash"}" = "Ctrl-backslash"; # SIGQUIT
+      };
     }
 
     # ════════════════════════════════════════════════════════════════════
@@ -271,59 +268,58 @@ let
     {
       name = "Text navigation and editing";
       application.not = terminals ++ fileManagers;
-      remap =
-        {
-          # ── Cmd+Arrow: Line/Document navigation ──
-          "${c "Left"}" = "Home";
-          "${c "Right"}" = "End";
-          "${c "Up"}" = "Ctrl-Home";
-          "${c "Down"}" = "Ctrl-End";
+      remap = {
+        # ── Cmd+Arrow: Line/Document navigation ──
+        "${c "Left"}" = "Home";
+        "${c "Right"}" = "End";
+        "${c "Up"}" = "Ctrl-Home";
+        "${c "Down"}" = "Ctrl-End";
 
-          # ── Cmd+Shift+Arrow: Line/Document selection ──
-          "${cs "Left"}" = "Shift-Home";
-          "${cs "Right"}" = "Shift-End";
-          "${cs "Up"}" = "Ctrl-Shift-Home";
-          "${cs "Down"}" = "Ctrl-Shift-End";
+        # ── Cmd+Shift+Arrow: Line/Document selection ──
+        "${cs "Left"}" = "Shift-Home";
+        "${cs "Right"}" = "Shift-End";
+        "${cs "Up"}" = "Ctrl-Shift-Home";
+        "${cs "Down"}" = "Ctrl-Shift-End";
 
-          # ── Option+Arrow: Word/Paragraph navigation ──
-          "${o "Left"}" = "Ctrl-Left";
-          "${o "Right"}" = "Ctrl-Right";
-          "${o "Up"}" = "Ctrl-Up";
-          "${o "Down"}" = "Ctrl-Down";
+        # ── Option+Arrow: Word/Paragraph navigation ──
+        "${o "Left"}" = "Ctrl-Left";
+        "${o "Right"}" = "Ctrl-Right";
+        "${o "Up"}" = "Ctrl-Up";
+        "${o "Down"}" = "Ctrl-Down";
 
-          # ── Option+Shift+Arrow: Word selection ──
-          "${os "Left"}" = "Ctrl-Shift-Left";
-          "${os "Right"}" = "Ctrl-Shift-Right";
-          "${os "Up"}" = "Ctrl-Shift-Up";
-          "${os "Down"}" = "Ctrl-Shift-Down";
+        # ── Option+Shift+Arrow: Word selection ──
+        "${os "Left"}" = "Ctrl-Shift-Left";
+        "${os "Right"}" = "Ctrl-Shift-Right";
+        "${os "Up"}" = "Ctrl-Shift-Up";
+        "${os "Down"}" = "Ctrl-Shift-Down";
 
-          # ── Delete shortcuts ──
-          "${o "Backspace"}" = "Ctrl-Backspace"; # Option+Backspace = delete word left
-          "${c "Backspace"}" = [
-            "Shift-Home"
-            "Backspace"
-          ]; # Cmd+Backspace = delete to line start
-          "${o "Delete"}" = "Ctrl-Delete"; # Option+Delete = delete word right
-          "${c "Delete"}" = [
-            "Shift-End"
-            "Delete"
-          ]; # Cmd+Delete = delete to line end
-        }
-        // lib.optionalAttrs isAltCmd {
-          # ── Emacs-style shortcuts (Physical Ctrl → Super after modmap) ──
-          "${pc "a"}" = "Home"; # Ctrl+A = line start
-          "${pc "e"}" = "End"; # Ctrl+E = line end
-          "${pc "k"}" = [
-            "Shift-End"
-            "Ctrl-x"
-          ]; # Ctrl+K = kill to end of line
-          "${pc "d"}" = "Delete"; # Ctrl+D = forward delete
-          "${pc "h"}" = "Backspace"; # Ctrl+H = backward delete
-          "${pc "f"}" = "Right"; # Ctrl+F = forward character
-          "${pc "b"}" = "Left"; # Ctrl+B = backward character
-          "${pc "p"}" = "Up"; # Ctrl+P = previous line
-          "${pc "n"}" = "Down"; # Ctrl+N = next line
-        };
+        # ── Delete shortcuts ──
+        "${o "Backspace"}" = "Ctrl-Backspace"; # Option+Backspace = delete word left
+        "${c "Backspace"}" = [
+          "Shift-Home"
+          "Backspace"
+        ]; # Cmd+Backspace = delete to line start
+        "${o "Delete"}" = "Ctrl-Delete"; # Option+Delete = delete word right
+        "${c "Delete"}" = [
+          "Shift-End"
+          "Delete"
+        ]; # Cmd+Delete = delete to line end
+      }
+      // lib.optionalAttrs isAltCmd {
+        # ── Emacs-style shortcuts (Physical Ctrl → Super after modmap) ──
+        "${pc "a"}" = "Home"; # Ctrl+A = line start
+        "${pc "e"}" = "End"; # Ctrl+E = line end
+        "${pc "k"}" = [
+          "Shift-End"
+          "Ctrl-x"
+        ]; # Ctrl+K = kill to end of line
+        "${pc "d"}" = "Delete"; # Ctrl+D = forward delete
+        "${pc "h"}" = "Backspace"; # Ctrl+H = backward delete
+        "${pc "f"}" = "Right"; # Ctrl+F = forward character
+        "${pc "b"}" = "Left"; # Ctrl+B = backward character
+        "${pc "p"}" = "Up"; # Ctrl+P = previous line
+        "${pc "n"}" = "Down"; # Ctrl+N = next line
+      };
     }
 
     # ════════════════════════════════════════════════════════════════════
