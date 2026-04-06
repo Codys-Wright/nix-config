@@ -79,8 +79,38 @@ in
     ];
 
     # Each provides.* imports an _nvf_modules file as a vim class block
-    provides.ai.vim = importVim "ai.nix";
-    provides.coding.vim = importVim "coding.nix";
+    # ai needs pkgs for sidekick
+    provides.ai.vim =
+      { pkgs, ... }:
+      let
+        cfg = importVim "ai.nix";
+      in
+      cfg
+      // {
+        extraPlugins = (cfg.extraPlugins or { }) // {
+          sidekick = (cfg.extraPlugins.sidekick or { }) // {
+            package = pkgs.vimPlugins.sidekick-nvim;
+          };
+        };
+      };
+
+    # coding needs pkgs for grug-far and vim-repeat
+    provides.coding.vim =
+      { pkgs, ... }:
+      let
+        cfg = importVim "coding.nix";
+      in
+      cfg
+      // {
+        extraPlugins = (cfg.extraPlugins or { }) // {
+          grug-far = (cfg.extraPlugins.grug-far or { }) // {
+            package = pkgs.vimPlugins.grug-far-nvim;
+          };
+          vim-repeat = (cfg.extraPlugins.vim-repeat or { }) // {
+            package = pkgs.vimPlugins.vim-repeat;
+          };
+        };
+      };
     provides.debug.vim = importVim "debug.nix";
     provides.editor.vim = importVim "editor.nix";
     provides.format.vim = importVim "format.nix";
@@ -88,7 +118,31 @@ in
     provides.lang.vim = importVim "lang.nix";
     provides.lint.vim = importVim "lint.nix";
     provides.lsp.vim = importVim "lsp.nix";
-    provides.nvzone.vim = importVim "nvzone.nix";
+    # nvzone needs pkgs for floaterm (npins) — merge packages with config
+    provides.nvzone.vim =
+      { pkgs, ... }:
+      let
+        nvzoneConfig = importVim "nvzone.nix";
+      in
+      nvzoneConfig
+      // {
+        extraPlugins = (nvzoneConfig.extraPlugins or { }) // {
+          floaterm = (nvzoneConfig.extraPlugins.floaterm or { }) // {
+            package = pkgs.vimUtils.buildVimPlugin {
+              pname = "nvzone-floaterm";
+              version = builtins.substring 0 8 npinsSources.nvzone-floaterm.revision;
+              src = npinsSources.nvzone-floaterm.outPath;
+              doCheck = false;
+            };
+          };
+          volt.package = pkgs.vimPlugins.nvzone-volt;
+          typr.package = pkgs.vimPlugins.nvzone-typr;
+          minty.package = pkgs.vimPlugins.nvzone-minty;
+          menu.package = pkgs.vimPlugins.nvzone-menu;
+          showkeys.package = pkgs.vimPlugins.showkeys;
+          timerly.package = pkgs.vimPlugins.timerly;
+        };
+      };
     provides.snacks.vim = importVim "snacks/snacks.nix";
     provides.snacks-picker.vim = importVim "snacks/picker.nix";
     provides.snacks-dashboard.vim = importVim "snacks/dashboard.nix";
@@ -103,21 +157,6 @@ in
     provides.plugins.vim =
       { pkgs, ... }:
       {
-        extraPlugins.grug-far.package = pkgs.vimPlugins.grug-far-nvim;
-        extraPlugins.vim-repeat.package = pkgs.vimPlugins.vim-repeat;
-        extraPlugins.floaterm.package = pkgs.vimUtils.buildVimPlugin {
-          pname = "nvzone-floaterm";
-          version = builtins.substring 0 8 npinsSources.nvzone-floaterm.revision;
-          src = npinsSources.nvzone-floaterm.outPath;
-          doCheck = false;
-        };
-        extraPlugins.volt.package = pkgs.vimPlugins.nvzone-volt;
-        extraPlugins.typr.package = pkgs.vimPlugins.nvzone-typr;
-        extraPlugins.minty.package = pkgs.vimPlugins.nvzone-minty;
-        extraPlugins.menu.package = pkgs.vimPlugins.nvzone-menu;
-        extraPlugins.showkeys.package = pkgs.vimPlugins.showkeys;
-        extraPlugins.timerly.package = pkgs.vimPlugins.timerly;
-        extraPlugins.sidekick.package = pkgs.vimPlugins.sidekick-nvim;
         extraPlugins.nvim-treesitter.package = pkgs.vimPlugins.nvim-treesitter;
         extraPlugins.lzn-auto-require.package = pkgs.vimPlugins.lzn-auto-require;
         extraPlugins.friendly-snippets.package = pkgs.vimPlugins.friendly-snippets;
