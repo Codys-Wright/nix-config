@@ -35,7 +35,6 @@
         nvf = <FTS.coding._.editors/nvf>;
         cursor = <FTS.coding._.editors/cursor>;
         zed = <FTS.coding._.editors/zed>;
-        lazyvim = <FTS.coding._.editors/lazyvim>;
         neovim = <FTS.coding._.editors/neovim>;
       };
 
