@@ -22,8 +22,8 @@ let
 in
 {
   # Set default shell for user
-  # Usage: (<FTS.user/shell> { default = "fish"; })
-  FTS.user._.shell.__functor =
+  # Usage: (<fleet.user/shell> { default = "fish"; })
+  fleet.user._.shell.__functor =
     _self:
     {
       default ? "fish",

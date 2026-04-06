@@ -1,10 +1,10 @@
 # Firefox Browser aspect
 {
-  FTS,
+  fleet,
   ...
 }:
 {
-  FTS.apps._.browsers._.firefox = {
+  fleet.apps._.browsers._.firefox = {
     description = "Firefox Browser - Mozilla's open-source browser";
 
     homeManager =

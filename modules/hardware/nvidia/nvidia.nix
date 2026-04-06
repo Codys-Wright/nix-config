@@ -1,7 +1,7 @@
 # NVIDIA hardware aspect
-{ FTS, den, ... }:
+{ fleet, den, ... }:
 {
-  FTS.hardware._.nvidia = {
+  fleet.hardware._.nvidia = {
     description = "NVIDIA graphics hardware support";
 
     includes = [ (den.lib.groups [ "video" ]) ];

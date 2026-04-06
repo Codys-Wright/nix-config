@@ -1,7 +1,7 @@
 # r2modman mod manager aspect
-{ FTS, ... }:
+{ fleet, ... }:
 {
-  FTS.gaming._.r2modman = {
+  fleet.gaming._.r2modman = {
     description = "r2modman mod manager for Thunderstore mods";
 
     homeManager =

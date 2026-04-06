@@ -3,13 +3,13 @@
 {
   inputs,
   lib,
-  FTS,
+  fleet,
   ...
 }:
 {
   flake-file.inputs.nixos-facter-modules.url = "github:numtide/nixos-facter-modules";
 
-  FTS.hardware._.facter = {
+  fleet.hardware._.facter = {
     description = "Hardware detection using nixos-facter";
 
     nixos =

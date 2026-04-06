@@ -1,5 +1,5 @@
 {
-  FTS.user._.admin =
+  fleet.user._.admin =
     { user, ... }:
     {
       darwin.system.primaryUser = user.userName;

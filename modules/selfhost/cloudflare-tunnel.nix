@@ -1,14 +1,14 @@
 # Cloudflare Tunnel aspect for exposing services without port forwarding
 {
-  FTS,
+  fleet,
   lib,
   __findFile,
   ...
 }:
 {
   # Cloudflare Tunnel aspect
-  # Usage: FTS.selfhost._.cloudflare-tunnel { domain = "example.com"; ... }
-  FTS.selfhost._.cloudflare-tunnel =
+  # Usage: fleet.selfhost._.cloudflare-tunnel { domain = "example.com"; ... }
+  fleet.selfhost._.cloudflare-tunnel =
     {
       tunnelId,
       domain,

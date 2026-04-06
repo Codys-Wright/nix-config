@@ -1,7 +1,7 @@
 {
   # Autologin configuration for user (useful for VM testing)
   # Automatically logs in the user when display manager is enabled
-  FTS.user._.autologin =
+  fleet.user._.autologin =
     { user, ... }:
     {
       nixos =

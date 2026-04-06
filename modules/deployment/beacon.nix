@@ -4,12 +4,12 @@
   inputs,
   den,
   lib,
-  FTS,
+  fleet,
   ssh-keys,
   ...
 }:
 {
-  FTS.deployment._.beacon = {
+  fleet.deployment._.beacon = {
     description = ''
       Installation beacon for bootable ISO/USB generation.
 
@@ -20,7 +20,7 @@
       - SSH Keys: Hardcoded keys for THEBATTLESHIP, starcommand, and cody
 
       Usage:
-        FTS.deployment._.beacon  # Include in beacon aspect
+        fleet.deployment._.beacon  # Include in beacon aspect
     '';
 
     nixos =

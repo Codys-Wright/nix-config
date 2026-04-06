@@ -1,6 +1,6 @@
 # Flameshot aspect
 {
-  FTS.apps._.misc._.flameshot = {
+  fleet.apps._.misc._.flameshot = {
     description = "Flameshot - Powerful yet simple to use screenshot software";
 
     homeManager =

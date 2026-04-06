@@ -1,20 +1,20 @@
 {
   den,
   lib,
-  FTS,
+  fleet,
   __findFile,
   ...
 }:
 {
-  FTS.user._.password.__functor =
+  fleet.user._.password.__functor =
     _self: arg:
     let
       description = ''
         User password configuration that works with den user context.
 
         Example usage:
-          (<FTS.user/password> { method = "initial"; value = "changeme"; })
-          (<FTS.user/password> "mypassword")
+          (<fleet.user/password> { method = "initial"; value = "changeme"; })
+          (<fleet.user/password> "mypassword")
       '';
 
       mkPasswordConfig =

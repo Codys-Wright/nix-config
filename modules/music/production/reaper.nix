@@ -1,7 +1,7 @@
 # Reaper DAW with extensions
 # Uses reaper-flake's custom reaper derivation (v7.66) instead of nixpkgs
 {
-  FTS,
+  fleet,
   inputs,
   ...
 }:
@@ -9,7 +9,7 @@
   flake-file.inputs.reaper-flake.url = "github:FastTrackStudios/reaper-flake";
   flake-file.inputs.reaper-flake.inputs.nixpkgs.follows = "nixpkgs";
 
-  FTS.music._.production._.reaper = {
+  fleet.music._.production._.reaper = {
     description = "Reaper digital audio workstation with SWS and ReaPack extensions (v7.66 via reaper-flake)";
 
     homeManager =

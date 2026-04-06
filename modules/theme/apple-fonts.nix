@@ -7,7 +7,7 @@
     apple-fonts.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  FTS.apple-fonts = {
+  fleet.apple-fonts = {
     description = "Apple San Francisco fonts - SF Pro, SF Mono, SF Compact with optional Nerd Font patches";
 
     homeManager =

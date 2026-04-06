@@ -1,6 +1,6 @@
 # Helper for aspects to add groups to all host users.
 #
-# Usage in any FTS aspect included by a host:
+# Usage in any fleet aspect included by a host:
 #   includes = [ (den.lib.groups [ "libvirtd" "docker" ]) ];
 #
 # Uses host context: silently skipped when no host context (e.g. standalone homes).

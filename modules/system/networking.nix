@@ -1,10 +1,10 @@
 # Basic networking configuration
 {
-  FTS,
+  fleet,
   ...
 }:
 {
-  FTS.system._.networking = {
+  fleet.system._.networking = {
     description = "Basic networking with systemd-networkd (DHCP by default)";
 
     nixos =

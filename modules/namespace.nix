@@ -7,7 +7,7 @@
 {
   # Create namespaces for aspects
   imports = [
-    (inputs.den.namespace "FTS" true) # FTS namespace (exported)
+    (inputs.den.namespace "fleet" true) # fleet namespace (exported)
     (inputs.den.namespace "cody" false) # Cody user namespace (not exported)
   ];
 

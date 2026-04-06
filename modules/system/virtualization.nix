@@ -1,11 +1,11 @@
 # Virtualization support with libvirt, QEMU/KVM, and virt-manager
 {
-  FTS,
+  fleet,
   den,
   ...
 }:
 {
-  FTS.system._.virtualization = {
+  fleet.system._.virtualization = {
     description = "KVM/QEMU virtualization with virt-manager for running Windows VMs";
 
     includes = [

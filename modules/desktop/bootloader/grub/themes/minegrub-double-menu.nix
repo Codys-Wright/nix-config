@@ -4,17 +4,17 @@
 {
   inputs,
   den,
-  FTS,
+  fleet,
   ...
 }:
 {
   # MineGrub double menu theme provider for GRUB
-  FTS.grub._.themes._.minegrub-double-menu = {
+  fleet.grub._.themes._.minegrub-double-menu = {
     description = "MineGrub double menu theme (main menu + world selection) for GRUB bootloader";
 
     includes = [
-      FTS.grub._.themes._.minegrub
-      FTS.grub._.themes._.minegrub-world-sel
+      fleet.grub._.themes._.minegrub
+      fleet.grub._.themes._.minegrub-world-sel
     ];
 
     nixos = {

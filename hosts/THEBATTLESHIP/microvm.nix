@@ -4,7 +4,7 @@
 # SSH also available: ssh -p 2222 root@localhost
 {
   inputs,
-  FTS,
+  fleet,
   __findFile,
   ...
 }:
@@ -18,10 +18,10 @@
   den.aspects.THEBATTLESHIP-vm = {
     description = "MicroVM with niri desktop for testing THEBATTLESHIP config";
     includes = [
-      <FTS.desktop/environment/niri>
-      <FTS.coding/cli>
-      <FTS.coding/editors>
-      <FTS.coding/shells>
+      <fleet.desktop/environment/niri>
+      <fleet.coding/cli>
+      <fleet.coding/editors>
+      <fleet.coding/shells>
     ];
 
     nixos =

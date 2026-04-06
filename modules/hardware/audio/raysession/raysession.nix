@@ -1,10 +1,10 @@
 # RaySession audio sub-aspect (can be included independently)
 {
-  FTS,
+  fleet,
   ...
 }:
 {
-  FTS.raysession = {
+  fleet.raysession = {
     description = "RaySession audio session manager";
 
     nixos =

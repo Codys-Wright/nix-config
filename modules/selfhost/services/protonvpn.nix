@@ -1,13 +1,13 @@
 # ProtonVPN Service
 # VPN service using ProtonVPN with OpenVPN
 {
-  FTS,
+  fleet,
   inputs,
   lib,
   ...
 }:
 {
-  FTS.selfhost._.protonvpn =
+  fleet.selfhost._.protonvpn =
     {
       domain,
       # VPN configuration

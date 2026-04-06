@@ -1,13 +1,13 @@
 # Grocy Service
 # Grocery and household management
 {
-  FTS,
+  fleet,
   inputs,
   lib,
   ...
 }:
 {
-  FTS.selfhost._.grocy =
+  fleet.selfhost._.grocy =
     {
       domain,
       subdomain,

@@ -1,7 +1,7 @@
 # Networking hardware aspect
-{ FTS, ... }:
+{ fleet, ... }:
 {
-  FTS.hardware._.networking = {
+  fleet.hardware._.networking = {
     description = "NetworkManager networking support";
 
     nixos =

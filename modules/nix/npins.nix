@@ -16,7 +16,7 @@ let
 in
 {
   # npins aspect - Pin management tool for Nix flakes
-  FTS.nix._.npins = {
+  fleet.nix._.npins = {
     description = "npins - Pin management tool for Nix flakes";
   }
   // my.nix._.npins;

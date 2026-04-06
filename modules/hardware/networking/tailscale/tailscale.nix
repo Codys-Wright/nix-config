@@ -1,10 +1,10 @@
 # Tailscale module - Secure mesh VPN
 {
-  FTS,
+  fleet,
   ...
 }:
 {
-  FTS.hardware._.networking._.tailscale = {
+  fleet.hardware._.networking._.tailscale = {
     description = "Tailscale VPN service";
 
     nixos =

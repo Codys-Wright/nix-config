@@ -1,10 +1,10 @@
 # Bottles - Windows app runner using Wine
 {
-  FTS,
+  fleet,
   ...
 }:
 {
-  FTS.gaming._.bottles = {
+  fleet.gaming._.bottles = {
     description = "Bottles - run Windows applications and games with Wine";
 
     homeManager =

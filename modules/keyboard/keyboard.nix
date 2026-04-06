@@ -1,15 +1,15 @@
 # CLI tools meta-aspect - includes all CLI tool modules
 {
-  FTS,
+  fleet,
   ...
 }:
 {
-  FTS.keyboard = {
+  fleet.keyboard = {
     description = "Keyboard Configuration";
 
     includes = [
-      FTS.kanata
-      FTS.karabiner-elements
+      fleet.kanata
+      fleet.karabiner-elements
     ];
 
   };

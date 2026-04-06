@@ -2,7 +2,7 @@
 {
   inputs,
   lib,
-  FTS,
+  fleet,
   ...
 }:
 let
@@ -25,7 +25,7 @@ let
   immichSubdomain = "photos";
 in
 {
-  FTS.selfhost = {
+  fleet.selfhost = {
     description = ''
       Self-hosting services stack using SelfHostBlocks.
 
@@ -43,14 +43,14 @@ in
 
     includes = [
       # Let's Encrypt certificates with Cloudflare DNS
-      (FTS.selfhost._.letsencrypt-certs {
+      (fleet.selfhost._.letsencrypt-certs {
         inherit domain;
         adminEmail = "admin@${domain}";
         cloudflareTokenKey = "starcommand/selfhost/proxy/cloudflare/zone_dns_key";
       })
 
       # Cloudflare Tunnel - Exposes services without port forwarding
-      (FTS.selfhost._.cloudflare-tunnel {
+      (fleet.selfhost._.cloudflare-tunnel {
         inherit domain;
         tunnelId = "803700ac-6ca2-4041-94c7-3d1c9ef05e52";
         accountTagKey = "starcommand/selfhost/proxy/cloudflare/account_tag";
@@ -136,7 +136,7 @@ in
       })
 
       # LLDAP Identity Provider
-      (FTS.selfhost._.lldap {
+      (fleet.selfhost._.lldap {
         inherit domain;
         subdomain = lldapSubdomain;
         adminPasswordKey = "starcommand/selfhost/auth/lldap/admin_password";
@@ -257,7 +257,7 @@ in
       })
 
       # Authelia SSO Provider
-      (FTS.selfhost._.authelia {
+      (fleet.selfhost._.authelia {
         inherit domain;
         subdomain = authSubdomain;
         # LDAP connection info - will be read from config.shb.lldap
@@ -362,7 +362,7 @@ in
       })
 
       # Nextcloud Server
-      (FTS.selfhost._.nextcloud {
+      (fleet.selfhost._.nextcloud {
         inherit domain;
         subdomain = nextcloudSubdomain;
         # App/config stays on btrfs for proper permissions
@@ -403,7 +403,7 @@ in
       })
 
       # Monitoring Stack
-      (FTS.selfhost._.monitoring {
+      (fleet.selfhost._.monitoring {
         inherit domain;
         subdomain = grafanaSubdomain;
         adminPasswordKey = "starcommand/selfhost/monitoring/grafana/admin_password";
@@ -426,7 +426,7 @@ in
       })
 
       # Vaultwarden Password Manager
-      (FTS.selfhost._.vaultwarden {
+      (fleet.selfhost._.vaultwarden {
         inherit domain;
         subdomain = vaultwardenSubdomain;
         databasePasswordKey = "starcommand/selfhost/apps/vaultwarden/database_password";
@@ -441,7 +441,7 @@ in
       #   Music: /mnt/storage/media/music
       #   Audiobooks: /mnt/storage/media/audiobooks
       # See docs/jellyfin-setup.md for detailed setup instructions
-      (FTS.selfhost._.jellyfin {
+      (fleet.selfhost._.jellyfin {
         inherit domain;
         subdomain = jellyfinSubdomain;
         dcdomain = "dc=${builtins.replaceStrings [ "." ] [ ",dc=" ] domain}";
@@ -452,7 +452,7 @@ in
       })
 
       # Arr Stack - Media management (Radarr, Sonarr, Bazarr, Readarr, Lidarr, Jackett)
-      (FTS.selfhost._.arr {
+      (fleet.selfhost._.arr {
         inherit domain;
         authEndpoint = "https://${authSubdomain}.${domain}";
         radarrApiKey = "starcommand/selfhost/apps/arr/radarr/api_key";
@@ -461,7 +461,7 @@ in
       })
 
       # Grocy - Grocery and household management
-      (FTS.selfhost._.grocy {
+      (fleet.selfhost._.grocy {
         inherit domain;
         subdomain = grocySubdomain;
         currency = "USD";
@@ -469,7 +469,7 @@ in
       })
 
       # Deluge - BitTorrent client
-      (FTS.selfhost._.deluge {
+      (fleet.selfhost._.deluge {
         inherit domain;
         subdomain = delugeSubdomain;
         downloadLocation = "/mnt/storage/torrents"; # Torrents on merged storage
@@ -479,7 +479,7 @@ in
       })
 
       # Forgejo - Git hosting
-      (FTS.selfhost._.forgejo {
+      (fleet.selfhost._.forgejo {
         inherit domain;
         subdomain = forgejoSubdomain;
         databasePasswordKey = "starcommand/selfhost/apps/forgejo/database_password";
@@ -495,7 +495,7 @@ in
       })
 
       # Karakeep - AI-powered bookmarking
-      (FTS.selfhost._.karakeep {
+      (fleet.selfhost._.karakeep {
         inherit domain;
         subdomain = karakeepSubdomain;
         nextauthSecretKey = "starcommand/selfhost/apps/karakeep/nextauth_secret";
@@ -507,7 +507,7 @@ in
       })
 
       # Audiobookshelf - Audiobook server
-      (FTS.selfhost._.audiobookshelf {
+      (fleet.selfhost._.audiobookshelf {
         inherit domain;
         subdomain = audiobookshelfSubdomain;
         # SSO
@@ -517,14 +517,14 @@ in
       })
 
       # Hledger - Plain-text accounting
-      (FTS.selfhost._.hledger {
+      (fleet.selfhost._.hledger {
         inherit domain;
         subdomain = hledgerSubdomain;
         authEndpoint = "https://${authSubdomain}.${domain}";
       })
 
       # Home-Assistant - Home automation
-      (FTS.selfhost._.home-assistant {
+      (fleet.selfhost._.home-assistant {
         inherit domain;
         subdomain = homeAssistantSubdomain;
         name = "Star Command Home";
@@ -539,7 +539,7 @@ in
       })
 
       # Open-WebUI - LLM chat interface
-      (FTS.selfhost._.open-webui {
+      (fleet.selfhost._.open-webui {
         inherit domain;
         subdomain = openWebuiSubdomain;
         # SSO
@@ -555,7 +555,7 @@ in
       #   - Music videos → /mnt/storage/media/music
       #   - Documentaries → /mnt/storage/media/movies
       #   - Podcasts → /mnt/storage/media/tv
-      (FTS.selfhost._.pinchflat {
+      (fleet.selfhost._.pinchflat {
         inherit domain;
         subdomain = pinchflatSubdomain;
         mediaDir = "/mnt/storage/youtube"; # Downloaded videos on merged storage
@@ -567,7 +567,7 @@ in
       })
 
       # Immich - Photo and video backup
-      (FTS.selfhost._.immich {
+      (fleet.selfhost._.immich {
         inherit domain;
         subdomain = immichSubdomain;
         # App state on btrfs, photos on merged storage
@@ -579,7 +579,7 @@ in
       })
 
       # ProtonVPN - VPN service with kill switch
-      (FTS.selfhost._.protonvpn {
+      (fleet.selfhost._.protonvpn {
         inherit domain;
         usernameKey = "starcommand/selfhost/openvpn/username";
         passwordKey = "starcommand/selfhost/openvpn/password";
@@ -598,7 +598,7 @@ in
       })
 
       # Samba Client Tools - SMB/CIFS utilities for network shares
-      (FTS.selfhost._.samba-client { })
+      (fleet.selfhost._.samba-client { })
     ];
 
     nixos =

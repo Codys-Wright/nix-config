@@ -5,24 +5,24 @@
   inputs,
   den,
   lib,
-  FTS,
+  fleet,
   ...
 }:
 {
   # Description for the config sub-aspect
-  FTS.deployment._.config.description = ''
+  fleet.deployment._.config.description = ''
     Base deployment configuration for remote NixOS hosts.
 
     Provides SSH access, networking, user setup, and system hardening.
     Other deployment modules (bootssh, hotspot, secrets) can access these settings.
 
     Usage:
-      (<FTS.deployment/config> { ip = "192.168.1.100"; })
-      (<FTS.deployment/config> { ip = "192.168.1.100"; sshPort = 2222; sshUser = "deploy"; })
+      (<fleet.deployment/config> { ip = "192.168.1.100"; })
+      (<fleet.deployment/config> { ip = "192.168.1.100"; sshPort = 2222; sshUser = "deploy"; })
   '';
 
   # Make config callable as a parametric aspect
-  FTS.deployment._.config.__functor =
+  fleet.deployment._.config.__functor =
     _self:
     {
       # Deploy-rs parameters

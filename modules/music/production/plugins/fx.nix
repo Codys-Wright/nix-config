@@ -1,10 +1,10 @@
 # Audio effects plugins
 {
-  FTS,
+  fleet,
   ...
 }:
 {
-  FTS.music._.production._.plugins._.fx = {
+  fleet.music._.production._.plugins._.fx = {
     description = "Audio effects plugins for music production";
 
     homeManager =

@@ -10,7 +10,7 @@
 #   Physical Ctrl    → Ctrl (terminal signals, unchanged)
 #   Physical Alt L   → Alt ("Option" word nav)
 {
-  FTS,
+  fleet,
   inputs,
   lib,
   ...
@@ -145,7 +145,7 @@ let
   };
 in
 {
-  FTS.desktop._.environment._.niri._.xremap = {
+  fleet.desktop._.environment._.niri._.xremap = {
     description = ''
       macOS-style keyboard shortcuts via xremap.
       Caps Lock (hold) = Mod5 (niri Mod), Physical Super = Cmd (F20 virtual modifier).

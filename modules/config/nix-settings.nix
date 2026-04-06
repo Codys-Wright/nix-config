@@ -1,5 +1,5 @@
 {
-  FTS,
+  fleet,
   den,
   __findFile,
   ...
@@ -43,10 +43,10 @@ let
     };
 in
 {
-  FTS.nix-settings = {
+  fleet.nix-settings = {
     description = "Shared nix settings and package policy";
     includes = [
-      <FTS/nix>
+      <fleet/nix>
     ];
     os = nixSettings;
   };

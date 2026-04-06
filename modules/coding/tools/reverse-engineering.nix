@@ -1,6 +1,6 @@
-{ FTS, ... }:
+{ fleet, ... }:
 {
-  FTS.coding._.tools._.reverse-engineering = {
+  fleet.coding._.tools._.reverse-engineering = {
     description = "Reverse engineering and binary analysis tools";
     nixos =
       { pkgs, ... }:

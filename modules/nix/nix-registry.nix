@@ -1,11 +1,11 @@
 {
   inputs,
   lib,
-  FTS,
+  fleet,
   ...
 }:
 {
-  FTS.nix._.nix-registry = {
+  fleet.nix._.nix-registry = {
     description = "Nix registry configuration from flake inputs";
 
     homeManager =

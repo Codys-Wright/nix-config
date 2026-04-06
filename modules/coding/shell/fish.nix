@@ -1,11 +1,11 @@
 # Fish shell aspect with custom configuration
 {
-  FTS,
+  fleet,
   lib,
   ...
 }:
 {
-  FTS.coding._.shells._.fish = {
+  fleet.coding._.shells._.fish = {
     description = "Fish shell with custom configuration, abbreviations, aliases, and functions";
 
     homeManager =

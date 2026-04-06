@@ -1,7 +1,7 @@
 {
   lib,
   den,
-  FTS,
+  fleet,
   __findFile,
   ...
 }:
@@ -13,7 +13,7 @@ let
     Usage:
 
       den.aspects.vic.includes = [
-        (FTS.coding._.user-terminal "kitty")
+        (fleet.coding._.user-terminal "kitty")
       ];
   '';
 
@@ -41,7 +41,7 @@ let
 
 in
 {
-  FTS.coding._.user-terminal =
+  fleet.coding._.user-terminal =
     terminal:
     <den.lib.parametric> {
       inherit description;

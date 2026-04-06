@@ -2,16 +2,16 @@
 # Takes named parameters for boot configuration
 {
   lib,
-  FTS,
+  fleet,
   ...
 }:
 {
-  FTS.grub.description = "GRUB boot loader configuration for NixOS";
+  fleet.grub.description = "GRUB boot loader configuration for NixOS";
 
   # Function that produces a GRUB boot loader configuration aspect
   # Takes named parameters: { devices, uefi, useOSProber, mirroredBoots, theme, ... }
-  # Usage: (FTS.grub { uefi = true; theme = "minegrub"; })
-  FTS.grub.__functor =
+  # Usage: (fleet.grub { uefi = true; theme = "minegrub"; })
+  fleet.grub.__functor =
     _self:
     {
       devices ? [ ],
@@ -61,11 +61,11 @@
       # Theme includes
       themeIncludes =
         if theme == "minegrub" then
-          [ FTS.grub._.themes._.minegrub ]
+          [ fleet.grub._.themes._.minegrub ]
         else if theme == "minegrub-world-sel" then
-          [ FTS.grub._.themes._.minegrub-world-sel ]
+          [ fleet.grub._.themes._.minegrub-world-sel ]
         else if theme == "minegrub-double-menu" then
-          [ FTS.grub._.themes._.minegrub-double-menu ]
+          [ fleet.grub._.themes._.minegrub-double-menu ]
         else
           [ ];
     in

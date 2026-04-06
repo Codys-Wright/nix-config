@@ -1,10 +1,10 @@
 # Telegram Desktop
 {
-  FTS,
+  fleet,
   ...
 }:
 {
-  FTS.apps._.communications._.telegram = {
+  fleet.apps._.communications._.telegram = {
     description = "Telegram Desktop messenger";
 
     homeManager =

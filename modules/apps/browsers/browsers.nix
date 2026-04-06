@@ -1,12 +1,12 @@
 # Browser aggregator
-{ FTS, ... }:
+{ fleet, ... }:
 {
-  FTS.apps._.browsers = {
+  fleet.apps._.browsers = {
     description = "Web browsers - Zen, Brave, Firefox";
     includes = [
-      FTS.apps._.browsers._.zen
-      FTS.apps._.browsers._.brave
-      FTS.apps._.browsers._.firefox
+      fleet.apps._.browsers._.zen
+      fleet.apps._.browsers._.brave
+      fleet.apps._.browsers._.firefox
     ];
   };
 }

@@ -1,13 +1,13 @@
 # Pinchflat Service
 # YouTube video downloader
 {
-  FTS,
+  fleet,
   inputs,
   lib,
   ...
 }:
 {
-  FTS.selfhost._.pinchflat =
+  fleet.selfhost._.pinchflat =
     {
       domain,
       subdomain,

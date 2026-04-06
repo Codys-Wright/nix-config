@@ -1,12 +1,12 @@
 # Jellyfin media server aspect module
 {
-  FTS,
+  fleet,
   lib,
   __findFile,
   ...
 }:
 {
-  FTS.selfhost._.jellyfin =
+  fleet.selfhost._.jellyfin =
     {
       domain,
       subdomain ? "jellyfin",

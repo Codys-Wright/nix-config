@@ -1,6 +1,6 @@
 # Brave Browser aspect
 {
-  FTS.apps._.misc._.nextcloud-client = {
+  fleet.apps._.misc._.nextcloud-client = {
     description = "Brave Browser - Privacy-focused Chromium-based browser";
 
     homeManager =

@@ -1,6 +1,6 @@
 {
   # Use hjem instead of mkOutOfStoreSymlink !
-  FTS.dots = {
+  fleet.dots = {
     homeManager =
       {
         config,

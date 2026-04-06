@@ -1,6 +1,6 @@
 # Zoxide - smart cd
 {
-  FTS.coding._.cli._.zoxide = {
+  fleet.coding._.cli._.zoxide = {
     description = "Zoxide smart cd replacement";
 
     homeManager = {

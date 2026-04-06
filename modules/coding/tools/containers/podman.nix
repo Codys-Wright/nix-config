@@ -1,7 +1,7 @@
 # Podman container tools aspect
-{ FTS, den, ... }:
+{ fleet, den, ... }:
 {
-  FTS.coding._.tools._.containers._.podman = {
+  fleet.coding._.tools._.containers._.podman = {
     description = "Podman container tools with Docker compatibility";
 
     includes = [ (den.lib.groups [ "podman" ]) ];

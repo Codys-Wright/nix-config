@@ -4,12 +4,12 @@
 {
   inputs,
   lib,
-  FTS,
+  fleet,
   ...
 }:
 {
   # Function that produces a manual btrfs disk configuration aspect
-  # Usage: (<FTS/system/disk/btrfs-manual> {
+  # Usage: (<fleet/system/disk/btrfs-manual> {
   #   device = "/dev/nvme0n1";
   #   partition = 3;  # /dev/nvme0n1p3
   #   bootPartition = 1;  # /dev/nvme0n1p1
@@ -20,7 +20,7 @@
   #     persist = "@persist";
   #   };
   # })
-  FTS.system._.disk._.btrfs-manual =
+  fleet.system._.disk._.btrfs-manual =
     {
       device,
       partition ? 3,

@@ -1,7 +1,7 @@
 # Disk utilities — udisks2, polkit automount rules, gvfs, devmon
-{ FTS, ... }:
+{ fleet, ... }:
 {
-  FTS.hardware._.disk-utils = {
+  fleet.hardware._.disk-utils = {
     description = "Disk utilities: udisks2 automounting, polkit rules, gvfs, devmon";
 
     nixos =

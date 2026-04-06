@@ -1,13 +1,13 @@
 # Deluge Service
 # Torrent client with web UI
 {
-  FTS,
+  fleet,
   inputs,
   lib,
   ...
 }:
 {
-  FTS.selfhost._.deluge =
+  fleet.selfhost._.deluge =
     {
       domain,
       subdomain,

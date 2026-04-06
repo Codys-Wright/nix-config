@@ -1,12 +1,12 @@
 # WiFi module for beacon installation environment
 # Uses iwd (iNet Wireless Daemon) for better CLI experience
 {
-  FTS,
+  fleet,
   lib,
   ...
 }:
 {
-  FTS.deployment._.wifi = {
+  fleet.deployment._.wifi = {
     description = ''
       WiFi support for beacon installation environment using iwd.
 
@@ -17,11 +17,11 @@
         iwctl station wlan0 connect "SSID"
 
       Usage:
-        FTS.deployment._.wifi  # Include in beacon aspect
+        fleet.deployment._.wifi  # Include in beacon aspect
     '';
 
     # Include networkd aspect for base networking
-    includes = [ FTS.deployment._.networkd ];
+    includes = [ fleet.deployment._.networkd ];
 
     nixos =
       {

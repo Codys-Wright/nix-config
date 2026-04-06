@@ -1,10 +1,10 @@
 # OpenCode AI terminal assistant aspect
 {
-  FTS,
+  fleet,
   ...
 }:
 {
-  FTS.coding._.tools._.opencode = {
+  fleet.coding._.tools._.opencode = {
     description = "OpenCode AI terminal assistant";
 
     homeManager =

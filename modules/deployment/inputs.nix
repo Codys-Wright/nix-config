@@ -3,11 +3,11 @@
 {
   inputs,
   lib,
-  FTS,
+  fleet,
   ...
 }:
 {
-  FTS.deployment._.inputs = {
+  fleet.deployment._.inputs = {
     description = "Deployment-related flake inputs (informational aspect)";
   };
 

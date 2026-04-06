@@ -1,5 +1,5 @@
 {
-  FTS.kanata = {
+  fleet.kanata = {
     description = "Kanata keyboard remapper for both NixOS and Darwin";
 
     nixos =

@@ -1,7 +1,7 @@
 # SDDM display manager with MacTahoe theme
-{ FTS, ... }:
+{ fleet, ... }:
 {
-  FTS.desktop._.display-manager._.sddm = {
+  fleet.desktop._.display-manager._.sddm = {
     description = "SDDM display manager with Wayland backend and MacTahoe-Dark theme";
 
     nixos =

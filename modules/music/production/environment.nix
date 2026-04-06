@@ -1,14 +1,14 @@
 # Music production environment - plugin paths and audio configuration
 # Sets up environment variables for DAWs to find plugins
 {
-  FTS,
+  fleet,
   inputs,
   ...
 }:
 {
   flake-file.inputs.musnix.url = "github:musnix/musnix";
 
-  FTS.music._.production._.environment = {
+  fleet.music._.production._.environment = {
     description = ''
       Music production environment configuration.
       Sets up plugin paths (LV2, CLAP, VST, VST3, LADSPA, DSSI) for DAWs.

@@ -1,7 +1,7 @@
 # SSH server configuration
-{ FTS, ssh-keys, ... }:
+{ fleet, ssh-keys, ... }:
 {
-  FTS.system._.ssh = {
+  fleet.system._.ssh = {
     description = "SSH server configuration with secure defaults and fleet access";
 
     nixos =

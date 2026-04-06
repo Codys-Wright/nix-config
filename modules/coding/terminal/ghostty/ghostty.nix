@@ -1,10 +1,10 @@
 # Ghostty terminal emulator aspect
 {
-  FTS,
+  fleet,
   ...
 }:
 {
-  FTS.coding._.terminals._.ghostty = {
+  fleet.coding._.terminals._.ghostty = {
     description = "Ghostty terminal emulator (Linux only)";
 
     nixos =

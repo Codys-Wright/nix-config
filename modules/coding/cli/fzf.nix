@@ -1,6 +1,6 @@
 # Fzf - fuzzy finder with custom colors
 {
-  FTS.coding._.cli._.fzf = {
+  fleet.coding._.cli._.fzf = {
     description = "Fzf fuzzy finder with custom colors";
 
     homeManager =

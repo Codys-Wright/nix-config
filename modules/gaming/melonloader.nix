@@ -1,10 +1,10 @@
 # MelonLoader Installer aspect
 {
-  FTS,
+  fleet,
   ...
 }:
 {
-  FTS.gaming._.melonloader = {
+  fleet.gaming._.melonloader = {
     description = "MelonLoader installer for Unity game modding";
 
     homeManager =
