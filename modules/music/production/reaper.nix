@@ -1,30 +1,30 @@
 # Reaper DAW with extensions
-# Uses fts-flake's custom reaper derivation (v7.66) instead of nixpkgs
+# Uses reaper-flake's custom reaper derivation (v7.66) instead of nixpkgs
 {
   FTS,
   inputs,
   ...
 }:
 {
-  flake-file.inputs.fts-flake.url = "path:/home/cody/Development/FastTrackStudio/fts-flake";
-  flake-file.inputs.fts-flake.inputs.nixpkgs.follows = "nixpkgs";
+  flake-file.inputs.reaper-flake.url = "github:FastTrackStudios/reaper-flake";
+  flake-file.inputs.reaper-flake.inputs.nixpkgs.follows = "nixpkgs";
 
   FTS.music._.production._.reaper = {
-    description = "Reaper digital audio workstation with SWS and ReaPack extensions (v7.66 via fts-flake)";
+    description = "Reaper digital audio workstation with SWS and ReaPack extensions (v7.66 via reaper-flake)";
 
     homeManager =
       { pkgs, ... }:
       let
-        ftsPkgs = inputs.fts-flake.lib.mkFtsPackages {
+        reaperPkgs = inputs.reaper-flake.lib.mkReaperPackages {
           inherit pkgs;
-          cfg = inputs.fts-flake.presets.full // {
+          cfg = inputs.reaper-flake.presets.full // {
             headless.enable = false;
           };
         };
       in
       {
         home.packages = [
-          ftsPkgs.reaper
+          reaperPkgs.reaper
           pkgs.reaper-sws-extension
           pkgs.reaper-reapack-extension
         ];

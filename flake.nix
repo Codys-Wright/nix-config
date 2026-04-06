@@ -35,10 +35,6 @@
       url = "github:hercules-ci/flake-parts";
       inputs.nixpkgs-lib.follows = "nixpkgs-lib";
     };
-    fts-flake = {
-      url = "path:/home/cody/Development/FastTrackStudio/fts-flake";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -77,6 +73,10 @@
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.11";
     nvf = {
       url = "github:notashelf/nvf";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    reaper-flake = {
+      url = "github:FastTrackStudios/reaper-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     rust-overlay = {
