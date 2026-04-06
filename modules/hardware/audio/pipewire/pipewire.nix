@@ -1,11 +1,14 @@
 # PipeWire audio sub-aspect (can be included independently)
 {
   FTS,
+  den,
   ...
 }:
 {
   FTS.hardware._.audio._.pipewire = {
     description = "PipeWire audio system with low-latency configuration";
+
+    includes = [ (den.lib.groups [ "audio" ]) ];
 
     nixos =
       { pkgs, lib, ... }:
