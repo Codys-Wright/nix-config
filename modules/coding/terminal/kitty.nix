@@ -79,10 +79,10 @@
           kitty-themes
         ];
 
-        # Environment variables
+        # Environment variables (mkDefault — overridden by user-terminal if another is the default)
         home.sessionVariables = {
-          TERMINAL = "kitty";
-          TERM = "xterm-kitty";
+          TERMINAL = lib.mkDefault "kitty";
+          TERM = lib.mkDefault "xterm-kitty";
         };
 
         # Shell aliases for kitty
