@@ -47,7 +47,7 @@
         (FTS.selfhost._.samba-client { })
         <FTS.system/avahi>
         <FTS.system/virtualization>
-        (<FTS.deployment> { })
+        (FTS.deploy { ip = "100.74.250.99"; })
 
         # 10G network tuning for starcommand link
         (FTS.system._.network-10g { interface = "enp12s0"; })
