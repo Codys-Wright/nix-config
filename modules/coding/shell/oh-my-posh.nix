@@ -15,8 +15,9 @@
     homeManager =
       { pkgs, lib, ... }:
       let
-        configArg = "--config ${pkgs.oh-my-posh}/share/oh-my-posh/themes/catppuccin.omp.json";
-        # Pre-generate the nushell init script at build time
+        themeFile = "${pkgs.oh-my-posh}/share/oh-my-posh/themes/catppuccin.omp.json";
+        configArg = "--config ${themeFile}";
+        # Pre-generate the nushell init script at build time with the theme baked in
         ompInitNu = pkgs.runCommand "oh-my-posh-init.nu" { } ''
           ${lib.getExe pkgs.oh-my-posh} init nu ${configArg} --print > $out
         '';
@@ -32,8 +33,11 @@
           useTheme = "catppuccin";
         };
 
-        # Proper nushell integration: source a pre-built init script.
-        # HM's built-in integration just dumps the bare command which nushell doesn't eval.
+        # Set POSH_THEME so oh-my-posh uses catppuccin at runtime
+        # The init script's `print` commands read this env var
+        programs.nushell.environmentVariables.POSH_THEME = themeFile;
+
+        # Source the pre-built init script
         programs.nushell.extraConfig = lib.mkOrder 2000 ''
           source ${ompInitNu}
         '';
