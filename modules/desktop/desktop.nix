@@ -31,6 +31,6 @@
         <FTS.desktop._.display-manager/sddm>
       ];
 
-      nixos.services.displayManager.defaultSession = sessionNames.${default};
+      nixos.services.displayManager.defaultSession = lib.mkForce sessionNames.${default};
     };
 }
