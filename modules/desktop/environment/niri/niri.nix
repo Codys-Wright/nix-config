@@ -36,11 +36,11 @@
         xdg.portal = {
           enable = true;
           extraPortals = [
+            pkgs.xdg-desktop-portal-wlr
             pkgs.xdg-desktop-portal-gtk
-            pkgs.xdg-desktop-portal-gnome
           ];
-          config.common.default = [
-            "gnome"
+          config.niri.default = [
+            "wlr"
             "gtk"
           ];
         };
@@ -59,11 +59,16 @@
           grim # Screenshot capture
           slurp # Region selection for screenshots
           swappy # Screenshot annotation editor
+          nautilus
         ];
       };
 
     homeManager =
-      { pkgs, lib, ... }:
+      {
+        pkgs,
+        lib,
+        ...
+      }:
       let
         # Evaluate the wrapper to get the baked config.kdl in the nix store.
         # This is the single source of truth for the niri config — defined in

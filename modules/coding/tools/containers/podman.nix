@@ -13,8 +13,6 @@
         # Enable Podman with Docker compatibility
         virtualisation.podman = {
           enable = true;
-          dockerCompat = true;
-          dockerSocket.enable = true;
           defaultNetwork.settings.dns_enabled = true;
         };
 
@@ -49,19 +47,6 @@
           lazydocker
         ];
 
-        # Set DOCKER_HOST environment variable for Docker Compose compatibility
-        home.sessionVariables = {
-          DOCKER_HOST = "unix://$XDG_RUNTIME_DIR/podman/podman.sock";
-        };
-
-        # Configure shells to set DOCKER_HOST
-        programs.fish.shellInit = ''
-          set -x DOCKER_HOST unix://$XDG_RUNTIME_DIR/podman/podman.sock
-        '';
-
-        programs.zsh.initExtra = ''
-          export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock
-        '';
       };
   };
 }
