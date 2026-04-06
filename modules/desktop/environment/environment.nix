@@ -1,12 +1,12 @@
 # Desktop environment facet
-{ FTS, ... }:
+{ fleet, ... }:
 {
-  FTS.desktop._.environment.description = ''
+  fleet.desktop._.environment.description = ''
     Desktop environment configuration.
 
     Direct access:
-      <FTS.desktop/environment/niri>
+      <fleet.desktop/environment/niri>
   '';
 
-  FTS.desktop._.environment = { };
+  fleet.desktop._.environment = { };
 }

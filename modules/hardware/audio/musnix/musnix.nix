@@ -1,7 +1,7 @@
 # Musnix real-time audio sub-aspect
 # Takes named parameters for musnix configuration
 {
-  FTS,
+  fleet,
   lib,
   inputs,
   ...
@@ -11,8 +11,8 @@
 
   # Function that produces a musnix real-time audio configuration aspect
   # Takes named parameters: { alsaSeq, ffado, rtcqs, soundcardPciId, ... }
-  # Usage: (<FTS/hardware/audio/musnix> { rtcqs = true; })
-  FTS.hardware._.audio._.musnix =
+  # Usage: (<fleet/hardware/audio/musnix> { rtcqs = true; })
+  fleet.hardware._.audio._.musnix =
     {
       alsaSeq ? true,
       ffado ? false,

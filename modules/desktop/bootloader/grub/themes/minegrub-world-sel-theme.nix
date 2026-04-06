@@ -3,7 +3,7 @@
 {
   inputs,
   den,
-  FTS,
+  fleet,
   ...
 }:
 {
@@ -13,7 +13,7 @@
   };
 
   # MineGrub World Selection theme provider for GRUB
-  FTS.grub._.themes._.minegrub-world-sel = {
+  fleet.grub._.themes._.minegrub-world-sel = {
     description = "MineGrub World Selection theme for GRUB bootloader";
 
     nixos = {

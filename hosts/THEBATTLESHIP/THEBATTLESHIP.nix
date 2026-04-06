@@ -1,6 +1,6 @@
 {
   inputs,
-  FTS,
+  fleet,
   __findFile,
   ...
 }:
@@ -18,23 +18,23 @@
   den.aspects = {
     THEBATTLESHIP = {
       includes = [
-        <FTS/fonts>
-        <FTS/phoenix>
-        <FTS/mactahoe>
-        <FTS/stylix>
+        <fleet/fonts>
+        <fleet/phoenix>
+        <fleet/mactahoe>
+        <fleet/stylix>
 
-        (FTS.desktop { default = "niri"; })
-        (FTS.grub { uefi = true; })
+        (fleet.desktop { default = "niri"; })
+        (fleet.grub { uefi = true; })
 
-        (FTS.hardware {
+        (fleet.hardware {
           nvidia = true;
           tailscale = true;
         })
 
-        <FTS/gaming>
-        <FTS/apps>
+        <fleet/gaming>
+        <fleet/apps>
 
-        (<FTS.system/disk> {
+        (<fleet.system/disk> {
           type = "btrfs-impermanence";
           device = "/dev/nvme2n1";
           withSwap = true;
@@ -42,15 +42,15 @@
           persistFolder = "/persist";
         })
 
-        <FTS/kernel>
-        <FTS.music/production>
-        (FTS.selfhost._.samba-client { })
-        <FTS.system/avahi>
-        <FTS.system/virtualization>
-        (FTS.deploy { ip = "100.74.250.99"; })
+        <fleet/kernel>
+        <fleet.music/production>
+        (fleet.selfhost._.samba-client { })
+        <fleet.system/avahi>
+        <fleet.system/virtualization>
+        (fleet.deploy { ip = "100.74.250.99"; })
 
         # 10G network tuning for starcommand link
-        (FTS.system._.network-10g { interface = "enp12s0"; })
+        (fleet.system._.network-10g { interface = "enp12s0"; })
       ];
 
       nixos =

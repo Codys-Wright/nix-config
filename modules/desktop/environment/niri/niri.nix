@@ -3,14 +3,14 @@
 # The wrapper evaluates the settings into a store-path config.kdl.
 # homeManager symlinks ~/.config/niri/config.kdl → that store path.
 {
-  FTS,
+  fleet,
   den,
   inputs,
   pkgs,
   ...
 }:
 {
-  FTS.desktop._.environment._.niri = {
+  fleet.desktop._.environment._.niri = {
     description = ''
       Niri scrollable-tiling Wayland compositor with Noctalia shell.
 
@@ -23,7 +23,7 @@
     '';
 
     includes = [
-      FTS.desktop._.environment._.niri._.xremap
+      fleet.desktop._.environment._.niri._.xremap
       (den.lib.groups [ "input" ])
     ];
 

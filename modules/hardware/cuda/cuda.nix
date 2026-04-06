@@ -1,7 +1,7 @@
 # CUDA hardware aspect
-{ FTS, ... }:
+{ fleet, ... }:
 {
-  FTS.hardware._.cuda = {
+  fleet.hardware._.cuda = {
     description = "CUDA hardware support";
 
     nixos =

@@ -1,13 +1,13 @@
 # Let's Encrypt Certificates with Cloudflare DNS
 # Production-ready SSL certificates using Let's Encrypt and Cloudflare DNS challenge
 {
-  FTS,
+  fleet,
   inputs,
   lib,
   ...
 }:
 {
-  FTS.selfhost._.letsencrypt-certs =
+  fleet.selfhost._.letsencrypt-certs =
     {
       domain,
       subdomains ? [ ],

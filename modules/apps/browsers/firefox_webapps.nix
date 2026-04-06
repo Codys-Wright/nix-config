@@ -1,7 +1,7 @@
 # Firefox WebApps - Site-specific browser instances
 # Based on https://github.com/n3oney/nixus/blob/main/modules/home/firefox-webapps.nix
 {
-  FTS,
+  fleet,
   pkgs,
   config,
   lib,
@@ -73,7 +73,7 @@ let
     ) cfg;
 in
 {
-  FTS.apps._.browsers._.firefox_webapps = {
+  fleet.apps._.browsers._.firefox_webapps = {
     description = "Firefox WebApps - Site-specific browser instances";
 
     homeManager =

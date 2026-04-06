@@ -1,12 +1,12 @@
 # Audio plugins facet - effects and instruments
-{ FTS, ... }:
+{ fleet, ... }:
 {
-  FTS.music._.production._.plugins = {
+  fleet.music._.production._.plugins = {
     description = "Audio plugins - effects and virtual instruments";
 
     includes = [
-      FTS.music._.production._.plugins._.fx
-      FTS.music._.production._.plugins._.instruments
+      fleet.music._.production._.plugins._.fx
+      fleet.music._.production._.plugins._.instruments
     ];
   };
 }

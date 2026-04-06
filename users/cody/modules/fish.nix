@@ -1,5 +1,5 @@
 # User-specific fish overrides (if any)
-# Most fish configuration is now in FTS.coding._.shells._.fish
+# Most fish configuration is now in fleet.coding._.shells._.fish
 { ... }:
 {
   cody.fish.description = "Cody's fish shell overrides — vi key bindings";

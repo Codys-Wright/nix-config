@@ -3,16 +3,16 @@
 # Any host that includes this becomes deployable via `just deploy <host>`.
 #
 # Usage:
-#   (FTS.deploy { ip = "100.74.250.99"; })
-#   (FTS.deploy { ip = "192.168.0.106"; sshUser = "root"; })
-#   (FTS.deploy { ip = "10.0.0.1"; sshPort = 2222; })
+#   (fleet.deploy { ip = "100.74.250.99"; })
+#   (fleet.deploy { ip = "192.168.0.106"; sshUser = "root"; })
+#   (fleet.deploy { ip = "10.0.0.1"; sshPort = 2222; })
 {
-  FTS,
+  fleet,
   lib,
   ...
 }:
 {
-  FTS.deploy = {
+  fleet.deploy = {
     description = "Deploy-rs target: makes a host remotely deployable via `just deploy <host>`";
 
     __functor =

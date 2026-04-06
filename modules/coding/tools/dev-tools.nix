@@ -1,7 +1,7 @@
 # General development tools aspect
-{ FTS, ... }:
+{ fleet, ... }:
 {
-  FTS.coding._.tools._.dev-tools = {
+  fleet.coding._.tools._.dev-tools = {
     description = "General development tools and utilities";
 
     # NixOS-specific tools (Linux-only)

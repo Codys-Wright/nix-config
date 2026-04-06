@@ -1,10 +1,10 @@
 # Kitty terminal emulator aspect
 {
-  FTS,
+  fleet,
   ...
 }:
 {
-  FTS.coding._.terminals._.kitty = {
+  fleet.coding._.terminals._.kitty = {
     description = "Kitty terminal emulator with custom configuration";
 
     homeManager =

@@ -4,11 +4,11 @@
   inputs,
   den,
   lib,
-  FTS,
+  fleet,
   ...
 }:
 {
-  FTS.deployment._.hotspot = {
+  fleet.deployment._.hotspot = {
     description = ''
       WiFi hotspot for bootstrap scenarios.
 

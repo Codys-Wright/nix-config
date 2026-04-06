@@ -1,11 +1,11 @@
 # GNOME Desktop Environment with MacTahoe theming
 {
   lib,
-  FTS,
+  fleet,
   ...
 }:
 {
-  FTS.desktop._.environment._.gnome = {
+  fleet.desktop._.environment._.gnome = {
     description = "GNOME desktop environment with MacTahoe theme";
 
     nixos =

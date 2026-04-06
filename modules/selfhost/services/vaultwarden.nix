@@ -1,13 +1,13 @@
 # Vaultwarden Service
 # Password manager (Bitwarden-compatible)
 {
-  FTS,
+  fleet,
   inputs,
   lib,
   ...
 }:
 {
-  FTS.selfhost._.vaultwarden =
+  fleet.selfhost._.vaultwarden =
     {
       domain,
       subdomain,

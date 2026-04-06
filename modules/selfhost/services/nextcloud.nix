@@ -1,13 +1,13 @@
 # Nextcloud Server Service
 # Self-hosted file sync and collaboration platform
 {
-  FTS,
+  fleet,
   inputs,
   lib,
   ...
 }:
 {
-  FTS.selfhost._.nextcloud =
+  fleet.selfhost._.nextcloud =
     {
       domain,
       subdomain,

@@ -1,13 +1,13 @@
 # Authelia SSO/OIDC Authentication Service
 # Provides single sign-on and two-factor authentication
 {
-  FTS,
+  fleet,
   inputs,
   lib,
   ...
 }:
 {
-  FTS.selfhost._.authelia =
+  fleet.selfhost._.authelia =
     {
       domain,
       subdomain,

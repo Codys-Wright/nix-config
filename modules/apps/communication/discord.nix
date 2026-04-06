@@ -1,6 +1,6 @@
 # Brave Browser aspect
 {
-  FTS.apps._.communications._.discord = {
+  fleet.apps._.communications._.discord = {
     description = "Discord";
 
     homeManager =

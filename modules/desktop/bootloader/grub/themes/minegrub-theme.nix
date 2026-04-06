@@ -3,7 +3,7 @@
 {
   inputs,
   den,
-  FTS,
+  fleet,
   ...
 }:
 {
@@ -13,7 +13,7 @@
   };
 
   # MineGrub theme provider for GRUB
-  FTS.grub._.themes._.minegrub = {
+  fleet.grub._.themes._.minegrub = {
     description = "MineGrub theme for GRUB bootloader";
 
     nixos = {

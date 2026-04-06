@@ -1,13 +1,13 @@
 {
   inputs,
-  FTS,
+  fleet,
   ...
 }:
 {
   flake-file.inputs.nix-index-database.url = "github:nix-community/nix-index-database";
   flake-file.inputs.nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
 
-  FTS.nix._.nix-index = {
+  fleet.nix._.nix-index = {
     description = "Nix-index for command lookup and comma integration";
 
     homeManager = {

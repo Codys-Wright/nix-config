@@ -1,5 +1,5 @@
 {
-  FTS.apps._.browsers._.brave = {
+  fleet.apps._.browsers._.brave = {
     description = "Brave Browser - Privacy-focused Chromium-based browser";
 
     homeManager =

@@ -1,6 +1,6 @@
 # Brave Browser aspect
 {
-  FTS.apps._.misc._.localsend = {
+  fleet.apps._.misc._.localsend = {
     description = "Brave Browser - Privacy-focused Chromium-based browser";
 
     homeManager =

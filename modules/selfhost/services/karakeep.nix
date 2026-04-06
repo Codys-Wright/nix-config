@@ -1,13 +1,13 @@
 # Karakeep Service
 # LLM-powered bookmarking service
 {
-  FTS,
+  fleet,
   inputs,
   lib,
   ...
 }:
 {
-  FTS.selfhost._.karakeep =
+  fleet.selfhost._.karakeep =
     {
       domain,
       subdomain,

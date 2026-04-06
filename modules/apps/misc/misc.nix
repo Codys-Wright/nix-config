@@ -1,13 +1,13 @@
 # Miscellaneous apps aggregator
-{ FTS, ... }:
+{ fleet, ... }:
 {
-  FTS.apps._.misc = {
+  fleet.apps._.misc = {
     description = "Miscellaneous apps - AppImage, Flameshot, LocalSend, Nextcloud";
     includes = [
-      FTS.apps._.misc._.appimage
-      FTS.apps._.misc._.flameshot
-      FTS.apps._.misc._.localsend
-      FTS.apps._.misc._.nextcloud-client
+      fleet.apps._.misc._.appimage
+      fleet.apps._.misc._.flameshot
+      fleet.apps._.misc._.localsend
+      fleet.apps._.misc._.nextcloud-client
     ];
   };
 }

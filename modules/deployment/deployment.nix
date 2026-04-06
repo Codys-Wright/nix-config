@@ -1,12 +1,12 @@
 # Deployment facet - All deployment and bootstrap tools
 # Parametric aspect that accepts deployment configuration
-{ FTS, ... }:
+{ fleet, ... }:
 {
-  FTS.deployment.description = ''
+  fleet.deployment.description = ''
     Deployment and system bootstrap facet.
 
     Implements skarabox-like functionality for bootstrapping and managing
-    NixOS systems remotely. Fully integrated with FTS modules like custom
+    NixOS systems remotely. Fully integrated with fleet modules like custom
     storage (mergerfs), disk configurations, and hardware detection.
 
     Features:
@@ -18,15 +18,15 @@
     - WiFi hotspot for bootstrap scenarios
 
     Usage (parametric - recommended):
-      (<FTS.deployment> { ip = "192.168.1.100"; })        # With deploy-rs IP
-      (<FTS.deployment> { ip = "192.168.1.100"; sshPort = 2222; })
-      (<FTS.deployment> {})                               # With defaults (no deploy-rs)
+      (<fleet.deployment> { ip = "192.168.1.100"; })        # With deploy-rs IP
+      (<fleet.deployment> { ip = "192.168.1.100"; sshPort = 2222; })
+      (<fleet.deployment> {})                               # With defaults (no deploy-rs)
 
     See modules/deployment/USAGE.md for detailed documentation.
   '';
 
   # Make deployment callable as a parametric aspect
-  FTS.deployment.__functor =
+  fleet.deployment.__functor =
     _self:
     {
       # Deploy-rs parameters (passed to config)
@@ -46,16 +46,16 @@
     {
       includes = [
         # Base deployment configuration with parameters
-        (FTS.deployment._.config args)
+        (fleet.deployment._.config args)
         # Boot SSH for remote unlocking (auto-detects host keys)
-        (FTS.deployment._.bootssh { })
+        (fleet.deployment._.bootssh { })
         # WiFi hotspot (disabled by default, set deployment.hotspot.enable = true)
-        FTS.deployment._.hotspot
-        FTS.deployment._.wifi
-        FTS.deployment._.tor-ssh
-        FTS.deployment._.restore-remote-access
+        fleet.deployment._.hotspot
+        fleet.deployment._.wifi
+        fleet.deployment._.tor-ssh
+        fleet.deployment._.restore-remote-access
         # Beacon is for creating installation ISOs - include it separately when needed:
-        # (<FTS.deployment/beacon> {})  # Uses deployment.config defaults
+        # (<fleet.deployment/beacon> {})  # Uses deployment.config defaults
         # Note: VM and ISO generation are defined in den.provides (modules/deployment/vm.nix and iso.nix)
         # They're perSystem modules that generate packages, included via den.default
       ];

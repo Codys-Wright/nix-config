@@ -1,13 +1,13 @@
 # Audiobookshelf Service
 # Audiobook and podcast server
 {
-  FTS,
+  fleet,
   inputs,
   lib,
   ...
 }:
 {
-  FTS.selfhost._.audiobookshelf =
+  fleet.selfhost._.audiobookshelf =
     {
       domain,
       subdomain,

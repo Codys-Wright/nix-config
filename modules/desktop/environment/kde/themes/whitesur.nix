@@ -1,14 +1,14 @@
 # MacTahoe KDE Theme
 # Full macOS Tahoe-inspired theming for KDE Plasma with Kvantum
 {
-  FTS,
+  fleet,
   inputs,
   pkgs,
   lib,
   ...
 }:
 {
-  FTS.desktop._.environment._.kde._.themes._.whitesur = {
+  fleet.desktop._.environment._.kde._.themes._.whitesur = {
     description = "MacTahoe KDE theme (macOS Tahoe style with Kvantum)";
 
     nixos =

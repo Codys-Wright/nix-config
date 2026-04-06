@@ -1,5 +1,5 @@
 {
-  FTS,
+  fleet,
   den,
   cody,
   __findFile,
@@ -92,10 +92,10 @@
       includes = [
         den.aspects.hm-backup
 
-        <FTS/apps>
-        <FTS.apps/browsers/firefox_webapps>
+        <fleet/apps>
+        <fleet.apps/browsers/firefox_webapps>
 
-        (FTS.coding {
+        (fleet.coding {
           editors = [
             "cursor"
             "nvf"
@@ -128,7 +128,7 @@
           ];
         })
 
-        (<FTS.user/password> {
+        (<fleet.user/password> {
           method = "hashed";
           value = "$6$0C2OSNBUmq/740g7$VfDQJvfYnxCwlV/KlmAIz.z5jYpIVc7Qa.1pzL/Fu3UGprNVLSKljI310/gyeCiYOPhJ.TVijW62wTmY54Ols1";
         })
@@ -137,8 +137,8 @@
 
         cody.dots
         cody.fish
-        <FTS/apple-fonts>
-        <FTS.hardware._.networking/tailscale>
+        <fleet/apple-fonts>
+        <fleet.hardware._.networking/tailscale>
       ];
     };
   };

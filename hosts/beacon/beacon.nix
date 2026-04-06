@@ -1,5 +1,5 @@
 {
-  FTS,
+  fleet,
   __findFile,
   ...
 }:
@@ -12,10 +12,10 @@
 
   den.aspects.beacon-aspect = {
     includes = [
-      <FTS/fonts>
-      <FTS/phoenix>
-      <FTS/beacon>
-      (FTS.deploy {
+      <fleet/fonts>
+      <fleet/phoenix>
+      <fleet/beacon>
+      (fleet.deploy {
         ip = "192.168.0.100";
         sshUser = "installer";
       })

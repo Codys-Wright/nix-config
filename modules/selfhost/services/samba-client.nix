@@ -1,13 +1,13 @@
 # Samba Client Tools
 # Provides SMB/CIFS client utilities for network file sharing
 {
-  FTS,
+  fleet,
   inputs,
   lib,
   ...
 }:
 {
-  FTS.selfhost._.samba-client =
+  fleet.selfhost._.samba-client =
     {
       enable ? true,
       packages ? null,

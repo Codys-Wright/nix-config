@@ -1,15 +1,15 @@
 {
-  FTS,
+  fleet,
   __findFile,
   ...
 }:
 {
-  FTS.base-host = {
+  fleet.base-host = {
     description = "Base host defaults shared by all hosts";
 
     includes = [
-      <FTS/nh>
-      <FTS/system>
+      <fleet/nh>
+      <fleet/system>
     ];
   };
 }

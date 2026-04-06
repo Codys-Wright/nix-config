@@ -3,14 +3,14 @@
 {
   inputs,
   lib,
-  FTS,
+  fleet,
   ...
 }:
 {
   # Function that produces a ZFS disk configuration aspect
   # Takes named parameters: { rootPool, dataPool, initialBackupDataset, ... }
-  # Usage: (<FTS/system/disk/zfs> { rootPool = {...}; })
-  FTS.system._.disk._.zfs =
+  # Usage: (<fleet/system/disk/zfs> { rootPool = {...}; })
+  fleet.system._.disk._.zfs =
     {
       rootPool,
       dataPool ? null,

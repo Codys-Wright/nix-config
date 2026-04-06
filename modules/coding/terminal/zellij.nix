@@ -1,13 +1,13 @@
 # Zellij terminal multiplexer aspect
 {
-  FTS,
+  fleet,
   inputs,
   ...
 }:
 {
   flake-file.inputs.zellij-nix.url = "github:a-kenji/zellij-nix";
 
-  FTS.coding._.terminals._.zellij = {
+  fleet.coding._.terminals._.zellij = {
     description = "Zellij terminal multiplexer with custom configuration";
 
     # Darwin-specific configuration

@@ -1,13 +1,13 @@
 # Monitoring Service
 # Grafana + Prometheus + Loki observability stack
 {
-  FTS,
+  fleet,
   inputs,
   lib,
   ...
 }:
 {
-  FTS.selfhost._.monitoring =
+  fleet.selfhost._.monitoring =
     {
       domain,
       subdomain,

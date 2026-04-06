@@ -1,7 +1,7 @@
 # Zsh shell aspect with custom configuration
-{ FTS, ... }:
+{ fleet, ... }:
 {
-  FTS.coding._.shells._.zsh = {
+  fleet.coding._.shells._.zsh = {
     description = "Zsh shell with custom configuration and optimizations";
 
     homeManager =

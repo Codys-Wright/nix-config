@@ -1,11 +1,11 @@
 # PipeWire audio sub-aspect (can be included independently)
 {
-  FTS,
+  fleet,
   den,
   ...
 }:
 {
-  FTS.hardware._.audio._.pipewire = {
+  fleet.hardware._.audio._.pipewire = {
     description = "PipeWire audio system with low-latency configuration";
 
     includes = [ (den.lib.groups [ "audio" ]) ];

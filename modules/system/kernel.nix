@@ -1,8 +1,8 @@
 # Kernel configuration aspect
 # Configures kernel 6_17 for NixOS systems
-{ FTS, ... }:
+{ fleet, ... }:
 {
-  FTS.kernel = {
+  fleet.kernel = {
     description = "Kernel 18 configuration";
 
     nixos =

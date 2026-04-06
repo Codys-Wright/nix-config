@@ -1,10 +1,10 @@
 {
   inputs,
-  FTS,
+  fleet,
   ...
 }:
 {
-  FTS.fonts = {
+  fleet.fonts = {
     description = "Fonts configuration for both NixOS and Darwin";
 
     nixos =
@@ -21,10 +21,10 @@
           mkOption
           types
           ;
-        cfg = config.FTS.fonts;
+        cfg = config.fleet.fonts;
       in
       {
-        options.FTS.fonts = {
+        options.fleet.fonts = {
           enable = mkEnableOption "fonts configuration";
 
           enableAppleEmoji = mkOption {
@@ -133,10 +133,10 @@
           mkOption
           types
           ;
-        cfg = config.FTS.fonts;
+        cfg = config.fleet.fonts;
       in
       {
-        options.FTS.fonts = {
+        options.fleet.fonts = {
           enable = mkEnableOption "fonts configuration";
 
           enableAppleEmoji = mkOption {

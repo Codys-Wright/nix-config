@@ -1,6 +1,6 @@
 {
   inputs,
-  FTS,
+  fleet,
   __findFile,
   ...
 }:
@@ -14,11 +14,11 @@
     template = {
       # Include basic aspects for testing
       includes = [
-        <FTS/fonts>
-        <FTS/phoenix>
+        <fleet/fonts>
+        <fleet/phoenix>
 
-        <FTS.hardware>
-        # <FTS.deployment>  # Deployment configuration (optional - uncomment when needed)
+        <fleet.hardware>
+        # <fleet.deployment>  # Deployment configuration (optional - uncomment when needed)
       ];
 
       # NixOS configuration for this host

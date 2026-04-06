@@ -1,11 +1,11 @@
 # ProtonVPN WireGuard client with kill switch
 {
-  FTS,
+  fleet,
   lib,
   ...
 }:
 {
-  FTS.hardware._.networking._.wireguard._.protonvpn = {
+  fleet.hardware._.networking._.wireguard._.protonvpn = {
     description = "ProtonVPN WireGuard client with kill switch";
 
     nixos =

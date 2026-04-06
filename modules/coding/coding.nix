@@ -1,5 +1,5 @@
 # Coding parametric aspect
-# Usage: (FTS.coding {
+# Usage: (fleet.coding {
 #   editors = [ "nvf" "cursor" "zed" ];
 #   terminals = [ "ghostty" "kitty" "tmux" ];
 #   shells = [ "fish" "zsh" ];
@@ -9,14 +9,14 @@
 {
   lib,
   den,
-  FTS,
+  fleet,
   __findFile,
   ...
 }:
 {
-  FTS.coding.description = "Development tools, languages, editors, terminals, and shells";
+  fleet.coding.description = "Development tools, languages, editors, terminals, and shells";
 
-  FTS.coding.__functor =
+  fleet.coding.__functor =
     _self:
     {
       cli ? true,
@@ -32,49 +32,49 @@
     }:
     let
       editorMap = {
-        nvf = <FTS.coding._.editors/nvf>;
-        cursor = <FTS.coding._.editors/cursor>;
-        zed = <FTS.coding._.editors/zed>;
-        neovim = <FTS.coding._.editors/neovim>;
+        nvf = <fleet.coding._.editors/nvf>;
+        cursor = <fleet.coding._.editors/cursor>;
+        zed = <fleet.coding._.editors/zed>;
+        neovim = <fleet.coding._.editors/neovim>;
       };
 
       terminalMap = {
-        ghostty = <FTS.coding._.terminals/ghostty>;
-        kitty = <FTS.coding._.terminals/kitty>;
-        tmux = <FTS.coding._.terminals/tmux>;
-        zellij = <FTS.coding._.terminals/zellij>;
-        wezterm = <FTS.coding._.terminals/wezterm>;
+        ghostty = <fleet.coding._.terminals/ghostty>;
+        kitty = <fleet.coding._.terminals/kitty>;
+        tmux = <fleet.coding._.terminals/tmux>;
+        zellij = <fleet.coding._.terminals/zellij>;
+        wezterm = <fleet.coding._.terminals/wezterm>;
       };
 
       shellMap = {
-        fish = <FTS.coding._.shells/fish>;
-        zsh = <FTS.coding._.shells/zsh>;
-        nushell = <FTS.coding._.shells/nushell>;
-        oh-my-posh = <FTS.coding._.shells/oh-my-posh>;
+        fish = <fleet.coding._.shells/fish>;
+        zsh = <fleet.coding._.shells/zsh>;
+        nushell = <fleet.coding._.shells/nushell>;
+        oh-my-posh = <fleet.coding._.shells/oh-my-posh>;
       };
 
       langMap = {
-        rust = <FTS.coding._.lang/rust>;
-        typescript = <FTS.coding._.lang/typescript>;
-        python = <FTS.coding._.lang/python>;
+        rust = <fleet.coding._.lang/rust>;
+        typescript = <fleet.coding._.lang/typescript>;
+        python = <fleet.coding._.lang/python>;
       };
 
       toolMap = {
-        android = <FTS.coding._.tools/android>;
-        dioxus = <FTS.coding._.tools/dioxus>;
-        "reverse-engineering" = <FTS.coding._.tools/reverse-engineering>;
-        opencode = <FTS.coding._.tools/opencode>;
-        "dev-tools" = <FTS.coding._.tools/dev-tools>;
-        docker = <FTS.coding._.tools._.containers/docker>;
-        podman = <FTS.coding._.tools._.containers/podman>;
+        android = <fleet.coding._.tools/android>;
+        dioxus = <fleet.coding._.tools/dioxus>;
+        "reverse-engineering" = <fleet.coding._.tools/reverse-engineering>;
+        opencode = <fleet.coding._.tools/opencode>;
+        "dev-tools" = <fleet.coding._.tools/dev-tools>;
+        docker = <fleet.coding._.tools._.containers/docker>;
+        podman = <fleet.coding._.tools._.containers/podman>;
       };
     in
     den.lib.parametric {
       includes =
-        lib.optional cli <FTS.coding/cli>
-        ++ lib.optional git <FTS.coding._.tools/git>
-        ++ lib.optional lazygit <FTS.coding._.tools/lazygit>
-        ++ lib.optional devTools <FTS.coding._.tools/dev-tools>
+        lib.optional cli <fleet.coding/cli>
+        ++ lib.optional git <fleet.coding._.tools/git>
+        ++ lib.optional lazygit <fleet.coding._.tools/lazygit>
+        ++ lib.optional devTools <fleet.coding._.tools/dev-tools>
         ++ map (e: editorMap.${e}) editors
         ++ map (t: terminalMap.${t}) terminals
         ++ map (s: shellMap.${s}) shells

@@ -1,6 +1,6 @@
 {
   inputs,
-  FTS,
+  fleet,
   __findFile,
   ...
 }:
@@ -19,13 +19,13 @@
     dave = {
       # Include role-based aspects
       includes = [
-        <FTS/fonts>
-        <FTS/phoenix>
+        <fleet/fonts>
+        <fleet/phoenix>
 
         # Complete desktop setup with GNOME
 
-        <FTS.kernel>
-        <FTS.hardware>
+        <fleet.kernel>
+        <fleet.hardware>
       ];
 
       # Manually set fileSystems and bootloader for now
@@ -73,7 +73,7 @@
             openFirewall = true;
           };
 
-          # NetworkManager (enabled by FTS.gnome) will automatically handle DHCP
+          # NetworkManager (enabled by fleet.gnome) will automatically handle DHCP
           # No need to configure useDHCP - NetworkManager manages networking
 
           # https://gist.github.com/nat-418/1101881371c9a7b419ba5f944a7118b0

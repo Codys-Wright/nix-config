@@ -1,13 +1,13 @@
 # Forgejo Service
 # Self-hosted Git service (GitHub alternative)
 {
-  FTS,
+  fleet,
   inputs,
   lib,
   ...
 }:
 {
-  FTS.selfhost._.forgejo =
+  fleet.selfhost._.forgejo =
     {
       domain,
       subdomain,

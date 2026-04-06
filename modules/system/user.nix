@@ -1,7 +1,7 @@
 # System user configuration aspect
 # Works with den's user context system to configure users on hosts
 {
-  FTS,
+  fleet,
   lib,
   ...
 }:
@@ -58,7 +58,7 @@ let
     };
 in
 {
-  FTS.user._.base = {
+  fleet.user._.base = {
     inherit description;
     includes = [
       userContext

@@ -1,6 +1,6 @@
 {
   inputs,
-  FTS,
+  fleet,
   __findFile,
   ...
 }:
@@ -20,8 +20,8 @@
   den.aspects = {
     voyager = {
       includes = [
-        <FTS/fonts>
-        <FTS/phoenix>
+        <fleet/fonts>
+        <fleet/phoenix>
       ];
       darwin =
         { pkgs, ... }:

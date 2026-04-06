@@ -1,6 +1,6 @@
 # Eza - modern ls replacement
 {
-  FTS.coding._.cli._.eza = {
+  fleet.coding._.cli._.eza = {
     description = "Eza modern ls replacement";
 
     homeManager =

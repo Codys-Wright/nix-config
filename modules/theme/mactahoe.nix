@@ -3,7 +3,7 @@
 # Note: cursor/icon/GTK theming is handled by stylix — this module adds packages
 # and configures what stylix doesn't cover (gtk4, Nautilus, etc.)
 {
-  FTS.mactahoe = {
+  fleet.mactahoe = {
     description = "MacTahoe theme packages - macOS Tahoe-inspired theming for GTK/niri";
 
     homeManager =

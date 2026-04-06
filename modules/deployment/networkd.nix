@@ -1,12 +1,12 @@
 # systemd-networkd configuration aspect
 # Provides base networking configuration with DHCP support
 {
-  FTS,
+  fleet,
   lib,
   ...
 }:
 {
-  FTS.deployment._.networkd = {
+  fleet.deployment._.networkd = {
     description = ''
       systemd-networkd configuration for beacon and deployment environments.
 
@@ -14,7 +14,7 @@
       Disables firewall for installation environments.
 
       Usage:
-        FTS.deployment._.networkd
+        fleet.deployment._.networkd
     '';
 
     nixos =

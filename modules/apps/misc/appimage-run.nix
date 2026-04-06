@@ -1,7 +1,7 @@
 # AppImage Run - Run AppImage files on NixOS
-{ FTS, ... }:
+{ fleet, ... }:
 {
-  FTS.apps._.misc._.appimage = {
+  fleet.apps._.misc._.appimage = {
     description = "AppImage runtime and binfmt support for NixOS";
 
     homeManager = {

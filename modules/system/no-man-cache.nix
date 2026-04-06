@@ -1,8 +1,8 @@
 # Disable man cache generation for faster rebuilds
 # man <command> still works, only apropos/man -k is affected
-{ FTS, ... }:
+{ fleet, ... }:
 {
-  FTS.no-man-cache = {
+  fleet.no-man-cache = {
     description = "Disable slow man cache generation for faster system rebuilds";
 
     # NixOS system-level

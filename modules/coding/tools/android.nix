@@ -1,7 +1,7 @@
 # Android development SDK with emulator
-{ FTS, den, ... }:
+{ fleet, den, ... }:
 {
-  FTS.coding._.tools._.android = {
+  fleet.coding._.tools._.android = {
     description = "Android SDK with build tools, platform tools, emulator, and system images";
 
     includes = [

@@ -1,8 +1,8 @@
 # Base Neovim configuration
 # This provides the standard neovim installation that other variants can use
-{ FTS, ... }:
+{ fleet, ... }:
 {
-  FTS.coding._.editors._.neovim = {
+  fleet.coding._.editors._.neovim = {
     description = "Base Neovim editor configuration";
 
     homeManager =

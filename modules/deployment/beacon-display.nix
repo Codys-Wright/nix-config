@@ -1,12 +1,12 @@
 # Beacon display module - shows QR code and connection info on boot
 # Based on nixos-images network-status
 {
-  FTS,
+  fleet,
   lib,
   ...
 }:
 {
-  FTS.deployment._.beacon-display = {
+  fleet.deployment._.beacon-display = {
     description = ''
       Beacon display module that shows QR code and connection info on boot.
 
@@ -14,7 +14,7 @@
       and a QR code for easy scanning.
 
       Usage:
-        FTS.deployment._.beacon-display  # Include in beacon aspect
+        fleet.deployment._.beacon-display  # Include in beacon aspect
     '';
 
     nixos =

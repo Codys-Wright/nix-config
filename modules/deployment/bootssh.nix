@@ -5,11 +5,11 @@
   inputs,
   den,
   lib,
-  FTS,
+  fleet,
   ...
 }:
 {
-  FTS.deployment._.bootssh = {
+  fleet.deployment._.bootssh = {
     description = ''
       SSH access during initrd boot for remote system unlocking.
 
@@ -17,9 +17,9 @@
       Automatically uses deployment.sshKey from deployment.config.
 
       Usage:
-        <FTS.deployment/bootssh>  # Auto-detects host keys
-        (<FTS.deployment/bootssh> { sshPort = 2223; })  # Custom port
-        (<FTS.deployment/bootssh> { hostKeys = [ ./my-key ]; })  # Custom keys
+        <fleet.deployment/bootssh>  # Auto-detects host keys
+        (<fleet.deployment/bootssh> { sshPort = 2223; })  # Custom port
+        (<fleet.deployment/bootssh> { hostKeys = [ ./my-key ]; })  # Custom keys
     '';
 
     __functor =

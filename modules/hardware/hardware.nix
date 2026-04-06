@@ -2,18 +2,18 @@
 # Common hardware (audio, bluetooth, networking, facter) always included.
 # Opt in to machine-specific components: nvidia, tailscale, cuda.
 #
-# Usage: (FTS.hardware { nvidia = true; tailscale = true; })
+# Usage: (fleet.hardware { nvidia = true; tailscale = true; })
 {
   lib,
   den,
-  FTS,
+  fleet,
   __findFile,
   ...
 }:
 {
-  FTS.hardware.description = "Hardware support configuration";
+  fleet.hardware.description = "Hardware support configuration";
 
-  FTS.hardware.__functor =
+  fleet.hardware.__functor =
     _self:
     {
       nvidia ? false,
@@ -23,14 +23,14 @@
     }:
     den.lib.parametric {
       includes = [
-        <FTS.hardware/facter>
-        <FTS.hardware/audio>
-        <FTS.hardware/bluetooth>
-        <FTS.hardware/networking>
-        <FTS.hardware/disk-utils>
+        <fleet.hardware/facter>
+        <fleet.hardware/audio>
+        <fleet.hardware/bluetooth>
+        <fleet.hardware/networking>
+        <fleet.hardware/disk-utils>
       ]
-      ++ lib.optional tailscale <FTS.hardware._.networking/tailscale>
-      ++ lib.optional nvidia <FTS.hardware/nvidia>
-      ++ lib.optional cuda <FTS.hardware/cuda>;
+      ++ lib.optional tailscale <fleet.hardware._.networking/tailscale>
+      ++ lib.optional nvidia <fleet.hardware/nvidia>
+      ++ lib.optional cuda <fleet.hardware/cuda>;
     };
 }

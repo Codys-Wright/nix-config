@@ -1,6 +1,6 @@
 # Btop - system monitor with vim keys
 {
-  FTS.coding._.cli._.btop = {
+  fleet.coding._.cli._.btop = {
     description = "Btop system monitor with vim keys";
 
     homeManager = {

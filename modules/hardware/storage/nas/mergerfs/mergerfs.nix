@@ -1,10 +1,10 @@
 # MergerFS sub-aspect (can be included independently)
 {
-  FTS,
+  fleet,
   ...
 }:
 {
-  FTS.hardware._.storage._.nas._.mergerfs = {
+  fleet.hardware._.storage._.nas._.mergerfs = {
     description = "MergerFS functionality for combining multiple disks";
 
     nixos =

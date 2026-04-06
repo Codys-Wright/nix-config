@@ -1,10 +1,10 @@
 # Zed editor aspect with comprehensive configuration
 {
-  FTS,
+  fleet,
   ...
 }:
 {
-  FTS.coding._.editors._.zed = {
+  fleet.coding._.editors._.zed = {
     description = "Zed editor with comprehensive configuration and vim keybindings";
 
     homeManager =

@@ -1,5 +1,5 @@
 {
-  FTS.karabiner-elements = {
+  fleet.karabiner-elements = {
     description = "Karabiner-Elements for macOS keyboard customization";
 
     nixos = {

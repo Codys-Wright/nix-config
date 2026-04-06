@@ -1,9 +1,9 @@
 # Dioxus desktop development environment
 # Provides native system libraries required to build Dioxus desktop apps on Linux.
 # Dioxus desktop uses wry (WebKitGTK2) for the webview backend.
-{ FTS, ... }:
+{ fleet, ... }:
 {
-  FTS.coding._.tools._.dioxus = {
+  fleet.coding._.tools._.dioxus = {
     description = "Dioxus desktop native build dependencies (cairo, WebKitGTK, GTK3, etc.)";
 
     homeManager =

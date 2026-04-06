@@ -1,12 +1,12 @@
 # Tor SSH hidden service aspect
 # Provides SSH access over Tor for privacy and NAT traversal
 {
-  FTS,
+  fleet,
   lib,
   ...
 }:
 {
-  FTS.deployment._.tor-ssh = {
+  fleet.deployment._.tor-ssh = {
     description = ''
       Enable SSH access over Tor hidden service.
 
@@ -14,7 +14,7 @@
       Useful for accessing machines behind NAT or for privacy.
 
       Usage:
-        FTS.deployment._.tor-ssh
+        fleet.deployment._.tor-ssh
     '';
 
     nixos =

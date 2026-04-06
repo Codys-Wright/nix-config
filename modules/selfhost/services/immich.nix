@@ -1,13 +1,13 @@
 # Immich Service
 # Self-hosted photo and video backup solution
 {
-  FTS,
+  fleet,
   inputs,
   lib,
   ...
 }:
 {
-  FTS.selfhost._.immich =
+  fleet.selfhost._.immich =
     {
       domain,
       subdomain,

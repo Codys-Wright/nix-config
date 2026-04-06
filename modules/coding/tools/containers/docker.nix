@@ -1,7 +1,7 @@
 # Docker tools aspect (legacy - prefer podman)
-{ FTS, ... }:
+{ fleet, ... }:
 {
-  FTS.coding._.tools._.containers._.docker = {
+  fleet.coding._.tools._.containers._.docker = {
     description = "Docker container tools (legacy - prefer podman)";
 
     homeManager =
