@@ -4,6 +4,7 @@
 # homeManager symlinks ~/.config/niri/config.kdl → that store path.
 {
   FTS,
+  den,
   inputs,
   pkgs,
   ...
@@ -23,6 +24,7 @@
 
     includes = [
       FTS.desktop._.environment._.niri._.xremap
+      (den.lib.groups [ "input" ])
     ];
 
     nixos =

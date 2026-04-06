@@ -1,8 +1,15 @@
 # Android development SDK with emulator
-{ FTS, ... }:
+{ FTS, den, ... }:
 {
   FTS.coding._.tools._.android = {
     description = "Android SDK with build tools, platform tools, emulator, and system images";
+
+    includes = [
+      (den.lib.groups [
+        "adbusers"
+        "kvm"
+      ])
+    ];
 
     nixos =
       { pkgs, ... }:
