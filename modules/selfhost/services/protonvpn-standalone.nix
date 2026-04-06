@@ -1,12 +1,12 @@
 # ProtonVPN - OpenVPN client with kill switch
 {
-  FTS,
+  fleet,
   inputs,
   lib,
   ...
 }:
 {
-  FTS.selfhost._.protonvpn-standalone =
+  fleet.selfhost._.protonvpn-standalone =
     {
       # Required parameters
       usernameFile,

@@ -1,5 +1,5 @@
 {
-  FTS,
+  fleet,
   __findFile,
   ...
 }:
@@ -19,18 +19,18 @@
   den.aspects = {
     example = {
       includes = [
-        <FTS/fonts>
-        <FTS/phoenix>
+        <fleet/fonts>
+        <fleet/phoenix>
 
         # Hardware and kernel
-        <FTS.hardware>
-        <FTS.kernel>
+        <fleet.hardware>
+        <fleet.kernel>
 
         # Deployment (SSH, networking, secrets, VM/ISO generation)
-        (<FTS.deployment> { })
+        (<fleet.deployment> { })
 
         # Disk configuration (uncomment and configure as needed)
-        # (<FTS.system/disk> {
+        # (<fleet.system/disk> {
         #   type = "btrfs-impermanence";
         #   device = "/dev/nvme0n1";
         #   withSwap = true;
@@ -38,7 +38,7 @@
         # })
 
         # Optional: Desktop environment
-        # (FTS.desktop {
+        # (fleet.desktop {
         #   environment.default = "gnome";
         #   displayManager.auto = true;
         # })
@@ -52,7 +52,7 @@
           ...
         }:
         {
-          # Hardware detection is handled by FTS.hardware (includes FTS.hardware.facter)
+          # Hardware detection is handled by fleet.hardware (includes fleet.hardware.facter)
           # Generate hardware config with: just generate-hardware example
           # The facter report path is auto-derived as hosts/example/facter.json
 

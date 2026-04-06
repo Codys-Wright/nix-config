@@ -1,11 +1,11 @@
 # Music facet - All music-related tools
-{ FTS, ... }:
+{ fleet, ... }:
 {
-  FTS.music = {
+  fleet.music = {
     description = "Music production and audio tools";
 
     includes = [
-      FTS.music._.production
+      fleet.music._.production
     ];
   };
 }

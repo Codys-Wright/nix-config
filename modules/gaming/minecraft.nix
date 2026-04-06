@@ -1,10 +1,10 @@
 # Minecraft gaming aspect
 {
-  FTS,
+  fleet,
   ...
 }:
 {
-  FTS.gaming._.minecraft = {
+  fleet.gaming._.minecraft = {
     description = "Minecraft with PrismLauncher";
 
     homeManager =

@@ -1,7 +1,7 @@
 # Flatpak support module - Enables flatpak with Flathub
-{ FTS, ... }:
+{ fleet, ... }:
 {
-  FTS.apps._.flatpaks = {
+  fleet.apps._.flatpaks = {
     description = "Flatpak runtime with Flathub";
 
     nixos = _: {

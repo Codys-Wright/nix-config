@@ -1,10 +1,10 @@
 # Tmux terminal multiplexer aspect
 {
-  FTS,
+  fleet,
   ...
 }:
 {
-  FTS.coding._.terminals._.tmux = {
+  fleet.coding._.terminals._.tmux = {
     description = "Tmux terminal multiplexer with custom configuration and plugins";
 
     # Darwin-specific configuration
@@ -194,7 +194,7 @@
         };
 
         # Additional tmux utilities (cross-platform)
-        # Note: tmuxinator completion is provided by zsh-completions (FTS.zsh)
+        # Note: tmuxinator completion is provided by zsh-completions (fleet.zsh)
         # If you need tmuxinator, install it separately or add it conditionally
         home.packages = with pkgs; [
           tmux

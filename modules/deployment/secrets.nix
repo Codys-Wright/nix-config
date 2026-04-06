@@ -2,11 +2,11 @@
 # Automatically finds secrets.yaml in hosts/<hostname>/
 {
   inputs,
-  FTS,
+  fleet,
   ...
 }:
 {
-  FTS.deployment._.secrets = {
+  fleet.deployment._.secrets = {
     description = ''
       Secrets management using sops-nix.
 

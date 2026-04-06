@@ -1,19 +1,19 @@
 # Desktop parametric aspect
 # Includes the default environment, SDDM, and sets the default session.
-# Add other environments directly: <FTS.desktop._.environment/kde>
+# Add other environments directly: <fleet.desktop._.environment/kde>
 #
-# Usage: (FTS.desktop { default = "niri"; })
+# Usage: (fleet.desktop { default = "niri"; })
 {
   lib,
   den,
-  FTS,
+  fleet,
   __findFile,
   ...
 }:
 {
-  FTS.desktop.description = "Desktop environment with SDDM display manager";
+  fleet.desktop.description = "Desktop environment with SDDM display manager";
 
-  FTS.desktop.__functor =
+  fleet.desktop.__functor =
     _self:
     { default, ... }:
     let
@@ -25,10 +25,10 @@
     in
     den.lib.parametric {
       includes = [
-        <FTS.desktop._.environment/niri>
-        <FTS.desktop._.environment/gnome>
-        <FTS.desktop._.environment/kde>
-        <FTS.desktop._.display-manager/sddm>
+        <fleet.desktop._.environment/niri>
+        <fleet.desktop._.environment/gnome>
+        <fleet.desktop._.environment/kde>
+        <fleet.desktop._.display-manager/sddm>
       ];
 
       nixos.services.displayManager.defaultSession = lib.mkForce sessionNames.${default};

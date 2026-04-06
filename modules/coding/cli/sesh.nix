@@ -1,6 +1,6 @@
 # Sesh - terminal session management
 {
-  FTS.coding._.cli._.sesh = {
+  fleet.coding._.cli._.sesh = {
     description = "Sesh terminal session management with tmux integration";
 
     homeManager = {

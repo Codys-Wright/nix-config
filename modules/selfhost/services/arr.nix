@@ -1,13 +1,13 @@
 # Arr stack (Radarr, Sonarr, Bazarr, Readarr, Lidarr, Jackett) aspect module
 {
-  FTS,
+  fleet,
   den,
   lib,
   __findFile,
   ...
 }:
 {
-  FTS.selfhost._.arr =
+  fleet.selfhost._.arr =
     {
       domain,
       authEndpoint,

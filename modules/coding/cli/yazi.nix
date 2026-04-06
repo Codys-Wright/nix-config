@@ -1,6 +1,6 @@
 # Yazi - file manager
 {
-  FTS.coding._.cli._.yazi = {
+  fleet.coding._.cli._.yazi = {
     description = "Yazi file manager";
 
     homeManager = {

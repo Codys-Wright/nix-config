@@ -1,10 +1,10 @@
 # LazyGit configuration aspect
 {
-  FTS,
+  fleet,
   ...
 }:
 {
-  FTS.coding._.tools._.lazygit = {
+  fleet.coding._.tools._.lazygit = {
     description = "LazyGit terminal UI for git";
 
     homeManager =

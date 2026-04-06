@@ -7,19 +7,19 @@
 #     aspect = "my-beacon";
 #     includes = [];  # skip home-manager defaults for ISO
 #   };
-#   den.aspects.my-beacon.includes = [ FTS.beacon ];
+#   den.aspects.my-beacon.includes = [ fleet.beacon ];
 {
-  FTS,
+  fleet,
   ...
 }:
 {
-  FTS.beacon = {
+  fleet.beacon = {
     description = "Universal bootable installation beacon ISO with QR code display and WiFi";
 
     includes = [
-      FTS.deployment._.beacon
-      FTS.deployment._.beacon-display
-      FTS.deployment._.wifi
+      fleet.deployment._.beacon
+      fleet.deployment._.beacon-display
+      fleet.deployment._.wifi
     ];
 
     nixos =

@@ -1,22 +1,22 @@
 # Apps aggregator
-# Usage: <FTS/apps>
+# Usage: <fleet/apps>
 {
-  FTS,
+  fleet,
   __findFile,
   ...
 }:
 {
-  FTS.apps = {
+  fleet.apps = {
     description = "All user applications";
 
     includes = [
-      <FTS.apps/browsers>
-      <FTS.apps/communications>
-      <FTS.apps._.notes/obsidian>
-      <FTS.apps._.recording/obs>
-      <FTS.apps/flatpaks>
-      <FTS.apps/misc>
-      <FTS.apps._.ai/openclaw>
+      <fleet.apps/browsers>
+      <fleet.apps/communications>
+      <fleet.apps._.notes/obsidian>
+      <fleet.apps._.recording/obs>
+      <fleet.apps/flatpaks>
+      <fleet.apps/misc>
+      <fleet.apps._.ai/openclaw>
     ];
   };
 }

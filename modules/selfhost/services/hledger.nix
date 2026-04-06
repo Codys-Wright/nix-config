@@ -1,13 +1,13 @@
 # Hledger Service
 # Plain-text accounting
 {
-  FTS,
+  fleet,
   inputs,
   lib,
   ...
 }:
 {
-  FTS.selfhost._.hledger =
+  fleet.selfhost._.hledger =
     {
       domain,
       subdomain,

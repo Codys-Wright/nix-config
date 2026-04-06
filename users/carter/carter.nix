@@ -1,5 +1,5 @@
 {
-  FTS,
+  fleet,
   den,
   __findFile,
   ...
@@ -24,10 +24,10 @@
       # Home-manager backup system
       den.aspects.hm-backup
 
-      <FTS/coding>
-      <FTS.user/admin>
-      <FTS.user/autologin>
-      (<FTS.user/shell> { default = "fish"; })
+      <fleet/coding>
+      <fleet.user/admin>
+      <fleet.user/autologin>
+      (<fleet.user/shell> { default = "fish"; })
     ];
   };
 }

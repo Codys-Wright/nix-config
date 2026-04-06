@@ -7,7 +7,7 @@
   inputs,
   lib,
   den,
-  FTS,
+  fleet,
   ...
 }:
 let
@@ -156,8 +156,8 @@ in
       };
   };
 
-  # ── FTS aspect for den host/home composition ──────────────────────────
-  FTS.coding._.editors._.nvf = {
+  # ── fleet aspect for den host/home composition ──────────────────────────
+  fleet.coding._.editors._.nvf = {
     description = "Neovim built with nvf configuration framework";
     homeManager =
       { pkgs, ... }:

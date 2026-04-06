@@ -1,11 +1,11 @@
 # 10G network interface tuning with jumbo frames and TCP buffer optimization
 {
-  FTS,
+  fleet,
   lib,
   ...
 }:
 {
-  FTS.system._.network-10g = {
+  fleet.system._.network-10g = {
     description = "10G network tuning: jumbo frames, TCP buffers, NFS client";
 
     __functor =

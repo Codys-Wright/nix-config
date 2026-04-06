@@ -1,6 +1,6 @@
 # Atuin - shell history
 {
-  FTS.coding._.cli._.atuin = {
+  fleet.coding._.cli._.atuin = {
     description = "Atuin shell history manager";
 
     homeManager =

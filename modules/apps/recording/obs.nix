@@ -1,10 +1,10 @@
 # OBS Studio — screen recording and streaming with NVIDIA hardware acceleration
 {
-  FTS,
+  fleet,
   ...
 }:
 {
-  FTS.apps._.recording._.obs = {
+  fleet.apps._.recording._.obs = {
     description = "OBS Studio with Wayland capture, pipewire audio, and NVIDIA encoding";
 
     nixos =

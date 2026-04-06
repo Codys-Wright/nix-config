@@ -2,7 +2,7 @@
 {
   inputs,
   lib,
-  FTS,
+  fleet,
   ...
 }:
 {
@@ -11,7 +11,7 @@
     inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  FTS.apps._.browsers._.zen = {
+  fleet.apps._.browsers._.zen = {
     description = "Zen Browser - Beautiful Firefox-based browser with privacy features";
 
     homeManager =

@@ -1,10 +1,10 @@
 # Wezterm terminal emulator aspect
 {
-  FTS,
+  fleet,
   ...
 }:
 {
-  FTS.coding._.terminals._.wezterm = {
+  fleet.coding._.terminals._.wezterm = {
     description = "Wezterm terminal emulator with custom configuration";
 
     homeManager =

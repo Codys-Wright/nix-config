@@ -1,12 +1,12 @@
 # Restore Remote Access aspect
 # Persists SSH host keys and authorized keys across boots for consistent remote access
 {
-  FTS,
+  fleet,
   lib,
   ...
 }:
 {
-  FTS.deployment._.restore-remote-access = {
+  fleet.deployment._.restore-remote-access = {
     description = ''
       Restore SSH host keys and authorized keys from initrd.
 
@@ -19,7 +19,7 @@
       - Ephemeral systems that need consistent SSH identity
 
       Usage:
-        FTS.deployment._.restore-remote-access
+        fleet.deployment._.restore-remote-access
     '';
 
     nixos =

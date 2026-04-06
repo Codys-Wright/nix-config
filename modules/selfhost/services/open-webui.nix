@@ -1,13 +1,13 @@
 # Open-WebUI Service
 # Web UI for LLMs (ChatGPT-like interface)
 {
-  FTS,
+  fleet,
   inputs,
   lib,
   ...
 }:
 {
-  FTS.selfhost._.open-webui =
+  fleet.selfhost._.open-webui =
     {
       domain,
       subdomain,

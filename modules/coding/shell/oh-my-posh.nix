@@ -1,10 +1,10 @@
 # Oh My Posh prompt theme configuration
 {
-  FTS,
+  fleet,
   ...
 }:
 {
-  FTS.coding._.shells._.oh-my-posh = {
+  fleet.coding._.shells._.oh-my-posh = {
     description = "Oh My Posh prompt theme with custom configuration";
     os =
       { pkgs, ... }:

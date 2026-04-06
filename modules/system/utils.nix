@@ -1,10 +1,10 @@
 # Essential system utilities
 {
-  FTS,
+  fleet,
   ...
 }:
 {
-  FTS.system._.utils = {
+  fleet.system._.utils = {
     description = "Essential system utilities - vim, curl, git, etc.";
 
     nixos =

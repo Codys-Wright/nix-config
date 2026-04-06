@@ -1,9 +1,9 @@
 {
-  FTS,
+  fleet,
   ...
 }:
 {
-  FTS.phoenix = {
+  fleet.phoenix = {
     description = "Phoenix system management tool for cross-platform Nix configurations";
 
     nixos =
@@ -21,7 +21,7 @@
           types
           optionalString
           ;
-        cfg = config.FTS.phoenix;
+        cfg = config.fleet.phoenix;
 
         # Helper function to create scripts with proper runtime dependencies
         createScript =
@@ -237,7 +237,7 @@
         '';
       in
       {
-        options.FTS.phoenix = {
+        options.fleet.phoenix = {
           enable = mkEnableOption "Phoenix system management tool";
 
           dotfilesDir = mkOption {
@@ -286,7 +286,7 @@
           mkOption
           types
           ;
-        cfg = config.FTS.phoenix;
+        cfg = config.fleet.phoenix;
 
         # Helper function to create scripts with proper runtime dependencies
         createScript =
@@ -497,7 +497,7 @@
         '';
       in
       {
-        options.FTS.phoenix = {
+        options.fleet.phoenix = {
           enable = mkEnableOption "Phoenix system management tool";
 
           dotfilesDir = mkOption {

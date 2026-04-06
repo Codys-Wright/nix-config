@@ -8,7 +8,7 @@
     stylix.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  FTS.stylix = {
+  fleet.stylix = {
     description = "Stylix - System-wide theming using base16 color schemes";
 
     nixos =

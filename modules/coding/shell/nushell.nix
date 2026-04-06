@@ -1,10 +1,10 @@
 # Nushell shell aspect
 {
-  FTS,
+  fleet,
   ...
 }:
 {
-  FTS.coding._.shells._.nushell = {
+  fleet.coding._.shells._.nushell = {
     description = "Nushell shell package";
 
     os =

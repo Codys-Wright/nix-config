@@ -1,10 +1,10 @@
 # Lutris gaming platform aspect
 {
-  FTS,
+  fleet,
   ...
 }:
 {
-  FTS.gaming._.lutris = {
+  fleet.gaming._.lutris = {
     description = "Lutris gaming platform for managing Windows games on Linux";
 
     homeManager =

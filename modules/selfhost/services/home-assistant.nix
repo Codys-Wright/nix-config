@@ -1,13 +1,13 @@
 # Home-Assistant Service
 # Home automation platform
 {
-  FTS,
+  fleet,
   inputs,
   lib,
   ...
 }:
 {
-  FTS.selfhost._.home-assistant =
+  fleet.selfhost._.home-assistant =
     {
       domain,
       subdomain,

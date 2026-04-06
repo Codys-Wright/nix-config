@@ -1,6 +1,6 @@
 # Proton compatibility tools aspect
 {
-  FTS.gaming._.proton = {
+  fleet.gaming._.proton = {
     description = "Proton compatibility tools for running Windows games on Linux";
 
     homeManager =

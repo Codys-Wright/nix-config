@@ -1,11 +1,11 @@
 # Avahi - mDNS/DNS-SD service discovery
 # Enables .local hostname resolution and service publishing
 {
-  FTS,
+  fleet,
   ...
 }:
 {
-  FTS.system._.avahi = {
+  fleet.system._.avahi = {
     description = "Avahi mDNS/DNS-SD for local network service discovery";
 
     nixos = {

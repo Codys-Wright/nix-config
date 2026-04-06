@@ -1,10 +1,10 @@
 # Bluetooth hardware aspect
 {
-  FTS,
+  fleet,
   ...
 }:
 {
-  FTS.hardware._.bluetooth = {
+  fleet.hardware._.bluetooth = {
     description = "Bluetooth hardware support";
 
     nixos =

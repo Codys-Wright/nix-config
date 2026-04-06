@@ -6,15 +6,15 @@
       den.aspects.hm
       den._.inputs'
       den._.self'
-      <FTS/base-host>
-      <FTS/nix-settings>
-      <FTS/state-version>
-      <FTS/hostname>
-      <FTS/no-man-cache>
+      <fleet/base-host>
+      <fleet/nix-settings>
+      <fleet/state-version>
+      <fleet/hostname>
+      <fleet/no-man-cache>
     ];
     home.includes = [
-      <FTS/nix>
-      <FTS/user-secrets>
+      <fleet/nix>
+      <fleet/user-secrets>
     ];
   };
 

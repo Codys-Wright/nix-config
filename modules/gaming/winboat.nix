@@ -1,10 +1,10 @@
 # Winboat - run Windows apps on Linux with seamless integration
 {
-  FTS,
+  fleet,
   ...
 }:
 {
-  FTS.gaming._.winboat = {
+  fleet.gaming._.winboat = {
     description = "Winboat - run Windows apps on Linux with seamless integration";
 
     homeManager =

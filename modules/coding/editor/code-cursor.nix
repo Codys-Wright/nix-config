@@ -1,10 +1,10 @@
 # Code Cursor editor aspect
 {
-  FTS,
+  fleet,
   ...
 }:
 {
-  FTS.coding._.editors._.cursor = {
+  fleet.coding._.editors._.cursor = {
     description = "Code Cursor AI-powered editor";
 
     homeManager =

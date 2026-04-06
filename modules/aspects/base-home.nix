@@ -1,14 +1,14 @@
 {
-  FTS,
+  fleet,
   __findFile,
   ...
 }:
 {
-  FTS.base-home = {
+  fleet.base-home = {
     description = "Base home-manager defaults shared by all users";
 
     includes = [
-      <FTS/user-secrets>
+      <fleet/user-secrets>
     ];
   };
 }

@@ -3,11 +3,11 @@
 {
   inputs,
   lib,
-  FTS,
+  fleet,
   ...
 }:
 {
-  FTS.user-secrets = {
+  fleet.user-secrets = {
     description = "User-level SOPS secrets management (for home-manager)";
 
     homeManager =

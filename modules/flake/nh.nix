@@ -1,10 +1,10 @@
 # nh aspect - Nix helper tool for managing NixOS/Nix-darwin configurations
 {
-  FTS,
+  fleet,
   ...
 }:
 {
-  FTS.nh = {
+  fleet.nh = {
     description = "Nix helper tool (nh) for managing NixOS/Nix-darwin configurations";
 
     os =

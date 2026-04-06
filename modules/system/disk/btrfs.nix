@@ -3,14 +3,14 @@
 {
   inputs,
   lib,
-  FTS,
+  fleet,
   ...
 }:
 {
   # Function that produces a btrfs-impermanence disk configuration aspect
   # Takes named parameters: { device, swapSize, withSwap, persistFolder, ... }
-  # Usage: (<FTS/system/disk/btrfs> { device = "/dev/sda"; })
-  FTS.system._.disk._.btrfs =
+  # Usage: (<fleet/system/disk/btrfs> { device = "/dev/sda"; })
+  fleet.system._.disk._.btrfs =
     {
       device,
       swapSize ? "8",

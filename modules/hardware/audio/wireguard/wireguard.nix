@@ -1,10 +1,10 @@
 # WirePlumber audio device management sub-aspect (can be included independently)
 {
-  FTS,
+  fleet,
   ...
 }:
 {
-  FTS.hardware._.audio._.wireplumber = {
+  fleet.hardware._.audio._.wireplumber = {
     description = "WirePlumber audio device management";
 
     nixos =

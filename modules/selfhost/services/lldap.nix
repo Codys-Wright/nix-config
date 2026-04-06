@@ -1,13 +1,13 @@
 # LLDAP Identity Provider Service
 # Lightweight LDAP server for user authentication and authorization
 {
-  FTS,
+  fleet,
   inputs,
   lib,
   ...
 }:
 {
-  FTS.selfhost._.lldap =
+  fleet.selfhost._.lldap =
     {
       domain,
       subdomain,

@@ -1,10 +1,10 @@
 # Virtual instrument plugins
 {
-  FTS,
+  fleet,
   ...
 }:
 {
-  FTS.music._.production._.plugins._.instruments = {
+  fleet.music._.production._.plugins._.instruments = {
     description = "Virtual instrument plugins for music production";
 
     homeManager =

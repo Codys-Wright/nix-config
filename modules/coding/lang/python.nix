@@ -1,11 +1,11 @@
 # Python development environment aspect
 {
-  FTS,
+  fleet,
   pkgs,
   ...
 }:
 {
-  FTS.coding._.lang._.python = {
+  fleet.coding._.lang._.python = {
     description = "Python development environment with essential tools";
 
     homeManager =

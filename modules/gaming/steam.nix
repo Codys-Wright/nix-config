@@ -1,10 +1,10 @@
 # Steam gaming platform aspect
 {
-  FTS,
+  fleet,
   ...
 }:
 {
-  FTS.gaming._.steam = {
+  fleet.gaming._.steam = {
     description = "Steam gaming platform with performance optimizations";
 
     nixos =

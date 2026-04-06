@@ -2,7 +2,7 @@
 # Discord integration + systemd user service on Linux
 {
   inputs,
-  FTS,
+  fleet,
   lib,
   ...
 }:
@@ -10,7 +10,7 @@
   # Declare nix-openclaw flake input
   flake-file.inputs.nix-openclaw.url = lib.mkDefault "github:openclaw/nix-openclaw";
 
-  FTS.apps._.ai._.openclaw = {
+  fleet.apps._.ai._.openclaw = {
     description = "OpenClaw - AI assistant gateway with Discord integration";
 
     homeManager =

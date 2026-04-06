@@ -2,7 +2,7 @@
 # Provides overlays for accessing pkgs.stable and pkgs.unstable
 {
   inputs,
-  FTS,
+  fleet,
   ...
 }:
 let
@@ -22,7 +22,7 @@ in
   flake-file.inputs.nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.11";
   # nixpkgs-unstable removed — inputs.nixpkgs is already nixpkgs-unstable
 
-  FTS.nix._.nixpkgs = {
+  fleet.nix._.nixpkgs = {
     description = "Nixpkgs stable overlay (pkgs.stable) — pkgs is already unstable";
     nixos.nixpkgs = { inherit overlays; };
     darwin.nixpkgs = { inherit overlays; };

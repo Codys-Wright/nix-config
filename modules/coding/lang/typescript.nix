@@ -1,7 +1,7 @@
 # TypeScript development environment aspect
-{ FTS, ... }:
+{ fleet, ... }:
 {
-  FTS.coding._.lang._.typescript = {
+  fleet.coding._.lang._.typescript = {
     description = "TypeScript and Node.js development environment";
 
     # Enable nix-ld for running dynamically linked binaries (bun global installs, etc.)

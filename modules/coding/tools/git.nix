@@ -1,10 +1,10 @@
 # Git configuration aspect
 {
-  FTS,
+  fleet,
   ...
 }:
 {
-  FTS.coding._.tools._.git = {
+  fleet.coding._.tools._.git = {
     description = "Git version control with delta and LFS support";
 
     homeManager =

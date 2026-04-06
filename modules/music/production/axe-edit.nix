@@ -2,14 +2,14 @@
 # Runs via Wine (mkWindowsApp from erosanix) with cursor fix
 {
   inputs,
-  FTS,
+  fleet,
   ...
 }:
 {
   # Add erosanix flake input for mkWindowsApp
   flake-file.inputs.erosanix.url = "github:emmanuelrosa/erosanix";
 
-  FTS.music._.production._.axeEdit = {
+  fleet.music._.production._.axeEdit = {
     description = "Fractal Audio Axe-Edit III editor/librarian via Wine";
 
     homeManager =

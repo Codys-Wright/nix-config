@@ -1,23 +1,23 @@
 # Gaming platforms aggregator
-# Usage: <FTS/gaming>
+# Usage: <fleet/gaming>
 {
-  FTS,
+  fleet,
   __findFile,
   ...
 }:
 {
-  FTS.gaming = {
+  fleet.gaming = {
     description = "All gaming platforms and tools";
 
     includes = [
-      <FTS.gaming/steam>
-      <FTS.gaming/minecraft>
-      <FTS.gaming/lutris>
-      <FTS.gaming/bottles>
-      <FTS.gaming/winboat>
-      <FTS.gaming/proton>
-      <FTS.gaming/melonloader>
-      <FTS.gaming/r2modman>
+      <fleet.gaming/steam>
+      <fleet.gaming/minecraft>
+      <fleet.gaming/lutris>
+      <fleet.gaming/bottles>
+      <fleet.gaming/winboat>
+      <fleet.gaming/proton>
+      <fleet.gaming/melonloader>
+      <fleet.gaming/r2modman>
     ];
   };
 }

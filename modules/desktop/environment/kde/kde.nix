@@ -1,14 +1,14 @@
 # KDE Plasma Desktop Environment with MacTahoe theming
 {
   lib,
-  FTS,
+  fleet,
   ...
 }:
 {
-  FTS.desktop._.environment._.kde = {
+  fleet.desktop._.environment._.kde = {
     description = "KDE Plasma 6 desktop environment with MacTahoe theme";
 
-    includes = [ FTS.desktop._.environment._.kde._.themes._.whitesur ];
+    includes = [ fleet.desktop._.environment._.kde._.themes._.whitesur ];
 
     nixos =
       { pkgs, ... }:
