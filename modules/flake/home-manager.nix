@@ -31,24 +31,6 @@
       };
   };
 
-  # Forward host-aspect homeManager blocks to each user's home-manager config.
-  # Den's built-in ctx pipeline only resolves the USER aspect for homeManager class.
-  # Host-included aspects with homeManager blocks (niri, stylix, etc.) need
-  # to be explicitly forwarded. This aspect uses host context to resolve the host
-  # aspect for homeManager class and include those modules.
-  den.aspects.hm-host-forward = <den.lib.parametric> {
-    description = "Forwards homeManager blocks from host-included aspects to HM users";
-    includes = [
-      (
-        { host, ... }:
-        let
-          hostAspect = den.aspects.${host.aspect};
-          resolved = den.lib.aspects.resolve "homeManager" hostAspect;
-        in
-        {
-          homeManager = _: { imports = resolved.imports; };
-        }
-      )
-    ];
-  };
+  # Note: host→user homeManager forwarding is handled by den._.mutual-provider
+  # (configured in defaults.nix via den.ctx.user.includes)
 }
