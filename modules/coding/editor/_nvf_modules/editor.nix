@@ -26,7 +26,8 @@
   };
 
   # LazyVim-style options (matching LazyVim's options.lua)
-  options = {
+  # Note: use `opts` (not `options`) to avoid conflict with NixOS module system's reserved `options` key
+  opts = {
     # Global statusline (required for lualine to work properly)
     laststatus = 3;
     # Disable default ruler (we have lualine)
