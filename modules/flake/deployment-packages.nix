@@ -124,13 +124,9 @@
                 VM_DIR=".${hostname}-vm-tmp"
                 mkdir -p "$VM_DIR"
 
-                # Create disk images if they don't exist (silently)
-                if [ ! -f "$VM_DIR/disk1.qcow2" ]; then
-                  ${pkgs.qemu_kvm}/bin/qemu-img create -f qcow2 "$VM_DIR/disk1.qcow2" 40G >/dev/null 2>&1
-                fi
-
-                if [ ! -f "$VM_DIR/disk2.qcow2" ]; then
-                  ${pkgs.qemu_kvm}/bin/qemu-img create -f qcow2 "$VM_DIR/disk2.qcow2" 20G >/dev/null 2>&1
+                # Create disk image if it doesn't exist (silently)
+                if [ ! -f "$VM_DIR/disk.qcow2" ]; then
+                  ${pkgs.qemu_kvm}/bin/qemu-img create -f qcow2 "$VM_DIR/disk.qcow2" 40G >/dev/null 2>&1
                 fi
 
                 # Build ISO path
@@ -157,8 +153,7 @@
                   "''${DISPLAY_ARGS[@]}" \
                   -cdrom "$ISO_PATH" \
                   -boot order=d \
-                  -drive file="$VM_DIR/disk1.qcow2",if=virtio,format=qcow2 \
-                  -drive file="$VM_DIR/disk2.qcow2",if=virtio,format=qcow2 \
+                  -drive file="$VM_DIR/disk.qcow2",if=virtio,format=qcow2 \
                   -nic user,hostfwd=tcp::"$HOST_PORT"-:22,hostfwd=tcp::"$BOOT_PORT"-:2222 \
                   -virtfs local,path=/nix/store,mount_tag=store,security_model=none,readonly=on
               '';
