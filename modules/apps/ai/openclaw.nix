@@ -49,7 +49,8 @@
             gateway = {
               mode = "local";
               auth = {
-                # Read from plain file at runtime
+                # TODO: migrate to SOPS — builtins.readFile reads at eval time,
+                # requires plaintext file and hardcodes /home/cody path
                 token = builtins.readFile /home/cody/.secrets/openclaw-gateway-token;
               };
             };
@@ -57,6 +58,7 @@
             # Discord bot channel
             channels.discord.accounts.default = {
               enabled = true;
+              # TODO: migrate to SOPS
               botToken = builtins.readFile /home/cody/.secrets/discord-bot-token;
               # FILL IN: your Discord user ID (right-click your name > Copy User ID with dev mode on)
               allowFrom = [ ]; # e.g. [ "123456789012345678" ]

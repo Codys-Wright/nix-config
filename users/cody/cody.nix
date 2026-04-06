@@ -99,7 +99,6 @@
           editors = [
             "cursor"
             "nvf"
-            "lazyvim"
             "zed"
           ];
           terminals = [
