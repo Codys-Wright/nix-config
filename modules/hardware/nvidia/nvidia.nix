@@ -1,8 +1,10 @@
 # NVIDIA hardware aspect
-{ FTS, ... }:
+{ FTS, den, ... }:
 {
   FTS.hardware._.nvidia = {
     description = "NVIDIA graphics hardware support";
+
+    includes = [ (den.lib.groups [ "video" ]) ];
 
     nixos =
       {
