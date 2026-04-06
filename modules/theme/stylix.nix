@@ -78,9 +78,10 @@
       { pkgs, lib, ... }:
       {
         # Terminal theming via Stylix (colors + JetBrains Mono font)
-        stylix.targets.kitty.enable = true;
+        # mkForce needed: NixOS-level autoEnable=false propagates to HM and overrides these
+        stylix.targets.kitty.enable = lib.mkForce true;
         stylix.targets.kitty.fonts.enable = true;
-        stylix.targets.ghostty.enable = true;
+        stylix.targets.ghostty.enable = lib.mkForce true;
         stylix.targets.ghostty.fonts.enable = true;
 
         # KDE theming is handled by the MacTahoe KDE theme aspect (whitesur.nix)

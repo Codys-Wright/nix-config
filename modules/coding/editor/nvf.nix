@@ -67,10 +67,6 @@ in
       lsp
       nvzone
       snacks
-      snacks-picker
-      snacks-dashboard
-      snacks-git
-      snacks-terminal
       test
       ui
       util
@@ -143,11 +139,20 @@ in
           timerly.package = pkgs.vimPlugins.timerly;
         };
       };
-    provides.snacks.vim = importVim "snacks/snacks.nix";
-    provides.snacks-picker.vim = importVim "snacks/picker.nix";
-    provides.snacks-dashboard.vim = importVim "snacks/dashboard.nix";
-    provides.snacks-git.vim = importVim "snacks/git.nix";
-    provides.snacks-terminal.vim = importVim "snacks/terminal.nix";
+    # All snacks modules merged into one provides — setupOpts must be in a single
+    # nvf module to deep-merge correctly (separate provides create separate modules
+    # that overwrite each other's setupOpts).
+    provides.snacks.vim =
+      let
+        merge = lib.foldl lib.recursiveUpdate { };
+      in
+      merge [
+        (importVim "snacks/snacks.nix")
+        (importVim "snacks/picker.nix")
+        (importVim "snacks/dashboard.nix")
+        (importVim "snacks/git.nix")
+        (importVim "snacks/terminal.nix")
+      ];
     provides.test.vim = importVim "test.nix";
     provides.ui.vim = importVim "ui.nix";
     provides.util.vim = importVim "util.nix";
