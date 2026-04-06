@@ -5,37 +5,40 @@
   ...
 }:
 {
-  den = {
-    homes = {
-      # NixOS home configuration
-      x86_64-linux.guest = {
-        userName = "guest";
-        aspect = "guest";
-      };
-    };
+  den.homes.x86_64-linux.guest = {
+    userName = "guest";
+    aspect = "guest";
+  };
 
-    # Guest user aspect - minimal configuration without secrets
-    aspects.guest = {
-      description = "Minimal guest user for bootstrap deployments";
+  den.aspects.guest = {
+    description = "Guest user — KDE Plasma desktop, minimal setup";
 
-      includes = [
-        # Home-manager backup system
-        den.aspects.hm-backup
+    includes = [
+      den.aspects.hm-backup
+      <den/primary-user>
+      (<den/user-shell> "bash")
+    ];
 
-        # Basic user setup (no secrets required)
-        <den/primary-user>
-      ];
-
-      # Minimal home-manager config
-      homeManager =
-        { pkgs, ... }:
-        {
-          home.packages = with pkgs; [
-            vim
-            htop
-            git
-          ];
+    nixos =
+      { ... }:
+      {
+        users.users.guest = {
+          isNormalUser = true;
+          description = "Guest";
+          extraGroups = [ "networkmanager" ];
+          password = ""; # passwordless login
         };
-    };
+      };
+
+    homeManager =
+      { pkgs, ... }:
+      {
+        home.packages = with pkgs; [
+          firefox
+          vim
+          htop
+          git
+        ];
+      };
   };
 }

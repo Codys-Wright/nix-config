@@ -26,6 +26,9 @@
           };
         };
 
+        # Docker daemon
+        virtualisation.docker.enable = true;
+
         # Enable spice USB redirection for passthrough
         virtualisation.spiceUSBRedirection.enable = true;
 

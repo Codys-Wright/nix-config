@@ -1,8 +1,8 @@
-# Storage hardware aspect
+# Disk utilities — udisks2, polkit automount rules, gvfs, devmon
 { FTS, ... }:
 {
-  FTS.hardware._.storage = {
-    description = "Automatic storage mounting support";
+  FTS.hardware._.disk-utils = {
+    description = "Disk utilities: udisks2 automounting, polkit rules, gvfs, devmon";
 
     nixos =
       { ... }:

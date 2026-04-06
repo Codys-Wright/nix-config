@@ -9,6 +9,8 @@
     THEBATTLESHIP = {
       description = "The Main System, ready for everyday battle";
       users.cody = { };
+      users.joshua = { };
+      users.guest = { };
       # users.starcommand = {}; # Service user for self-hosting infrastructure
       aspect = "THEBATTLESHIP";
 
@@ -21,39 +23,25 @@
   # THEBATTLESHIP host-specific aspect that includes role-based aspects
   den.aspects = {
     THEBATTLESHIP = {
-      # Include role-based aspects
       includes = [
         <FTS/fonts>
         <FTS/phoenix>
-
-        # System-wide theme (bootloader, default appearance)
-
-        # ── Gaming ──
-        <FTS.gaming/steam>
-        <FTS.gaming/minecraft>
-        <FTS.gaming/lutris>
-        <FTS.gaming/bottles>
-        <FTS.gaming/winboat>
-        <FTS.gaming/proton>
-        <FTS.gaming/melonloader>
-        <FTS.gaming/r2modman>
-
-        # ── Apps ──
-        <FTS.apps/flatpaks>
-        <FTS.music/production>
-        (FTS.selfhost._.samba-client { })
         <FTS/mactahoe>
         <FTS/stylix>
 
-        # Desktop environment, display manager, and bootloader
-        <FTS.desktop/environment/niri>
-        <FTS.desktop/display-manager/sddm>
-        (FTS.grub {
-          uefi = true;
-          # theme is set by system theme preset
+        (FTS.desktop { default = "niri"; })
+        (FTS.grub { uefi = true; })
+
+        (FTS.hardware {
+          nvidia = true;
+          tailscale = true;
+          # cuda = true;  # Disabled: download failures due to NVIDIA SSL issues
         })
 
-        # Disk and filesystem configuration
+        <FTS/gaming>
+
+        <FTS/apps>
+
         (<FTS.system/disk> {
           type = "btrfs-impermanence";
           device = "/dev/nvme2n1";
@@ -62,37 +50,12 @@
           persistFolder = "/persist";
         })
 
-        # Hardware and kernel - manually include hardware sub-aspects except CUDA
-        # (CUDA downloads fail due to SSL issues with NVIDIA servers)
-        <FTS.kernel>
-        <FTS.hardware._.facter>
-        <FTS.hardware._.audio>
-        <FTS.hardware._.bluetooth>
-        # SKIP: <FTS.hardware._.cuda>  - Disabled due to download failures
-        <FTS.hardware._.networking>
-        <FTS.hardware._.networking._.tailscale>
-        # <FTS.hardware._.networking._.wireguard._.protonvpn>  # Disabled: broken iptables kill switch rules
-        <FTS.hardware._.nvidia>
-        <FTS.hardware._.storage>
-        # commented out for debugging
-        # <FTS/kanata>
-
-        # mDNS/DNS-SD service discovery
-        <FTS.system._.avahi>
-
-        # Virtualization for Windows VMs (EASEUS backup recovery, etc.)
-        <FTS.system._.virtualization>
-
-        # Reverse engineering and binary analysis
-        <FTS.coding._.tools._.reverse-engineering>
-
-        # Deployment configuration (SSH, networking, secrets, VM/ISO generation)
+        <FTS/kernel>
+        <FTS.music/production>
+        (FTS.selfhost._.samba-client { })
+        <FTS.system/avahi>
+        <FTS.system/virtualization>
         (<FTS.deployment> { })
-
-        # WireGuard VPN for ProtonVPN
-
-        # Self-hosting services are provided by the starcommand user
-        # See users/starcommand/starcommand.nix for service configuration
       ];
 
       # Manually set fileSystems and bootloader for now
@@ -189,8 +152,11 @@
 
           # Add cody to libvirtd group for VM management
           users.users.cody.extraGroups = [
+            "adbusers"
             "audio"
+            "docker"
             "input"
+            "kvm"
             "libvirtd"
           ];
 
