@@ -13,7 +13,7 @@
       {
         services.desktopManager.gnome.enable = true;
 
-        services.displayManager.defaultSession = "gnome";
+        services.displayManager.defaultSession = lib.mkDefault "gnome";
 
         services.sysprof.enable = true;
 
