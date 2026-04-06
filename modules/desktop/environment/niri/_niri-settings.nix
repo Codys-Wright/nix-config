@@ -101,14 +101,14 @@ in
     prefer-no-csd = _: { };
 
     input = {
-      # niri Mod = Mod5 (ISO_Level3_Shift). xremap routes Caps Lock / Esc / Right Ctrl /
-      # Right Alt to ISO_Level3_Shift, and remaps physical Super to F20 for "Cmd" shortcuts.
+      # niri Mod = Mod5 (via XKB lv3:ralt_switch). xremap routes Caps Lock / Esc / Right Ctrl
+      # to Alt_R which XKB maps to Mod5. Physical Super stays as Super for Cmd shortcuts.
       mod-key = "Mod5";
       focus-follows-mouse = _: { };
       keyboard = {
         xkb = {
           layout = "us";
-          options = "lv3:ralt_switch";
+          options = "lv3:ralt_switch,lv3:lwin_switch";
         };
         repeat-rate = 40;
         repeat-delay = 250;
@@ -241,13 +241,13 @@ in
     ];
 
     binds = {
-      # Terminal & launcher
+      # ── Launchers ──────────────────────────────────────────────────────
       "Mod+Return".spawn = lib.getExe p.kitty;
       "Mod+E".spawn = lib.getExe p.ghostty;
       "Mod+Space".spawn-sh = "${noctaliaExe} ipc call launcher toggle";
 
-      # Which-key popup (Mod=Super on host, Alt when nested)
-      "Mod+d".spawn-sh = mkWhichKeyExe [
+      # Which-key popup
+      "Mod+D".spawn-sh = mkWhichKeyExe [
         {
           key = "b";
           desc = "Browser (LibreWolf)";
@@ -346,17 +346,22 @@ in
         }
       ];
 
-      # Overview
+      # ── Overview ────────────────────────────────────────────────────────
       "Mod+O".toggle-overview = _: { };
 
-      # Window management
+      # ── Window management ──────────────────────────────────────────────
       "Mod+Q".close-window = _: { };
+      "Alt+F4".close-window = _: { };
       "Mod+F".maximize-column = _: { };
       "Mod+G".fullscreen-window = _: { };
       "Mod+Shift+F".toggle-window-floating = _: { };
       "Mod+C".center-column = _: { };
+      "Mod+T".toggle-column-tabbed-display = _: { };
+      "Mod+Tab".focus-window-previous = _: { };
+      "Mod+W".consume-or-expel-window-right = _: { };
+      "Mod+Shift+W".consume-or-expel-window-left = _: { };
 
-      # Focus (Vi-keys + arrows) — crosses monitor boundaries
+      # ── Focus (Vi-keys + arrows) — crosses monitor boundaries ────────
       "Mod+H".focus-column-or-monitor-left = _: { };
       "Mod+L".focus-column-or-monitor-right = _: { };
       "Mod+K".focus-window-or-monitor-up = _: { };
@@ -366,19 +371,19 @@ in
       "Mod+Up".focus-window-or-monitor-up = _: { };
       "Mod+Down".focus-window-or-monitor-down = _: { };
 
-      # Move windows — crosses monitor boundaries
+      # ── Move windows (Mod+Shift) — crosses monitor boundaries ────────
       "Mod+Shift+H".move-column-left-or-to-monitor-left = _: { };
       "Mod+Shift+L".move-column-right-or-to-monitor-right = _: { };
       "Mod+Shift+K".move-window-up-or-to-workspace-up = _: { };
       "Mod+Shift+J".move-window-down-or-to-workspace-down = _: { };
 
-      # Resize
+      # ── Resize (Mod+Ctrl) ──────────────────────────────────────────────
       "Mod+Ctrl+H".set-column-width = "-5%";
       "Mod+Ctrl+L".set-column-width = "+5%";
       "Mod+Ctrl+J".set-window-height = "-5%";
       "Mod+Ctrl+K".set-window-height = "+5%";
 
-      # Workspaces (named w0-w9, bound to keys 1-0)
+      # ── Workspaces (Mod + number) ──────────────────────────────────────
       "Mod+1".focus-workspace = "w0";
       "Mod+2".focus-workspace = "w1";
       "Mod+3".focus-workspace = "w2";
@@ -400,29 +405,39 @@ in
       "Mod+Shift+9".move-column-to-workspace = "w8";
       "Mod+Shift+0".move-column-to-workspace = "w9";
 
-      # Workspace navigation (current monitor)
+      # ── Workspace navigation ───────────────────────────────────────────
       "Mod+N".focus-workspace-down = _: { };
       "Mod+P".focus-workspace-up = _: { };
 
-      # Mouse wheel navigation
+      # ── Workspace/monitor moves (Mod+Alt) ──────────────────────────────
+      "Mod+Alt+H".move-workspace-to-monitor-left = _: { };
+      "Mod+Alt+L".move-workspace-to-monitor-right = _: { };
+      "Mod+Alt+J".move-workspace-to-monitor-down = _: { };
+      "Mod+Alt+K".move-workspace-to-monitor-up = _: { };
+      "Mod+Alt+N".move-column-to-workspace-down = _: { };
+      "Mod+Alt+P".move-column-to-workspace-up = _: { };
+
+      # ── Mouse wheel navigation ─────────────────────────────────────────
       "Mod+WheelScrollDown".focus-column-right = _: { };
       "Mod+WheelScrollUp".focus-column-left = _: { };
       "Mod+Ctrl+WheelScrollDown".focus-workspace-down = _: { };
       "Mod+Ctrl+WheelScrollUp".focus-workspace-up = _: { };
 
-      # Volume
+      # ── Volume ─────────────────────────────────────────────────────────
       "XF86AudioRaiseVolume".spawn-sh = "wpctl set-volume -l 1.4 @DEFAULT_AUDIO_SINK@ 5%+";
       "XF86AudioLowerVolume".spawn-sh = "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-";
       "XF86AudioMute".spawn-sh = "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle";
 
-      # Screenshots
+      # ── Screenshots ────────────────────────────────────────────────────
       "Print".screenshot = _: { };
       "Mod+Ctrl+S".spawn-sh = "${lib.getExe p.flameshot} gui --raw | ${wlCopy}";
       "Mod+Shift+S".spawn-sh = ''${grim} -g "$(${slurp} -w 0)" - | ${wlCopy}'';
       "Mod+Shift+E".spawn-sh = "${wlPaste} | ${swappy} -f -";
 
-      # Session
-      "Mod+Alt+L".spawn = "swaylock";
+      # ── Help & session ─────────────────────────────────────────────────
+      "Mod+Shift+Slash".show-hotkey-overlay = _: { };
+      "Mod+Escape".toggle-keyboard-shortcuts-inhibit = _: { };
+      "Mod+Shift+Escape".spawn = "swaylock";
       "Mod+Shift+Q".quit = _: { };
     };
   };

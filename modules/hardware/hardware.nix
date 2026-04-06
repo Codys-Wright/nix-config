@@ -1,18 +1,36 @@
-# Hardware facet - All hardware support
-{ FTS, ... }:
+# Hardware parametric aspect
+# Common hardware (audio, bluetooth, networking, facter) always included.
+# Opt in to machine-specific components: nvidia, tailscale, cuda.
+#
+# Usage: (FTS.hardware { nvidia = true; tailscale = true; })
 {
-  FTS.hardware = {
-    description = "All hardware support - facter, audio, bluetooth, cuda, networking, nvidia";
+  lib,
+  den,
+  FTS,
+  __findFile,
+  ...
+}:
+{
+  FTS.hardware.description = "Hardware support configuration";
 
-    includes = [
-      FTS.hardware._.facter # Hardware detection using nixos-facter
-      FTS.hardware._.audio
-      FTS.hardware._.bluetooth
-      # FTS.hardware._.cuda
-      FTS.hardware._.networking
-      FTS.hardware._.networking._.tailscale
-      FTS.hardware._.nvidia
-      FTS.hardware._.storage
-    ];
-  };
+  FTS.hardware.__functor =
+    _self:
+    {
+      nvidia ? false,
+      tailscale ? false,
+      cuda ? false,
+      ...
+    }:
+    den.lib.parametric {
+      includes = [
+        <FTS.hardware/facter>
+        <FTS.hardware/audio>
+        <FTS.hardware/bluetooth>
+        <FTS.hardware/networking>
+        <FTS.hardware/disk-utils>
+      ]
+      ++ lib.optional tailscale <FTS.hardware._.networking/tailscale>
+      ++ lib.optional nvidia <FTS.hardware/nvidia>
+      ++ lib.optional cuda <FTS.hardware/cuda>;
+    };
 }

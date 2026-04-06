@@ -1,20 +1,23 @@
-# SDDM display manager with Wayland support
+# SDDM display manager with MacTahoe theme
 { FTS, ... }:
 {
   FTS.desktop._.display-manager._.sddm = {
-    description = "SDDM display manager with Wayland backend and autologin";
+    description = "SDDM display manager with Wayland backend and MacTahoe-Dark theme";
 
     nixos =
-      { pkgs, lib, ... }:
+      { pkgs, ... }:
+      let
+        mactahoeKde = pkgs.callPackage ../../../packages/mactahoe/kde-theme.nix { };
+      in
       {
         services.displayManager.sddm = {
           enable = true;
           wayland.enable = true;
           autoNumlock = true;
+          theme = "MacTahoe-Dark";
         };
 
-        # Default session for SDDM to offer
-        services.displayManager.defaultSession = "niri";
+        environment.systemPackages = [ mactahoeKde ];
       };
   };
 }

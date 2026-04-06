@@ -5,13 +5,13 @@
   ...
 }:
 {
-  den.homes.x86_64-linux.guest = {
-    userName = "guest";
-    aspect = "guest";
+  den.homes.x86_64-linux.joshua = {
+    userName = "joshua";
+    aspect = "joshua";
   };
 
-  den.aspects.guest = {
-    description = "Guest user — KDE Plasma desktop, minimal setup";
+  den.aspects.joshua = {
+    description = "Joshua user — KDE Plasma desktop";
 
     includes = [
       den.aspects.hm-backup
@@ -22,11 +22,11 @@
     nixos =
       { ... }:
       {
-        users.users.guest = {
+        users.users.joshua = {
           isNormalUser = true;
-          description = "Guest";
+          description = "Joshua";
           extraGroups = [ "networkmanager" ];
-          password = ""; # passwordless login
+          hashedPassword = "$6$cRP5cjenpjJ2dtcB$s8Hhnvk8Ro7INZasS2nP3OZyBrno/IkfpdSMlBFuDQ6LjloH6l4PMYMYK9jocj0gkXQoawqK1mUJEVHds/P1n.";
         };
       };
 
@@ -35,9 +35,7 @@
       {
         home.packages = with pkgs; [
           firefox
-          vim
-          htop
-          git
+          vlc
         ];
       };
   };

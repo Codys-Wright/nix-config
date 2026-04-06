@@ -28,7 +28,7 @@ let
 
   # ── Modifier prefix names (post-modmap) ──────────────────────────────
   # These determine what modifier name appears in keymap rules for each role.
-  cmd = if isAltCmd then "Ctrl" else "F20"; # "Cmd" shortcuts
+  cmd = if isAltCmd then "Ctrl" else "Super_L"; # "Cmd" shortcuts
   opt = "Alt"; # "Option" shortcuts (Alt in both modes)
   physCtrl = if isAltCmd then "Super" else "Ctrl"; # Physical Ctrl (for terminal signals)
 
@@ -128,14 +128,7 @@ let
         }
       ]
     else
-      [
-        {
-          name = "Physical Super_L → F20 (Cmd virtual modifier)";
-          remap = {
-            Super_L = "F20";
-          };
-        }
-      ];
+      [ ]; # Super stays as Super — niri Mod is Mod5, no conflict
 
   # Helper: prepend modifier to key name
   c = key: "${cmd}-${key}"; # Cmd+key
@@ -394,7 +387,7 @@ let
 
 in
 {
-  virtual_modifiers = lib.optionals (!isAltCmd) [ "F20" ];
+  virtual_modifiers = [ ];
   modmap = extraModmap ++ modmap;
   keymap = keymap ++ extraKeymap;
 }

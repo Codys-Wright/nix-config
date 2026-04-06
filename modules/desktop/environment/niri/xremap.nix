@@ -1,11 +1,11 @@
 # xremap — macOS-style keybindings for niri
 #
 # Uses the mac-keybindings module with cmdKey = "super":
-#   Caps Lock (hold) → ISO_Level3_Shift / Mod5 (niri Mod), tap → Escape
-#   Esc (hold)       → ISO_Level3_Shift / Mod5 (niri Mod), tap → Escape
-#   Right Ctrl       → ISO_Level3_Shift / Mod5 (niri Mod)
-#   Right Alt        → ISO_Level3_Shift / Mod5 (niri Mod)
-#   Physical Super L → F20 → "Cmd" app shortcuts
+#   Caps Lock (hold) → Alt_R → XKB Mod5 (niri Mod), tap → Escape
+#   Esc (hold)       → Alt_R → XKB Mod5 (niri Mod), tap → Escape
+#   Right Ctrl       → Alt_R → XKB Mod5 (niri Mod)
+#   Right Alt        → XKB Mod5 natively (lv3:ralt_switch)
+#   Physical Super L → Super (Cmd, mac-style app shortcuts)
 #   Physical Super R → Symbols layer (hold + key → symbol)
 #   Physical Ctrl    → Ctrl (terminal signals, unchanged)
 #   Physical Alt L   → Alt ("Option" word nav)
@@ -27,17 +27,11 @@ let
       {
         name = "Hyper keys → Mod5 (niri Mod via Alt_R → XKB lv3)";
         remap = {
-          CapsLock = {
-            tap = "Esc";
-            hold = "Alt_R";
-            held_threshold_millis = 80;
-            tap_timeout_millis = 10000;
-          };
           Esc = {
             tap = "Esc";
             hold = "Alt_R";
             held_threshold_millis = 100;
-            tap_timeout_millis = 10000;
+            tap_timeout_millis = 1000;
           };
           Ctrl_R = {
             tap = "Ctrl_R";
@@ -52,6 +46,7 @@ let
     # Symbols layer: hold Right Super + key → symbol
     # Ported from kanata symbols layer (rmet hold)
     extraKeymap = [
+
       {
         name = "Symbols layer (Right Super held)";
         remap = {
@@ -115,6 +110,37 @@ let
           "Super_R-Enter" = "Enter";
         };
       }
+
+      # Prevent Super_L+key from leaking to niri as Mod+key in terminals.
+      # Keys already mapped in mac-keybindings terminal section are fine;
+      # these are the unmapped ones that would trigger niri WM actions.
+      {
+        name = "Swallow Cmd keys in terminals (prevent niri Mod leak)";
+        application.only = [
+          "Alacritty"
+          "kitty"
+          "ghostty"
+          "foot"
+          "wezterm"
+          "org.wezfurlong.wezterm"
+          "org.gnome.Terminal"
+          "org.gnome.Console"
+          "org.gnome.Ptyxis"
+          "konsole"
+        ];
+        remap = {
+          "Super_L-h" = "h";
+          "Super_L-j" = "j";
+          "Super_L-l" = "l";
+          "Super_L-p" = "p";
+          "Super_L-o" = "o";
+          "Super_L-g" = "g";
+          "Super_L-d" = "d";
+          "Super_L-e" = "e";
+          "Super_L-r" = "r";
+          "Super_L-Enter" = "Enter";
+        };
+      }
     ];
   };
 in
@@ -126,15 +152,34 @@ in
     '';
 
     homeManager =
-      { ... }:
+      { pkgs, ... }:
+      let
+        # Find the niri socket at runtime and inject it into the systemd user env.
+        # niri does not call import-environment, so PassEnvironment gets nothing.
+        # Uses only shell builtins + systemctl (always in PATH via /run/current-system/sw).
+        findNiriSocket = pkgs.writeShellScript "xremap-find-niri-socket" ''
+          for sock in /run/user/$UID/niri.*.sock; do
+            [ -S "$sock" ] && exec systemctl --user set-environment NIRI_SOCKET=$sock
+          done
+          exit 0
+        '';
+      in
       {
         imports = [ inputs.xremap-flake.homeManagerModules.default ];
 
         services.xremap = {
           enable = true;
           withNiri = true;
+          # --mouse makes xremap listen to mouse devices, so mouse clicks count as
+          # interruptions for multipurpose key decisions (Esc/CapsLock hold → Mod5)
+          mouse = true;
           config = xremapConfig;
         };
+
+        # xremap needs NIRI_SOCKET for app-specific remaps (terminal vs non-terminal).
+        systemd.user.services.xremap.Unit.After = [ "niri.service" ];
+        systemd.user.services.xremap.Service.RestartSec = "2";
+        systemd.user.services.xremap.Service.ExecStartPre = [ "${findNiriSocket}" ];
       };
   };
 }

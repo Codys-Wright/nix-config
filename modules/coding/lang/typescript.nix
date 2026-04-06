@@ -61,6 +61,9 @@
             eslint_d
             stylelint
 
+            # CSS tooling
+            tailwindcss
+
             bun
 
             # Development servers
