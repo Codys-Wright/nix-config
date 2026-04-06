@@ -23,10 +23,19 @@
           settings = {
             show_banner = false;
             edit_mode = "vi";
-            shell_integration = true;
             use_kitty_protocol = true;
             highlight_resolved_externals = true;
             recursion_limit = 50;
+
+            shell_integration = {
+              osc2 = true;
+              osc7 = true;
+              osc8 = true;
+              osc9_9 = false;
+              osc133 = true;
+              osc633 = true;
+              reset_application_mode = true;
+            };
 
             completions = {
               case_sensitive = false;
