@@ -17,9 +17,16 @@
       let
         themeFile = "${pkgs.oh-my-posh}/share/oh-my-posh/themes/catppuccin.omp.json";
         configArg = "--config ${themeFile}";
-        # Pre-generate the nushell init script at build time with the theme baked in
+
+        # Pre-generate the nushell init script at build time, patching in the
+        # --config flag on every `print` call so the theme is used at runtime.
+        # Without this, oh-my-posh falls back to the default theme because
+        # its cache (created during `init`) doesn't persist from the nix sandbox.
         ompInitNu = pkgs.runCommand "oh-my-posh-init.nu" { } ''
-          ${lib.getExe pkgs.oh-my-posh} init nu ${configArg} --print > $out
+          ${lib.getExe pkgs.oh-my-posh} init nu ${configArg} --print \
+            | ${pkgs.gnused}/bin/sed 's|print \$type|print $type ${configArg}|g' \
+            | ${pkgs.gnused}/bin/sed 's|print secondary|print secondary ${configArg}|g' \
+            > $out
         '';
       in
       {
@@ -33,11 +40,7 @@
           useTheme = "catppuccin";
         };
 
-        # Set POSH_THEME so oh-my-posh uses catppuccin at runtime
-        # The init script's `print` commands read this env var
-        programs.nushell.environmentVariables.POSH_THEME = themeFile;
-
-        # Source the pre-built init script
+        # Source the pre-built and patched init script
         programs.nushell.extraConfig = lib.mkOrder 2000 ''
           source ${ompInitNu}
         '';
