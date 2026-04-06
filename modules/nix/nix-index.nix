@@ -17,6 +17,7 @@
 
       programs.nix-index.enable = true;
       programs.nix-index.enableFishIntegration = true;
+      programs.nix-index.enableNushellIntegration = true;
       programs.nix-index-database.comma.enable = true;
     };
   };
