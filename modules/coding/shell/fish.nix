@@ -8,6 +8,12 @@
   fleet.coding._.shells._.fish = {
     description = "Fish shell with custom configuration, abbreviations, aliases, and functions";
 
+    os =
+      { ... }:
+      {
+        programs.fish.enable = true;
+      };
+
     homeManager =
       {
         config,
