@@ -20,19 +20,15 @@ let
   userTerminal =
     terminal: from:
     let
-      envVars = {
-        TERMINAL = terminal;
-        TERM = "xterm-256color"; # Default TERM value, can be overridden if needed
-      };
       os =
-        { ... }:
+        { lib, ... }:
         {
-          environment.sessionVariables = envVars;
+          environment.sessionVariables.TERMINAL = lib.mkForce terminal;
         };
       homeManager =
-        { ... }:
+        { lib, ... }:
         {
-          home.sessionVariables = envVars;
+          home.sessionVariables.TERMINAL = lib.mkForce terminal;
         };
     in
     {

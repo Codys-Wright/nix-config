@@ -96,36 +96,15 @@
         <fleet.apps/browsers/firefox_webapps>
 
         (fleet.coding {
-          editors = [
-            "cursor"
-            "nvf"
-            "zed"
-          ];
-          terminals = [
-            "ghostty"
-            "kitty"
-            "tmux"
-            "zellij"
-            "wezterm"
-          ];
-          shells = [
-            "fish"
-            "zsh"
-            "nushell"
-            "oh-my-posh"
-          ];
-          langs = [
-            "rust"
-            "typescript"
-            "python"
-          ];
-          tools = [
-            "dioxus"
-            "android"
-            "opencode"
-            "podman"
-            "reverse-engineering"
-          ];
+          editor = {
+            default = "nvf";
+          };
+          terminal = {
+            default = "ghostty";
+          };
+          shell = {
+            default = "fish";
+          };
         })
 
         (<fleet.user/password> {
@@ -133,7 +112,6 @@
           value = "$6$0C2OSNBUmq/740g7$VfDQJvfYnxCwlV/KlmAIz.z5jYpIVc7Qa.1pzL/Fu3UGprNVLSKljI310/gyeCiYOPhJ.TVijW62wTmY54Ols1";
         })
         <den/primary-user>
-        (<den/user-shell> "fish")
 
         cody.dots
         cody.fish

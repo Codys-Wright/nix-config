@@ -1,10 +1,11 @@
 # Coding parametric aspect
+# All editors, terminals, shells, languages, and tools are included.
+# Use `default` to pick the primary shell (login shell) and terminal ($TERMINAL).
+#
 # Usage: (fleet.coding {
-#   editors = [ "nvf" "cursor" "zed" ];
-#   terminals = [ "ghostty" "kitty" "tmux" ];
-#   shells = [ "fish" "zsh" ];
-#   langs = [ "rust" "typescript" "python" ];
-#   tools = [ "android" "dioxus" "podman" ];
+#   editor   = { default = "nvf"; };
+#   terminal = { default = "ghostty"; };
+#   shell    = { default = "fish"; };
 # })
 {
   lib,
@@ -19,66 +20,52 @@
   fleet.coding.__functor =
     _self:
     {
-      cli ? true,
-      git ? true,
-      lazygit ? true,
-      devTools ? true,
-      editors ? [ ],
-      terminals ? [ ],
-      shells ? [ ],
-      langs ? [ ],
-      tools ? [ ],
+      editor ? { },
+      terminal ? { },
+      shell ? { },
       ...
     }:
-    let
-      editorMap = {
-        nvf = <fleet.coding._.editors/nvf>;
-        cursor = <fleet.coding._.editors/cursor>;
-        zed = <fleet.coding._.editors/zed>;
-        neovim = <fleet.coding._.editors/neovim>;
-      };
-
-      terminalMap = {
-        ghostty = <fleet.coding._.terminals/ghostty>;
-        kitty = <fleet.coding._.terminals/kitty>;
-        tmux = <fleet.coding._.terminals/tmux>;
-        zellij = <fleet.coding._.terminals/zellij>;
-        wezterm = <fleet.coding._.terminals/wezterm>;
-      };
-
-      shellMap = {
-        fish = <fleet.coding._.shells/fish>;
-        zsh = <fleet.coding._.shells/zsh>;
-        nushell = <fleet.coding._.shells/nushell>;
-        oh-my-posh = <fleet.coding._.shells/oh-my-posh>;
-      };
-
-      langMap = {
-        rust = <fleet.coding._.lang/rust>;
-        typescript = <fleet.coding._.lang/typescript>;
-        python = <fleet.coding._.lang/python>;
-      };
-
-      toolMap = {
-        android = <fleet.coding._.tools/android>;
-        dioxus = <fleet.coding._.tools/dioxus>;
-        "reverse-engineering" = <fleet.coding._.tools/reverse-engineering>;
-        opencode = <fleet.coding._.tools/opencode>;
-        "dev-tools" = <fleet.coding._.tools/dev-tools>;
-        docker = <fleet.coding._.tools._.containers/docker>;
-        podman = <fleet.coding._.tools._.containers/podman>;
-      };
-    in
     den.lib.parametric {
-      includes =
-        lib.optional cli <fleet.coding/cli>
-        ++ lib.optional git <fleet.coding._.tools/git>
-        ++ lib.optional lazygit <fleet.coding._.tools/lazygit>
-        ++ lib.optional devTools <fleet.coding._.tools/dev-tools>
-        ++ map (e: editorMap.${e}) editors
-        ++ map (t: terminalMap.${t}) terminals
-        ++ map (s: shellMap.${s}) shells
-        ++ map (l: langMap.${l}) langs
-        ++ map (t: toolMap.${t}) tools;
+      includes = [
+        # CLI tools
+        <fleet.coding/cli>
+        <fleet.coding._.tools/git>
+        <fleet.coding._.tools/lazygit>
+        <fleet.coding._.tools/dev-tools>
+
+        # All editors
+        <fleet.coding._.editors/nvf>
+        <fleet.coding._.editors/cursor>
+        <fleet.coding._.editors/zed>
+        <fleet.coding._.editors/neovim>
+
+        # All terminals
+        <fleet.coding._.terminals/ghostty>
+        <fleet.coding._.terminals/kitty>
+        <fleet.coding._.terminals/tmux>
+        <fleet.coding._.terminals/zellij>
+        <fleet.coding._.terminals/wezterm>
+
+        # All shells
+        <fleet.coding._.shells/fish>
+        <fleet.coding._.shells/zsh>
+        <fleet.coding._.shells/nushell>
+        <fleet.coding._.shells/oh-my-posh>
+
+        # All languages
+        <fleet.coding._.lang/rust>
+        <fleet.coding._.lang/typescript>
+        <fleet.coding._.lang/python>
+
+        # All tools
+        <fleet.coding._.tools/android>
+        <fleet.coding._.tools/dioxus>
+        <fleet.coding._.tools/reverse-engineering>
+        <fleet.coding._.tools/opencode>
+        <fleet.coding._.tools._.containers/podman>
+      ]
+      # Set defaults
+      ++ lib.optional (shell ? default) (<den/user-shell> shell.default)
+      ++ lib.optional (terminal ? default) (fleet.coding._.user-terminal terminal.default);
     };
 }
