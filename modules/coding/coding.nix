@@ -65,7 +65,7 @@
         <fleet.coding._.tools._.containers/podman>
       ]
       # Set defaults
-      ++ lib.optional (shell ? default) (<den/user-shell> shell.default)
+      ++ lib.optional (shell ? default) (fleet.user._.shell { default = shell.default; })
       ++ lib.optional (terminal ? default) (fleet.coding._.user-terminal terminal.default);
     };
 }
