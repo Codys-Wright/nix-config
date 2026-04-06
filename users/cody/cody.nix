@@ -103,7 +103,7 @@
             default = "ghostty";
           };
           shell = {
-            default = "fish";
+            default = "nushell";
           };
         })
 

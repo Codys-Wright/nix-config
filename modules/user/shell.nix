@@ -9,20 +9,29 @@ let
     Sets a user default shell and enables the shell at OS and Home levels.
   '';
 
+  # Shells that have a NixOS/darwin programs.<shell> module
+  hasOsModule =
+    shell:
+    builtins.elem shell [
+      "fish"
+      "zsh"
+      "bash"
+    ];
+
   userShell = shell: user: {
     os =
       { pkgs, ... }:
       {
-        programs.${shell}.enable = true;
         users.users.${user.userName}.shell = pkgs.${shell};
+      }
+      // lib.optionalAttrs (hasOsModule shell) {
+        programs.${shell}.enable = true;
       };
 
     homeManager.programs.${shell}.enable = true;
   };
 in
 {
-  # Set default shell for user
-  # Usage: (<fleet.user/shell> { default = "fish"; })
   fleet.user._.shell.__functor =
     _self:
     {
