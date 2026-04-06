@@ -1,6 +1,7 @@
 # Arr stack (Radarr, Sonarr, Bazarr, Readarr, Lidarr, Jackett) aspect module
 {
   FTS,
+  den,
   lib,
   __findFile,
   ...
@@ -20,6 +21,8 @@
       aspect-chain,
     }:
     {
+      includes = [ (den.lib.groups [ "media" ]) ];
+
       nixos =
         {
           lib,
