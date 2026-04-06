@@ -6,7 +6,7 @@
     homeManager = {
       programs.sesh = {
         enable = true;
-        enableAlias = true;
+        enableAlias = false; # Disabled — bash-style $(…) breaks nushell. Custom alias below.
         enableTmuxIntegration = true;
         icons = true;
         tmuxKey = "T"; # Use T instead of default 's'
@@ -98,6 +98,14 @@
           )\""
         '';
       };
+
+      # Cross-shell sesh alias — bash/zsh/fish use $(…), nushell uses custom command
+      programs.bash.shellAliases.s = "sesh connect $(sesh list --icons | fzf --ansi)";
+      programs.zsh.shellAliases.s = "sesh connect $(sesh list --icons | fzf --ansi)";
+      programs.fish.shellAliases.s = "sesh connect (sesh list --icons | fzf --ansi)";
+      programs.nushell.extraConfig = ''
+        def s [] { sesh connect (sesh list --icons | fzf --ansi | str trim) }
+      '';
     };
   };
 }
