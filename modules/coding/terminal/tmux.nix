@@ -94,13 +94,11 @@
             bind -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "pbcopy"
             bind -T copy-mode-vi Enter send-keys -X copy-pipe-and-cancel "pbcopy"
 
-            # Status bar configuration
+            # Status bar configuration (runs after plugins, so catppuccin modules are available)
             set -g status-position top
             set -g status-interval 1
-
-            # Window status format
-            set -g window-status-current-format "#[fg=colour232,bg=colour39] #I #W "
-            set -g window-status-format "#[fg=colour232,bg=colour244] #I #W "
+            set -gF status-right "#{E:@catppuccin_status_directory}#{E:@catppuccin_status_session}"
+            set -g status-left ""
 
             # Don't exit tmux when closing a session
             set -g detach-on-destroy off
@@ -125,21 +123,17 @@
             {
               plugin = catppuccin;
               extraConfig = ''
-                set -g @catppuccin_flavour 'mocha'
-                set -g @catppuccin_window_left_separator ""
-                set -g @catppuccin_window_right_separator " "
-                set -g @catppuccin_window_middle_separator " █"
+                # catppuccin v2 options (US spelling "flavor", not "flavour")
+                set -g @catppuccin_flavor "mocha"
+                set -g @catppuccin_window_status_style "rounded"
                 set -g @catppuccin_window_number_position "right"
-                set -g @catppuccin_window_default_fill "number"
-                set -g @catppuccin_window_default_text "#W"
-                set -g @catppuccin_window_current_fill "number"
-                set -g @catppuccin_window_current_text "#W"
-                set -g @catppuccin_status_modules_right "directory session"
-                set -g @catppuccin_status_left_separator  " "
-                set -g @catppuccin_status_right_separator ""
-                set -g @catppuccin_status_fill "icon"
+                set -g @catppuccin_window_text " #W"
+                set -g @catppuccin_window_current_text " #W"
+                set -g @catppuccin_window_flags "none"
+                set -g @catppuccin_status_left_separator ""
+                set -g @catppuccin_status_right_separator " "
                 set -g @catppuccin_status_connect_separator "no"
-                set -g @catppuccin_directory_text "#{pane_current_path}"
+                set -g @catppuccin_directory_text " #{b:pane_current_path}"
               '';
             }
             {
