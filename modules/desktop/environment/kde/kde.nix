@@ -43,4 +43,10 @@
         '';
       };
   };
+
+  # HM-only aspect for host→user forwarding via provides.to-users.
+  fleet.desktop._.environment._.kde._.home = {
+    description = "KDE home-manager configuration (shortcuts, theme defaults)";
+    homeManager = fleet.desktop._.environment._.kde.homeManager;
+  };
 }
