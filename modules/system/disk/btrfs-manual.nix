@@ -38,8 +38,7 @@
         "discard=async"
         "space_cache=v2"
       ],
-      ...
-    }@args:
+    }:
     { class, aspect-chain }:
     let
       # Build partition path from device

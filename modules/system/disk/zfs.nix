@@ -15,8 +15,7 @@
       rootPool,
       dataPool ? null,
       initialBackupDataset ? true,
-      ...
-    }@args:
+    }:
     { class, aspect-chain }:
     let
       inherit (lib)

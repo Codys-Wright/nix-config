@@ -16,8 +16,7 @@
       swapSize ? "8",
       withSwap ? false,
       persistFolder ? "/persist",
-      ...
-    }@args:
+    }:
     { class, aspect-chain }:
     {
       nixos =
