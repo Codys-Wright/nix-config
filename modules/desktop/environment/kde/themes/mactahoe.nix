@@ -64,7 +64,7 @@
 
         xdg.configFile."kdedefaults/kwinrc".text = ''
           [org.kde.kdecoration2]
-          library=org.kde.kwin.aurorae
+          library=org.kde.kwin.aurorae.v2
           theme=__aurorae__svg__MacTahoe-Dark
           ButtonsOnLeft=XIA
           ButtonsOnRight=
@@ -127,5 +127,11 @@
           fi
         '';
       };
+  };
+
+  # HM-only aspect for host→user forwarding via provides.to-users.
+  fleet.desktop._.environment._.kde._.themes._.mactahoe._.home = {
+    description = "MacTahoe KDE home-manager configuration (apply script, activation, kdedefaults)";
+    homeManager = fleet.desktop._.environment._.kde._.themes._.mactahoe.homeManager;
   };
 }

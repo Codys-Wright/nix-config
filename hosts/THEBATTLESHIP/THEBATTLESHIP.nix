@@ -24,6 +24,8 @@
       provides.to-users.includes = [
         <fleet.desktop._.environment._.niri/home>
         <fleet.desktop._.environment._.gnome/home>
+        <fleet.desktop._.environment._.kde/home>
+        <fleet.desktop._.environment._.kde._.themes._.mactahoe/home>
         <fleet/mactahoe>
       ];
 
