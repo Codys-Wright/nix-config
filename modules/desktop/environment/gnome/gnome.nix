@@ -21,32 +21,13 @@
 
         programs.ssh.askPassword = lib.mkForce "";
 
-        environment.systemPackages = [
-          (pkgs.callPackage ../../../../packages/mactahoe/gtk-theme.nix {
-            colorVariants = [ "dark" ];
-            themeVariants = [ "blue" ];
-          })
-          (pkgs.callPackage ../../../../packages/mactahoe/icon-theme.nix {
-            themeVariants = [ "blue" ];
-          })
-          (pkgs.callPackage ../../../../packages/mactahoe/cursor-theme.nix { })
-        ];
+        # Theme packages are installed by the mactahoe aspect — don't duplicate here.
       };
 
     homeManager =
       { pkgs, lib, ... }:
       {
-        home.packages = [
-          (pkgs.callPackage ../../../../packages/mactahoe/gtk-theme.nix {
-            colorVariants = [ "dark" ];
-            themeVariants = [ "blue" ];
-          })
-          (pkgs.callPackage ../../../../packages/mactahoe/icon-theme.nix {
-            themeVariants = [ "blue" ];
-          })
-          (pkgs.callPackage ../../../../packages/mactahoe/cursor-theme.nix { })
-        ];
-
+        # Theme packages are installed by the mactahoe aspect — don't duplicate here.
         gtk = {
           enable = true;
           theme.name = lib.mkForce "MacTahoe-Dark-Blue";
@@ -69,5 +50,11 @@
           };
         };
       };
+  };
+
+  # HM-only aspect for host→user forwarding via provides.to-users.
+  fleet.desktop._.environment._.gnome._.home = {
+    description = "GNOME home-manager configuration (GTK theming, dconf)";
+    homeManager = fleet.desktop._.environment._.gnome.homeManager;
   };
 }
