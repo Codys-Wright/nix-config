@@ -110,6 +110,10 @@
             default = "nushell";
           };
         })
+        (fleet.git-identity {
+          name = "Cody Wright";
+          email = "acodywright@gmail.com";
+        })
 
         (<fleet.user/password> {
           method = "hashed";
