@@ -1,78 +1,88 @@
-# Disk/filesystem configuration wrapper aspect
-# Provides a unified interface for different disk configuration types
+# Disk/filesystem configuration — type-safe parametric aspects
+#
+# Each filesystem type is directly callable, so a typo is a Nix attribute error
+# instead of a runtime throw:
+#
+#   (fleet.disk.btrfs        { device = "/dev/nvme0n1"; swap = "16G"; })
+#   (fleet.disk.btrfs-manual { device = "/dev/nvme0n1"; partition = 3; })
+#   (fleet.disk.zfs          { rootPool = { ... }; })
+#
+# The old router (<fleet.system/disk> { type = "..."; }) still works for
+# backwards compatibility.
 {
+  lib,
   fleet,
   ...
 }:
 {
-  # Create disk as a provider under fleet.system with description
   fleet.system._.disk.description = ''
-    Disk and filesystem configuration with support for different filesystem types.
+    Disk and filesystem configuration.
 
-    Usage as router:
-      (<fleet/system/disk> { type = "btrfs-impermanence"; device = "/dev/sda"; })
-      (<fleet/system/disk> { type = "btrfs-manual"; device = "/dev/nvme0n1"; partition = 3; })
+    Preferred (type-safe):
+      (fleet.disk.btrfs        { device = "/dev/sda"; })
+      (fleet.disk.btrfs-manual { device = "/dev/nvme0n1"; partition = 3; })
+      (fleet.disk.zfs          { rootPool = { ... }; })
 
-    Direct access to specific types:
-      (<fleet/system/disk/btrfs> { device = "/dev/sda"; })
-      (<fleet/system/disk/btrfs-manual> { device = "/dev/nvme0n1"; partition = 3; })
-      (<fleet/system/disk/zfs> { rootPool = {...}; })
+    Legacy router (still works):
+      (<fleet.system/disk> { type = "btrfs-impermanence"; device = "/dev/sda"; })
   '';
 
-  # Make disk callable as a router function
+  # ── Type-safe top-level aliases ──────────────────────────────────────
+  fleet.disk.description = "Disk and filesystem configuration (type-safe)";
+
+  fleet.disk._.btrfs = fleet.system._.disk._.btrfs;
+  fleet.disk._.btrfs-manual = fleet.system._.disk._.btrfs-manual;
+  fleet.disk._.zfs = fleet.system._.disk._.zfs;
+
+  # ── Legacy string router (backwards compat) ─────────────────────────
   fleet.system._.disk.__functor =
     _self:
     {
       type,
-      # Btrfs parameters (shared)
       device ? null,
       swapSize ? "8",
       withSwap ? false,
       persistFolder ? "/persist",
-      # Btrfs-manual specific parameters
       partition ? 3,
       bootPartition ? 1,
       subvolumes ? null,
       mountOptions ? null,
-      # ZFS parameters
       rootPool ? null,
       dataPool ? null,
       initialBackupDataset ? true,
-      ...
-    }@args:
+    }:
     { class, aspect-chain }:
+    let
+      types = {
+        "btrfs-impermanence" = fleet.system._.disk._.btrfs {
+          inherit
+            device
+            swapSize
+            withSwap
+            persistFolder
+            ;
+        };
+        "btrfs-manual" = fleet.system._.disk._.btrfs-manual (
+          {
+            inherit
+              device
+              partition
+              bootPartition
+              persistFolder
+              ;
+          }
+          // lib.optionalAttrs (subvolumes != null) { inherit subvolumes; }
+          // lib.optionalAttrs (mountOptions != null) { inherit mountOptions; }
+        );
+        "zfs" = fleet.system._.disk._.zfs {
+          inherit rootPool dataPool initialBackupDataset;
+        };
+      };
+    in
     {
       includes = [
-        # Route to the appropriate disk type implementation
-        (
-          if type == "btrfs-impermanence" then
-            (fleet.system._.disk._.btrfs {
-              inherit
-                device
-                swapSize
-                withSwap
-                persistFolder
-                ;
-            })
-          else if type == "btrfs-manual" then
-            (fleet.system._.disk._.btrfs-manual (
-              {
-                inherit
-                  device
-                  partition
-                  bootPartition
-                  persistFolder
-                  ;
-              }
-              // (if subvolumes != null then { inherit subvolumes; } else { })
-              // (if mountOptions != null then { inherit mountOptions; } else { })
-            ))
-          else if type == "zfs" then
-            (fleet.system._.disk._.zfs {
-              inherit rootPool dataPool initialBackupDataset;
-            })
-          else
-            throw "fleet.system.disk: unsupported type '${type}'. Available types: btrfs-impermanence, btrfs-manual, zfs"
+        (types.${type}
+          or (throw "fleet.system.disk: unknown type '${type}'. Available: ${lib.concatStringsSep ", " (builtins.attrNames types)}")
         )
       ];
     };
