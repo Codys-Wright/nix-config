@@ -17,6 +17,16 @@
 
   den.aspects = {
     THEBATTLESHIP = {
+      # Forward desktop/theme homeManager config to all users on this host.
+      # Den only evaluates homeManager blocks in user context — aspects included
+      # at the host level have their homeManager silently dropped without this.
+      # Uses HM-only child aspects to avoid double-importing NixOS modules.
+      provides.to-users.includes = [
+        <fleet.desktop._.environment._.niri/home>
+        <fleet.desktop._.environment._.gnome/home>
+        <fleet/mactahoe>
+      ];
+
       includes = [
         <fleet/fonts>
         <fleet/phoenix>
