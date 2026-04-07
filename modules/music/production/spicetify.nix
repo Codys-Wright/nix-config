@@ -11,12 +11,6 @@
   fleet.music._.production._.spicetify = {
     description = "Spotify client with Catppuccin theme, adblock, and extensions via spicetify-nix";
 
-    nixos = {
-      home-manager.sharedModules = [
-        inputs.spicetify-nix.homeManagerModules.default
-      ];
-    };
-
     homeManager =
       { pkgs, ... }:
       let
