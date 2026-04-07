@@ -85,6 +85,10 @@
     };
     selfhostblocks.url = "github:Codys-Wright/selfhostblocks";
     sops-nix.url = "github:Mic92/sops-nix";
+    spicetify-nix = {
+      url = "github:Gerg-L/spicetify-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     stylix = {
       url = "github:danth/stylix";
       inputs.nixpkgs.follows = "nixpkgs";
