@@ -1,6 +1,7 @@
 # Git configuration aspect
 {
   fleet,
+  lib,
   ...
 }:
 {
@@ -12,12 +13,7 @@
       {
         programs.git = {
           enable = true;
-          settings = {
-            user = {
-              name = "Cody Wright";
-              email = "acodywright@gmail.com";
-            };
-          };
+          # User identity is set via fleet.git-identity — no hardcoded defaults
           lfs = {
             enable = true;
           };
