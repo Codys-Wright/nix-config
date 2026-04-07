@@ -41,7 +41,7 @@
                       priority = 1;
                       name = "ESP";
                       start = "1M";
-                      end = "512M";
+                      end = "2G";
                       type = "EF00";
                       content = {
                         type = "filesystem";
