@@ -22,6 +22,9 @@
       ...
     }:
     den.lib.parametric {
+      # Redistributable firmware (AMD GPU, WiFi, etc.) — needed by most hardware
+      nixos.hardware.enableRedistributableFirmware = lib.mkDefault true;
+
       includes = [
         <fleet.hardware/facter>
         <fleet.hardware/audio>
