@@ -66,6 +66,8 @@
           [org.kde.kdecoration2]
           library=org.kde.kwin.aurorae
           theme=__aurorae__svg__MacTahoe-Dark
+          ButtonsOnLeft=XIA
+          ButtonsOnRight=
         '';
 
         home.file.".local/bin/mactahoe-apply" = {
@@ -89,9 +91,11 @@
             dbus-send --session --dest=org.kde.KIconLoader /KIconLoader org.kde.KIconLoader.iconChanged int32:0 2>/dev/null || true
             kwriteconfig6 --file kdeglobals --group KDE --key widgetStyle kvantum-dark
 
-            # Window decorations — Aurorae MacTahoe-Dark
+            # Window decorations — Aurorae MacTahoe-Dark, buttons on left (macOS style)
             kwriteconfig6 --file kwinrc --group org.kde.kdecoration2 --key library org.kde.kwin.aurorae
             kwriteconfig6 --file kwinrc --group org.kde.kdecoration2 --key theme __aurorae__svg__MacTahoe-Dark
+            kwriteconfig6 --file kwinrc --group org.kde.kdecoration2 --key ButtonsOnLeft XIA
+            kwriteconfig6 --file kwinrc --group org.kde.kdecoration2 --key ButtonsOnRight ""
             dbus-send --session --dest=org.kde.KWin /KWin org.kde.KWin.reconfigure 2>/dev/null || true
           '';
         };
