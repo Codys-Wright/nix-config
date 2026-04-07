@@ -84,7 +84,7 @@
             stylix.targets.ghostty.enable = true;
             stylix.targets.ghostty.fonts.enable = true;
 
-            # KDE theming is handled by the MacTahoe KDE theme aspect (whitesur.nix)
+            # KDE theming is handled by the MacTahoe KDE theme aspect (mactahoe.nix)
             # Stylix KDE target is disabled because it creates its own look-and-feel
             # that conflicts with the MacTahoe look-and-feel package
             stylix.targets.kde.enable = false;

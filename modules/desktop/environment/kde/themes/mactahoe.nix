@@ -8,7 +8,7 @@
   ...
 }:
 {
-  fleet.desktop._.environment._.kde._.themes._.whitesur = {
+  fleet.desktop._.environment._.kde._.themes._.mactahoe = {
     description = "MacTahoe KDE theme (macOS Tahoe style with Kvantum)";
 
     nixos =
