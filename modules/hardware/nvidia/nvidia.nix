@@ -13,6 +13,15 @@
         ...
       }:
       {
+        # Load all NVIDIA modules in initrd so the DRM device is ready before SDDM starts.
+        # Without this, kwin_wayland races the driver and fails to find /dev/dri/card*.
+        boot.initrd.kernelModules = [
+          "nvidia"
+          "nvidia_modeset"
+          "nvidia_uvm"
+          "nvidia_drm"
+        ];
+
         hardware.graphics.enable = true;
 
         services.xserver.videoDrivers = [ "nvidia" ];
