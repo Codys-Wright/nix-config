@@ -8,7 +8,7 @@
   fleet.desktop._.environment._.kde = {
     description = "KDE Plasma 6 desktop environment with MacTahoe theme";
 
-    includes = [ fleet.desktop._.environment._.kde._.themes._.whitesur ];
+    includes = [ fleet.desktop._.environment._.kde._.themes._.mactahoe ];
 
     nixos =
       { pkgs, ... }:
