@@ -29,5 +29,18 @@
           okular
         ];
       };
+
+    homeManager =
+      { lib, ... }:
+      {
+        # Remap app launcher to Super+Space (macOS Spotlight style)
+        xdg.configFile."kdedefaults/kglobalshortcutsrc".text = ''
+          [krunner.desktop]
+          _launch=Meta+Space,Alt+Space,KRunner
+
+          [plasmashell]
+          activate application launcher=Meta+Space,Meta+Space,Activate Application Launcher
+        '';
+      };
   };
 }
