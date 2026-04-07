@@ -31,15 +31,6 @@
         <fleet.desktop._.display-manager/sddm>
       ];
 
-      # Forward desktop homeManager blocks to all users on this host.
-      # Without this, homeManager config (niri config.kdl, noctalia colors,
-      # GTK themes, etc.) is silently dropped in the host-only context.
-      provides.to-users.includes = [
-        <fleet.desktop._.environment/niri>
-        <fleet.desktop._.environment/gnome>
-        <fleet.desktop._.environment/kde>
-      ];
-
       nixos.services.displayManager.defaultSession = lib.mkForce sessionNames.${default};
     };
 }

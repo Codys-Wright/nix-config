@@ -108,4 +108,12 @@
         };
       };
   };
+
+  # HM-only aspect for host→user forwarding via provides.to-users.
+  # Separates the homeManager config from the nixos block so the niri-flake
+  # NixOS module isn't imported twice.
+  fleet.desktop._.environment._.niri._.home = {
+    description = "Niri home-manager configuration (config.kdl, noctalia colors)";
+    homeManager = fleet.desktop._.environment._.niri.homeManager;
+  };
 }
