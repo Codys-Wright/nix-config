@@ -43,6 +43,10 @@
                 user = "cody";
                 identityFile = "~/.ssh/id_ed25519";
               };
+              "electric" = {
+                hostname = "192.168.0.61";
+                user = "root";
+              };
             };
           };
 
