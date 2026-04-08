@@ -1,6 +1,6 @@
-# FTS signal rigs — REAPER instances for live instrument capture
-# Uses fts-reaper-flake's home-manager module to declaratively install
-# per-rig launch configs, badge icons, and .desktop entries.
+# FTS REAPER rigs — self-contained wrapper commands for each rig.
+# Installs fts-reaper, fts-keys, fts-drums, fts-bass, fts-guitar, fts-vocals
+# as terminal commands. Each generates its own launch.json + icons on first run.
 {
   fleet,
   inputs,
@@ -11,38 +11,21 @@
 
   fleet.music._.production._.ftsRigs = {
     description = ''
-      FTS REAPER signal rigs (keys, drums, bass, guitar, vocals).
-      Installs per-rig launch.json configs, badge icons, and .desktop entries
-      via fts-reaper-flake. Each rig launches a separate REAPER instance with
-      its own resources dir at ~/.fasttrackstudio/Reaper.
+      FTS REAPER rigs (reaper, keys, drums, bass, guitar, vocals).
+      Installs self-contained wrapper commands that launch separate REAPER
+      instances. Each rig auto-generates its config and icons on first run.
     '';
 
     homeManager =
-      { pkgs, lib, ... }:
+      { pkgs, ... }:
       let
         fts = inputs.fts-reaper-flake;
         system = pkgs.stdenv.hostPlatform.system;
-
-        # GUI build — presets.full has headless.enable = false
-        prodPkgs = fts.lib.mkFtsPackages {
-          inherit pkgs;
-          cfg = fts.presets.full // {
-            reaper.configDir = "$HOME/.fasttrackstudio/Reaper";
-          };
-        };
       in
       {
-        imports = [ fts.homeManagerModules.default ];
-
-        fts.reaper = {
-          enable = true;
-          package = lib.mkForce prodPkgs.reaper;
-          launcherPackage = lib.mkForce fts.packages.${system}.reaper-launcher;
-
-          # Enable all predefined signal rigs.
-          # Toggle individually with rigs.keys, rigs.drums, etc.
-          rigs.all = true;
-        };
+        home.packages = [
+          fts.packages.${system}.fts-rigs
+        ];
       };
   };
 }
