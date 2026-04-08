@@ -8,6 +8,8 @@
   fleet.desktop._.environment._.gnome = {
     description = "GNOME desktop environment with MacTahoe theme";
 
+    includes = [ fleet.desktop._.environment._.gnome._.nautilus-default ];
+
     nixos =
       { pkgs, ... }:
       {
