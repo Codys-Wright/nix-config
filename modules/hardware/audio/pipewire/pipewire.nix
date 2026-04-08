@@ -62,6 +62,7 @@
           pavucontrol
           crosspipe
           qpwgraph
+          qjackctl
           coppwr
         ];
       };

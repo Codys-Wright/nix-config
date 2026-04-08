@@ -20,6 +20,7 @@
       provides.to-users.includes = [ <fleet.desktop/home> ];
 
       includes = [
+        <fleet/unfree>
         <fleet/fonts>
         <fleet/phoenix>
         <fleet/mactahoe>
@@ -65,6 +66,11 @@
         {
           time.timeZone = "America/Los_Angeles";
           boot.loader.grub.configurationLimit = 15;
+
+          # Prevent Intel i225 (igc/enp11s0) PCIe link loss after extended uptime.
+          # The igc driver has a known issue where PCIe ASPM L1 substates cause
+          # "PCIe link lost, device now detached" after hours of uptime.
+          boot.kernelParams = [ "pcie_aspm=off" ];
 
           nix.gc = {
             automatic = true;

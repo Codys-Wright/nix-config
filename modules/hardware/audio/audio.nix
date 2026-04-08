@@ -10,6 +10,7 @@
       # Users can include it directly with custom params if needed:
       # (<fleet/hardware/audio/musnix> { rtcqs = true; })
       (fleet.hardware._.audio._.musnix { })
+      fleet.raysession
     ];
   };
 }

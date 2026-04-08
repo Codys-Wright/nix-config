@@ -44,7 +44,7 @@
                 identityFile = "~/.ssh/id_ed25519";
               };
               "electric" = {
-                hostname = "192.168.0.61";
+                hostname = "100.65.190.11";
                 user = "root";
               };
             };
