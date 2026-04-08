@@ -10,6 +10,7 @@
       fleet.music._.production._.reaper
       fleet.music._.production._.plugins
       fleet.music._.production._.spicetify
+      fleet.music._.production._.ftsRigs
     ];
   };
 }
