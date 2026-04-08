@@ -18,7 +18,7 @@
     '';
 
     homeManager =
-      { pkgs, ... }:
+      { pkgs, lib, ... }:
       let
         fts = inputs.fts-reaper-flake;
         system = pkgs.stdenv.hostPlatform.system;
@@ -36,8 +36,8 @@
 
         fts.reaper = {
           enable = true;
-          package = prodPkgs.reaper;
-          launcherPackage = fts.packages.${system}.reaper-launcher;
+          package = lib.mkForce prodPkgs.reaper;
+          launcherPackage = lib.mkForce fts.packages.${system}.reaper-launcher;
 
           # Enable all predefined signal rigs.
           # Toggle individually with rigs.keys, rigs.drums, etc.
