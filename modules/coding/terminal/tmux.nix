@@ -97,7 +97,7 @@
             # Status bar configuration (runs after plugins, so catppuccin modules are available)
             set -g status-position top
             set -g status-interval 1
-            set -gF status-right "#{E:@catppuccin_status_directory}#{E:@catppuccin_status_session}"
+            set -g status-right "#{E:@catppuccin_status_directory}#{E:@catppuccin_status_session}"
             set -g status-left ""
 
             # Don't exit tmux when closing a session
