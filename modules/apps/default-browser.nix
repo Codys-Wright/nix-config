@@ -1,11 +1,25 @@
 # Parametric aspect for setting the default browser via xdg.mimeApps
-# Usage: (<fleet/apps/default-browser> { desktop = "brave-browser.desktop"; })
-{ fleet, ... }:
+# Usage: (<fleet/apps/default-browser> "brave")
+# Valid options: "brave" | "firefox" | "zen" | "chromium"
+{ fleet, lib, ... }:
+let
+  desktopFiles = {
+    brave = "brave-browser.desktop";
+    firefox = "firefox.desktop";
+    zen = "zen-twilight.desktop";
+    chromium = "chromium-browser.desktop";
+  };
+  validOptions = lib.concatStringsSep ", " (builtins.attrNames desktopFiles);
+in
 {
   fleet.apps._.default-browser.__functor =
-    _self:
-    { desktop }:
+    _self: browser:
     { class, aspect-chain }:
+    let
+      desktop =
+        desktopFiles.${browser}
+          or (throw "default-browser: unknown browser '${browser}'. Valid options: ${validOptions}");
+    in
     {
       homeManager =
         { ... }:
