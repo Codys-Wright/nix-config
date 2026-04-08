@@ -98,6 +98,8 @@
 
         <fleet/apps>
         <fleet.apps/browsers/firefox_webapps>
+        (<fleet.apps/default-file-manager> "nautilus")
+        (<fleet.apps/default-browser> "brave")
 
         (fleet.coding {
           editor = {
