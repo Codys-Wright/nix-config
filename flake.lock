@@ -1296,11 +1296,11 @@
         "wrappers": "wrappers"
       },
       "locked": {
-        "lastModified": 1775628108,
-        "narHash": "sha256-PCxD9aSXxKUIadghin5hB1FfZRO/cRPgG3HbfZTTcsQ=",
+        "lastModified": 1775629036,
+        "narHash": "sha256-c3nbXscBIX+6V+Fqq5wTUQRv1YPwUP+OZRHUG+DG5yk=",
         "owner": "FastTrackStudios",
         "repo": "fts-reaper-flake",
-        "rev": "9968cd7e9ebc7e7521caa912f69c63638283a043",
+        "rev": "05d794d33c7ec8df0490727b53daac90193479f4",
         "type": "github"
       },
       "original": {
