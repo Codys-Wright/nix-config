@@ -6,11 +6,14 @@
 
     # Enable nix-ld for running dynamically linked binaries (bun global installs, etc.)
     nixos =
-      { pkgs, ... }:
+      { pkgs, lib, ... }:
       {
+        # Make nix-ld libraries available to dlopen (e.g. pip pygame's bundled SDL2)
+        environment.sessionVariables.LD_LIBRARY_PATH = lib.mkForce "/run/current-system/sw/share/nix-ld/lib";
+
         programs.nix-ld = {
           enable = true;
-          # Common libraries needed by Node.js/Bun binaries
+          # Common libraries needed by dynamically linked binaries
           libraries = with pkgs; [
             stdenv.cc.cc.lib
             zlib
@@ -19,11 +22,32 @@
             icu
             libuuid
             libsecret
+
+            # Graphics / SDL2 / pygame support
             libGL
+            SDL2
+            SDL2_image
+            SDL2_mixer
+            SDL2_ttf
+
+            # X11
             xorg.libX11
             xorg.libXcursor
             xorg.libXrandr
             xorg.libXi
+            xorg.libXext
+            xorg.libXinerama
+            xorg.libXScrnSaver
+
+            # Wayland
+            wayland
+            libxkbcommon
+
+            # Media / codecs
+            libpng
+            libjpeg
+            freetype
+            fontconfig
           ];
         };
       };

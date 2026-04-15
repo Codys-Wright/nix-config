@@ -36,6 +36,7 @@
       inputs.nixpkgs-lib.follows = "nixpkgs-lib";
     };
     fts-reaper-flake.url = "github:FastTrackStudios/fts-reaper-flake";
+    ghidra-cli.url = "github:Codys-Wright/ghidra-cli/fix/ghidra-12-compat";
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";

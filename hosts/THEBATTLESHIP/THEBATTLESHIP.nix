@@ -81,12 +81,23 @@
           programs.nh.enable = true;
 
           # NTFS games partition
-          fileSystems."run/media/GAMES" = {
+          fileSystems."/run/media/GAMES" = {
             device = "/dev/nvme2n1p2";
             fsType = "ntfs-3g";
             options = [
               "rw"
               "uid=1000"
+            ];
+          };
+
+          # NTFS audio production partition
+          fileSystems."/run/media/AudioHaven" = {
+            device = "/dev/nvme1n1p2";
+            fsType = "ntfs-3g";
+            options = [
+              "rw"
+              "uid=1000"
+              "nofail"
             ];
           };
 

@@ -24,17 +24,19 @@
             pkgs.protontricks # Run winetricks commands for Proton games
             pkgs.dotnet-runtime_6 # Required for MelonLoader on Il2Cpp games
           ];
-          home.sessionVariables = {
-            STEAM_EXTRA_COMPAT_TOOLS_PATHS = "\${HOME}/.steam/root/compatibilitytools.d";
-          };
         })
       ];
 
-    nixos = _: {
-      # Allow dotnet 6.0 (EOL but required for MelonLoader on Il2Cpp games)
-      nixpkgs.config.permittedInsecurePackages = [
-        "dotnet-runtime-6.0.36"
-      ];
-    };
+    nixos =
+      { lib, ... }:
+      {
+        # Allow dotnet 6.0 (EOL but required for MelonLoader on Il2Cpp games)
+        nixpkgs.config.permittedInsecurePackages = [
+          "dotnet-runtime-6.0.36"
+        ];
+
+        # Set at system level so Steam (launched from desktop, not shell) can see it
+        environment.sessionVariables.STEAM_EXTRA_COMPAT_TOOLS_PATHS = lib.mkDefault "\${HOME}/.steam/root/compatibilitytools.d";
+      };
   };
 }

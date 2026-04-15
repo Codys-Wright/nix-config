@@ -37,6 +37,32 @@
             };
           };
 
+          # Virtual stereo sink for PulseAudio clients (Wine/Proton)
+          # The Yamaha TF runs in pro-audio mode (raw AUX channels), which
+          # Wine's winepulse.drv cannot see. This loopback creates a normal
+          # stereo sink that PulseAudio clients can target, and routes audio
+          # to the Yamaha's first two pro-audio channels (AUX0/AUX1).
+          extraConfig.pipewire."93-yamaha-stereo-sink" = {
+            "context.modules" = [
+              {
+                name = "libpipewire-module-loopback";
+                args = {
+                  "node.description" = "Yamaha TF Stereo";
+                  "node.name" = "yamaha_tf_stereo";
+                  "capture.props" = {
+                    "media.class" = "Audio/Sink";
+                    "audio.position" = "FL,FR";
+                  };
+                  "playback.props" = {
+                    "node.target" = "alsa_output.usb-Yamaha_Corporation_Yamaha_TF-00.pro-output-0";
+                    "audio.position" = "AUX0,AUX1";
+                    "node.passive" = true;
+                  };
+                };
+              }
+            ];
+          };
+
           # PulseAudio backend configuration with flexible latency
           extraConfig.pipewire-pulse."92-low-latency" = {
             context.modules = [
@@ -55,6 +81,14 @@
               node.latency = "256/48000";
               resample.quality = 4;
             };
+          };
+        };
+
+        # Make the Yamaha TF Stereo loopback the default sink so
+        # PulseAudio clients (Wine/Proton) always have a stable stereo target
+        services.pipewire.wireplumber.extraConfig."51-yamaha-default" = {
+          "wireplumber.settings" = {
+            "default.configured.audio.sink" = "input.yamaha_tf_stereo";
           };
         };
 
