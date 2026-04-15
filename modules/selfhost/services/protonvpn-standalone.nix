@@ -239,6 +239,15 @@
               iptables -A nixos-fw -d ${subnet} -j ACCEPT
             '') killswitch.allowedSubnets}
 
+            # Allow DNS (required for VPN server resolution)
+            iptables -A nixos-fw -p tcp --dport 53 -j ACCEPT
+            iptables -A nixos-fw -p udp --dport 53 -j ACCEPT
+
+            # Allow VPN connection ports (443, 7770, 8443) before VPN is up
+            iptables -A nixos-fw -p tcp --dport 443 -j ACCEPT
+            iptables -A nixos-fw -p tcp --dport 7770 -j ACCEPT
+            iptables -A nixos-fw -p tcp --dport 8443 -j ACCEPT
+
             # Allow exempt ports
             ${lib.concatMapStrings (port: ''
               iptables -A nixos-fw -p tcp --dport ${toString port} -j ACCEPT

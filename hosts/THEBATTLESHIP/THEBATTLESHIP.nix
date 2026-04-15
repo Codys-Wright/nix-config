@@ -126,6 +126,9 @@
             publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIENFHgs8JqCE4/dO58AN8W4M2SRgetgar94m2ntI9xb8";
           };
 
+          # Disable reverse path filtering for VPN compatibility
+          networking.firewall.checkReversePath = false;
+
           # SOPS secrets
           imports = [ inputs.sops-nix.nixosModules.default ];
           sops = {
