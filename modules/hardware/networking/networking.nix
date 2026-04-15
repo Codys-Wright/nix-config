@@ -1,31 +1,22 @@
-# Networking hardware aspect
+# Networking hardware aspect — use NetworkManager instead of systemd-networkd
 { fleet, ... }:
 {
   fleet.hardware._.networking = {
-    description = "NetworkManager networking support";
+    description = "NetworkManager networking support (overrides systemd-networkd)";
 
     nixos =
-      { ... }:
+      { lib, ... }:
       {
-        networking = {
-          networkmanager.enable = true;
-        };
+        networking.networkmanager.enable = true;
+
+        # Disable systemd-networkd so it doesn't conflict with NetworkManager
+        systemd.network.enable = lib.mkForce false;
 
         # Enable network manager applet
         programs.nm-applet.enable = true;
 
-        # Disable systemd network wait-online
+        # Disable systemd network wait-online (NM handles this)
         systemd.network.wait-online.enable = false;
-
-        # environment.systemPackages = [
-        #     pkgs.linuxKernel.packages.linux_zen.rtl8821au
-        # ];
-
-        # # specific tp-link driver
-        # boot.extraModulePackages = with config.boot.kernelPackages; [
-        #   rtl8821au
-        #   rtl8821cu
-        # ];
       };
   };
 }

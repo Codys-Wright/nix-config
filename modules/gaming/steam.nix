@@ -29,6 +29,11 @@
           remotePlay.openFirewall = lib.mkDefault true;
           dedicatedServer.openFirewall = lib.mkDefault true;
           localNetworkGameTransfers.openFirewall = lib.mkDefault true;
+
+          # PulseAudio client libs for Proton audio output
+          extraPackages = with pkgs; [
+            libpulseaudio
+          ];
         };
 
         # Enable gamemode for better gaming performance

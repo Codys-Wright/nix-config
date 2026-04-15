@@ -38,6 +38,7 @@
         <fleet.coding._.editors/cursor>
         <fleet.coding._.editors/zed>
         <fleet.coding._.editors/neovim>
+        <fleet.coding._.editors/vscode>
 
         # All terminals
         <fleet.coding._.terminals/ghostty>

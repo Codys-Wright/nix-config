@@ -33,7 +33,13 @@
             enable = true;
             matchBlocks = {
               "starcommand" = {
-                hostname = "192.168.0.102";
+                hostname = "192.168.0.106";
+                user = "starcommand";
+                identityFile = "~/.ssh/starcommand-deploy";
+              };
+              "starcommand-root" = {
+                host = "starcommand-root";
+                hostname = "192.168.0.106";
                 user = "root";
                 identityFile = "~/.ssh/starcommand-deploy";
               };
@@ -126,7 +132,10 @@
         cody.dots
         cody.fish
         <fleet/apple-fonts>
+        <fleet.coding/ghidra>
+        <fleet.coding._.tools/game-dev>
         <fleet.hardware._.networking/tailscale>
+        <fleet.gaming/proton>
       ];
     };
   };

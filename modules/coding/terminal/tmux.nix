@@ -123,6 +123,20 @@
             {
               plugin = catppuccin;
               extraConfig = ''
+                # Ensure Nix paths are available for plugin scripts (#!/usr/bin/env bash)
+                set-environment -g PATH "${
+                  lib.makeBinPath [
+                    pkgs.bash
+                    pkgs.coreutils
+                    pkgs.gnused
+                    pkgs.gnugrep
+                    pkgs.gawk
+                    pkgs.procps
+                    pkgs.findutils
+                    pkgs.bc
+                  ]
+                }:/run/current-system/sw/bin:/etc/profiles/per-user/%u/bin:$PATH"
+
                 # catppuccin v2 options (US spelling "flavor", not "flavour")
                 set -g @catppuccin_flavor "mocha"
                 set -g @catppuccin_window_status_style "rounded"
