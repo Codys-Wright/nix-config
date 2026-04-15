@@ -25,6 +25,7 @@
         <fleet/phoenix>
         <fleet/mactahoe>
         <fleet/stylix>
+        <fleet.system/agent-user>
 
         (fleet.desktop { default = "niri"; })
         (fleet.grub { uefi = true; })
