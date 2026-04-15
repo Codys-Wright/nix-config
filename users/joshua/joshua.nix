@@ -16,7 +16,35 @@
     includes = [
       den.aspects.hm-backup
       <den/primary-user>
-      (<den/user-shell> "bash")
+
+      # Coding
+      (fleet.coding {
+        editor = {
+          default = "nvf";
+        };
+        terminal = {
+          default = "ghostty";
+        };
+        shell = {
+          default = "bash";
+        };
+      })
+      (fleet.git-identity {
+        name = "Zedonate";
+        email = "skwish86@icloud.com";
+      })
+
+      <fleet.coding._.tools/game-dev>
+
+      # Browsers
+      <fleet.apps/browsers>
+      (<fleet.apps/default-browser> "brave")
+      (<fleet.apps/default-file-manager> "nautilus")
+
+      # Utilities
+      <fleet.apps._.misc/flameshot>
+      <fleet.apps._.misc/localsend>
+      <fleet.apps/flatpaks>
     ];
 
     nixos =
@@ -34,7 +62,6 @@
       { pkgs, ... }:
       {
         home.packages = with pkgs; [
-          firefox
           vlc
         ];
       };
