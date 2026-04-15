@@ -12,7 +12,7 @@
     # Fleet SSH public keys (deploy keys from hosts/<hostname>/ssh.pub)
     fleet = {
       THEBATTLESHIP = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICGTCYWYifaiPcQVQnebV/cFVnvGULPJ2+jVEkPIEgXg THEBATTLESHIP-deploy";
-      starcommand = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILBJxxU1TXbV1IvGFm67X7jX+C7uRtLcgimcoDGxapNP starcommand-deploy";
+      starcommand = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK2Q/nkryxc2ZL5xTsYApQxFXK5HgxPTjIcl+OGAsKy8 starcommand-deploy";
     };
 
     # All keys as a flat list
@@ -20,7 +20,7 @@
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO8y8AMfYQnvu3BvjJ54/qYJcedNkMHmnjexine1ypda cody"
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEExJ9+wtbBN4v9uWZwZKK+K83/ZscpIyuVMCQkuMY2c cody@voyager"
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICGTCYWYifaiPcQVQnebV/cFVnvGULPJ2+jVEkPIEgXg THEBATTLESHIP-deploy"
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILBJxxU1TXbV1IvGFm67X7jX+C7uRtLcgimcoDGxapNP starcommand-deploy"
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK2Q/nkryxc2ZL5xTsYApQxFXK5HgxPTjIcl+OGAsKy8 starcommand-deploy"
     ];
   };
 }
