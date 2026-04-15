@@ -68,10 +68,29 @@
           time.timeZone = "America/Los_Angeles";
           boot.loader.grub.configurationLimit = 15;
 
-          # Prevent Intel i225 (igc/enp11s0) PCIe link loss after extended uptime.
-          # The igc driver has a known issue where PCIe ASPM L1 substates cause
-          # "PCIe link lost, device now detached" after hours of uptime.
-          boot.kernelParams = [ "pcie_aspm=off" ];
+          # Prevent Intel I226-V (igc/enp11s0) PCIe link loss after extended uptime.
+          # The I226-V has a hardware errata where the NIC self-initiates PCIe L1
+          # substates independently of host ASPM, causing "PCIe link lost, device
+          # now detached" after hours of uptime. pci=nommconf forces I/O port access
+          # for PCI config space instead of MMIO, working around the link-drop bug.
+          boot.kernelParams = [
+            "pcie_aspm=off"
+            "pci=nommconf"
+          ];
+
+          # Disable Energy Efficient Ethernet on the I226-V — EEE interaction with
+          # the PCIe L1 substates errata is a common trigger for spontaneous link loss.
+          systemd.services."igc-disable-eee" = {
+            description = "Disable EEE on Intel I226-V (enp11s0) to prevent PCIe link drops";
+            after = [ "network-online.target" ];
+            wants = [ "network-online.target" ];
+            wantedBy = [ "multi-user.target" ];
+            script = "${pkgs.ethtool}/sbin/ethtool --set-eee enp11s0 eee off || true";
+            serviceConfig = {
+              Type = "oneshot";
+              RemainAfterExit = true;
+            };
+          };
 
           nix.gc = {
             automatic = true;
