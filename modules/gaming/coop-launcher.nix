@@ -18,10 +18,37 @@
         # it picks up the env — in-memory processes don't re-read env.
         environment.sessionVariables.SDL_GAMECONTROLLER_IGNORE_DEVICES = "0x045e/0x0b12,0x054c/0x0ce6,0x054c/0x0df2,0x045e/0x0b13,0x045e/0x0b20,0x045e/0x02ea,0x045e/0x0b00";
 
+        # Allow wheel users to setfacl on input device nodes without a
+        # password — needed by steam-as to ACL-block other users from the
+        # target pad. Steam's own controller enumeration (Steam Input API)
+        # bypasses SDL_GAMECONTROLLER_IGNORE_DEVICES, so we have to block
+        # at kernel level to keep cody's Steam from seeing bri's pad.
+        security.sudo.extraRules = [
+          {
+            groups = [ "wheel" ];
+            commands = [
+              {
+                command = "${pkgs.acl}/bin/setfacl";
+                options = [ "NOPASSWD" ];
+              }
+            ];
+          }
+        ];
+
         environment.systemPackages = [
           (pkgs.writeShellApplication {
             name = "steam-as";
-            runtimeInputs = [ pkgs.gamescope ];
+            # Explicitly do NOT include pkgs.sudo here. writeShellApplication
+            # prepends runtimeInputs to PATH, so `pkgs.sudo` would shadow the
+            # NixOS setuid wrapper at /run/wrappers/bin/sudo — and the raw
+            # nix-store sudo binary isn't setuid, so every sudo -n call would
+            # silently fail. Leaving sudo off the list lets the script's
+            # bare `sudo` resolve via PATH to the setuid wrapper.
+            runtimeInputs = [
+              pkgs.gamescope
+              pkgs.acl
+              pkgs.systemd
+            ];
             text = ''
               if [ $# -lt 1 ]; then
                 cat <<'EOF' >&2
@@ -50,6 +77,36 @@
 
               W="''${GAMESCOPE_W:-2560}"
               H="''${GAMESCOPE_H:-1440}"
+
+              # Kernel-level controller routing: grant the target user rw
+              # on every joystick evdev node, and deny access to every
+              # *other* real interactive local user. Steam Input bypasses
+              # SDL env filters, so this is the only reliable block — a
+              # non-target user's Steam gets EACCES when trying to open a
+              # pad assigned to the target.
+              #
+              # sudo matches by absolute path, so the invocation must use
+              # the nix-store setfacl binary that the sudoers rule names.
+              SETFACL="${pkgs.acl}/bin/setfacl"
+              for node in /dev/input/event*; do
+                [ -e "$node" ] || continue
+                joy=$(udevadm info -q property -n "$node" 2>/dev/null \
+                  | grep -c "^ID_INPUT_JOYSTICK=1" || true)
+                [ "$joy" -ge 1 ] || continue
+                sudo -n "$SETFACL" -b "$node" 2>/dev/null || true
+                sudo -n "$SETFACL" -m "u:''${target}:rw" "$node" 2>/dev/null || true
+                # Iterate real interactive users (UID 1000-29999, login shell).
+                # Process substitution keeps us in the current shell so the
+                # loop iterates once per user.
+                while IFS=: read -r user _ uid _ _ _ shell; do
+                  [ "$uid" -ge 1000 ] && [ "$uid" -lt 30000 ] || continue
+                  case "$shell" in
+                    */nologin | */false) continue ;;
+                  esac
+                  [ "$user" = "$target" ] && continue
+                  sudo -n "$SETFACL" -m "u:''${user}:---" "$node" 2>/dev/null || true
+                done < <(getent passwd)
+              done
 
               exec launch-as "$target" env \
                 -u SDL_GAMECONTROLLER_IGNORE_DEVICES \
