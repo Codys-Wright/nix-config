@@ -6,6 +6,7 @@
     includes = [
       fleet.apps._.communications._.discord
       fleet.apps._.communications._.telegram
+      fleet.apps._.communications._.protonmail-bridge
     ];
   };
 }
