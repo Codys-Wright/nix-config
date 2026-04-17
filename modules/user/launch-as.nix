@@ -38,17 +38,24 @@
               target="$1"
               shift
 
-              # KWin/Xwayland creates the named X socket with mode 0755 (no write for
-              # others). ego adds an xhost SI entry and relies on abstract-socket
-              # fallback, which modern libX11 uses — but Steam's 32-bit bootstrap
-              # connects via the filesystem socket only and fails with
-              # "XOpenDisplay failed". Grant the target user rw on the named socket.
+              # KWin/Xwayland creates /tmp/.X11-unix/X<n> mode 0755 (no write for
+              # others), which blocks clients running under a different UID from
+              # connect()ing. ego adds an xhost SI entry and relies on the
+              # abstract socket fallback, but Steam's 32-bit bootstrap uses the
+              # filesystem socket only. An ACL entry keyed to the target UID
+              # doesn't help either because Steam's bwrap wraps the client in a
+              # user namespace where bri→uid 0 and everyone else→nobody, so the
+              # kernel matches the `other` bits, not the ACL entry.
+              #
+              # Pragmatic fix: chmod the socket to 0777. X-level auth (ego's
+              # xhost SI:localuser:<target> entry) still gates who the server
+              # accepts, so this is no weaker than a regular multi-user X session.
               if [ -n "''${DISPLAY:-}" ]; then
                 xnum="''${DISPLAY#*:}"
                 xnum="''${xnum%%.*}"
                 sock="/tmp/.X11-unix/X''${xnum}"
                 if [ -S "$sock" ]; then
-                  setfacl -m "u:''${target}:rw" "$sock" 2>/dev/null || true
+                  chmod 0777 "$sock" 2>/dev/null || true
                 fi
               fi
 
