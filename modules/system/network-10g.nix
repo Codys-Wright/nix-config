@@ -12,11 +12,13 @@
       _self:
       {
         interface ? "enp12s0",
+        # Optional static IPv4 in CIDR form (e.g. "10.10.10.10/24"). When unset, DHCP.
+        staticIp ? null,
         ...
       }:
       {
         nixos =
-          { pkgs, ... }:
+          { pkgs, lib, ... }:
           {
             # Jumbo frames via NetworkManager
             networking.networkmanager.ensureProfiles.profiles."10g-jumbo" = {
@@ -27,7 +29,16 @@
                 autoconnect = "true";
               };
               ethernet.mtu = 9000;
-              ipv4.method = "auto";
+              ipv4 =
+                if staticIp != null then
+                  {
+                    method = "manual";
+                    addresses = staticIp;
+                  }
+                else
+                  {
+                    method = "auto";
+                  };
               ipv6.method = "auto";
             };
 
