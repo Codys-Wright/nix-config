@@ -11,6 +11,7 @@
       users.cody = { };
       users.joshua = { };
       users.guest = { };
+      users.bri = { };
       aspect = "THEBATTLESHIP";
     };
   };
@@ -37,6 +38,7 @@
 
         <fleet/gaming>
         <fleet/apps>
+        <fleet.user/launch-as>
 
         (<fleet.system/disk> {
           type = "btrfs-impermanence";
