@@ -6,12 +6,17 @@
     nixos =
       { pkgs, ... }:
       {
-        # Hide the InputPlumber-emitted virtual xbox-series pad (045e:0b12)
-        # from every user's Steam by default. `steam-as` unsets this and
-        # sets _EXCEPT instead, so only the target user's gamescoped Steam
-        # sees the virtual pad. New logins get the env; currently-running
-        # Steams need a restart (or a per-game launch-option override).
-        environment.sessionVariables.SDL_GAMECONTROLLER_IGNORE_DEVICES = "0x045e/0x0b12";
+        # Hide the InputPlumber virtual xbox-series pad (045e:0b12) AND the
+        # raw pads it feeds from (DualSense 054c:0ce6 + its Edge 054c:0df2
+        # + Xbox Wireless 045e:0b13, 0x0b20 + Xbox One 045e:02ea + Xbox
+        # Elite 2 045e:0b00) from every user's Steam by default. `steam-as`
+        # unsets this and sets _EXCEPT instead, so only the target user's
+        # gamescoped Steam sees the virtual pad.
+        #
+        # New logins / newly-launched Steams inherit these values. A
+        # currently-running Steam needs a full tray-quit + relaunch before
+        # it picks up the env — in-memory processes don't re-read env.
+        environment.sessionVariables.SDL_GAMECONTROLLER_IGNORE_DEVICES = "0x045e/0x0b12,0x054c/0x0ce6,0x054c/0x0df2,0x045e/0x0b13,0x045e/0x0b20,0x045e/0x02ea,0x045e/0x0b00";
 
         environment.systemPackages = [
           (pkgs.writeShellApplication {
@@ -26,8 +31,8 @@
               Every game launched from that Steam inherits the controller
               filter — no per-game launch options required.
 
-              Defaults: 1920x1080 windowed. Override via env or extra args:
-                GAMESCOPE_W=2560 GAMESCOPE_H=1440 steam-as bri
+              Defaults: 2560x1440 windowed. Override via env or extra args:
+                GAMESCOPE_W=1920 GAMESCOPE_H=1080 steam-as bri
                 steam-as bri --prefer-output HDMI-A-2 -f
 
               Requires: <fleet.gaming/inputplumber> (virtual xbox target)
@@ -43,8 +48,8 @@
               # our 90-desktop-gamepads.yaml composite config.
               VIRT_VID_PID="0x045e/0x0b12"
 
-              W="''${GAMESCOPE_W:-1920}"
-              H="''${GAMESCOPE_H:-1080}"
+              W="''${GAMESCOPE_W:-2560}"
+              H="''${GAMESCOPE_H:-1440}"
 
               exec launch-as "$target" env \
                 -u SDL_GAMECONTROLLER_IGNORE_DEVICES \
