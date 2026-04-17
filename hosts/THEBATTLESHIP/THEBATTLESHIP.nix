@@ -58,7 +58,12 @@
         (fleet.deploy { ip = "100.74.250.99"; })
 
         # 10G network tuning for starcommand link
-        (fleet.system._.network-10g { interface = "enp12s0"; })
+        # Static 10.10.10.10/24 — outside starcommand dnsmasq DHCP range (.100-.200),
+        # gives Hermes/agent a stable address to SSH to from starcommand.
+        (fleet.system._.network-10g {
+          interface = "enp12s0";
+          staticIp = "10.10.10.10/24";
+        })
       ];
 
       nixos =

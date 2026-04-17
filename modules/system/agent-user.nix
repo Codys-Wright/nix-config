@@ -23,6 +23,7 @@
           extraGroups = [ "wheel" ];
           openssh.authorizedKeys.keys = [
             ssh-keys.fleet.starcommand
+            ssh-keys.fleet.starcommandAgent
           ];
         };
 
