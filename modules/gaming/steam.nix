@@ -34,6 +34,12 @@
           extraPackages = with pkgs; [
             libpulseaudio
           ];
+
+          # System-wide GE-Proton — available to every user's Steam without
+          # per-user protonup installs.
+          extraCompatPackages = with pkgs; [
+            proton-ge-bin
+          ];
         };
 
         # Enable gamemode for better gaming performance
