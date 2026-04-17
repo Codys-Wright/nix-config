@@ -13,6 +13,8 @@
     fleet = {
       THEBATTLESHIP = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICGTCYWYifaiPcQVQnebV/cFVnvGULPJ2+jVEkPIEgXg THEBATTLESHIP-deploy";
       starcommand = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK2Q/nkryxc2ZL5xTsYApQxFXK5HgxPTjIcl+OGAsKy8 starcommand-deploy";
+      # Agent user on starcommand — used by Hermes to SSH out to other fleet hosts
+      starcommandAgent = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFrMb6rGjMO0EzWfkG71kYnkbtxW5+oIUCyaum3uHViW agent@starcommand";
     };
 
     # All keys as a flat list
@@ -21,6 +23,7 @@
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEExJ9+wtbBN4v9uWZwZKK+K83/ZscpIyuVMCQkuMY2c cody@voyager"
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICGTCYWYifaiPcQVQnebV/cFVnvGULPJ2+jVEkPIEgXg THEBATTLESHIP-deploy"
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK2Q/nkryxc2ZL5xTsYApQxFXK5HgxPTjIcl+OGAsKy8 starcommand-deploy"
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFrMb6rGjMO0EzWfkG71kYnkbtxW5+oIUCyaum3uHViW agent@starcommand"
     ];
   };
 }
