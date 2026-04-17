@@ -8,10 +8,14 @@
       {
         # Allow wheel users to open machinectl shells into other local
         # accounts without a password prompt. ego's default backend is
-        # machinectl, which polkit gates on `org.freedesktop.machine1.shell`.
+        # `machinectl shell`, which polkit gates on host-shell (and an
+        # implied host-login). Both actions default to auth_admin, so we
+        # whitelist them for wheel.
         security.polkit.extraConfig = ''
           polkit.addRule(function(action, subject) {
-            if (action.id == "org.freedesktop.machine1.shell" &&
+            if ((action.id == "org.freedesktop.machine1.host-shell" ||
+                 action.id == "org.freedesktop.machine1.host-login" ||
+                 action.id == "org.freedesktop.machine1.host-open-pty") &&
                 subject.isInGroup("wheel")) {
               return polkit.Result.YES;
             }
