@@ -14,9 +14,7 @@
       <fleet.apps/communications>
       <fleet.apps._.notes/obsidian>
       <fleet.apps._.recording/obs>
-      <fleet.apps/flatpaks>
       <fleet.apps/misc>
-      <fleet.apps._.ai/openclaw>
     ];
   };
 }

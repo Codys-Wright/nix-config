@@ -1,61 +1,55 @@
-# ProtonMail Bridge — systemd user service exposing Proton Mail via local IMAP/SMTP.
+# ProtonMail Bridge — local IMAP/SMTP proxy for Proton Mail.
 #
-# After login, listens on 127.0.0.1:1143 (IMAP) and 127.0.0.1:1025 (SMTP).
-# Mail clients (Nextcloud Mail, Thunderbird, mutt, etc.) connect there.
+# Thin wrapper over the upstream home-manager module
+# `services.protonmail-bridge` (merged to home-manager master 2025-08-17,
+# nix-community/home-manager#7674). We:
 #
-# Credential vault:
-#   Bridge stores its vault in `pass` (gpg-backed). You must have a gpg key
-#   and an initialized password store before the service can run:
-#     gpg --gen-key
-#     pass init <gpg-id>
-#   Then perform the one-time login:
-#     protonmail-bridge --cli
-#     > login
-#   After that the service runs --noninteractive.
+#   - Add `pass` + `gnupg` to the service PATH so Bridge's keychain helper
+#     can find a vault when no gnome-keyring / kwallet is present.
+#   - Override the Install target so the service works on headless servers
+#     with a lingering user (default.target) as well as graphical sessions.
 #
-# Headless servers: works the same — Bridge's vault is file-backed via `pass`,
-# no graphical keyring required. Just make sure the service user has a gpg
-# agent running (the user systemd target starts gpg-agent on demand).
+# One-time setup after the first activation:
+#
+#   # As the user running Bridge (cody, starcommand, etc.):
+#   gpg --batch --passphrase '' --quick-gen-key \
+#       "Bridge <bridge@$(hostname)>" default default 0
+#   pass init $(gpg --list-secret-keys --with-colons | awk -F: '/^fpr:/ {print $10; exit}')
+#   systemctl --user stop protonmail-bridge
+#   protonmail-bridge --cli
+#     > login         # paste Proton credentials + 2FA
+#     > info <email>  # copy the Bridge IMAP/SMTP password
+#     > quit
+#   systemctl --user start protonmail-bridge
+#
+# Bridge listens on 127.0.0.1:1143 (IMAP) and 127.0.0.1:1025 (SMTP).
 {
   fleet.apps._.communications._.protonmail-bridge = {
     description = "ProtonMail Bridge — local IMAP/SMTP proxy for Proton Mail";
 
     homeManager =
       {
-        config,
         lib,
         pkgs,
         ...
       }:
       {
-        home.packages = with pkgs; [
-          protonmail-bridge
-          pass
-          gnupg
-        ];
+        services.protonmail-bridge = {
+          enable = true;
+          extraPackages = with pkgs; [
+            pass
+            gnupg
+          ];
+          logLevel = "info";
+        };
 
+        # Upstream defaults to graphical-session.target. On lingering server
+        # users (no graphical session) that target never activates — force
+        # default.target so Bridge starts on boot everywhere.
         systemd.user.services.protonmail-bridge = {
-          Unit = {
-            Description = "ProtonMail Bridge";
-            # gpg-agent runs as a user service; wait until it's available so
-            # pass can decrypt the vault on startup.
-            After = [
-              "network-online.target"
-              "gpg-agent.service"
-            ];
-            Wants = [ "network-online.target" ];
-          };
-
-          Service = {
-            Type = "simple";
-            Restart = "always";
-            RestartSec = 10;
-            ExecStart = "${pkgs.protonmail-bridge}/bin/protonmail-bridge --noninteractive --no-window --log-level info";
-          };
-
-          Install = {
-            WantedBy = [ "default.target" ];
-          };
+          Unit.After = lib.mkForce [ "network-online.target" ];
+          Unit.Wants = [ "network-online.target" ];
+          Install.WantedBy = lib.mkForce [ "default.target" ];
         };
       };
   };
