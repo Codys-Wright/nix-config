@@ -6,6 +6,18 @@
     nixos =
       { pkgs, ... }:
       {
+        # Allow wheel users to open machinectl shells into other local
+        # accounts without a password prompt. ego's default backend is
+        # machinectl, which polkit gates on `org.freedesktop.machine1.shell`.
+        security.polkit.extraConfig = ''
+          polkit.addRule(function(action, subject) {
+            if (action.id == "org.freedesktop.machine1.shell" &&
+                subject.isInGroup("wheel")) {
+              return polkit.Result.YES;
+            }
+          });
+        '';
+
         environment.systemPackages = [
           pkgs.ego
           (pkgs.writeShellApplication {
