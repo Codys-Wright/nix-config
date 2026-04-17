@@ -39,6 +39,7 @@
         <fleet/gaming>
         <fleet/apps>
         <fleet.user/launch-as>
+        <fleet.gaming/inputplumber>
 
         (<fleet.system/disk> {
           type = "btrfs-impermanence";
