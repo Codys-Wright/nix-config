@@ -32,6 +32,7 @@
 
   fleet.disk._.btrfs = fleet.system._.disk._.btrfs;
   fleet.disk._.btrfs-manual = fleet.system._.disk._.btrfs-manual;
+  fleet.disk._.btrfs-partitions = fleet.system._.disk._.btrfs-partitions;
   fleet.disk._.zfs = fleet.system._.disk._.zfs;
 
   # ── Legacy string router (backwards compat) ─────────────────────────
