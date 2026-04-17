@@ -15,8 +15,12 @@
         ...
       }:
       {
+        # NOTE: do NOT add `pkgs.steam` here. `programs.steam.enable = true`
+        # installs a correctly-wrapped Steam (honoring extraCompatPackages,
+        # extraPackages, FHS env, etc.) into the system path. Adding raw
+        # `pkgs.steam` on top creates a second unwrapped Steam that wins in
+        # PATH, and GE-Proton / extraPackages silently disappear.
         environment.systemPackages = with pkgs; [
-          steam
           mangohud
           # steam-tui   # temporarily disabled - Steam CDN rate limiting
           # steamcmd    # temporarily disabled - Steam CDN rate limiting
