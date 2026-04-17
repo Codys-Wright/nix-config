@@ -21,6 +21,10 @@
         method = "hashed";
         value = "$6$.E5U9uf5rBti35ez$7x.Rmf/Sfu7tN6g0qMEShgRhi3rxF62P4bJHvqQkJcrRF/fSlwkK6mxtWrM1XAFfref6BIkFrUmnrKr5CzyiJ1";
       })
+
+      # Proton tooling (protonup-rs, protontricks, dotnet 6) in bri's home.
+      # System-wide GE-Proton comes from <fleet.gaming/steam> at the host.
+      <fleet.gaming/proton>
     ];
 
     nixos =
