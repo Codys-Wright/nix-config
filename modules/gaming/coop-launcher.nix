@@ -6,17 +6,12 @@
     nixos =
       { pkgs, ... }:
       {
-        # Hide the InputPlumber virtual xbox-series pad (045e:0b12) AND the
-        # raw pads it feeds from (DualSense 054c:0ce6 + its Edge 054c:0df2
-        # + Xbox Wireless 045e:0b13, 0x0b20 + Xbox One 045e:02ea + Xbox
-        # Elite 2 045e:0b00) from every user's Steam by default. `steam-as`
-        # unsets this and sets _EXCEPT instead, so only the target user's
-        # gamescoped Steam sees the virtual pad.
-        #
-        # New logins / newly-launched Steams inherit these values. A
-        # currently-running Steam needs a full tray-quit + relaunch before
-        # it picks up the env — in-memory processes don't re-read env.
-        environment.sessionVariables.SDL_GAMECONTROLLER_IGNORE_DEVICES = "0x045e/0x0b12,0x054c/0x0ce6,0x054c/0x0df2,0x045e/0x0b13,0x045e/0x0b20,0x045e/0x02ea,0x045e/0x0b00";
+        # No environment.sessionVariables filter: the kernel ACLs that
+        # steam-as applies per-invocation already block non-target users
+        # at open(2) time, and a default-hide env layer would also strip
+        # controllers from a normal solo Steam session (which the logout/
+        # login cycle would unexpectedly turn on). Re-add only if we want
+        # a session-scoped filter that survives outside the ACL window.
 
         # Allow wheel users to setfacl on input device nodes without a
         # password — needed by steam-as to ACL-block other users from the
