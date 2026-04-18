@@ -34,6 +34,14 @@
         ...
       }:
       {
+        # Also expose pass + gnupg in the interactive shell PATH so
+        # `protonmail-bridge --cli` (run by the user for login) can find
+        # the keychain helper. The systemd service gets them via
+        # `extraPackages` below, but that PATH is service-only.
+        home.packages = with pkgs; [
+          pass
+          gnupg
+        ];
         services.protonmail-bridge = {
           enable = true;
           extraPackages = with pkgs; [
