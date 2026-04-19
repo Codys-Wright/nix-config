@@ -276,6 +276,28 @@ deploy host *args:
         --ssh-opts "-i $TEMP_KEY -o StrictHostKeyChecking=no" \
         ".#{{host}}"
 
+# Deploy to a darwin host (builds remotely, activates locally)
+# Usage: just deploy-darwin airlock
+deploy-darwin host:
+    #!/usr/bin/env bash
+    set -e
+    cd "{{justfile_directory()}}"
+
+    echo "Pushing to remote..."
+    git push
+
+    echo "Building and deploying to {{host}}..."
+    SSHPASS='    ' nix run nixpkgs#sshpass -- ssh -o StrictHostKeyChecking=no -o ConnectTimeout=30 \
+        -o PreferredAuthentications=password -o PubkeyAuthentication=no "rat@192.168.0.65" \
+        "cd ~/nix-config && git pull && rm -f result && NIX_CONFIG='experimental-features = nix-command flakes' nix build .#darwinConfigurations.{{host}}.config.system.build.toplevel"
+
+    echo "Activating..."
+    SSHPASS='    ' nix run nixpkgs#sshpass -- ssh -o StrictHostKeyChecking=no -o ConnectTimeout=30 \
+        -o PreferredAuthentications=password -o PubkeyAuthentication=no "rat@192.168.0.65" \
+        "echo '    ' | sudo -S /Users/rat/nix-config/result/activate"
+
+    echo "Done!"
+
 # Run a VM for a NixOS host (old vm command removed - use the new one at line 70)
 
 # Check VM CPU cores and memory (run this inside the VM)
