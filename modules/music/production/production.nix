@@ -7,6 +7,9 @@
     includes = [
       fleet.music._.production._.axeEdit
       fleet.music._.production._.environment
+      fleet.music._.production._.inferno
+      fleet.music._.production._.netaudio
+      fleet.music._.production._.statime
       fleet.music._.production._.reaper
       fleet.music._.production._.plugins
       fleet.music._.production._.spicetify
