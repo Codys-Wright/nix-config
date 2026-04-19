@@ -18,8 +18,8 @@
     darwin =
       { pkgs, ... }:
       {
-        nix.enable = lib.mkDefault false;
-        nix.optimise.automatic = lib.mkDefault false;
+        nix.enable = lib.mkForce false;
+        nix.optimise.automatic = lib.mkForce false;
       };
   };
 
