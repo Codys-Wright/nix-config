@@ -5,29 +5,55 @@
   ...
 }:
 {
-  # Darwin (macOS) home configuration
-  den.homes.aarch64-darwin.carter = {
-    userName = "electric";
-    aspect = "carter";
-  };
-
-  # NixOS home configuration
   den.homes.x86_64-linux.carter = {
     userName = "carter";
     aspect = "carter";
   };
 
-  # Carter user aspect - includes user-specific configurations
   den.aspects.carter = {
-    description = "Carter user configuration";
-    includes = [
-      # Home-manager backup system
-      den.aspects.hm-backup
+    description = "Carter user — local co-op gaming account, launched from Cody's session via ego";
 
-      <fleet/coding>
-      <fleet.user/admin>
-      <fleet.user/autologin>
-      (<fleet.user/shell> { default = "fish"; })
+    includes = [
+      den.aspects.hm-backup
+      <den/primary-user>
+      (<den/user-shell> "bash")
+      (<fleet.user/password> {
+        method = "hashed";
+        value = "$6$fncYrVMO/9rhDTcj$bL6xaLsi3pv2c4N8FPFjEM8FoHsbL8ZORPq9cyKI8CWrS/UzknCsslUICzCvtAVv3cgQ3MDiDsEsammxQNxOj1";
+      })
+
+      # Proton tooling (protonup-rs, protontricks, dotnet 6) in carter's home.
+      # System-wide GE-Proton comes from <fleet.gaming/steam> at the host.
+      <fleet.gaming/proton>
     ];
+
+    nixos =
+      { ... }:
+      {
+        users.users.carter = {
+          isNormalUser = true;
+          description = "Carter";
+          extraGroups = [
+            "networkmanager"
+            "audio"
+            "video"
+            "render"
+            "input"
+            "gamemode"
+            "pipewire"
+          ];
+        };
+      };
+
+    homeManager =
+      { pkgs, ... }:
+      {
+        home.packages = with pkgs; [
+          firefox
+          vim
+          htop
+          git
+        ];
+      };
   };
 }

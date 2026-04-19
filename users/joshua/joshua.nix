@@ -152,13 +152,23 @@ in
             "noexec"
             "nodev"
             "nosuid"
+            "x-systemd.requires-mounts-for=/persist"
           ];
-          neededForBoot = true;
         };
 
-        systemd.tmpfiles.rules = [
-          "d /persist/home/joshua 0700 joshua users -"
-        ];
+        systemd.services."persist-home-joshua-init" = {
+          description = "Create /persist/home/joshua before bind mount";
+          wantedBy = [ "home-joshua.mount" ];
+          before = [ "home-joshua.mount" ];
+          after = [ "persist.mount" ];
+          unitConfig.RequiresMountsFor = "/persist";
+          serviceConfig.Type = "oneshot";
+          script = ''
+            mkdir -p /persist/home/joshua
+            chown joshua:users /persist/home/joshua
+            chmod 0700 /persist/home/joshua
+          '';
+        };
 
         # Allow Joshua to log in only between 08:00 and 22:00.
         environment.etc."security/time.conf".text = ''

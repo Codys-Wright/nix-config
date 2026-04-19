@@ -111,16 +111,18 @@ beacon-vm *args:
     @nix run .#beacon-vm -- {{args}}
 
 # Install any host using nixos-anywhere (auto-detects primary disk)
-# Usage: just install <hostname> -i <ip> [-p <port>] [--password <password>]
+# Usage: just install <hostname> -i <ip> [-u <user>] [-p <port>] [--password <password>]
 # Examples:
 #   just install starcommand -i localhost -p 2222  # Beacon VM
 #   just install starcommand -i localhost -p 2222 --password word1-word2-word3
+#   just install stowaway -i 192.168.0.177 -u root --password password
 #   just install THEBATTLESHIP -i 192.168.1.100  # Real hardware
 install host *args:
     #!/usr/bin/env bash
     set -euo pipefail
     
     # Default values
+    USER="installer"
     PORT="22"
     IP=""
     PASSWORD=""
@@ -132,6 +134,10 @@ install host *args:
     # Parse arguments
     while [[ $# -gt 0 ]]; do
       case $1 in
+        -u|--user)
+          USER="$2"
+          shift 2
+          ;;
         -p|--port)
           PORT="$2"
           shift 2
@@ -147,11 +153,12 @@ install host *args:
           ;;
         *)
           echo "Unknown option: $1"
-          echo "Usage: just install <hostname> -i <ip> [-p <port>] [--password <password>]"
+          echo "Usage: just install <hostname> -i <ip> [-u <user>] [-p <port>] [--password <password>]"
           echo ""
           echo "Examples:"
           echo "  just install starcommand -i localhost -p 2222"
           echo "  just install starcommand -i localhost -p 2222 --password word1-word2-word3"
+          echo "  just install stowaway -i 192.168.0.177 -u root --password password"
           echo "  just install THEBATTLESHIP -i 192.168.1.100"
           exit 1
           ;;
@@ -161,19 +168,19 @@ install host *args:
     # Validate IP is provided
     if [ -z "$IP" ]; then
       echo "Error: -i <ip> is required"
-      echo "Usage: just install <hostname> -i <ip> [-p <port>] [--password <password>]"
+      echo "Usage: just install <hostname> -i <ip> [-u <user>] [-p <port>] [--password <password>]"
       exit 1
     fi
     
     echo "======================================"
     echo "Installing {{host}}"
     echo "======================================"
-    echo "Target: installer@$IP:$PORT"
+    echo "Target: $USER@$IP:$PORT"
     echo "Auth: $(if $USE_PASSWORD; then echo "Password"; else echo "SSH Key"; fi)"
     echo ""
     echo "Note: Hardware configuration will be generated with nixos-facter"
     echo "      Disko will auto-detect the primary disk on the target"
-    echo "      SSH to check disks: ssh -p $PORT installer@$IP lsblk"
+    echo "      SSH to check disks: ssh -p $PORT $USER@$IP lsblk"
     echo ""
     
     # Build nixos-anywhere command
@@ -184,7 +191,7 @@ install host *args:
       export SSHPASS="$PASSWORD"
       nix run github:nix-community/nixos-anywhere -- \
         --flake ".#{{host}}" \
-        --target-host "installer@$IP" \
+        --target-host "$USER@$IP" \
         --generate-hardware-config nixos-facter "hosts/{{host}}/facter.json" \
         --ssh-option "StrictHostKeyChecking=no" \
         --ssh-option "UserKnownHostsFile=/dev/null" \
@@ -196,7 +203,7 @@ install host *args:
       # Use SSH key authentication
       nix run github:nix-community/nixos-anywhere -- \
         --flake ".#{{host}}" \
-        --target-host "installer@$IP" \
+        --target-host "$USER@$IP" \
         --generate-hardware-config nixos-facter "hosts/{{host}}/facter.json" \
         --ssh-option "StrictHostKeyChecking=no" \
         --ssh-option "UserKnownHostsFile=/dev/null" \

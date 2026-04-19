@@ -1,14 +1,15 @@
 # OpenCode AI terminal assistant aspect
-{
-  fleet,
-  ...
-}:
+{ fleet, ... }:
 {
   fleet.coding._.tools._.opencode = {
     description = "OpenCode AI terminal assistant";
 
     homeManager =
-      { pkgs, lib, ... }:
+      {
+        pkgs,
+        lib,
+        ...
+      }:
       {
         home.packages = with pkgs; [
           opencode
@@ -16,7 +17,7 @@
 
           # amazon-q-cli
           # aider-chat
-          # codex
+          codex
           # copilot-cli
           # crush
           # cursor-cli

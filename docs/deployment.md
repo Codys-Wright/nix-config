@@ -72,6 +72,10 @@ This runs `nixos-anywhere` which:
 
 ## 2. Install on Real Hardware
 
+For Intel T2 MacBooks using a `t2linux` live ISO instead of the beacon, use the dedicated guide:
+
+- [docs/t2linux-macbook-install.md](/home/cody/.flake/docs/t2linux-macbook-install.md)
+
 ### Build the beacon ISO
 
 ```bash
