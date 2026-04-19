@@ -12,6 +12,7 @@
       users.joshua = { };
       users.guest = { };
       users.bri = { };
+      users.carter = { };
       aspect = "THEBATTLESHIP";
     };
   };
@@ -38,9 +39,10 @@
 
         <fleet/gaming>
         <fleet/apps>
-        <fleet.user/launch-as>
-        <fleet.gaming/inputplumber>
-        <fleet.gaming/coop-launcher>
+        # controller-split bundles polkit + sudoers + InputPlumber config +
+        # the launch-as / steam-as equivalents. Replaces the three modules
+        # that used to live here (launch-as, inputplumber, coop-launcher).
+        <fleet.gaming/controller-split>
 
         (<fleet.system/disk> {
           type = "btrfs-impermanence";
