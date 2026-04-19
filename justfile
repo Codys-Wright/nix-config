@@ -284,17 +284,23 @@ deploy-darwin host:
     cd "{{justfile_directory()}}"
     PASS="    "
 
+    # Get deployment config from flake
+    DEPLOY_CFG=$(nix eval --json ".#darwinConfigurations.{{host}}.config.deployment" 2>/dev/null || echo "{}")
+    IP=$(echo "$DEPLOY_CFG" | jq -r '.ip // "192.168.0.65"')
+    PORT=$(echo "$DEPLOY_CFG" | jq -r '.sshPort // 22')
+    USER=$(echo "$DEPLOY_CFG" | jq -r '.sshUser // "rat"')
+
     echo "Pushing to remote..."
     git push
 
-    echo "Building and deploying to {{host}}..."
+    echo "Building and deploying to {{host}} at $USER@$IP:$PORT..."
     echo "$PASS" | nix run nixpkgs#sshpass -- ssh -o StrictHostKeyChecking=no -o ConnectTimeout=30 \
-        -o PreferredAuthentications=password -o PubkeyAuthentication=no "rat@192.168.0.65" \
+        -o PreferredAuthentications=password -o PubkeyAuthentication=no "-p $PORT" "$USER@$IP" \
         "cd ~/nix-config && git pull && rm -f result && NIX_CONFIG='experimental-features = nix-command flakes' nix build .#darwinConfigurations.{{host}}.config.system.build.toplevel"
 
     echo "Activating..."
     echo "$PASS" | nix run nixpkgs#sshpass -- ssh -o StrictHostKeyChecking=no -o ConnectTimeout=30 \
-        -o PreferredAuthentications=password -o PubkeyAuthentication=no "rat@192.168.0.65" \
+        -o PreferredAuthentications=password -o PubkeyAuthentication=no "-p $PORT" "$USER@$IP" \
         "echo '$PASS' | sudo -S /Users/rat/nix-config/result/activate"
 
     echo "Done!"
