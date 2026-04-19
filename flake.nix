@@ -22,10 +22,6 @@
       url = "path:/home/cody/Development/Tools/controller-split";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    codex-desktop-linux = {
-      url = "github:ilysenko/codex-desktop-linux";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     darwin = {
       url = "github:nix-darwin/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";

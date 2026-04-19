@@ -4,11 +4,12 @@
   den,
   __findFile,
   ...
-}: {
+}:
+{
   den.hosts.x86_64-linux = {
     stowaway = {
       description = "MacBookPro15,1 (T2) — covert field unit, dual-booted with macOS";
-      users.cody = {};
+      users.cody = { };
       aspect = "stowaway";
     };
   };
@@ -37,7 +38,7 @@
     stowaway = {
       # Forward the Steam CEF fix to every user on this host. Game rendering
       # still uses the GPU — only the Steam client UI runs in software.
-      provides.to-users.includes = [den.aspects.nomad-steam-cef-fix];
+      provides.to-users.includes = [ den.aspects.nomad-steam-cef-fix ];
 
       includes = [
         <fleet/unfree>
@@ -58,10 +59,10 @@
         (fleet.hardware {
           tailscale = true;
         })
-        (fleet.desktop {default = "niri";})
+        (fleet.desktop { default = "niri"; })
 
         <fleet.music/production>
-        (fleet.selfhost._.samba-client {})
+        (fleet.selfhost._.samba-client { })
 
         (<fleet.disk/btrfs-partitions> {
           rootPartlabel = "stowaway-root";
@@ -70,40 +71,42 @@
           espLabel = "STOWAWAYESP";
         })
 
-        (fleet.deploy {ip = "192.168.0.139";})
+        (fleet.deploy { ip = "192.168.0.139"; })
       ];
 
-      nixos = {
-        config,
-        lib,
-        pkgs,
-        ...
-      }: {
-        imports = [
-          inputs.nixos-hardware.nixosModules.apple-macbook-pro
-        ];
+      nixos =
+        {
+          config,
+          lib,
+          pkgs,
+          ...
+        }:
+        {
+          imports = [
+            inputs.nixos-hardware.nixosModules.apple-macbook-pro
+          ];
 
-        time.timeZone = "America/Los_Angeles";
+          time.timeZone = "America/Los_Angeles";
 
-        # 2019 MBP has Intel UHD 630 (iGPU) + AMD Radeon Pro 560X (dGPU).
-        # Letting amdgpu own the display gives games full dGPU performance
-        # (UHD 630 drags Super Battle Golf to 20fps; the 560X does 60+).
-        # The Steam client's CEF crash is handled by `-cef-disable-gpu` in
-        # the nomad-steam-cef-fix aspect, so we don't need to force iGPU.
-        # hardware.apple-t2.enableIGPU = true;
+          # 2019 MBP has Intel UHD 630 (iGPU) + AMD Radeon Pro 560X (dGPU).
+          # Letting amdgpu own the display gives games full dGPU performance
+          # (UHD 630 drags Super Battle Golf to 20fps; the 560X does 60+).
+          # The Steam client's CEF crash is handled by `-cef-disable-gpu` in
+          # the nomad-steam-cef-fix aspect, so we don't need to force iGPU.
+          # hardware.apple-t2.enableIGPU = true;
 
-        # Declaratively extract Broadcom Wi-Fi/BT firmware from Apple's
-        # macOS recovery DMG at build time. Without this, BCM4364B3 stays
-        # silent — only wired networking works.
-        hardware.apple-t2.firmware.enable = true;
-        hardware.apple-t2.firmware.version = "sonoma";
+          # Declaratively extract Broadcom Wi-Fi/BT firmware from Apple's
+          # macOS recovery DMG at build time. Without this, BCM4364B3 stays
+          # silent — only wired networking works.
+          hardware.apple-t2.firmware.enable = true;
+          hardware.apple-t2.firmware.version = "sonoma";
 
-        boot.loader.systemd-boot.enable = true;
-        boot.loader.efi.canTouchEfiVariables = false;
-        boot.loader.efi.efiSysMountPoint = "/boot";
+          boot.loader.systemd-boot.enable = true;
+          boot.loader.efi.canTouchEfiVariables = false;
+          boot.loader.efi.efiSysMountPoint = "/boot";
 
-        networking.networkmanager.enable = true;
-      };
+          networking.networkmanager.enable = true;
+        };
     };
   };
 }
