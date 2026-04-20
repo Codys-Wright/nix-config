@@ -26,6 +26,8 @@
 
         # Yabridge for Windows VST/VST3/CLAP plugin support
         environment.systemPackages = with pkgs; [
+          alsa-utils # speaker-test, aplay, arecord
+          sox # Audio test file generation
           wineWowPackages.stable # Wine for running Windows plugins
           yabridge # Bridge between Wine plugins and Linux DAWs
           yabridgectl # CLI to manage yabridge plugin directories

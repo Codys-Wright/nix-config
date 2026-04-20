@@ -54,7 +54,8 @@
                     "audio.position" = "FL,FR";
                   };
                   "playback.props" = {
-                    "node.target" = "alsa_output.usb-Yamaha_Corporation_Yamaha_TF-00.pro-output-0";
+                    # Link the loopback playback stream to the actual TF pro-audio output node.
+                    "target.object" = "alsa_output.usb-Yamaha_Corporation_Yamaha_TF-00.pro-output-0";
                     "audio.position" = "AUX0,AUX1";
                     "node.passive" = true;
                   };
@@ -88,7 +89,16 @@
         # PulseAudio clients (Wine/Proton) always have a stable stereo target
         services.pipewire.wireplumber.extraConfig."51-yamaha-default" = {
           "wireplumber.settings" = {
-            "default.configured.audio.sink" = "input.yamaha_tf_stereo";
+            # The capture side already sets node.name, so the sink node is just `yamaha_tf_stereo`.
+            "default.configured.audio.sink" = "yamaha_tf_stereo";
+          };
+        };
+
+        # Make THEBATTLESHIP Inferno the default for Dante audio workflow
+        services.pipewire.wireplumber.extraConfig."52-inferno-default" = {
+          "wireplumber.settings" = {
+            "default.configured.audio.sink" = "Inferno sink";
+            "default.configured.audio.source" = "Inferno source";
           };
         };
 
