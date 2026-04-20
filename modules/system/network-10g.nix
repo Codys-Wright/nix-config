@@ -6,7 +6,7 @@
 }:
 {
   fleet.system._.network-10g = {
-    description = "10G network tuning: jumbo frames, TCP buffers, NFS client";
+    description = "10G network tuning: jumbo frames, TCP buffers, NFS client, Dante multicast";
 
     __functor =
       _self:
@@ -52,6 +52,14 @@
               "net.ipv4.tcp_wmem" = "4096 1048576 16777216";
               "net.core.netdev_max_backlog" = 5000;
             };
+
+            # Multicast route for Dante audio network
+            networking.interfaces."${interface}".ipv4.routes = [
+              {
+                address = "224.0.0.0";
+                prefixLength = 4;
+              }
+            ];
 
             # NFS client support
             environment.systemPackages = [ pkgs.nfs-utils ];
