@@ -1,6 +1,7 @@
 {
   lib,
   stdenv,
+  bash,
   rustPlatform,
   fetchFromGitHub,
   pkg-config,
@@ -59,13 +60,28 @@ rustPlatform.buildRustPackage {
     install -Dm755 alsa_pcm_inferno/restart_pw \
       $out/bin/inferno-restart-pipewire
 
+    substituteInPlace \
+      $out/bin/inferno-start-pipewire-sink \
+      $out/bin/inferno-start-pipewire-source \
+      $out/bin/inferno-stop-pipewire-nodes \
+      $out/bin/inferno-restart-pipewire \
+      --replace-fail '#!/bin/bash' '#!${bash}/bin/bash'
+
+    substituteInPlace $out/bin/inferno-start-pipewire-sink \
+      --replace-fail 'api.alsa.path="inferno:RX_CHANNELS=24,TX_CHANNELS=24"' 'api.alsa.path="THEBATTLESHIP"'
+    substituteInPlace $out/bin/inferno-start-pipewire-source \
+      --replace-fail 'api.alsa.path="inferno:RX_CHANNELS=24,TX_CHANNELS=24"' 'api.alsa.path="THEBATTLESHIP"'
+
     runHook postInstall
   '';
 
   meta = {
     description = "Unofficial implementation of the Dante protocol with inferno2pipe and ALSA PCM plugin";
     homepage = "https://github.com/teodly/inferno";
-    license = with lib.licenses; [ gpl3Plus agpl3Plus ];
+    license = with lib.licenses; [
+      gpl3Plus
+      agpl3Plus
+    ];
     platforms = lib.platforms.linux;
     mainProgram = "inferno2pipe";
   };
