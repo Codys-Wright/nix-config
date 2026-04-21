@@ -88,14 +88,414 @@
               resample.quality = 4;
             };
           };
+
+          # Human-friendly studio buses. These are named virtual sinks/sources
+          # that we can target from WirePlumber/Pulse rules instead of routing
+          # apps directly to the raw Dante device.
+          extraConfig.pipewire."94-studio-buses" = {
+            context.modules = [
+              {
+                name = "libpipewire-module-loopback";
+                args = {
+                  node.description = "Broadcast";
+                  capture.props = {
+                    node.name = "broadcast";
+                    media.class = "Audio/Sink";
+                    audio.position = [
+                      "FL"
+                      "FR"
+                    ];
+                    priority.session = 500;
+                  };
+                  playback.props = {
+                    node.name = "broadcast.playback";
+                    target.object = "Inferno sink";
+                    node.passive = true;
+                    node.dont-reconnect = true;
+                    stream.dont-remix = true;
+                    audio.position = [
+                      "FL"
+                      "FR"
+                    ];
+                  };
+                };
+              }
+              {
+                name = "libpipewire-module-loopback";
+                args = {
+                  node.description = "System Audio";
+                  capture.props = {
+                    node.name = "system_audio";
+                    media.class = "Audio/Sink";
+                    audio.position = [
+                      "FL"
+                      "FR"
+                    ];
+                    priority.session = 1000;
+                  };
+                  playback.props = {
+                    node.name = "system-audio.playback";
+                    target.object = "broadcast";
+                    node.passive = true;
+                    node.dont-reconnect = true;
+                    stream.dont-remix = true;
+                    audio.position = [
+                      "FL"
+                      "FR"
+                    ];
+                  };
+                };
+              }
+              {
+                name = "libpipewire-module-loopback";
+                args = {
+                  node.description = "System Notifications";
+                  capture.props = {
+                    node.name = "system_notifications";
+                    media.class = "Audio/Sink";
+                    audio.position = [
+                      "FL"
+                      "FR"
+                    ];
+                    priority.session = 800;
+                  };
+                  playback.props = {
+                    node.name = "system-notifications.playback";
+                    target.object = "system_audio";
+                    node.passive = true;
+                    node.dont-reconnect = true;
+                    stream.dont-remix = true;
+                    audio.position = [
+                      "FL"
+                      "FR"
+                    ];
+                  };
+                };
+              }
+              {
+                name = "libpipewire-module-loopback";
+                args = {
+                  node.description = "Voice Chat";
+                  capture.props = {
+                    node.name = "voice_chat";
+                    media.class = "Audio/Sink";
+                    audio.position = [
+                      "FL"
+                      "FR"
+                    ];
+                    priority.session = 850;
+                  };
+                  playback.props = {
+                    node.name = "voice-chat.playback";
+                    target.object = "broadcast";
+                    node.passive = true;
+                    node.dont-reconnect = true;
+                    stream.dont-remix = true;
+                    audio.position = [
+                      "FL"
+                      "FR"
+                    ];
+                  };
+                };
+              }
+              {
+                name = "libpipewire-module-loopback";
+                args = {
+                  node.description = "Daw";
+                  capture.props = {
+                    node.name = "daw";
+                    media.class = "Audio/Sink";
+                    audio.channels = 16;
+                    audio.position = [
+                      "FL"
+                      "FR"
+                      "RL"
+                      "RR"
+                      "FC"
+                      "LFE"
+                      "SL"
+                      "SR"
+                      "AUX0"
+                      "AUX1"
+                      "AUX2"
+                      "AUX3"
+                      "AUX4"
+                      "AUX5"
+                      "AUX6"
+                      "AUX7"
+                    ];
+                    priority.session = 950;
+                  };
+                  playback.props = {
+                    node.name = "daw.playback";
+                    target.object = "Inferno sink";
+                    node.passive = true;
+                    node.dont-reconnect = true;
+                    stream.dont-remix = true;
+                    audio.position = [
+                      "FL"
+                      "FR"
+                      "RL"
+                      "RR"
+                      "FC"
+                      "LFE"
+                      "SL"
+                      "SR"
+                      "AUX0"
+                      "AUX1"
+                      "AUX2"
+                      "AUX3"
+                      "AUX4"
+                      "AUX5"
+                      "AUX6"
+                      "AUX7"
+                    ];
+                  };
+                };
+              }
+              {
+                name = "libpipewire-module-loopback";
+                args = {
+                  node.description = "Daw Broadcast";
+                  capture.props = {
+                    node.name = "daw_broadcast.capture";
+                    target.object = "daw";
+                    stream.capture.sink = true;
+                    node.passive = true;
+                    node.dont-reconnect = true;
+                    stream.dont-remix = true;
+                  };
+                  playback.props = {
+                    node.name = "daw_broadcast";
+                    media.class = "Audio/Source";
+                    audio.position = [
+                      "FL"
+                      "FR"
+                    ];
+                    priority.session = 900;
+                  };
+                };
+              }
+              {
+                name = "libpipewire-module-loopback";
+                args = {
+                  node.description = "Talkback Mic";
+                  capture.props = {
+                    # Leave the capture side untargeted so WirePlumber can bind
+                    # this source to the best available physical microphone.
+                    node.name = "talkback_mic.capture";
+                    node.passive = true;
+                    node.dont-reconnect = true;
+                    stream.dont-remix = true;
+                    audio.position = [ "MONO" ];
+                  };
+                  playback.props = {
+                    node.name = "talkback_mic";
+                    media.class = "Audio/Source";
+                    audio.position = [ "MONO" ];
+                    priority.session = 1000;
+                  };
+                };
+              }
+            ];
+          };
         };
 
-        # Default Dante sink/source for the studio workflow
-        services.pipewire.wireplumber.extraConfig."51-inferno-default" = {
+        # Default studio buses for the workflow.
+        services.pipewire.wireplumber.extraConfig."51-studio-defaults" = {
           "wireplumber.settings" = {
-            "default.configured.audio.sink" = "Inferno sink";
-            "default.configured.audio.source" = "Inferno source";
+            "default.configured.audio.sink" = "system_audio";
+            "default.configured.audio.source" = "talkback_mic";
           };
+        };
+
+        # Route common applications to the named buses above.
+        services.pipewire.extraConfig.pipewire-pulse."93-studio-routing" = {
+          stream.rules = [
+            {
+              matches = [
+                {
+                  application.name = "Brave Browser";
+                }
+                {
+                  application.name = "Firefox";
+                }
+                {
+                  application.name = "Chromium";
+                }
+                {
+                  application.name = "Google Chrome";
+                }
+                {
+                  application.name = "Zen Browser";
+                }
+              ];
+              actions = {
+                update-props = {
+                  target.object = "system_audio";
+                };
+              };
+            }
+            {
+              matches = [
+                {
+                  application.name = "Discord";
+                }
+                {
+                  application.name = "Discord Canary";
+                }
+                {
+                  application.name = "Vesktop";
+                }
+                {
+                  application.name = "WebCord";
+                }
+                {
+                  application.name = "Microsoft Teams";
+                }
+                {
+                  application.name = "Teams for Linux";
+                }
+              ];
+              actions = {
+                update-props = {
+                  target.object = "voice_chat";
+                };
+              };
+            }
+            {
+              matches = [
+                {
+                  application.name = "REAPER";
+                }
+                {
+                  application.name = "Reaper";
+                }
+                {
+                  application.name = "reaper";
+                }
+              ];
+              actions = {
+                update-props = {
+                  target.object = "daw";
+                };
+              };
+            }
+            {
+              matches = [
+                {
+                  application.name = "OBS Studio";
+                }
+                {
+                  application.name = "OBS";
+                }
+              ];
+              actions = {
+                update-props = {
+                  target.object = "broadcast";
+                };
+              };
+            }
+            {
+              matches = [
+                {
+                  media.role = "event";
+                }
+              ];
+              actions = {
+                update-props = {
+                  target.object = "system_notifications";
+                };
+              };
+            }
+            {
+              matches = [
+                {
+                  application.process.binary = "reaper";
+                }
+                {
+                  application.process.binary = "reaper.exe";
+                }
+              ];
+              actions = {
+                update-props = {
+                  target.object = "daw";
+                };
+              };
+            }
+            {
+              matches = [
+                {
+                  application.process.binary = "discord";
+                }
+                {
+                  application.process.binary = "Discord";
+                }
+                {
+                  application.process.binary = "discord-canary";
+                }
+                {
+                  application.process.binary = "vesktop";
+                }
+                {
+                  application.process.binary = "WebCord";
+                }
+                {
+                  application.process.binary = "teams";
+                }
+                {
+                  application.process.binary = "teams-for-linux";
+                }
+              ];
+              actions = {
+                update-props = {
+                  target.object = "voice_chat";
+                };
+              };
+            }
+            {
+              matches = [
+                {
+                  application.process.binary = "obs";
+                }
+                {
+                  application.process.binary = "obs64";
+                }
+                {
+                  application.process.binary = "com.obsproject.Studio";
+                }
+              ];
+              actions = {
+                update-props = {
+                  target.object = "broadcast";
+                };
+              };
+            }
+            {
+              matches = [
+                {
+                  application.process.binary = "brave-browser";
+                }
+                {
+                  application.process.binary = "firefox";
+                }
+                {
+                  application.process.binary = "chromium";
+                }
+                {
+                  application.process.binary = "google-chrome";
+                }
+                {
+                  application.process.binary = "zen-browser";
+                }
+              ];
+              actions = {
+                update-props = {
+                  target.object = "system_audio";
+                };
+              };
+            }
+          ];
         };
 
         environment.systemPackages = with pkgs; [

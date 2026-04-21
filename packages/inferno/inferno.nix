@@ -1,7 +1,6 @@
 {
   lib,
   stdenv,
-  bash,
   rustPlatform,
   fetchFromGitHub,
   pkg-config,
@@ -50,27 +49,6 @@ rustPlatform.buildRustPackage {
     install -Dm644 README.md $out/share/doc/inferno/README.md
     install -Dm644 os_integration/systemd_allow_clock.conf \
       $out/share/inferno/systemd_allow_clock.conf
-
-    install -Dm755 alsa_pcm_inferno/start_pipewire_sink \
-      $out/bin/inferno-start-pipewire-sink
-    install -Dm755 alsa_pcm_inferno/start_pipewire_source \
-      $out/bin/inferno-start-pipewire-source
-    install -Dm755 alsa_pcm_inferno/stop_pipewire_nodes \
-      $out/bin/inferno-stop-pipewire-nodes
-    install -Dm755 alsa_pcm_inferno/restart_pw \
-      $out/bin/inferno-restart-pipewire
-
-    substituteInPlace \
-      $out/bin/inferno-start-pipewire-sink \
-      $out/bin/inferno-start-pipewire-source \
-      $out/bin/inferno-stop-pipewire-nodes \
-      $out/bin/inferno-restart-pipewire \
-      --replace-fail '#!/bin/bash' '#!${bash}/bin/bash'
-
-    substituteInPlace $out/bin/inferno-start-pipewire-sink \
-      --replace-fail 'api.alsa.path="inferno:RX_CHANNELS=24,TX_CHANNELS=24"' 'api.alsa.path="THEBATTLESHIP"'
-    substituteInPlace $out/bin/inferno-start-pipewire-source \
-      --replace-fail 'api.alsa.path="inferno:RX_CHANNELS=24,TX_CHANNELS=24"' 'api.alsa.path="THEBATTLESHIP"'
 
     runHook postInstall
   '';
