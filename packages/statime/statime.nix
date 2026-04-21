@@ -6,7 +6,7 @@
   pkg-config,
 }:
 rustPlatform.buildRustPackage {
-  pname = "statime-inferno";
+  pname = "statime";
   version = "0.4.0-unstable-2025-07-18";
 
   src = fetchFromGitHub {
@@ -41,10 +41,10 @@ rustPlatform.buildRustPackage {
       install -Dm755 "$releaseDir/statime-metrics-exporter" $out/bin/statime-metrics-exporter
     fi
 
-    install -Dm644 README.md $out/share/doc/statime-inferno/README.md
-    install -Dm644 inferno-ptpv1.toml $out/share/statime-inferno/inferno-ptpv1.toml
-    install -Dm644 inferno-ptpv2.toml $out/share/statime-inferno/inferno-ptpv2.toml
-    install -Dm644 statime.toml $out/share/statime-inferno/statime.toml
+    install -Dm644 README.md $out/share/doc/statime/README.md
+    install -Dm644 inferno-ptpv1.toml $out/share/statime/inferno-ptpv1.toml
+    install -Dm644 inferno-ptpv2.toml $out/share/statime/inferno-ptpv2.toml
+    install -Dm644 statime.toml $out/share/statime/statime.toml
 
     runHook postInstall
   '';
@@ -52,7 +52,10 @@ rustPlatform.buildRustPackage {
   meta = {
     description = "Inferno-oriented Statime fork for Dante/PTP clock synchronization";
     homepage = "https://github.com/teodly/statime";
-    license = with lib.licenses; [ asl20 mit ];
+    license = with lib.licenses; [
+      asl20
+      mit
+    ];
     platforms = lib.platforms.linux;
     mainProgram = "statime";
   };
