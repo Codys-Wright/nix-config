@@ -11,12 +11,17 @@
     includes = [ (den.lib.groups [ "audio" ]) ];
 
     nixos =
-      { pkgs, lib, ... }:
+      {
+        pkgs,
+        lib,
+        ...
+      }:
       {
         security.rtkit.enable = true;
 
         services.pipewire = {
           enable = true;
+          systemWide = true; # Studio: single shared audio daemon for all users
 
           alsa = {
             enable = true;
@@ -85,17 +90,8 @@
           };
         };
 
-        # Make the Yamaha TF Stereo loopback the default sink so
-        # PulseAudio clients (Wine/Proton) always have a stable stereo target
-        services.pipewire.wireplumber.extraConfig."51-yamaha-default" = {
-          "wireplumber.settings" = {
-            # The capture side already sets node.name, so the sink node is just `yamaha_tf_stereo`.
-            "default.configured.audio.sink" = "yamaha_tf_stereo";
-          };
-        };
-
-        # Make THEBATTLESHIP Inferno the default for Dante audio workflow
-        services.pipewire.wireplumber.extraConfig."52-inferno-default" = {
+        # Default Dante sink/source for the studio workflow
+        services.pipewire.wireplumber.extraConfig."51-inferno-default" = {
           "wireplumber.settings" = {
             "default.configured.audio.sink" = "Inferno sink";
             "default.configured.audio.source" = "Inferno source";
@@ -104,6 +100,10 @@
 
         environment.systemPackages = with pkgs; [
           pavucontrol
+          alsa-lib
+          alsa-tools
+          alsa-utils
+          alsa-plugins
           crosspipe
           qpwgraph
           qjackctl
