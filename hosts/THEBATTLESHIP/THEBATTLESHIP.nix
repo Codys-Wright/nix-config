@@ -9,6 +9,7 @@
     THEBATTLESHIP = {
       description = "The Main System, ready for everyday battle";
       users.cody = {
+        extraGroups = [ "audio" ];
       };
       users.joshua = { };
       users.guest = { };
@@ -166,6 +167,9 @@
             "L+ /home/cody/agent/.flake 0644 cody users - /home/cody/.flake"
           ];
 
+          users.users.cody.openssh.authorizedKeys.keys = [
+            "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFrMb6rGjMO0EzWfkG71kYnkbtxW5+oIUCyaum3uHViW agent@starcommand"
+          ];
           # SOPS secrets
           imports = [ inputs.sops-nix.nixosModules.default ];
           sops = {
