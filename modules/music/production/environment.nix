@@ -3,8 +3,12 @@
 {
   fleet,
   inputs,
+  lib,
   ...
 }:
+let
+  audioProduction = import ../../../lib/audio/production/common.nix { inherit lib; };
+in
 {
   flake-file.inputs.musnix.url = "github:musnix/musnix";
 
@@ -24,43 +28,14 @@
         # CLAP_PATH is already set by nixpkgs shells-environment.nix
         musnix.enable = true;
 
-        # Yabridge for Windows VST/VST3/CLAP plugin support
-        environment.systemPackages = with pkgs; [
-          alsa-utils # speaker-test, aplay, arecord
-          sox # Audio test file generation
-          wineWowPackages.stable # Wine for running Windows plugins
-          yabridge # Bridge between Wine plugins and Linux DAWs
-          yabridgectl # CLI to manage yabridge plugin directories
-        ];
+        environment.systemPackages = audioProduction.defaultProductionPackages pkgs;
 
         # Ensure plugin directories exist in profile
-        environment.pathsToLink = [
-          "/lib/clap"
-          "/lib/lv2"
-          "/lib/vst"
-          "/lib/vst3"
-          "/lib/ladspa"
-          "/lib/dssi"
-        ];
+        environment.pathsToLink = map (dir: "/lib/${dir}") audioProduction.defaultPluginDirs;
       };
 
     homeManager =
-      { pkgs, config, ... }:
-      {
-        # Create plugin directories with nixos/ subdirectory for Nix-managed plugins
-        # This keeps the parent directories writable for user-installed plugins
-        home.file.".clap/nixos".source =
-          config.lib.file.mkOutOfStoreSymlink "${config.home.profileDirectory}/lib/clap";
-        home.file.".lv2/nixos".source =
-          config.lib.file.mkOutOfStoreSymlink "${config.home.profileDirectory}/lib/lv2";
-        home.file.".vst/nixos".source =
-          config.lib.file.mkOutOfStoreSymlink "${config.home.profileDirectory}/lib/vst";
-        home.file.".vst3/nixos".source =
-          config.lib.file.mkOutOfStoreSymlink "${config.home.profileDirectory}/lib/vst3";
-        home.file.".ladspa/nixos".source =
-          config.lib.file.mkOutOfStoreSymlink "${config.home.profileDirectory}/lib/ladspa";
-        home.file.".dssi/nixos".source =
-          config.lib.file.mkOutOfStoreSymlink "${config.home.profileDirectory}/lib/dssi";
-      };
+      { config, ... }:
+      audioProduction.mkHomePluginLinks { inherit config; };
   };
 }
