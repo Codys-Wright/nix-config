@@ -12,11 +12,11 @@
         infernoPkg = pkgs.callPackage ../../../packages/inferno/inferno.nix { };
 
         infernoStartSink = pkgs.writeShellScript "inferno-start-pipewire-sink" ''
-          ${pkgs.pipewire}/bin/pw-cli create-node adapter '{ object.linger=1 factory.name=api.alsa.pcm.sink node.name="Inferno sink" media.class=Audio/Sink api.alsa.path="inferno" session.suspend-timeout-seconds=0 node.pause-on-idle=false node.suspend-on-idle=false node.always-process=true api.alsa.headroom=128 api.alsa.pcm.card=999 }'
+          ${pkgs.pipewire}/bin/pw-cli create-node adapter '{ object.linger=1 factory.name=api.alsa.pcm.sink node.name="Inferno sink" node.description="Inferno Dante Sink" media.class=Audio/Sink audio.channels=16 audio.position=[ FL FR RL RR FC LFE SL SR AUX0 AUX1 AUX2 AUX3 AUX4 AUX5 AUX6 AUX7 ] api.alsa.path="inferno" session.suspend-timeout-seconds=0 node.pause-on-idle=false node.suspend-on-idle=false node.always-process=true api.alsa.headroom=128 api.alsa.pcm.card=999 }'
         '';
 
         infernoStartSource = pkgs.writeShellScript "inferno-start-pipewire-source" ''
-          ${pkgs.pipewire}/bin/pw-cli create-node adapter '{ object.linger=1 factory.name=api.alsa.pcm.source node.name="Inferno source" media.class=Audio/Source api.alsa.path="inferno" session.suspend-timeout-seconds=0 node.pause-on-idle=false node.suspend-on-idle=false node.always-process=true api.alsa.headroom=128 api.alsa.pcm.card=999 }'
+          ${pkgs.pipewire}/bin/pw-cli create-node adapter '{ object.linger=1 factory.name=api.alsa.pcm.source node.name="Inferno source" node.description="Inferno Dante Source" media.class=Audio/Source audio.channels=16 audio.position=[ FL FR RL RR FC LFE SL SR AUX0 AUX1 AUX2 AUX3 AUX4 AUX5 AUX6 AUX7 ] api.alsa.path="inferno" session.suspend-timeout-seconds=0 node.pause-on-idle=false node.suspend-on-idle=false node.always-process=true api.alsa.headroom=128 api.alsa.pcm.card=999 }'
         '';
       in
       {
@@ -45,8 +45,8 @@
             PROCESS_ID "1"
             ALT_PORT "4400"
             SAMPLE_RATE "48000"
-            RX_CHANNELS "2"
-            TX_CHANNELS "2"
+            RX_CHANNELS "16"
+            TX_CHANNELS "16"
             RX_LATENCY_NS "1000000"
             TX_LATENCY_NS "1000000"
 
