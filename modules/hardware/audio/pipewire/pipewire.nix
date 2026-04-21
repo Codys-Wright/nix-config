@@ -109,6 +109,71 @@
           qjackctl
           coppwr
         ];
+
+        # System-wide PipeWire needs ALSA_PLUGIN_DIR to find custom plugins (e.g., inferno)
+        systemd.services.pipewire.serviceConfig.Environment = [
+          "ALSA_PLUGIN_DIR=/run/current-system/sw/lib/alsa-lib"
+        ];
+
+        # Add pipewire user to clock group for PTP hardware clock access (Inferno/Dante)
+        users.users.pipewire.extraGroups = [ "clock" ];
+
+        # Make system PipeWire socket accessible to audio group members
+        # This allows user apps (KDE Plasma, browsers, etc.) to connect to system-wide daemon
+        systemd.sockets.pipewire.socketConfig.SocketMode = "0660";
+        systemd.sockets.pipewire.socketConfig.SocketGroup = "audio";
+
+        # User service to create symlinks from user runtime dir to system pipewire
+        # This allows apps looking in standard location (/run/user/UID) to find system daemon
+        systemd.user.services.pipewire-system-bridge = {
+          description = "Bridge user PipeWire socket to system daemon";
+          wantedBy = [ "default.target" ];
+          after = [ "basic.target" ];
+          serviceConfig = {
+            Type = "oneshot";
+            RemainAfterExit = true;
+            ExecStart = "${pkgs.bash}/bin/bash -c 'mkdir -p %t && ln -sf /run/pipewire/pipewire-0 %t/pipewire-0 && ln -sf /run/pipewire/pipewire-0-manager %t/pipewire-0-manager'";
+          };
+        };
+
+        # Point user apps to system pipewire
+        environment.etc."profile.d/pipewire-system.sh".text = ''
+          # Use system-wide PipeWire
+          export PIPEWIRE_RUNTIME_DIR=/run/pipewire
+        '';
+
+        # System-wide PipeWire needs explicit pulse and wireplumber services
+        systemd.services.pipewire-pulse = {
+          wantedBy = [ "multi-user.target" ];
+          serviceConfig.Environment = [
+            "PIPEWIRE_RUNTIME_DIR=/run/pipewire"
+            "ALSA_PLUGIN_DIR=/run/current-system/sw/lib/alsa-lib"
+          ];
+        };
+
+        systemd.services.wireplumber = {
+          wantedBy = [ "multi-user.target" ];
+          serviceConfig.Environment = [
+            "PIPEWIRE_RUNTIME_DIR=/run/pipewire"
+          ];
+        };
+
+        # Make pulse socket accessible to audio group
+        systemd.sockets.pipewire-pulse.socketConfig.SocketMode = "0660";
+        systemd.sockets.pipewire-pulse.socketConfig.SocketGroup = "audio";
+
+        # User service to bridge PulseAudio socket from user runtime to system
+        # The system pulse socket is at /run/pipewire/pulse/native (via %t/pulse/native in service)
+        systemd.user.services.pulseaudio-system-bridge = {
+          description = "Bridge user PulseAudio socket to system daemon";
+          wantedBy = [ "default.target" ];
+          after = [ "basic.target" ];
+          serviceConfig = {
+            Type = "oneshot";
+            RemainAfterExit = true;
+            ExecStart = "${pkgs.bash}/bin/bash -c 'mkdir -p %t/pulse && ln -sf /run/pipewire/pulse/native %t/pulse/native'";
+          };
+        };
       };
   };
 }

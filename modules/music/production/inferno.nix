@@ -40,14 +40,15 @@
             NAME "THEBATTLESHIP"
             DEVICE_ID "00000A0A0A0A0001"
             BIND_IP "10.10.10.10"
-            CLOCK_PATH "/dev/ptp0"
+            # Leave CLOCK_PATH unset so Inferno follows Statime's exported usrvclock,
+            # which in turn tracks the Dante/PTP grandmaster (Galaxy32).
             PROCESS_ID "1"
             ALT_PORT "4400"
             SAMPLE_RATE "48000"
             RX_CHANNELS "2"
             TX_CHANNELS "2"
-            RX_LATENCY_NS "10000000"
-            TX_LATENCY_NS "10000000"
+            RX_LATENCY_NS "500000"
+            TX_LATENCY_NS "500000"
 
             hint {
               show on
@@ -62,8 +63,12 @@
         # System-wide Inferno sink (playback / Dante TX)
         systemd.services.inferno-pipewire-sink = {
           description = "Inferno Dante sink node for PipeWire";
-          after = [ "pipewire.service" ];
+          after = [
+            "pipewire.service"
+            "statime-inferno.service"
+          ];
           requires = [ "pipewire.service" ];
+          wants = [ "statime-inferno.service" ];
           wantedBy = [ "multi-user.target" ];
           serviceConfig = {
             Type = "oneshot";
@@ -83,8 +88,10 @@
           after = [
             "pipewire.service"
             "inferno-pipewire-sink.service"
+            "statime-inferno.service"
           ];
           requires = [ "pipewire.service" ];
+          wants = [ "statime-inferno.service" ];
           wantedBy = [ "multi-user.target" ];
           serviceConfig = {
             Type = "oneshot";
