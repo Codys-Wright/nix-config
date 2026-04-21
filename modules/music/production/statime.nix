@@ -1,70 +1,26 @@
-# Statime fork for Inferno/Dante clock sync
-# Runs as a system service so PTP privileged ports and clock access work reliably
-{ fleet, ... }:
+# Statime fork for Inferno/Dante clock sync.
+# This is now driven by a reusable helper in lib/inferno/common.nix.
+{ fleet, lib, ... }:
+let
+  mkStatime = import ../../../lib/inferno/common.nix { inherit lib; };
+in
 {
   fleet.music._.production._.statime = {
     description = "Statime Inferno fork configured for Dante/PTPv1 on THEBATTLESHIP's 10G Dante NIC";
 
-    nixos =
-      { pkgs, ... }:
-      let
-        statimePkg = pkgs.callPackage ../../../packages/statime/statime.nix { };
-        netaudioPkg = pkgs.callPackage ../../../packages/netaudio/netaudio.nix { };
-      in
-      {
-        environment.systemPackages = [
-          statimePkg
-          netaudioPkg
-        ];
-
-        environment.etc."inferno/statime-ptpv1.toml".text = ''
-          loglevel = "warn"
-          sdo-id = 0
-          domain = 0
-          priority1 = 251
-          virtual-system-clock = true
-          virtual-system-clock-base = "monotonic_raw"
-          usrvclock-export = true
-
-          [[port]]
-          # Verified via netaudio discovery: Dante devices are visible on the
-          # 10G link enp12s0 (10.10.10.10), not on enp11s0.
-          interface = "enp12s0"
-          network-mode = "ipv4"
-          hardware-clock = "none"
-          protocol-version = "PTPv1"
-        '';
-
-        systemd.services.statime-inferno = {
-          description = "Statime Inferno PTP daemon";
-          wantedBy = [ "multi-user.target" ];
-          after = [ "network-online.target" ];
-          wants = [ "network-online.target" ];
-          serviceConfig = {
-            Type = "simple";
-            ExecStart = "${statimePkg}/bin/statime --config /etc/inferno/statime-ptpv1.toml";
-            Restart = "on-failure";
-            RestartSec = "3s";
-          };
-        };
-
-        systemd.services.dante-galaxy32-preferred-leader = {
-          description = "Ensure Galaxy32 is preferred leader for Dante PTP";
-          wantedBy = [ "multi-user.target" ];
-          after = [
-            "network-online.target"
-            "statime-inferno.service"
-          ];
-          wants = [
-            "network-online.target"
-            "statime-inferno.service"
-          ];
-          serviceConfig = {
-            Type = "oneshot";
-            RemainAfterExit = true;
-            ExecStart = "${netaudioPkg}/bin/netaudio --name AA-4202524000109 device config preferred-leader on";
-          };
-        };
-      };
+    nixos = mkStatime.mkStatimeNixos {
+      name = "THEBATTLESHIP";
+      deviceName = "Galaxy32";
+      interface = "enp12s0";
+      interfaceComment = "Verified via netaudio discovery: Dante devices are visible on the 10G link enp12s0 (10.10.10.10), not on enp11s0.";
+      preferredLeaderArgs = [
+        "--name"
+        "AA-4202524000109"
+        "device"
+        "config"
+        "preferred-leader"
+        "on"
+      ];
+    };
   };
 }
