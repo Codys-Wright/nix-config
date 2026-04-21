@@ -136,7 +136,6 @@
         <fleet.coding._.tools/game-dev>
         <fleet.hardware._.networking/tailscale>
         <fleet.gaming/proton>
-        <fleet.music/production/inferno>
       ];
     };
   };

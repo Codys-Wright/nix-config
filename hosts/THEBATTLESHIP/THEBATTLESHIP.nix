@@ -157,6 +157,15 @@
             publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIENFHgs8JqCE4/dO58AN8W4M2SRgetgar94m2ntI9xb8";
           };
 
+          # Hermes workspace on THEBATTLESHIP for remote SSH execution from starcommand.
+          # The agent user lands in /home/cody/agent and gets symlinks to the source
+          # trees it most commonly needs without having to bounce between shells.
+          systemd.tmpfiles.rules = [
+            "d /home/cody/agent 0755 agent users -"
+            "L+ /home/cody/agent/.starcommand 0644 agent users - /home/cody/.starcommand"
+            "L+ /home/cody/agent/.flake 0644 agent users - /home/cody/.flake"
+          ];
+
           # SOPS secrets
           imports = [ inputs.sops-nix.nixosModules.default ];
           sops = {

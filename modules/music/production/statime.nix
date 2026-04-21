@@ -9,9 +9,13 @@
       { pkgs, ... }:
       let
         statimePkg = pkgs.callPackage ../../../packages/statime/statime.nix { };
+        netaudioPkg = pkgs.callPackage ../../../packages/netaudio/netaudio.nix { };
       in
       {
-        environment.systemPackages = [ statimePkg ];
+        environment.systemPackages = [
+          statimePkg
+          netaudioPkg
+        ];
 
         environment.etc."inferno/statime-ptpv1.toml".text = ''
           loglevel = "warn"
@@ -41,6 +45,24 @@
             ExecStart = "${statimePkg}/bin/statime --config /etc/inferno/statime-ptpv1.toml";
             Restart = "on-failure";
             RestartSec = "3s";
+          };
+        };
+
+        systemd.services.dante-galaxy32-preferred-leader = {
+          description = "Ensure Galaxy32 is preferred leader for Dante PTP";
+          wantedBy = [ "multi-user.target" ];
+          after = [
+            "network-online.target"
+            "statime-inferno.service"
+          ];
+          wants = [
+            "network-online.target"
+            "statime-inferno.service"
+          ];
+          serviceConfig = {
+            Type = "oneshot";
+            RemainAfterExit = true;
+            ExecStart = "${netaudioPkg}/bin/netaudio --name AA-4202524000109 device config preferred-leader on";
           };
         };
       };
