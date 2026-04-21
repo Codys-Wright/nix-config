@@ -47,8 +47,8 @@
             SAMPLE_RATE "48000"
             RX_CHANNELS "2"
             TX_CHANNELS "2"
-            RX_LATENCY_NS "500000"
-            TX_LATENCY_NS "500000"
+            RX_LATENCY_NS "1000000"
+            TX_LATENCY_NS "1000000"
 
             hint {
               show on
