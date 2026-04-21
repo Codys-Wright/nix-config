@@ -4,10 +4,10 @@
 # counts, latencies, device IDs, bind IPs, and PCM names.
 { fleet, lib, ... }:
 let
-  mkInfernoAspect = import ../../../lib/inferno/common.nix { inherit lib; };
+  infernoHelpers = import ../../../lib/inferno/common.nix { inherit lib; };
 in
 {
-  fleet.music._.production._.inferno = mkInfernoAspect {
+  fleet.music._.production._.inferno = infernoHelpers.mkInfernoAspect {
     name = "THEBATTLESHIP";
     bindIp = "10.10.10.10";
     deviceId = "00000A0A0A0A0001";
