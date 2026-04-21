@@ -1,8 +1,12 @@
 # RaySession audio sub-aspect (can be included independently)
 {
   fleet,
+  lib,
   ...
 }:
+let
+  raysessionHelpers = import ../../../../lib/audio/raysession/common.nix { inherit lib; };
+in
 {
   fleet.raysession = {
     description = "RaySession audio session manager";
@@ -11,9 +15,7 @@
       { pkgs, ... }:
       {
         environment.systemPackages = [
-          (pkgs.stable.raysession.overridePythonAttrs (old: {
-            dependencies = (old.dependencies or [ ]) ++ [ pkgs.stable.python313Packages.legacy-cgi ];
-          }))
+          (raysessionHelpers.mkRaysessionPackage pkgs)
         ];
       };
   };
