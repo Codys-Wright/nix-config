@@ -2,6 +2,8 @@ keys:
   # User's personal age key (from sops.key)
   # To get this: age-keygen -y sops.key
   - &me age1vaf7qpk38ddhlmjc0qj3r5l7nyz77csjtskmxp3hrl57jr8my4ws6h05ge
+  # Hermes agent age key (derived from /home/agent/.ssh/id_ed25519)
+  - &agent age1lu2qfrjscrmg5d84dyc9ttgjkhegamf4rut8qsr2a7r038fsfqysmgcwjz
   # THEBATTLESHIP host's SSH-derived age key
   # To get this: ssh-to-age < hosts/THEBATTLESHIP/host_key.pub
   - &THEBATTLESHIP age18xrg3x02lv2flw9tg25rkxwgg87mg8faaaehlt4vdwr58pm2ky9snfzdhx
@@ -18,6 +20,7 @@ creation_rules:
     key_groups:
       - age:
           - *me
+          - *agent
           - *THEBATTLESHIP
   # starcommand host secrets
   - path_regex: ^hosts/starcommand/secrets\.yaml$
@@ -31,6 +34,7 @@ creation_rules:
     key_groups:
       - age:
           - *me
+          - *agent
           - *THEBATTLESHIP
           - *starcommand_host
           - *starcommand_user

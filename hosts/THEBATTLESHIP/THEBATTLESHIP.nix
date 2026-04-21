@@ -9,7 +9,6 @@
     THEBATTLESHIP = {
       description = "The Main System, ready for everyday battle";
       users.cody = {
-        extraGroups = [ "clock" ];
       };
       users.joshua = { };
       users.guest = { };
