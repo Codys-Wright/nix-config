@@ -161,9 +161,9 @@
           # The agent user lands in /home/cody/agent and gets symlinks to the source
           # trees it most commonly needs without having to bounce between shells.
           systemd.tmpfiles.rules = [
-            "d /home/cody/agent 0755 agent users -"
-            "L+ /home/cody/agent/.starcommand 0644 agent users - /home/cody/.starcommand"
-            "L+ /home/cody/agent/.flake 0644 agent users - /home/cody/.flake"
+            "d /home/cody/agent 0755 cody users -"
+            "L+ /home/cody/agent/.starcommand 0644 cody users - /home/cody/.starcommand"
+            "L+ /home/cody/agent/.flake 0644 cody users - /home/cody/.flake"
           ];
 
           # SOPS secrets
