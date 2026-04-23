@@ -13,7 +13,8 @@ in
     deviceId = "00000A0A0A0A0001";
     description = "Inferno Dante tools and system-wide ALSA virtual soundcard";
     pcmName = "inferno";
-    channels = 16;
+    channels = 128;
+    audioPositions = infernoHelpers.mkChannelPositions 128 null;
     sampleRate = 48000;
     latencyNs = 1000000;
     headroom = 128;

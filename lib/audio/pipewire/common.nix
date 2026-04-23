@@ -44,6 +44,15 @@ let
 
   mkPositionString = positions: lib.concatStringsSep " " positions;
 
+  mkPositionCsv = positions: lib.concatStringsSep "," positions;
+
+  getNestedOrFlat =
+    attrs: nestedPath: flatKey: default:
+    let
+      nestedValue = lib.attrByPath nestedPath null attrs;
+    in
+    if nestedValue != null then nestedValue else lib.attrByPath [ flatKey ] default attrs;
+
   mkLoopbackModule =
     {
       description,
@@ -51,12 +60,19 @@ let
       playbackProps,
       nodeName ? null,
     }:
+    let
+      captureProps' =
+        if nodeName != null && !(captureProps ? "node.name") && !(captureProps ? node.name) then
+          captureProps // { "node.name" = nodeName; }
+        else
+          captureProps;
+    in
     {
       name = "libpipewire-module-loopback";
       args = lib.filterAttrs (_: v: v != null) {
-        inherit description nodeName;
-        capture.props = captureProps;
-        playback.props = playbackProps;
+        "node.description" = description;
+        "capture.props" = captureProps';
+        "playback.props" = playbackProps;
       };
     };
 
@@ -67,8 +83,10 @@ let
     }:
     {
       inherit matches;
-      actions.update-props = {
-        target.object = targetObject;
+      actions = {
+        "update-props" = {
+          "target.object" = targetObject;
+        };
       };
     };
 in
@@ -76,6 +94,7 @@ in
   inherit
     mkChannelPositions
     mkPositionString
+    mkPositionCsv
     mkLoopbackModule
     mkRouteRule
     ;
@@ -110,7 +129,6 @@ in
     }:
     { pkgs, ... }:
     let
-      loopbackModules = map mkLoopbackModule loopbacks;
       routeRules = map mkRouteRule routes;
       defaultConfig = lib.optionalAttrs (defaultSink != null || defaultSource != null) {
         "wireplumber.settings" = lib.filterAttrs (_: v: v != null) {
@@ -118,6 +136,69 @@ in
           "default.configured.audio.source" = defaultSource;
         };
       };
+      withTargetPolicy =
+        props:
+        if (getNestedOrFlat props [ "target" "object" ] "target.object" null) != null then
+          props
+          // {
+            "node.dont-fallback" = true;
+            "node.linger" = true;
+          }
+        else
+          props;
+      loopbacks' = map (
+        loopback:
+        let
+          captureProps0 =
+            if
+              loopback ? nodeName
+              && loopback.nodeName != null
+              && !(loopback.captureProps ? "node.name")
+              && !(loopback.captureProps ? node.name)
+            then
+              loopback.captureProps // { "node.name" = loopback.nodeName; }
+            else
+              loopback.captureProps;
+        in
+        loopback
+        // {
+          captureProps = withTargetPolicy captureProps0;
+          playbackProps = withTargetPolicy loopback.playbackProps;
+        }
+      ) loopbacks;
+      loopbackModules = map (
+        loopback:
+        mkLoopbackModule {
+          inherit (loopback) description captureProps playbackProps;
+          nodeName = loopback.nodeName or null;
+        }
+      ) loopbacks';
+      defaultAudioScript = pkgs.writeShellScript "pipewire-set-default-audio" ''
+        set -euo pipefail
+        export XDG_RUNTIME_DIR=${pipewireRuntimeDir}
+
+        ${lib.optionalString (defaultSink != null) ''
+          for _ in $(seq 1 30); do
+            sink_id="$(${pkgs.pipewire}/bin/pw-dump | ${pkgs.jq}/bin/jq -r '.[] | select(.type=="PipeWire:Interface:Node/3" and .info.props["node.name"]=="${defaultSink}") | .id' | head -n1)"
+            if [ -n "$sink_id" ] && [ "$sink_id" != "null" ]; then
+              ${pkgs.pipewire}/bin/wpctl set-default "$sink_id"
+              break
+            fi
+            ${pkgs.coreutils}/bin/sleep 1
+          done
+        ''}
+
+        ${lib.optionalString (defaultSource != null) ''
+          for _ in $(seq 1 30); do
+            source_id="$(${pkgs.pipewire}/bin/pw-dump | ${pkgs.jq}/bin/jq -r '.[] | select(.type=="PipeWire:Interface:Node/3" and .info.props["node.name"]=="${defaultSource}") | .id' | head -n1)"
+            if [ -n "$source_id" ] && [ "$source_id" != "null" ]; then
+              ${pkgs.pipewire}/bin/wpctl set-default "$source_id"
+              break
+            fi
+            ${pkgs.coreutils}/bin/sleep 1
+          done
+        ''}
+      '';
     in
     {
       security.rtkit.enable = true;
@@ -145,35 +226,31 @@ in
                 "default.clock.max-quantum" = defaultClockMaxQuantum;
               };
             };
-
-            "93-studio-buses" = {
-              context.modules = loopbackModules;
+          }
+          // lib.optionalAttrs (loopbackModules != [ ]) {
+            "93-studio-loopbacks" = {
+              "context.modules" = loopbackModules;
             };
           }
           // extraPipewireConfig;
 
           pipewire-pulse = {
             "92-low-latency" = {
-              context.modules = [
-                {
-                  name = "libpipewire-module-protocol-pulse";
-                  args = {
-                    pulse.min.req = pulseMinReq;
-                    pulse.default.req = pulseDefaultReq;
-                    pulse.max.req = pulseMaxReq;
-                    pulse.min.quantum = pulseMinQuantum;
-                    pulse.max.quantum = pulseMaxQuantum;
-                  };
-                }
-              ];
-              stream.properties = {
+              "pulse.properties" = {
+                pulse.min.req = pulseMinReq;
+                pulse.default.req = pulseDefaultReq;
+                pulse.max.req = pulseMaxReq;
+                pulse.min.quantum = pulseMinQuantum;
+                pulse.max.quantum = pulseMaxQuantum;
+              };
+              "stream.properties" = {
                 node.latency = pulseDefaultReq;
                 resample.quality = resampleQuality;
               };
             };
 
             "93-studio-routing" = lib.optionalAttrs (routes != [ ]) {
-              stream.rules = routeRules;
+              "stream.rules" = routeRules;
             };
           }
           // extraPulseConfig;
@@ -183,12 +260,49 @@ in
       services.pipewire.wireplumber.extraConfig."51-studio-defaults" =
         defaultConfig // extraWireplumberConfig;
 
-      environment.systemPackages = systemPackages pkgs;
+      systemd.services =
+        lib.optionalAttrs (defaultSink != null || defaultSource != null) {
+          pipewire-set-default-audio = {
+            description = "Set PipeWire default audio nodes";
+            after = [
+              "pipewire.service"
+              "wireplumber.service"
+            ];
+            wants = [
+              "pipewire.service"
+              "wireplumber.service"
+            ];
+            wantedBy = [ "multi-user.target" ];
+            serviceConfig = {
+              Type = "oneshot";
+              Environment = [ "XDG_RUNTIME_DIR=${pipewireRuntimeDir}" ];
+              ExecStart = "${defaultAudioScript}";
+            };
+          };
+        }
+        // {
+          pipewire.serviceConfig.Environment = [
+            "ALSA_PLUGIN_DIR=${alsaPluginDir}"
+          ];
+          pipewire.serviceConfig.SystemCallFilter = [ "@clock" ];
 
-      systemd.services.pipewire.serviceConfig.Environment = [
-        "ALSA_PLUGIN_DIR=${alsaPluginDir}"
-      ];
-      systemd.services.pipewire.serviceConfig.SystemCallFilter = [ "@clock" ];
+          pipewire-pulse = {
+            wantedBy = [ "multi-user.target" ];
+            serviceConfig.Environment = [
+              "PIPEWIRE_RUNTIME_DIR=${pipewireRuntimeDir}"
+              "ALSA_PLUGIN_DIR=${alsaPluginDir}"
+            ];
+          };
+
+          wireplumber = {
+            wantedBy = [ "multi-user.target" ];
+            serviceConfig.Environment = [
+              "PIPEWIRE_RUNTIME_DIR=${pipewireRuntimeDir}"
+            ];
+          };
+        };
+
+      environment.systemPackages = systemPackages pkgs;
 
       users.groups.${clockGroup} = { };
       users.users.pipewire.extraGroups = [ clockGroup ];
@@ -212,21 +326,6 @@ in
         export PIPEWIRE_RUNTIME_DIR=${pipewireRuntimeDir}
       '';
 
-      systemd.services.pipewire-pulse = {
-        wantedBy = [ "multi-user.target" ];
-        serviceConfig.Environment = [
-          "PIPEWIRE_RUNTIME_DIR=${pipewireRuntimeDir}"
-          "ALSA_PLUGIN_DIR=${alsaPluginDir}"
-        ];
-      };
-
-      systemd.services.wireplumber = {
-        wantedBy = [ "multi-user.target" ];
-        serviceConfig.Environment = [
-          "PIPEWIRE_RUNTIME_DIR=${pipewireRuntimeDir}"
-        ];
-      };
-
       systemd.sockets.pipewire-pulse.socketConfig.SocketMode = socketMode;
       systemd.sockets.pipewire-pulse.socketConfig.SocketGroup = socketGroup;
 
@@ -237,7 +336,7 @@ in
         serviceConfig = {
           Type = "oneshot";
           RemainAfterExit = true;
-          ExecStart = "${pkgs.bash}/bin/bash -c 'mkdir -p %t/pulse && ln -sf ${pipewireRuntimeDir}/pulse/native %t/pulse/native'";
+          ExecStart = "${pkgs.bash}/bin/bash -c 'mkdir -p %t/pulse && ln -sf /run/pulse/native %t/pulse/native'";
         };
       };
     };
