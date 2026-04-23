@@ -23,7 +23,7 @@ let
       os =
         { lib, ... }:
         {
-          environment.sessionVariables.TERMINAL = lib.mkForce terminal;
+          environment.variables.TERMINAL = lib.mkForce terminal;
         };
       homeManager =
         { lib, ... }:
