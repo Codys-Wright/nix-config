@@ -36,7 +36,7 @@
         ];
 
         # Set at system level so Steam (launched from desktop, not shell) can see it
-        environment.sessionVariables.STEAM_EXTRA_COMPAT_TOOLS_PATHS = lib.mkDefault "\${HOME}/.steam/root/compatibilitytools.d";
+        environment.variables.STEAM_EXTRA_COMPAT_TOOLS_PATHS = lib.mkDefault "\${HOME}/.steam/root/compatibilitytools.d";
       };
   };
 }
