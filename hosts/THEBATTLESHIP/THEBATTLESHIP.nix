@@ -139,13 +139,12 @@
             ];
           };
 
-          # NTFS audio production partition
+          # ext4 audio production partition
           fileSystems."/run/media/AudioHaven" = {
-            device = "/dev/nvme1n1p2";
-            fsType = "ntfs-3g";
+            device = "/dev/nvme0n1p2";
+            fsType = "ext4";
             options = [
               "rw"
-              "uid=1000"
               "nofail"
             ];
           };
