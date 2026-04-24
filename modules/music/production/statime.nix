@@ -35,7 +35,7 @@
             { host, ... }:
             {
               nixos =
-                { pkgs, ... }:
+                { pkgs, lib, ... }:
                 let
                   statimePkg = pkgs.callPackage ../../../packages/statime/statime.nix { };
                   netaudioPkg = pkgs.callPackage ../../../packages/netaudio/netaudio.nix { };
@@ -63,29 +63,31 @@
                     protocol-version = "${protocolVersion}"
                   '';
 
-                  systemd.services.statime-inferno = {
-                    description = "Statime PTP daemon for ${host.name} Dante network";
-                    after = [ "network-online.target" ];
-                    wants = [ "network-online.target" ];
-                    wantedBy = [ "multi-user.target" ];
-                    serviceConfig = {
-                      Type = "simple";
-                      ExecStart = "${statimePkg}/bin/statime --config ${configPath}";
-                      Restart = "on-failure";
-                      RestartSec = "3s";
+                  systemd.services = {
+                    statime-inferno = {
+                      description = "Statime PTP daemon for ${host.name} Dante network";
+                      after = [ "network-online.target" ];
+                      wants = [ "network-online.target" ];
+                      wantedBy = [ "multi-user.target" ];
+                      serviceConfig = {
+                        Type = "simple";
+                        ExecStart = "${statimePkg}/bin/statime --config ${configPath}";
+                        Restart = "on-failure";
+                        RestartSec = "3s";
+                      };
                     };
-                  };
-                }
-                // lib.optionalAttrs (preferredLeader != null) {
-                  systemd.services.dante-preferred-leader = {
-                    description = "Lock ${preferredLeader} as Dante PTP preferred leader";
-                    after = [ "statime-inferno.service" ];
-                    wants = [ "statime-inferno.service" ];
-                    wantedBy = [ "multi-user.target" ];
-                    serviceConfig = {
-                      Type = "oneshot";
-                      RemainAfterExit = true;
-                      ExecStart = "${netaudioPkg}/bin/netaudio --name ${preferredLeader} device config preferred-leader on";
+                  }
+                  // lib.optionalAttrs (preferredLeader != null) {
+                    dante-preferred-leader = {
+                      description = "Lock ${preferredLeader} as Dante PTP preferred leader";
+                      after = [ "statime-inferno.service" ];
+                      wants = [ "statime-inferno.service" ];
+                      wantedBy = [ "multi-user.target" ];
+                      serviceConfig = {
+                        Type = "oneshot";
+                        RemainAfterExit = true;
+                        ExecStart = "${netaudioPkg}/bin/netaudio --name ${preferredLeader} device config preferred-leader on";
+                      };
                     };
                   };
                 };
