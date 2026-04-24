@@ -1,14 +1,15 @@
-# Audio hardware facet - All audio components
+# Audio hardware facet.
+#
+# Default instance of the PipeWire sub-aspect with no overrides — hosts that
+# need special defaults (default sink, sticky HDMI nodes, etc.) should include
+# `(fleet.hardware._.audio._.pipewire { ... })` themselves, which replaces
+# this default via den's parametric-dispatch rules.
 { fleet, ... }:
 {
   fleet.hardware._.audio = {
-    description = "Audio system with PipeWire and device management";
+    description = "Audio system (PipeWire + musnix realtime)";
     includes = [
-      fleet.hardware._.audio._.pipewire
-      fleet.hardware._.audio._.wireplumber
-      # Note: musnix is a function, so call it with default params
-      # Users can include it directly with custom params if needed:
-      # (<fleet/hardware/audio/musnix> { rtcqs = true; })
+      (fleet.hardware._.audio._.pipewire { })
       (fleet.hardware._.audio._.musnix { })
       fleet.raysession
     ];

@@ -1,248 +1,181 @@
-# PipeWire audio sub-aspect (can be included independently)
+# PipeWire audio aspect.
+#
+# System-wide PipeWire so Inferno's ALSA plugin (which needs to run at system
+# boot, before any user logs in, because it holds the Dante PCM device open)
+# can share the same graph as user applications.
+#
+# The module is parametric so it can be deployed on multiple hosts:
+#
+#   (fleet.hardware._.audio._.pipewire {
+#     defaultSink = "system_audio";
+#     defaultSource = "talkback_mic";
+#     stickyNodes = [
+#       # node.name patterns that must never suspend
+#       "alsa_output.pci-0000_01_00.1.hdmi-stereo-extra1"
+#     ];
+#   })
+#
+# When called with no args (the default via the audio facet), you get a plain
+# low-latency PipeWire setup with no virtual sinks or routing rules. Hosts that
+# need studio routing (virtual sinks, app -> sink rules) should configure them
+# in their own aspect on top of this.
 {
-  fleet,
   den,
-  lib,
   ...
 }:
-let
-  pw = import ../../../../lib/audio/pipewire/common.nix { inherit lib; };
-  stereoPositions = pw.mkChannelPositions 2 null;
-  dawPositions = pw.mkChannelPositions 16 null;
-in
 {
   fleet.hardware._.audio._.pipewire = {
-    description = "PipeWire audio system with low-latency configuration";
+    description = "PipeWire audio system (system-wide, low-latency)";
 
-    includes = [ (den.lib.groups [ "audio" ]) ];
+    includes = [
+      (den.lib.groups [
+        "audio"
+        "pipewire"
+      ])
+    ];
 
-    nixos = pw.mkPipewireNixos {
-      systemPackages =
-        pkgs: with pkgs; [
-          pavucontrol
-          alsa-lib
-          alsa-tools
-          alsa-utils
-          alsa-plugins
-          crosspipe
-          qpwgraph
-          qjackctl
-          coppwr
+    __functor =
+      _self:
+      {
+        # Wireplumber-configured default sink/source by node.name. Null means
+        # "let wireplumber pick".
+        defaultSink ? null,
+        defaultSource ? null,
+
+        # Node.name patterns that must never suspend. Useful for HDMI/NVIDIA
+        # outputs that pop or have startup delay after idle.
+        stickyNodes ? [ ],
+
+        # Clock / quantum tuning. The defaults match the NixOS wiki low-latency
+        # recipe and are safe on modern hardware.
+        clockRate ? 48000,
+        clockQuantum ? 256,
+        clockMinQuantum ? 32,
+        clockMaxQuantum ? 1024,
+
+        # Pulse backend request sizes (must be >= the pipewire quantum).
+        pulseMinReq ? "32/48000",
+        pulseDefaultReq ? "256/48000",
+        pulseMaxReq ? "1024/48000",
+        resampleQuality ? 4,
+        ...
+      }:
+      {
+        includes = [
+          # Per-user side: bridge the system-wide pipewire sockets into each
+          # user's XDG_RUNTIME_DIR and keep them logged-in so audio works over
+          # SSH / before graphical login.
+          (
+            { host, ... }:
+            {
+              nixos.users.users = builtins.mapAttrs (_: _: { linger = true; }) host.users;
+            }
+          )
         ];
 
-      defaultSink = "system_audio";
-      defaultSource = "talkback_mic";
-      loopbacks = [
-        {
-          description = "Yamaha TF Stereo";
-          nodeName = "yamaha_tf_stereo";
-          captureProps = {
-            "media.class" = "Audio/Sink";
-            "audio.position" = stereoPositions;
-          };
-          playbackProps = {
-            "target.object" = "alsa_output.usb-Yamaha_Corporation_Yamaha_TF-00.multichannel-output";
-            "audio.position" = [
-              "AUX0"
-              "AUX1"
-            ];
-            "node.passive" = true;
-          };
-        }
-        {
-          description = "Broadcast";
-          captureProps = {
-            "node.name" = "broadcast";
-            "media.class" = "Audio/Sink";
-            "audio.position" = stereoPositions;
-            "priority.session" = 500;
-          };
-          playbackProps = {
-            "node.name" = "broadcast.playback";
-            "target.object" = "Inferno sink";
-            "node.passive" = true;
-            "stream.dont-remix" = true;
-            "audio.position" = stereoPositions;
-          };
-        }
-        {
-          description = "System Audio";
-          captureProps = {
-            "node.name" = "system_audio";
-            "media.class" = "Audio/Sink";
-            "audio.position" = stereoPositions;
-            "priority.session" = 1000;
-          };
-          playbackProps = {
-            "node.name" = "system-audio.playback";
-            "target.object" = "Inferno sink";
-            "node.passive" = true;
-            "stream.dont-remix" = true;
-            "audio.position" = stereoPositions;
-          };
-        }
-        {
-          description = "System Notifications";
-          captureProps = {
-            "node.name" = "system_notifications";
-            "media.class" = "Audio/Sink";
-            "audio.position" = stereoPositions;
-            "priority.session" = 800;
-          };
-          playbackProps = {
-            "node.name" = "system-notifications.playback";
-            "target.object" = "system_audio";
-            "node.passive" = true;
-            "stream.dont-remix" = true;
-            "audio.position" = stereoPositions;
-          };
-        }
-        {
-          description = "Voice Chat";
-          captureProps = {
-            "node.name" = "voice_chat";
-            "media.class" = "Audio/Sink";
-            "audio.position" = stereoPositions;
-            "priority.session" = 850;
-          };
-          playbackProps = {
-            "node.name" = "voice-chat.playback";
-            "target.object" = "broadcast";
-            "node.passive" = true;
-            "stream.dont-remix" = true;
-            "audio.position" = stereoPositions;
-          };
-        }
-        {
-          description = "Daw";
-          captureProps = {
-            "node.name" = "daw";
-            "media.class" = "Audio/Sink";
-            "audio.channels" = 16;
-            "audio.position" = dawPositions;
-            "priority.session" = 950;
-          };
-          playbackProps = {
-            "node.name" = "daw.playback";
-            "target.object" = "Inferno sink";
-            "node.passive" = true;
-            "stream.dont-remix" = true;
-            "audio.position" = dawPositions;
-          };
-        }
-        {
-          description = "Daw Broadcast";
-          captureProps = {
-            "node.name" = "daw_broadcast.capture";
-            "target.object" = "daw";
-            "stream.capture.sink" = true;
-            "node.passive" = true;
-            "stream.dont-remix" = true;
-          };
-          playbackProps = {
-            "node.name" = "daw_broadcast";
-            "media.class" = "Audio/Source";
-            "audio.position" = stereoPositions;
-            "priority.session" = 900;
-          };
-        }
-        {
-          description = "Talkback Mic";
-          captureProps = {
-            "node.name" = "talkback_mic.capture";
-            "target.object" = "alsa_input.usb-Insta360_Insta360_Link_2_Pro-02.mono-fallback";
-            "node.passive" = true;
-            "stream.dont-remix" = true;
-            "audio.position" = [ "MONO" ];
-          };
-          playbackProps = {
-            "node.name" = "talkback_mic";
-            "media.class" = "Audio/Source";
-            "audio.position" = [ "MONO" ];
-            "priority.session" = 1000;
-          };
-        }
-      ];
+        nixos =
+          { pkgs, lib, ... }:
+          {
+            security.rtkit.enable = true;
 
-      routes = [
-        {
-          matches = [
-            { "application.name" = "Brave Browser"; }
-            { "application.name" = "Firefox"; }
-            { "application.name" = "Chromium"; }
-            { "application.name" = "Google Chrome"; }
-            { "application.name" = "Zen Browser"; }
-          ];
-          targetObject = "system_audio";
-        }
-        {
-          matches = [
-            { "application.name" = "Discord"; }
-            { "application.name" = "Discord Canary"; }
-            { "application.name" = "Vesktop"; }
-            { "application.name" = "WebCord"; }
-            { "application.name" = "Microsoft Teams"; }
-            { "application.name" = "Teams for Linux"; }
-          ];
-          targetObject = "voice_chat";
-        }
-        {
-          matches = [
-            { "application.name" = "REAPER"; }
-            { "application.name" = "Reaper"; }
-            { "application.name" = "reaper"; }
-          ];
-          targetObject = "daw";
-        }
-        {
-          matches = [
-            { "application.name" = "OBS Studio"; }
-            { "application.name" = "OBS"; }
-          ];
-          targetObject = "broadcast";
-        }
-        {
-          matches = [ { "media.role" = "event"; } ];
-          targetObject = "system_notifications";
-        }
-        {
-          matches = [
-            { "application.process.binary" = "reaper"; }
-            { "application.process.binary" = "reaper.exe"; }
-          ];
-          targetObject = "daw";
-        }
-        {
-          matches = [
-            { "application.process.binary" = "discord"; }
-            { "application.process.binary" = "Discord"; }
-            { "application.process.binary" = "discord-canary"; }
-            { "application.process.binary" = "vesktop"; }
-            { "application.process.binary" = "WebCord"; }
-            { "application.process.binary" = "teams"; }
-            { "application.process.binary" = "teams-for-linux"; }
-          ];
-          targetObject = "voice_chat";
-        }
-        {
-          matches = [
-            { "application.process.binary" = "obs"; }
-            { "application.process.binary" = "obs64"; }
-            { "application.process.binary" = "com.obsproject.Studio"; }
-          ];
-          targetObject = "broadcast";
-        }
-        {
-          matches = [
-            { "application.process.binary" = "brave-browser"; }
-            { "application.process.binary" = "firefox"; }
-            { "application.process.binary" = "chromium"; }
-            { "application.process.binary" = "google-chrome"; }
-            { "application.process.binary" = "zen-browser"; }
-          ];
-          targetObject = "system_audio";
-        }
-      ];
-    };
+            services.pipewire = {
+              enable = true;
+              systemWide = true;
+
+              # Headless wiki recommendation: don't rely on socket activation,
+              # start the daemon at boot. This also eliminates a race where the
+              # first media call after login fails because the sockets exist
+              # but the daemon hasn't finished initialising the devices.
+              socketActivation = false;
+
+              alsa = {
+                enable = true;
+                support32Bit = true;
+              };
+              pulse.enable = true;
+              jack.enable = true;
+              wireplumber.enable = true;
+
+              extraConfig.pipewire."92-low-latency".context.properties = {
+                "default.clock.rate" = clockRate;
+                "default.clock.quantum" = clockQuantum;
+                "default.clock.min-quantum" = clockMinQuantum;
+                "default.clock.max-quantum" = clockMaxQuantum;
+              };
+
+              extraConfig.pipewire-pulse."92-low-latency" = {
+                "pulse.properties" = {
+                  "pulse.min.req" = pulseMinReq;
+                  "pulse.default.req" = pulseDefaultReq;
+                  "pulse.max.req" = pulseMaxReq;
+                  "pulse.min.quantum" = pulseMinReq;
+                  "pulse.max.quantum" = pulseMaxReq;
+                };
+                "stream.properties" = {
+                  "node.latency" = pulseDefaultReq;
+                  "resample.quality" = resampleQuality;
+                };
+              };
+
+              wireplumber.extraConfig =
+                lib.optionalAttrs (defaultSink != null || defaultSource != null) {
+                  "10-defaults".wireplumber.settings = lib.filterAttrs (_: v: v != null) {
+                    "default.configured.audio.sink" = defaultSink;
+                    "default.configured.audio.source" = defaultSource;
+                  };
+                }
+                // lib.optionalAttrs (stickyNodes != [ ]) {
+                  # Disable suspend + keep the pipeline hot for sinks that pop
+                  # or have long start-up after idle (NVIDIA HDMI, etc).
+                  "99-disable-suspend"."monitor.alsa.rules" = [
+                    {
+                      matches = map (name: { "node.name" = name; }) stickyNodes;
+                      actions.update-props = {
+                        "session.suspend-timeout-seconds" = 0;
+                        "node.always-process" = true;
+                        "dither.method" = "wannamaker3";
+                        "dither.noise" = 1;
+                      };
+                    }
+                  ];
+                };
+            };
+
+            # Inferno's ALSA plugin needs clock_nanosleep / clock_adjtime —
+            # systemd's default seccomp filter drops them. Ship the same
+            # override the upstream Inferno repo recommends.
+            systemd.services.pipewire.config.SystemCallFilter = [ "@clock" ];
+
+            # Bridge the system-wide pipewire / pulse sockets into each user's
+            # XDG_RUNTIME_DIR so userland apps Just Work without any per-user
+            # daemon.
+            systemd.user.services.pipewire-system-bridge = {
+              description = "Bridge system-wide PipeWire sockets into user runtime dir";
+              wantedBy = [ "default.target" ];
+              after = [ "basic.target" ];
+              serviceConfig = {
+                Type = "oneshot";
+                RemainAfterExit = true;
+                ExecStart = pkgs.writeShellScript "pipewire-system-bridge" ''
+                  set -eu
+                  mkdir -p "$XDG_RUNTIME_DIR/pulse"
+                  ln -sf /run/pipewire/pipewire-0         "$XDG_RUNTIME_DIR/pipewire-0"
+                  ln -sf /run/pipewire/pipewire-0-manager "$XDG_RUNTIME_DIR/pipewire-0-manager"
+                  ln -sf /run/pulse/native                "$XDG_RUNTIME_DIR/pulse/native"
+                '';
+              };
+            };
+
+            environment.systemPackages = with pkgs; [
+              pavucontrol
+              pwvucontrol
+              qpwgraph
+              qjackctl
+              coppwr
+              helvum
+              alsa-utils
+            ];
+          };
+      };
   };
 }
