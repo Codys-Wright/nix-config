@@ -55,7 +55,23 @@
         })
 
         <fleet/kernel>
+
+        # Music production base (Reaper, plugins, netaudio, environment).
         <fleet.music/production>
+
+        # Dante / Inferno: this host is "THEBATTLESHIP" on the 10G Dante
+        # network, bound to the enp12s0 NIC. Statime does PTP clock sync,
+        # Inferno exposes a 128-channel virtual Dante soundcard.
+        (fleet.music._.production._.statime {
+          interface = "enp12s0";
+          preferredLeader = "AA-4202524000109";
+        })
+        (fleet.music._.production._.inferno {
+          bindIp = "10.10.10.10";
+          deviceId = "00000A0A0A0A0001";
+          channels = 128;
+        })
+
         (fleet.selfhost._.samba-client { })
         <fleet.system/avahi>
         <fleet.system/virtualization>
@@ -194,6 +210,7 @@
               320
               4400
               4401
+              8800
               4402
               4455
               5353
