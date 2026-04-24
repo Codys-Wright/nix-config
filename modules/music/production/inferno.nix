@@ -5,20 +5,17 @@
 # shows up in Dante Controller with its own identity.
 #
 #   (fleet.music._.production._.inferno {
-#     bindIp   = "10.10.10.10";   # IP on the Dante interface
+#     bindIp   = "10.10.10.10";
 #     deviceId = "00000A0A0A0A0001";
-#     channels = 128;             # RX/TX channel count
+#     channels = 128;
 #   })
 #
-# Design notes:
-# * The ALSA PCM plugin is declared in /etc/asound.conf.
-# * PipeWire creates the sink/source adapter nodes declaratively via
-#   context.objects — no pw-cli scripts, no oneshot services, no cleanup.
-# * Nodes are set to never suspend so the Dante stream stays alive on the
-#   network (otherwise Inferno stops emulating the device when nothing reads
-#   or writes, which takes several seconds to recover from).
-# * Requires system-wide PipeWire (see fleet.hardware._.audio._.pipewire) so
-#   the plugin is loaded at boot before any user logs in.
+# The Inferno ALSA plugin only allows one PCM stream per device. To have both
+# a sink (playback) and source (capture) in PipeWire simultaneously, we define
+# two separate ALSA PCM devices with different PROCESS_ID and ALT_PORT, as
+# recommended in the Inferno README for JACK alsa_in/alsa_out usage.
+#
+# Requires system-wide PipeWire (see fleet.hardware._.audio._.pipewire).
 { fleet, lib, ... }:
 {
   fleet.music._.production._.inferno = {
@@ -31,10 +28,7 @@
         deviceId,
         channels ? 128,
         sampleRate ? 48000,
-        latencyNs ? 1000000, # 1ms
-        pcmName ? "inferno",
-        processId ? "1",
-        altPort ? "4400",
+        latencyNs ? 1000000,
         headroom ? 128,
         card ? 999,
         ...
@@ -48,46 +42,60 @@
                 { pkgs, ... }:
                 let
                   infernoPkg = pkgs.callPackage ../../../packages/inferno/inferno.nix { };
+                  pcmSink = "inferno_sink";
+                  pcmSource = "inferno_source";
                 in
                 {
                   environment.systemPackages = [ infernoPkg ];
 
-                  # Let ALSA find the Inferno PCM plugin shipped by the inferno
-                  # package.
                   environment.pathsToLink = [ "/lib/alsa-lib" ];
                   environment.variables.ALSA_PLUGIN_DIR = "/run/current-system/sw/lib/alsa-lib";
 
-                  # Declare the virtual Dante soundcard. NAME is the host's
-                  # name so Dante Controller shows each machine with its own
-                  # identity.
+                  # Two separate ALSA PCM devices — the Inferno plugin requires
+                  # unique PROCESS_ID and ALT_PORT for each concurrent stream.
+                  # The sink (playback / TX to Dante) uses PROCESS_ID 1, the
+                  # source (capture / RX from Dante) uses PROCESS_ID 2.
                   environment.etc."asound.conf".text = ''
                     pcm!default { type null }
                     ctl!default { type null }
 
-                    pcm.${pcmName} {
+                    pcm.${pcmSink} {
                       type inferno
                       NAME "${host.name}"
                       DEVICE_ID "${deviceId}"
                       BIND_IP "${bindIp}"
-                      PROCESS_ID "${processId}"
-                      ALT_PORT "${altPort}"
+                      PROCESS_ID "1"
+                      ALT_PORT "4400"
                       SAMPLE_RATE "${toString sampleRate}"
-                      RX_CHANNELS "${toString channels}"
+                      RX_CHANNELS "0"
                       TX_CHANNELS "${toString channels}"
-                      RX_LATENCY_NS "${toString latencyNs}"
                       TX_LATENCY_NS "${toString latencyNs}"
 
                       hint {
                         show on
-                        description "${host.name} Inferno virtual device"
+                        description "${host.name} Inferno playback"
+                      }
+                    }
+
+                    pcm.${pcmSource} {
+                      type inferno
+                      NAME "${host.name}"
+                      DEVICE_ID "${deviceId}"
+                      BIND_IP "${bindIp}"
+                      PROCESS_ID "2"
+                      ALT_PORT "4410"
+                      SAMPLE_RATE "${toString sampleRate}"
+                      RX_CHANNELS "${toString channels}"
+                      TX_CHANNELS "0"
+                      RX_LATENCY_NS "${toString latencyNs}"
+
+                      hint {
+                        show on
+                        description "${host.name} Inferno capture"
                       }
                     }
                   '';
 
-                  # Declarative PipeWire nodes — created automatically at
-                  # pipewire startup, no shell scripts needed. PipeWire probes
-                  # the ALSA device for channel count and layout so we don't
-                  # set audio.channels / audio.position here.
                   services.pipewire.extraConfig.pipewire."91-inferno" = {
                     "context.objects" = [
                       {
@@ -97,7 +105,7 @@
                           "node.name" = "Inferno sink";
                           "node.description" = "Inferno Dante Sink";
                           "media.class" = "Audio/Sink";
-                          "api.alsa.path" = pcmName;
+                          "api.alsa.path" = pcmSink;
                           "api.alsa.pcm.card" = toString card;
                           "api.alsa.headroom" = toString headroom;
                           "priority.session" = 2000;
@@ -115,7 +123,7 @@
                           "node.name" = "Inferno source";
                           "node.description" = "Inferno Dante Source";
                           "media.class" = "Audio/Source";
-                          "api.alsa.path" = pcmName;
+                          "api.alsa.path" = pcmSource;
                           "api.alsa.pcm.card" = toString card;
                           "api.alsa.headroom" = toString headroom;
                           "priority.session" = 1900;
