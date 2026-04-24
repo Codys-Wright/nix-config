@@ -19,10 +19,7 @@
 # low-latency PipeWire setup with no virtual sinks or routing rules. Hosts that
 # need studio routing (virtual sinks, app -> sink rules) should configure them
 # in their own aspect on top of this.
-{
-  den,
-  ...
-}:
+{ den, ... }:
 {
   fleet.hardware._.audio._.pipewire = {
     description = "PipeWire audio system (system-wide, low-latency)";
@@ -61,7 +58,11 @@
         ];
 
         nixos =
-          { pkgs, lib, ... }:
+          {
+            pkgs,
+            lib,
+            ...
+          }:
           {
             security.rtkit.enable = true;
 
@@ -121,21 +122,20 @@
                 };
             };
 
-            # PipeWire needs to find the Inferno ALSA plugin. System services
-            # don't inherit environment.variables, so set it explicitly.
-            systemd.services.pipewire.serviceConfig.Environment = [
-              "ALSA_PLUGIN_DIR=/run/current-system/sw/lib/alsa-lib"
-            ];
-
-            # Inferno's ALSA plugin needs clock syscalls (clock_nanosleep,
-            # clock_adjtime). The NixOS pipewire module sets
-            # SystemCallFilter=@system-service which blocks them. We add @clock
-            # via a systemd drop-in so the two filter sets are unioned (systemd
-            # merges multiple SystemCallFilter lines) rather than overriding.
-            environment.etc."systemd/system/pipewire.service.d/allow-clock.conf".text = ''
-              [Service]
-              SystemCallFilter=@clock
-            '';
+            systemd.services.pipewire.serviceConfig = {
+              # PipeWire needs to find the Inferno ALSA plugin. System services
+              # don't inherit environment.variables, so set it explicitly.
+              Environment = [ "ALSA_PLUGIN_DIR=/run/current-system/sw/lib/alsa-lib" ];
+              # Inferno's ALSA plugin needs clock syscalls (clock_nanosleep,
+              # clock_adjtime). The NixOS pipewire module sets
+              # SystemCallFilter=@system-service which blocks them. We must
+              # include BOTH @system-service and @clock — setting only @clock
+              # removes the basic syscalls PipeWire needs to run (exit code 234).
+              SystemCallFilter = [
+                "@system-service"
+                "@clock"
+              ];
+            };
 
             # Bridge the system-wide pipewire / pulse sockets into each user's
             # XDG_RUNTIME_DIR so userland apps Just Work without any per-user
@@ -164,6 +164,7 @@
               qjackctl
               coppwr
               crosspipe
+              easyeffects
               alsa-utils
             ];
           };
