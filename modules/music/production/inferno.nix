@@ -85,7 +85,9 @@
                   '';
 
                   # Declarative PipeWire nodes — created automatically at
-                  # pipewire startup, no shell scripts needed.
+                  # pipewire startup, no shell scripts needed. PipeWire probes
+                  # the ALSA device for channel count and layout so we don't
+                  # set audio.channels / audio.position here.
                   services.pipewire.extraConfig.pipewire."91-inferno" = {
                     "context.objects" = [
                       {
@@ -98,7 +100,6 @@
                           "api.alsa.path" = pcmName;
                           "api.alsa.pcm.card" = toString card;
                           "api.alsa.headroom" = toString headroom;
-                          "audio.channels" = channels;
                           "priority.session" = 2000;
                           "session.suspend-timeout-seconds" = 0;
                           "node.pause-on-idle" = false;
@@ -117,7 +118,6 @@
                           "api.alsa.path" = pcmName;
                           "api.alsa.pcm.card" = toString card;
                           "api.alsa.headroom" = toString headroom;
-                          "audio.channels" = channels;
                           "priority.session" = 1900;
                           "session.suspend-timeout-seconds" = 0;
                           "node.pause-on-idle" = false;

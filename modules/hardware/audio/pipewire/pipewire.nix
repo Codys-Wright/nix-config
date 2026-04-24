@@ -37,23 +37,13 @@
     __functor =
       _self:
       {
-        # Wireplumber-configured default sink/source by node.name. Null means
-        # "let wireplumber pick".
         defaultSink ? null,
         defaultSource ? null,
-
-        # Node.name patterns that must never suspend. Useful for HDMI/NVIDIA
-        # outputs that pop or have startup delay after idle.
         stickyNodes ? [ ],
-
-        # Clock / quantum tuning. The defaults match the NixOS wiki low-latency
-        # recipe and are safe on modern hardware.
         clockRate ? 48000,
         clockQuantum ? 256,
         clockMinQuantum ? 32,
         clockMaxQuantum ? 1024,
-
-        # Pulse backend request sizes (must be >= the pipewire quantum).
         pulseMinReq ? "32/48000",
         pulseDefaultReq ? "256/48000",
         pulseMaxReq ? "1024/48000",
@@ -62,9 +52,6 @@
       }:
       {
         includes = [
-          # Per-user side: bridge the system-wide pipewire sockets into each
-          # user's XDG_RUNTIME_DIR and keep them logged-in so audio works over
-          # SSH / before graphical login.
           (
             { host, ... }:
             {
@@ -81,11 +68,6 @@
             services.pipewire = {
               enable = true;
               systemWide = true;
-
-              # Headless wiki recommendation: don't rely on socket activation,
-              # start the daemon at boot. This also eliminates a race where the
-              # first media call after login fails because the sockets exist
-              # but the daemon hasn't finished initialising the devices.
               socketActivation = false;
 
               alsa = {
@@ -125,8 +107,6 @@
                   };
                 }
                 // lib.optionalAttrs (stickyNodes != [ ]) {
-                  # Disable suspend + keep the pipeline hot for sinks that pop
-                  # or have long start-up after idle (NVIDIA HDMI, etc).
                   "99-disable-suspend"."monitor.alsa.rules" = [
                     {
                       matches = map (name: { "node.name" = name; }) stickyNodes;
@@ -141,10 +121,21 @@
                 };
             };
 
-            # Inferno's ALSA plugin needs clock_nanosleep / clock_adjtime —
-            # systemd's default seccomp filter drops them. Ship the same
-            # override the upstream Inferno repo recommends.
-            systemd.services.pipewire.config.SystemCallFilter = [ "@clock" ];
+            # PipeWire needs to find the Inferno ALSA plugin. System services
+            # don't inherit environment.variables, so set it explicitly.
+            systemd.services.pipewire.serviceConfig.Environment = [
+              "ALSA_PLUGIN_DIR=/run/current-system/sw/lib/alsa-lib"
+            ];
+
+            # Inferno's ALSA plugin needs clock syscalls (clock_nanosleep,
+            # clock_adjtime). The NixOS pipewire module sets
+            # SystemCallFilter=@system-service which blocks them. We add @clock
+            # via a systemd drop-in so the two filter sets are unioned (systemd
+            # merges multiple SystemCallFilter lines) rather than overriding.
+            environment.etc."systemd/system/pipewire.service.d/allow-clock.conf".text = ''
+              [Service]
+              SystemCallFilter=@clock
+            '';
 
             # Bridge the system-wide pipewire / pulse sockets into each user's
             # XDG_RUNTIME_DIR so userland apps Just Work without any per-user
@@ -172,7 +163,7 @@
               qpwgraph
               qjackctl
               coppwr
-              helvum
+              crosspipe
               alsa-utils
             ];
           };
