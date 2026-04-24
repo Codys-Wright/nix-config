@@ -10,26 +10,17 @@
 #     defaultSink = "system_audio";
 #     defaultSource = "talkback_mic";
 #     stickyNodes = [
-#       # node.name patterns that must never suspend
 #       "alsa_output.pci-0000_01_00.1.hdmi-stereo-extra1"
 #     ];
 #   })
 #
 # When called with no args (the default via the audio facet), you get a plain
-# low-latency PipeWire setup with no virtual sinks or routing rules. Hosts that
-# need studio routing (virtual sinks, app -> sink rules) should configure them
-# in their own aspect on top of this.
+# low-latency PipeWire setup. Hosts that need studio routing should configure
+# them in their own aspect on top of this.
 { den, ... }:
 {
   fleet.hardware._.audio._.pipewire = {
     description = "PipeWire audio system (system-wide, low-latency)";
-
-    includes = [
-      (den.lib.groups [
-        "audio"
-        "pipewire"
-      ])
-    ];
 
     __functor =
       _self:
@@ -51,6 +42,33 @@
         includes = [
           (
             { host, ... }:
+            let
+              audioGroups = [
+                "audio"
+                "pipewire"
+              ];
+            in
+            {
+              nixos =
+                { lib, ... }:
+                {
+                  users.users =
+                    (lib.listToAttrs (
+                      map (userName: {
+                        name = userName;
+                        value = {
+                          extraGroups = audioGroups;
+                        };
+                      }) (builtins.attrNames host.users)
+                    ))
+                    // {
+                      pipewire.extraGroups = [ "audio" ];
+                    };
+                };
+            }
+          )
+          (
+            { host, ... }:
             {
               nixos.users.users = builtins.mapAttrs (_: _: { linger = true; }) host.users;
             }
@@ -58,11 +76,7 @@
         ];
 
         nixos =
-          {
-            pkgs,
-            lib,
-            ...
-          }:
+          { pkgs, lib, ... }:
           {
             security.rtkit.enable = true;
 
@@ -123,23 +137,13 @@
             };
 
             systemd.services.pipewire.serviceConfig = {
-              # PipeWire needs to find the Inferno ALSA plugin. System services
-              # don't inherit environment.variables, so set it explicitly.
               Environment = [ "ALSA_PLUGIN_DIR=/run/current-system/sw/lib/alsa-lib" ];
-              # Inferno's ALSA plugin needs clock syscalls (clock_nanosleep,
-              # clock_adjtime). The NixOS pipewire module sets
-              # SystemCallFilter=@system-service which blocks them. We must
-              # include BOTH @system-service and @clock — setting only @clock
-              # removes the basic syscalls PipeWire needs to run (exit code 234).
               SystemCallFilter = [
                 "@system-service"
                 "@clock"
               ];
             };
 
-            # Bridge the system-wide pipewire / pulse sockets into each user's
-            # XDG_RUNTIME_DIR so userland apps Just Work without any per-user
-            # daemon.
             systemd.user.services.pipewire-system-bridge = {
               description = "Bridge system-wide PipeWire sockets into user runtime dir";
               wantedBy = [ "default.target" ];
@@ -164,7 +168,6 @@
               qjackctl
               coppwr
               crosspipe
-              easyeffects
               alsa-utils
             ];
           };
