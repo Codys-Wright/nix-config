@@ -9,8 +9,8 @@
       <fleet/base-host>
       <fleet/nix-settings>
       <fleet/state-version>
-      <fleet/hostname>
       <fleet/no-man-cache>
+      den._.hostname
     ];
     home.includes = [
       <fleet/nix>
