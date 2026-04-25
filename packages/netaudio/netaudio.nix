@@ -5,7 +5,7 @@
 }:
 python3Packages.buildPythonApplication rec {
   pname = "netaudio";
-  version = "0.2.4-unstable-2026-04-25";
+  version = "0.2.4-unstable-2026-03-31";
   pyproject = true;
 
   src = fetchFromGitHub {
