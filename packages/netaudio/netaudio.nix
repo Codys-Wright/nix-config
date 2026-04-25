@@ -5,14 +5,14 @@
 }:
 python3Packages.buildPythonApplication rec {
   pname = "netaudio";
-  version = "0.2.4-unstable-2026-03-31";
+  version = "0.2.4-unstable-2026-04-25";
   pyproject = true;
 
   src = fetchFromGitHub {
-    owner = "chris-ritsen";
+    owner = "FastTrackStudios";
     repo = "network-audio-controller";
-    rev = "1d32c70c2db56abc8a8d83123f72b7b4cf3a4ccf";
-    hash = "sha256-GUsXHnDQ2Dy24MshO/chjp5jTA/aBENZIHCimx74rZI=";
+    rev = "756d1bd9b9e0e69fe545546c8a12b31cdd718495";
+    hash = "sha256-0dwi57289hvgmswdvk6ipha79drmvrpqpyjbpw68q6ac4q62s";
   };
 
   build-system = with python3Packages; [
@@ -43,7 +43,7 @@ python3Packages.buildPythonApplication rec {
 
   meta = {
     description = "CLI for managing Dante/network audio devices";
-    homepage = "https://github.com/chris-ritsen/network-audio-controller";
+    homepage = "https://github.com/FastTrackStudios/network-audio-controller";
     license = lib.licenses.unlicense;
     mainProgram = "netaudio";
     platforms = lib.platforms.linux ++ lib.platforms.darwin;
