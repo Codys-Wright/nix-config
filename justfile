@@ -258,7 +258,7 @@ deploy host *args:
     
     echo "Extracting SSH key from SOPS..."
     SOPS_AGE_KEY_FILE=sops.key nix develop --command sops --config sops.yaml \
-        --decrypt --extract "[.{{host}}.system.sshPrivateKey]" \
+        --decrypt --extract '["{{host}}"]["system"]["sshPrivateKey"]' \
         "hosts/{{host}}/secrets.yaml" > "$TEMP_KEY"
     chmod 600 "$TEMP_KEY"
     
