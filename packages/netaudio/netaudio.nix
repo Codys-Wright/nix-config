@@ -12,7 +12,7 @@ python3Packages.buildPythonApplication rec {
     owner = "FastTrackStudios";
     repo = "network-audio-controller";
     rev = "756d1bd9b9e0e69fe545546c8a12b31cdd718495";
-    hash = "sha256-0dwi57289hvgmswdvk6ipha79drmvrpqpyjbpw68q6ac4q62s";
+    hash = "sha256-WhhMmDIAI3P5lf7ii/KuuaWj4I1m7sZ1fRuuhMQpkTc=";
   };
 
   build-system = with python3Packages; [
