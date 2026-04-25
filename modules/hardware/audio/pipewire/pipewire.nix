@@ -1,7 +1,8 @@
 # PipeWire audio aspect.
 #
-# User-session PipeWire so Inferno and desktop apps share the same graph from
-# Cody's login session instead of a system-wide daemon.
+# System-wide PipeWire so Inferno's ALSA plugin (which needs to run at system
+# boot, before any user logs in, because it holds the Dante PCM device open)
+# can share the same graph as user applications.
 #
 # The module is parametric so it can be deployed on multiple hosts:
 #
@@ -19,7 +20,7 @@
 { den, ... }:
 {
   fleet.hardware._.audio._.pipewire = {
-    description = "PipeWire audio system (user-session, low-latency)";
+    description = "PipeWire audio system (system-wide, low-latency)";
 
     __functor =
       _self:
@@ -61,6 +62,7 @@
                       }) (builtins.attrNames host.users)
                     ))
                     // {
+                      pipewire.extraGroups = [ "audio" ];
                     };
                 };
             }
@@ -74,17 +76,13 @@
         ];
 
         nixos =
-          {
-            pkgs,
-            lib,
-            ...
-          }:
+          { pkgs, lib, ... }:
           {
             security.rtkit.enable = true;
 
             services.pipewire = {
               enable = true;
-              systemWide = false;
+              systemWide = true;
               socketActivation = false;
 
               alsa = {
@@ -94,172 +92,6 @@
               pulse.enable = true;
               jack.enable = true;
               wireplumber.enable = true;
-
-              extraConfig.pipewire."91-studio-sinks"."context.objects" = [
-                {
-                  factory = "spa-node-factory";
-                  args = {
-                    "factory.name" = "support.node.driver";
-                    "node.name" = "Dummy-Driver";
-                    "priority.driver" = 8000;
-                  };
-                }
-                {
-                  factory = "adapter";
-                  flags = [ "nofail" ];
-                  args = {
-                    "factory.name" = "support.null-audio-sink";
-                    "node.name" = "system_audio";
-                    "node.description" = "System Audio";
-                    "media.class" = "Audio/Sink";
-                    "audio.position" = [
-                      "FL"
-                      "FR"
-                    ];
-                    "priority.session" = 1000;
-                    "object.linger" = true;
-                  };
-                }
-                {
-                  factory = "adapter";
-                  flags = [ "nofail" ];
-                  args = {
-                    "factory.name" = "support.null-audio-sink";
-                    "node.name" = "system_notifications";
-                    "node.description" = "System Notifications";
-                    "media.class" = "Audio/Sink";
-                    "audio.position" = [
-                      "FL"
-                      "FR"
-                    ];
-                    "priority.session" = 800;
-                    "object.linger" = true;
-                    "monitor.channel-volumes" = true;
-                    "monitor.passthrough" = true;
-                    "adapter.auto-port-config" = {
-                      mode = "dsp";
-                      monitor = true;
-                      position = "preserve";
-                    };
-                  };
-                }
-                {
-                  factory = "adapter";
-                  flags = [ "nofail" ];
-                  args = {
-                    "factory.name" = "support.null-audio-sink";
-                    "node.name" = "voice_chat";
-                    "node.description" = "Voice Chat";
-                    "media.class" = "Audio/Sink";
-                    "audio.position" = [
-                      "FL"
-                      "FR"
-                    ];
-                    "priority.session" = 850;
-                    "object.linger" = true;
-                    "monitor.channel-volumes" = true;
-                    "monitor.passthrough" = true;
-                    "adapter.auto-port-config" = {
-                      mode = "dsp";
-                      monitor = true;
-                      position = "preserve";
-                    };
-                  };
-                }
-                {
-                  factory = "adapter";
-                  flags = [ "nofail" ];
-                  args = {
-                    "factory.name" = "support.null-audio-sink";
-                    "node.name" = "games";
-                    "node.description" = "Games";
-                    "media.class" = "Audio/Sink";
-                    "audio.position" = [
-                      "FL"
-                      "FR"
-                    ];
-                    "priority.session" = 900;
-                    "object.linger" = true;
-                  };
-                }
-                {
-                  factory = "adapter";
-                  flags = [ "nofail" ];
-                  args = {
-                    "factory.name" = "support.null-audio-sink";
-                    "node.name" = "daw";
-                    "node.description" = "DAW";
-                    "media.class" = "Audio/Sink";
-                    "audio.channels" = 128;
-                    "audio.position" = lib.genList (i: "AUX${toString i}") 128;
-                    "adapter.auto-port-config" = {
-                      mode = "dsp";
-                      monitor = true;
-                      position = "preserve";
-                    };
-                    "priority.session" = 950;
-                    "object.linger" = true;
-                    "monitor.channel-volumes" = true;
-                    "monitor.passthrough" = true;
-                  };
-                }
-                {
-                  factory = "adapter";
-                  flags = [ "nofail" ];
-                  args = {
-                    "factory.name" = "support.null-audio-sink";
-                    "node.name" = "daw_broadcast";
-                    "node.description" = "DAW Broadcast";
-                    "media.class" = "Audio/Source/Virtual";
-                    "audio.position" = [
-                      "FL"
-                      "FR"
-                    ];
-                    "priority.session" = 900;
-                    "object.linger" = true;
-                    "monitor.channel-volumes" = true;
-                    "monitor.passthrough" = true;
-                    "adapter.auto-port-config" = {
-                      mode = "dsp";
-                      monitor = true;
-                      position = "preserve";
-                    };
-                  };
-                }
-                {
-                  factory = "adapter";
-                  flags = [ "nofail" ];
-                  args = {
-                    "factory.name" = "support.null-audio-sink";
-                    "node.name" = "talkback_mic";
-                    "node.description" = "Talkback Mic";
-                    "media.class" = "Audio/Source/Virtual";
-                    "audio.position" = [ "MONO" ];
-                    "priority.session" = 1000;
-                    "object.linger" = true;
-                    "monitor.channel-volumes" = true;
-                    "monitor.passthrough" = true;
-                    "adapter.auto-port-config" = {
-                      mode = "dsp";
-                      monitor = true;
-                      position = "preserve";
-                    };
-                  };
-                }
-                {
-                  factory = "adapter";
-                  flags = [ "nofail" ];
-                  args = {
-                    "factory.name" = "support.null-audio-sink";
-                    "node.name" = "talkback_mic_dsp";
-                    "node.description" = "Talkback Mic [DSP]";
-                    "media.class" = "Audio/Source/Virtual";
-                    "audio.position" = [ "MONO" ];
-                    "priority.session" = 999;
-                    "object.linger" = true;
-                  };
-                }
-              ];
 
               extraConfig.pipewire."92-low-latency".context.properties = {
                 "default.clock.rate" = clockRate;
@@ -304,12 +136,29 @@
                 };
             };
 
-            systemd.user.services.pipewire.serviceConfig = {
+            systemd.services.pipewire.serviceConfig = {
               Environment = [ "ALSA_PLUGIN_DIR=/run/current-system/sw/lib/alsa-lib" ];
               SystemCallFilter = [
                 "@system-service"
                 "@clock"
               ];
+            };
+
+            systemd.user.services.pipewire-system-bridge = {
+              description = "Bridge system-wide PipeWire sockets into user runtime dir";
+              wantedBy = [ "default.target" ];
+              after = [ "basic.target" ];
+              serviceConfig = {
+                Type = "oneshot";
+                RemainAfterExit = true;
+                ExecStart = pkgs.writeShellScript "pipewire-system-bridge" ''
+                  set -eu
+                  mkdir -p "$XDG_RUNTIME_DIR/pulse"
+                  ln -sf /run/pipewire/pipewire-0         "$XDG_RUNTIME_DIR/pipewire-0"
+                  ln -sf /run/pipewire/pipewire-0-manager "$XDG_RUNTIME_DIR/pipewire-0-manager"
+                  ln -sf /run/pulse/native                "$XDG_RUNTIME_DIR/pulse/native"
+                '';
+              };
             };
 
             environment.systemPackages = with pkgs; [
