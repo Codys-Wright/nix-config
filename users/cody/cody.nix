@@ -99,6 +99,12 @@
           };
         };
 
+      nixos =
+        { ... }:
+        {
+          users.users.cody.extraGroups = [ "clock" ];
+        };
+
       includes = [
         den.aspects.hm-backup
 
