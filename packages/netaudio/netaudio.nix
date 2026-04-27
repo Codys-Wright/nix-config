@@ -5,14 +5,14 @@
 }:
 python3Packages.buildPythonApplication rec {
   pname = "netaudio";
-  version = "0.2.4-unstable-2026-03-31";
+  version = "0.2.4-unstable-2026-04-27";
   pyproject = true;
 
   src = fetchFromGitHub {
     owner = "FastTrackStudios";
     repo = "network-audio-controller";
-    rev = "756d1bd9b9e0e69fe545546c8a12b31cdd718495";
-    hash = "sha256-WhhMmDIAI3P5lf7ii/KuuaWj4I1m7sZ1fRuuhMQpkTc=";
+    rev = "3260844";
+    hash = "sha256-f7gOuKG1dXqPwbN0OnzVJ0Lo1KNpZhmDzJXv6fKHjYo=";
   };
 
   build-system = with python3Packages; [
