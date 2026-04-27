@@ -27,6 +27,11 @@ rustPlatform.buildRustPackage {
     "alsa_pcm_inferno"
   ];
 
+  postPatch = ''
+    substituteInPlace inferno_aoip/src/device_server/arc_server.rs \
+      --replace-fail 'rx_channels.len().min(32)' 'rx_channels.len().min(16)'
+  '';
+
   doCheck = false;
 
   nativeBuildInputs = [ pkg-config ];
