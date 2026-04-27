@@ -44,6 +44,9 @@
                   infernoPkg = pkgs.callPackage ../../../packages/inferno/inferno.nix { };
                   pcmSink = "inferno_sink";
                   pcmSource = "inferno_source";
+                  # Convention: last 4 hex chars of DEVICE_ID = PROCESS_ID zero-padded.
+                  # e.g. deviceId = "00000A0A0A0A0001" → sourceDeviceId = "00000A0A0A0A0002"
+                  sourceDeviceId = "${builtins.substring 0 12 deviceId}0002";
                 in
                 {
                   environment.systemPackages = [ infernoPkg ];
@@ -66,11 +69,6 @@
                   # symptom. Using the PROCESS_ID as the last two bytes of DEVICE_ID
                   # (convention: "...0001" for sink, "...0002" for source) makes them
                   # distinct Dante devices, each with their own correct channel config.
-                  let
-                    # Convention: last 4 hex chars of DEVICE_ID = PROCESS_ID zero-padded.
-                    # e.g. deviceId = "00000A0A0A0A0001" → sourceDeviceId = "00000A0A0A0A0002"
-                    sourceDeviceId = "${builtins.substring 0 12 deviceId}0002";
-                  in
                   environment.etc."asound.conf".text = ''
                     pcm!default { type null }
                     ctl!default { type null }
