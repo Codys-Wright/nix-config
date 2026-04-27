@@ -55,6 +55,22 @@
                   # unique PROCESS_ID and ALT_PORT for each concurrent stream.
                   # The sink (playback / TX to Dante) uses PROCESS_ID 1, the
                   # source (capture / RX from Dante) uses PROCESS_ID 2.
+                  #
+                  # IMPORTANT: the sink and source MUST have different DEVICE_IDs.
+                  # Inferno's ALSA plugin uses factory_device_id as a process-wide
+                  # key to share DeviceServer instances (so one OS process can have
+                  # both a capture and playback stream on the same Dante device).
+                  # If both PCMs share the same DEVICE_ID, only the first-opened one
+                  # creates a DeviceServer; the second reuses it and its channel config
+                  # (TX or RX) is silently ignored. This causes the "wrong channel count"
+                  # symptom. Using the PROCESS_ID as the last two bytes of DEVICE_ID
+                  # (convention: "...0001" for sink, "...0002" for source) makes them
+                  # distinct Dante devices, each with their own correct channel config.
+                  let
+                    # Convention: last 4 hex chars of DEVICE_ID = PROCESS_ID zero-padded.
+                    # e.g. deviceId = "00000A0A0A0A0001" → sourceDeviceId = "00000A0A0A0A0002"
+                    sourceDeviceId = "${builtins.substring 0 12 deviceId}0002";
+                  in
                   environment.etc."asound.conf".text = ''
                     pcm!default { type null }
                     ctl!default { type null }
@@ -80,7 +96,7 @@
                     pcm.${pcmSource} {
                       type inferno
                       NAME "${host.name}"
-                      DEVICE_ID "${deviceId}"
+                      DEVICE_ID "${sourceDeviceId}"
                       BIND_IP "${bindIp}"
                       PROCESS_ID "2"
                       ALT_PORT "4410"
