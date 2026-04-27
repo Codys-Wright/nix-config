@@ -10,10 +10,15 @@
 #     channels = 128;
 #   })
 #
-# The Inferno ALSA plugin only allows one PCM stream per device. To have both
-# a sink (playback) and source (capture) in PipeWire simultaneously, we define
-# two separate ALSA PCM devices with different PROCESS_ID and ALT_PORT, as
-# recommended in the Inferno README for JACK alsa_in/alsa_out usage.
+# The Inferno ALSA plugin shares a DeviceServer singleton per DEVICE_ID within
+# a process. Both the sink (playback) and source (capture) PCM devices use the
+# SAME DEVICE_ID so they share a single Dante device on the network — appearing
+# as one device with both TX and RX channels in Dante Controller.
+#
+# The DeviceServer is created by whichever PCM opens first. Both PCMs must
+# therefore declare the full channel counts (TX and RX) so the DeviceServer is
+# initialised correctly regardless of open order. PROCESS_ID and ALT_PORT
+# distinguish the two streams within the shared DeviceServer.
 #
 # Requires system-wide PipeWire (see fleet.hardware._.audio._.pipewire).
 { fleet, lib, ... }:
@@ -44,9 +49,6 @@
                   infernoPkg = pkgs.callPackage ../../../packages/inferno/inferno.nix { };
                   pcmSink = "inferno_sink";
                   pcmSource = "inferno_source";
-                  # Convention: last 4 hex chars of DEVICE_ID = PROCESS_ID zero-padded.
-                  # e.g. deviceId = "00000A0A0A0A0001" → sourceDeviceId = "00000A0A0A0A0002"
-                  sourceDeviceId = "${builtins.substring 0 12 deviceId}0002";
                 in
                 {
                   environment.systemPackages = [ infernoPkg ];
@@ -54,21 +56,11 @@
                   environment.pathsToLink = [ "/lib/alsa-lib" ];
                   environment.variables.ALSA_PLUGIN_DIR = "/run/current-system/sw/lib/alsa-lib";
 
-                  # Two separate ALSA PCM devices — the Inferno plugin requires
-                  # unique PROCESS_ID and ALT_PORT for each concurrent stream.
-                  # The sink (playback / TX to Dante) uses PROCESS_ID 1, the
-                  # source (capture / RX from Dante) uses PROCESS_ID 2.
-                  #
-                  # IMPORTANT: the sink and source MUST have different DEVICE_IDs.
-                  # Inferno's ALSA plugin uses factory_device_id as a process-wide
-                  # key to share DeviceServer instances (so one OS process can have
-                  # both a capture and playback stream on the same Dante device).
-                  # If both PCMs share the same DEVICE_ID, only the first-opened one
-                  # creates a DeviceServer; the second reuses it and its channel config
-                  # (TX or RX) is silently ignored. This causes the "wrong channel count"
-                  # symptom. Using the PROCESS_ID as the last two bytes of DEVICE_ID
-                  # (convention: "...0001" for sink, "...0002" for source) makes them
-                  # distinct Dante devices, each with their own correct channel config.
+                  # Both PCMs share the same DEVICE_ID → same DeviceServer → single
+                  # Dante device on the network with TX=channels and RX=channels.
+                  # Both declare the full TX+RX counts so the DeviceServer is correct
+                  # regardless of which PCM PipeWire opens first.
+                  # PROCESS_ID and ALT_PORT distinguish the two streams.
                   environment.etc."asound.conf".text = ''
                     pcm!default { type null }
                     ctl!default { type null }
@@ -81,9 +73,10 @@
                       PROCESS_ID "1"
                       ALT_PORT "4400"
                       SAMPLE_RATE "${toString sampleRate}"
-                      RX_CHANNELS "0"
+                      RX_CHANNELS "${toString channels}"
                       TX_CHANNELS "${toString channels}"
                       TX_LATENCY_NS "${toString latencyNs}"
+                      RX_LATENCY_NS "${toString latencyNs}"
 
                       hint {
                         show on
@@ -94,13 +87,14 @@
                     pcm.${pcmSource} {
                       type inferno
                       NAME "${host.name}"
-                      DEVICE_ID "${sourceDeviceId}"
+                      DEVICE_ID "${deviceId}"
                       BIND_IP "${bindIp}"
                       PROCESS_ID "2"
                       ALT_PORT "4410"
                       SAMPLE_RATE "${toString sampleRate}"
                       RX_CHANNELS "${toString channels}"
-                      TX_CHANNELS "0"
+                      TX_CHANNELS "${toString channels}"
+                      TX_LATENCY_NS "${toString latencyNs}"
                       RX_LATENCY_NS "${toString latencyNs}"
 
                       hint {
