@@ -136,6 +136,14 @@
                 };
             };
 
+            # nixpkgs only wires pipewire into sockets.target when socketActivation
+            # is true. With socketActivation = false we get an orphaned linked unit
+            # that never starts. Wire both explicitly: socket into sockets.target so
+            # the upstream Requires=pipewire.socket in pipewire.service is satisfied,
+            # and the service into multi-user.target for eager boot-time startup.
+            systemd.sockets.pipewire.wantedBy = [ "sockets.target" ];
+            systemd.services.pipewire.wantedBy = [ "multi-user.target" ];
+
             systemd.services.pipewire.serviceConfig = {
               Environment = [ "ALSA_PLUGIN_DIR=/run/current-system/sw/lib/alsa-lib" ];
               SystemCallFilter = [
