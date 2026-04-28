@@ -8,17 +8,17 @@
 }:
 rustPlatform.buildRustPackage {
   pname = "inferno";
-  version = "0.5.0-unstable-2026-04-06";
+  version = "0.5.0-unstable-2026-04-27";
 
   src = fetchFromGitHub {
-    owner = "teodly";
+    owner = "FastTrackStudios";
     repo = "inferno";
-    rev = "3f2bf142e15d01436562e09678763cde89baca9a";
-    hash = "sha256-tAnDc452N7yrDTJOkAbJZ58LJ1S6EFYLb0bUEiogW5E=";
+    rev = "309f534374e425badc9d3594911a46a36ecad838";
+    hash = "sha256-3c0C94yEzgX2h10bIxUG+QLRuV+Edomb7FukpKm1Hh0=";
     fetchSubmodules = true;
   };
 
-  cargoHash = "sha256-ptspDSLVkJtuOH8i5K3e72TIRN6kzlYq79gwujJpy3Y=";
+  cargoHash = "sha256-oQER1LDfLRxiSfeRCb9abKkkIIkDoES34NaolM4y1j4=";
 
   cargoBuildFlags = [
     "-p"
@@ -26,11 +26,6 @@ rustPlatform.buildRustPackage {
     "-p"
     "alsa_pcm_inferno"
   ];
-
-  postPatch = ''
-    substituteInPlace inferno_aoip/src/device_server/arc_server.rs \
-      --replace-fail 'rx_channels.len().min(32)' 'rx_channels.len().min(16)'
-  '';
 
   doCheck = false;
 
@@ -60,7 +55,7 @@ rustPlatform.buildRustPackage {
 
   meta = {
     description = "Unofficial implementation of the Dante protocol with inferno2pipe and ALSA PCM plugin";
-    homepage = "https://github.com/teodly/inferno";
+    homepage = "https://github.com/FastTrackStudios/inferno";
     license = with lib.licenses; [
       gpl3Plus
       agpl3Plus
