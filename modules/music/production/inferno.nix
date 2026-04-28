@@ -62,9 +62,6 @@
                   # regardless of which PCM PipeWire opens first.
                   # PROCESS_ID and ALT_PORT distinguish the two streams.
                   environment.etc."asound.conf".text = ''
-                    pcm!default { type null }
-                    ctl!default { type null }
-
                     pcm.${pcmSink} {
                       type inferno
                       NAME "${host.name}"

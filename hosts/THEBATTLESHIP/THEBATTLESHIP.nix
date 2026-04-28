@@ -197,6 +197,121 @@
             };
           };
 
+          # --- Virtual PipeWire routing nodes ---
+          #
+          # Stereo null sinks: apps play here; routing to specific Inferno TX
+          # channels is done via qpwgraph (WirePlumber persists the links).
+          # Loopback sources expose two stereo slices of Inferno RX for apps
+          # that need a plain mic input (voice chat, recording).
+          # DAW is a 128-channel pass-through to Inferno for Reaper.
+
+          services.pipewire =
+            let
+              auxChs = lib.genList (i: "AUX${toString i}") 120;
+              allChs = [
+                "FL"
+                "FR"
+                "RL"
+                "RR"
+                "FC"
+                "LFE"
+                "SL"
+                "SR"
+              ]
+              ++ auxChs;
+              mkNullSink = name: desc: {
+                factory = "adapter";
+                args = {
+                  "factory.name" = "support.null-audio-sink";
+                  "node.name" = name;
+                  "node.description" = desc;
+                  "media.class" = "Audio/Sink";
+                  "audio.channels" = 2;
+                  "audio.position" = [
+                    "FL"
+                    "FR"
+                  ];
+                  "monitor.channel-volumes" = true;
+                  "node.pause-on-idle" = false;
+                };
+              };
+              mkLoopbackSource = name: desc: {
+                name = "libpipewire-module-loopback";
+                args = {
+                  "node.description" = desc;
+                  "capture.props" = {
+                    "node.name" = "${name}_input";
+                    "audio.channels" = 2;
+                    "audio.position" = [
+                      "FL"
+                      "FR"
+                    ];
+                    "target.object" = "Inferno source";
+                    "stream.dont-remix" = true;
+                    "node.passive" = true;
+                  };
+                  "playback.props" = {
+                    "node.name" = name;
+                    "node.description" = desc;
+                    "media.class" = "Audio/Source";
+                    "audio.channels" = 2;
+                    "audio.position" = [
+                      "FL"
+                      "FR"
+                    ];
+                    "node.passive" = true;
+                  };
+                };
+              };
+            in
+            {
+              extraConfig.pipewire."93-studio-virtual-nodes" = {
+                "context.objects" = [
+                  (mkNullSink "system_audio" "System Audio")
+                  (mkNullSink "system_notifications" "System Notifications")
+                  (mkNullSink "voice_chat" "Voice Chat")
+                  (mkNullSink "daw_broadcast" "DAW Broadcast")
+                  (mkNullSink "games" "Games")
+                ];
+                "context.modules" = [
+                  {
+                    name = "libpipewire-module-loopback";
+                    args = {
+                      "node.description" = "DAW";
+                      "capture.props" = {
+                        "node.name" = "daw_to_inferno";
+                        "audio.channels" = 128;
+                        "audio.position" = allChs;
+                        "target.object" = "Inferno sink";
+                        "stream.dont-remix" = true;
+                        "node.passive" = true;
+                      };
+                      "playback.props" = {
+                        "node.name" = "daw";
+                        "node.description" = "DAW";
+                        "media.class" = "Audio/Sink";
+                        "audio.channels" = 128;
+                        "audio.position" = allChs;
+                        "node.pause-on-idle" = false;
+                      };
+                    };
+                  }
+                  (mkLoopbackSource "talkback" "Talkback")
+                  (mkLoopbackSource "talkback_dsp" "Talkback [DSP]")
+                ];
+              };
+
+              wireplumber.extraConfig."80-pro-audio-usb"."monitor.alsa.rules" = [
+                {
+                  matches = [
+                    { "device.name" = "alsa_card.usb-Yamaha_Corporation_Yamaha_TF-00"; }
+                    { "device.name" = "~alsa_card.usb-Fractal_Audio.*"; }
+                  ];
+                  actions.update-props."api.alsa.use-acp" = false;
+                }
+              ];
+            };
+
           # --- Dante / Inferno audio network configuration ---
 
           # Disable systemd-timesyncd — it conflicts with statime-inferno PTP daemon
