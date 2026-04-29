@@ -51,3 +51,4 @@ Development/
 # Dolt database files (added by bd init)
 .dolt/
 *.db
+scripts/__pycache__/
