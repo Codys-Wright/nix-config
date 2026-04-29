@@ -7,6 +7,7 @@ import re
 import sys
 
 from netaudio._common import _command_context, filter_devices
+from netaudio.dante.const import SERVICE_ARC
 from netaudio.dante.device_commands import DanteDeviceCommands
 
 REAPER_CHANMAP_PATH = "/home/cody/.fasttrackstudio/Reaper/ChanMaps/THEBATTLESHIP.ReaperChanMap"
@@ -36,10 +37,48 @@ async def wait_for_device(device_name: str, attempts: int = 20, delay: float = 1
     return {}
 
 
+def _arc_port(device) -> int:
+    # Devices advertise their ARC port over mDNS; the Dante default is 4440 but
+    # Inferno-AoIP relocates it (e.g. 4400) when ALT_PORT is set, so always
+    # prefer what the device announced.
+    for service in (device.services or {}).values():
+        if service.get("type") == SERVICE_ARC:
+            port = service.get("port")
+            if port:
+                return port
+    return 4440
+
+
 async def set_channel_name(device, send, channel_number: int, channel_type: str, name: str):
     commands = DanteDeviceCommands()
     packet, _ = commands.command_set_channel_name(channel_type, channel_number, name)
-    await send(packet, device.ipv4, 4440)
+    await send(packet, device.ipv4, _arc_port(device))
+
+
+async def set_single(device_name: str, channel_number: int, channel_type: str, name: str) -> int:
+    devices = await wait_for_device(device_name)
+    if not devices:
+        print(f"Device {device_name} did not appear", file=sys.stderr)
+        return 1
+
+    async with _command_context() as (_all_devices, send):
+        filtered = {
+            sn: d for sn, d in filter_devices(_all_devices).items()
+            if d.name == device_name or sn == device_name
+        }
+        if not filtered:
+            print(f"Device {device_name} disappeared before setting channel", file=sys.stderr)
+            return 1
+
+        server_name, device = next(iter(filtered.items()))
+        print(f"Setting {channel_type} channel {channel_number} to '{name}'...")
+        try:
+            await set_channel_name(device, send, channel_number, channel_type, name)
+        except Exception as exc:
+            print(f"  Error: {exc}", file=sys.stderr)
+            return 1
+        print("  OK")
+        return 0
 
 
 async def run(device_name: str, chanmap_path: str, channel_type: str, dry_run: bool, start: int, end: int):
@@ -95,8 +134,12 @@ def main():
     parser.add_argument("--start", type=int, default=1, help="1-based index of the first chanmap entry to process")
     parser.add_argument("--end", type=int, default=0, help="1-based index of the last chanmap entry to process (0 = all)")
     parser.add_argument("--dry-run", action="store_true", help="Print commands without executing")
+    parser.add_argument("--set-channel", type=int, help="Set a single channel number (1-based)")
+    parser.add_argument("--name", help="Name to set when using --set-channel")
     args = parser.parse_args()
 
+    if args.set_channel and args.name:
+        return asyncio.run(set_single(args.device, args.set_channel, args.channel_type, args.name))
     return asyncio.run(run(args.device, args.chanmap, args.channel_type, args.dry_run, args.start, args.end))
 
 
