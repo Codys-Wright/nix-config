@@ -44,11 +44,17 @@
             { host, ... }:
             {
               nixos =
-                { pkgs, ... }:
+                { pkgs, lib, ... }:
                 let
                   infernoPkg = pkgs.callPackage ../../../packages/inferno/inferno.nix { };
                   pcmSink = "inferno_sink";
                   pcmSource = "inferno_source";
+                  # Plain numeric channel layout. UNK on every slot makes
+                  # PipeWire emit ports named playback_1..N / capture_1..N
+                  # instead of FL/FR/AUX… — better for raw multichannel
+                  # routing where positions are meaningless and we wire
+                  # specific channel pairs with pw-link.
+                  positions = lib.replicate channels "UNK";
                 in
                 {
                   environment.systemPackages = [ infernoPkg ];
@@ -113,6 +119,8 @@
                           "api.alsa.path" = pcmSink;
                           "api.alsa.pcm.card" = toString card;
                           "api.alsa.headroom" = toString headroom;
+                          "audio.channels" = channels;
+                          "audio.position" = positions;
                           "priority.session" = 2000;
                           "session.suspend-timeout-seconds" = 0;
                           "node.pause-on-idle" = false;
@@ -131,6 +139,8 @@
                           "api.alsa.path" = pcmSource;
                           "api.alsa.pcm.card" = toString card;
                           "api.alsa.headroom" = toString headroom;
+                          "audio.channels" = channels;
+                          "audio.position" = positions;
                           "priority.session" = 1900;
                           "session.suspend-timeout-seconds" = 0;
                           "node.pause-on-idle" = false;

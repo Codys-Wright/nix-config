@@ -150,6 +150,12 @@
                 "@system-service"
                 "@clock"
               ];
+              # Each link allocates a few file descriptors (event fds, shm
+              # segments). With ~150+ static link-factory pins a 128-ch
+              # Inferno graph trips the systemd default 1024/4096 limit and
+              # PipeWire logs `error alloc buffers: Too many open files`.
+              # 524288 is the upstream-recommended ceiling.
+              LimitNOFILE = 524288;
             };
 
             systemd.user.services.pipewire-system-bridge = {
