@@ -202,13 +202,13 @@
           # Every multichannel node (Inferno + the studio loopbacks) declares
           # plain numeric channels via `audio.position = ["UNK", …]`, so the
           # ports come out as `playback_N` / `capture_N` / `input_N` /
-          # `output_N` instead of FL/FR/AUX…. Specific channel pairs are
-          # then pinned with `libpipewire-module-link-factory` instances
-          # (see `93-studio-routing-links` below): each instance creates
-          # exactly one persistent link between two named ports the moment
-          # both nodes exist. This is the closest thing PipeWire has to a
-          # declarative static-link rule — WirePlumber 0.5 has no
-          # equivalent and would still need a Lua script.
+          # `output_N` instead of FL/FR/AUX… — easier to reason about and
+          # required for explicit port-by-port linking by name. Specific
+          # channel pairs are then wired by the `studio-routing-links`
+          # systemd oneshot below using `pw-link`. WirePlumber 0.5 has no
+          # static-link config, and PipeWire's `context.objects` link-
+          # factory creation is fatal-on-missing-port at startup, so a
+          # post-pipewire oneshot with retries is the reliable pattern.
 
           services.pipewire =
             let
@@ -325,38 +325,6 @@
                 }
               ];
 
-              # WirePlumber 0.5 has no static-link config and PipeWire's
-              # `context.objects` link-factory creation fails fatally if
-              # target ports don't exist at startup (the loopback nodes
-              # are registered asynchronously, so they often don't yet).
-              # The reliable pattern is `pw-link` from a systemd oneshot
-              # that waits for nodes to appear and retries on disconnect.
-              # See systemd.services.studio-routing-links below.
-              sinkLinkPairs = builtins.concatMap (s: [
-                {
-                  out = "${s.name}_to_inferno:output_1";
-                  inp = "Inferno sink:playback_${toString s.txL}";
-                }
-                {
-                  out = "${s.name}_to_inferno:output_2";
-                  inp = "Inferno sink:playback_${toString s.txR}";
-                }
-              ]) routedSinks;
-              sourceLinkPairs = builtins.concatMap (s: [
-                {
-                  out = "Inferno source:capture_${toString s.rxL}";
-                  inp = "${s.name}_from_inferno:input_1";
-                }
-                {
-                  out = "Inferno source:capture_${toString s.rxR}";
-                  inp = "${s.name}_from_inferno:input_2";
-                }
-              ]) routedSources;
-              dawLinkPairs = lib.genList (i: {
-                out = "daw_to_inferno:output_${toString (i + 1)}";
-                inp = "Inferno sink:playback_${toString (i + 1)}";
-              }) 128;
-              allLinkPairs = sinkLinkPairs ++ sourceLinkPairs ++ dawLinkPairs;
             in
             {
               extraConfig.pipewire."93-studio-virtual-nodes" = {
