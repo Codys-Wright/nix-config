@@ -98,24 +98,40 @@
           # PipeWire loopback definitions and the studio-routing-links
           # systemd oneshot. Channel numbers reference the
           # THEBATTLESHIP.ReaperChanMap entries on Inferno TX/RX.
+          # `fanout` (optional) is a list of additional Audio/Sink targets
+          # that should also receive a copy of the sink's stereo signal,
+          # wired from the loopback's capture-side `monitor_1/2` ports.
+          # Used so e.g. System Audio plays *both* into the Dante TX
+          # channels and out of the Yamaha TF console for local monitoring
+          # without needing the Dante side to be wired up.
+          yamahaTF = "alsa_output.usb-Yamaha_Corporation_Yamaha_TF-00.playback.0.0";
           studioRoutedSinks = [
             {
               name = "system_audio";
               desc = "System Audio";
               txL = 97;
               txR = 98;
+              fanout = [
+                {
+                  node = yamahaTF;
+                  portL = "playback_1";
+                  portR = "playback_2";
+                }
+              ];
             }
             {
               name = "system_notifications";
               desc = "System Notifications";
               txL = 99;
               txR = 100;
+              fanout = [ ];
             }
             {
               name = "voice_chat";
               desc = "Voice Chat";
               txL = 101;
               txR = 102;
+              fanout = [ ];
             }
             # Games shares TX with System Audio but stays a separate
             # Audio/Sink so OBS / recordings can capture Games alone.
@@ -124,6 +140,7 @@
               desc = "Games";
               txL = 97;
               txR = 98;
+              fanout = [ ];
             }
           ];
           studioRoutedSources = [
@@ -277,6 +294,7 @@
                   desc,
                   txL,
                   txR,
+                  fanout ? [ ],
                 }:
                 {
                   name = "libpipewire-module-loopback";
@@ -396,18 +414,75 @@
           # link, and if a pair fails (because the node hasn't registered
           # yet) the loop retries until either both nodes exist or the
           # 60-second budget runs out.
+          # WirePlumber persists "which profile is active for each card" in
+          # ~pipewire/.local/state/wireplumber/default-profile. If a card's
+          # entry says `off`, WP refuses to instantiate any sink/source for
+          # it. We want the Yamaha TF console and the Ryzen onboard analog
+          # to come up active on every boot, so seed those entries before
+          # wireplumber starts. Cards we don't list (e.g. the Axe-Fx) keep
+          # whatever the file previously had.
+          systemd.services.wireplumber.serviceConfig.ExecStartPre =
+            let
+              seedScript = pkgs.writeShellScript "wireplumber-seed-profiles" ''
+                set -u
+                state=/var/lib/pipewire/.local/state/wireplumber/default-profile
+                mkdir -p "$(dirname "$state")"
+                touch "$state"
+
+                # Each (card-name, profile) pair we want enforced.
+                declare -A want=(
+                  ["alsa_card.usb-Yamaha_Corporation_Yamaha_TF-00"]="on"
+                  ["alsa_card.pci-0000_7a_00.6"]="output:analog-stereo+input:analog-stereo"
+                )
+
+                tmp=$(mktemp)
+                # Keep the [default-profile] header and any keys we don't manage.
+                if grep -q '^\[default-profile\]' "$state"; then
+                  cp "$state" "$tmp"
+                else
+                  echo '[default-profile]' > "$tmp"
+                fi
+
+                for k in "''${!want[@]}"; do
+                  v="''${want[$k]}"
+                  if grep -qE "^$k=" "$tmp"; then
+                    ${pkgs.gnused}/bin/sed -i "s|^$k=.*|$k=$v|" "$tmp"
+                  else
+                    echo "$k=$v" >> "$tmp"
+                  fi
+                done
+
+                install -m 0644 "$tmp" "$state"
+                rm -f "$tmp"
+              '';
+            in
+            [ "${seedScript}" ];
+
           systemd.services.studio-routing-links =
             let
-              sinkLinkPairs = builtins.concatMap (s: [
-                {
-                  out = "${s.name}_to_inferno:output_1";
-                  inp = "Inferno sink:playback_${toString s.txL}";
-                }
-                {
-                  out = "${s.name}_to_inferno:output_2";
-                  inp = "Inferno sink:playback_${toString s.txR}";
-                }
-              ]) studioRoutedSinks;
+              sinkLinkPairs = builtins.concatMap (
+                s:
+                [
+                  {
+                    out = "${s.name}_to_inferno:output_1";
+                    inp = "Inferno sink:playback_${toString s.txL}";
+                  }
+                  {
+                    out = "${s.name}_to_inferno:output_2";
+                    inp = "Inferno sink:playback_${toString s.txR}";
+                  }
+                ]
+                ++ builtins.concatMap (f: [
+                  {
+                    out = "${s.name}:monitor_1";
+                    inp = "${f.node}:${f.portL}";
+                  }
+                  {
+                    out = "${s.name}:monitor_2";
+                    inp = "${f.node}:${f.portR}";
+                  }
+                ]) (s.fanout or [ ])
+              ) studioRoutedSinks;
               sourceLinkPairs = builtins.concatMap (s: [
                 {
                   out = "Inferno source:capture_${toString s.rxL}";
