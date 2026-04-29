@@ -143,6 +143,11 @@
             # and the service into multi-user.target for eager boot-time startup.
             systemd.sockets.pipewire.wantedBy = [ "sockets.target" ];
             systemd.services.pipewire.wantedBy = [ "multi-user.target" ];
+            # Same fix for the PulseAudio bridge — without this, /run/pulse/native
+            # never appears and KDE Plasma's plasma-pa client sits forever in
+            # "connecting to sound server", and volume keys do nothing. Socket
+            # activation is enough; the service starts on first connect.
+            systemd.sockets.pipewire-pulse.wantedBy = [ "sockets.target" ];
 
             systemd.services.pipewire.serviceConfig = {
               Environment = [ "ALSA_PLUGIN_DIR=/run/current-system/sw/lib/alsa-lib" ];
