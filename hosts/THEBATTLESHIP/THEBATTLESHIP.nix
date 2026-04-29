@@ -199,106 +199,193 @@
 
           # --- Virtual PipeWire routing nodes ---
           #
-          # Stereo null sinks: apps play here; routing to specific Inferno TX
-          # channels is done via qpwgraph (WirePlumber persists the links).
-          # Loopback sources expose two stereo slices of Inferno RX for apps
-          # that need a plain mic input (voice chat, recording).
-          # DAW is a 128-channel pass-through to Inferno for Reaper.
+          # Every multichannel node (Inferno + the studio loopbacks) declares
+          # plain numeric channels via `audio.position = ["UNK", …]`, so the
+          # ports come out as `playback_N` / `capture_N` / `input_N` /
+          # `output_N` instead of FL/FR/AUX…. Specific channel pairs are
+          # then pinned with `libpipewire-module-link-factory` instances
+          # (see `93-studio-routing-links` below): each instance creates
+          # exactly one persistent link between two named ports the moment
+          # both nodes exist. This is the closest thing PipeWire has to a
+          # declarative static-link rule — WirePlumber 0.5 has no
+          # equivalent and would still need a Lua script.
 
           services.pipewire =
             let
-              auxChs = lib.genList (i: "AUX${toString i}") 120;
-              allChs = [
-                "FL"
-                "FR"
-                "RL"
-                "RR"
-                "FC"
-                "LFE"
-                "SL"
-                "SR"
-              ]
-              ++ auxChs;
-              mkNullSink = name: desc: {
-                factory = "adapter";
-                args = {
-                  "factory.name" = "support.null-audio-sink";
-                  "node.name" = name;
-                  "node.description" = desc;
-                  "media.class" = "Audio/Sink";
-                  "audio.channels" = 2;
-                  "audio.position" = [
-                    "FL"
-                    "FR"
-                  ];
-                  "monitor.channel-volumes" = true;
-                  "node.pause-on-idle" = false;
-                };
+              numericPos = n: lib.replicate n "UNK";
+
+              # `node.autoconnect = false` tells WirePlumber's linking
+              # policy to skip the node entirely; without it WP picks the
+              # default sink as a target and grows the loopback's port
+              # count to match (128). The link-factory pins are the only
+              # things allowed to wire these ends.
+              dontAutoconnect = {
+                "node.autoconnect" = false;
+                "node.dont-reconnect" = true;
               };
-              mkLoopbackSource = name: desc: {
-                name = "libpipewire-module-loopback";
-                args = {
-                  "node.description" = desc;
-                  "capture.props" = {
-                    "node.name" = "${name}_input";
-                    "audio.channels" = 2;
-                    "audio.position" = [
-                      "FL"
-                      "FR"
-                    ];
-                    "target.object" = "Inferno source";
-                    "stream.dont-remix" = true;
-                    "node.passive" = true;
-                  };
-                  "playback.props" = {
-                    "node.name" = name;
+              mkRoutedSink =
+                {
+                  name,
+                  desc,
+                  txL,
+                  txR,
+                }:
+                {
+                  name = "libpipewire-module-loopback";
+                  args = {
                     "node.description" = desc;
-                    "media.class" = "Audio/Source";
-                    "audio.channels" = 2;
-                    "audio.position" = [
-                      "FL"
-                      "FR"
-                    ];
-                    "node.passive" = true;
+                    "capture.props" = {
+                      "node.name" = name;
+                      "node.description" = desc;
+                      "media.class" = "Audio/Sink";
+                      "audio.channels" = 2;
+                      "audio.position" = numericPos 2;
+                      "monitor.channel-volumes" = true;
+                      "node.pause-on-idle" = false;
+                    };
+                    "playback.props" = dontAutoconnect // {
+                      "node.name" = "${name}_to_inferno";
+                      "node.description" = "${desc} → Inferno TX ${toString txL}/${toString txR}";
+                      "audio.channels" = 2;
+                      "audio.position" = numericPos 2;
+                      "node.passive" = true;
+                    };
                   };
                 };
-              };
+              mkRoutedSource =
+                {
+                  name,
+                  desc,
+                  rxL,
+                  rxR,
+                }:
+                {
+                  name = "libpipewire-module-loopback";
+                  args = {
+                    "node.description" = desc;
+                    "capture.props" = dontAutoconnect // {
+                      "node.name" = "${name}_from_inferno";
+                      "node.description" = "Inferno RX ${toString rxL}/${toString rxR} → ${desc}";
+                      "audio.channels" = 2;
+                      "audio.position" = numericPos 2;
+                      "node.passive" = true;
+                    };
+                    "playback.props" = {
+                      "node.name" = name;
+                      "node.description" = desc;
+                      "media.class" = "Audio/Source";
+                      "audio.channels" = 2;
+                      "audio.position" = numericPos 2;
+                      "node.passive" = true;
+                    };
+                  };
+                };
+
+              # Channel pairs match the THEBATTLESHIP ReaperChanMap. Games
+              # gets 107/108 (Speakers L/R) until the chanmap grows
+              # dedicated Games L/R entries.
+              routedSinks = [
+                {
+                  name = "system_audio";
+                  desc = "System Audio";
+                  txL = 97;
+                  txR = 98;
+                }
+                {
+                  name = "system_notifications";
+                  desc = "System Notifications";
+                  txL = 99;
+                  txR = 100;
+                }
+                {
+                  name = "voice_chat";
+                  desc = "Voice Chat";
+                  txL = 101;
+                  txR = 102;
+                }
+                {
+                  name = "games";
+                  desc = "Games";
+                  txL = 107;
+                  txR = 108;
+                }
+              ];
+              routedSources = [
+                {
+                  name = "talkback_mic";
+                  desc = "Talkback Mic";
+                  rxL = 51;
+                  rxR = 52;
+                }
+                {
+                  name = "talkback_mic_dsp";
+                  desc = "Talkback Mic [DSP]";
+                  rxL = 90;
+                  rxR = 91;
+                }
+              ];
+
+              # WirePlumber 0.5 has no static-link config and PipeWire's
+              # `context.objects` link-factory creation fails fatally if
+              # target ports don't exist at startup (the loopback nodes
+              # are registered asynchronously, so they often don't yet).
+              # The reliable pattern is `pw-link` from a systemd oneshot
+              # that waits for nodes to appear and retries on disconnect.
+              # See systemd.services.studio-routing-links below.
+              sinkLinkPairs = builtins.concatMap (s: [
+                {
+                  out = "${s.name}_to_inferno:output_1";
+                  inp = "Inferno sink:playback_${toString s.txL}";
+                }
+                {
+                  out = "${s.name}_to_inferno:output_2";
+                  inp = "Inferno sink:playback_${toString s.txR}";
+                }
+              ]) routedSinks;
+              sourceLinkPairs = builtins.concatMap (s: [
+                {
+                  out = "Inferno source:capture_${toString s.rxL}";
+                  inp = "${s.name}_from_inferno:input_1";
+                }
+                {
+                  out = "Inferno source:capture_${toString s.rxR}";
+                  inp = "${s.name}_from_inferno:input_2";
+                }
+              ]) routedSources;
+              dawLinkPairs = lib.genList (i: {
+                out = "daw_to_inferno:output_${toString (i + 1)}";
+                inp = "Inferno sink:playback_${toString (i + 1)}";
+              }) 128;
+              allLinkPairs = sinkLinkPairs ++ sourceLinkPairs ++ dawLinkPairs;
             in
             {
               extraConfig.pipewire."93-studio-virtual-nodes" = {
-                "context.objects" = [
-                  (mkNullSink "system_audio" "System Audio")
-                  (mkNullSink "system_notifications" "System Notifications")
-                  (mkNullSink "voice_chat" "Voice Chat")
-                  (mkNullSink "daw_broadcast" "DAW Broadcast")
-                  (mkNullSink "games" "Games")
-                ];
                 "context.modules" = [
+                  # 128-ch DAW pass-through for Reaper. Linked 1:1 into
+                  # Inferno sink by the link factories below.
                   {
                     name = "libpipewire-module-loopback";
                     args = {
                       "node.description" = "DAW";
                       "capture.props" = {
-                        "node.name" = "daw_to_inferno";
-                        "audio.channels" = 128;
-                        "audio.position" = allChs;
-                        "target.object" = "Inferno sink";
-                        "stream.dont-remix" = true;
-                        "node.passive" = true;
-                      };
-                      "playback.props" = {
                         "node.name" = "daw";
                         "node.description" = "DAW";
                         "media.class" = "Audio/Sink";
                         "audio.channels" = 128;
-                        "audio.position" = allChs;
+                        "audio.position" = numericPos 128;
                         "node.pause-on-idle" = false;
+                      };
+                      "playback.props" = dontAutoconnect // {
+                        "node.name" = "daw_to_inferno";
+                        "audio.channels" = 128;
+                        "audio.position" = numericPos 128;
+                        "node.passive" = true;
                       };
                     };
                   }
-                  (mkLoopbackSource "talkback" "Talkback")
-                  (mkLoopbackSource "talkback_dsp" "Talkback [DSP]")
-                ];
+                ]
+                ++ map mkRoutedSink routedSinks
+                ++ map mkRoutedSource routedSources;
               };
 
               wireplumber.extraConfig."80-pro-audio-usb"."monitor.alsa.rules" = [
@@ -310,6 +397,144 @@
                   actions.update-props."api.alsa.use-acp" = false;
                 }
               ];
+
+              # Belt-and-suspenders: in case the per-loopback `node.autoconnect`
+              # property doesn't make it through libpipewire-module-loopback's
+              # adapter init, also pin the same flag from WirePlumber by name.
+              wireplumber.extraConfig."95-studio-no-autolink"."node.rules" = [
+                {
+                  matches = [
+                    { "node.name" = "~.*_to_inferno"; }
+                    { "node.name" = "~.*_from_inferno"; }
+                  ];
+                  actions.update-props = {
+                    "node.autoconnect" = false;
+                    "node.dont-reconnect" = true;
+                  };
+                }
+              ];
+            };
+
+          # --- Studio routing link service ---
+          #
+          # Walks every (out, in) port pair derived above and wires it via
+          # `pw-link`. Idempotent: pw-link refuses to create a duplicate
+          # link, and if a pair fails (because the node hasn't registered
+          # yet) the loop retries until either both nodes exist or the
+          # 60-second budget runs out.
+          systemd.services.studio-routing-links =
+            let
+              routedSinks = [
+                {
+                  name = "system_audio";
+                  txL = 97;
+                  txR = 98;
+                }
+                {
+                  name = "system_notifications";
+                  txL = 99;
+                  txR = 100;
+                }
+                {
+                  name = "voice_chat";
+                  txL = 101;
+                  txR = 102;
+                }
+                {
+                  name = "games";
+                  txL = 107;
+                  txR = 108;
+                }
+              ];
+              routedSources = [
+                {
+                  name = "talkback_mic";
+                  rxL = 51;
+                  rxR = 52;
+                }
+                {
+                  name = "talkback_mic_dsp";
+                  rxL = 90;
+                  rxR = 91;
+                }
+              ];
+              sinkLinkPairs = builtins.concatMap (s: [
+                {
+                  out = "${s.name}_to_inferno:output_1";
+                  inp = "Inferno sink:playback_${toString s.txL}";
+                }
+                {
+                  out = "${s.name}_to_inferno:output_2";
+                  inp = "Inferno sink:playback_${toString s.txR}";
+                }
+              ]) routedSinks;
+              sourceLinkPairs = builtins.concatMap (s: [
+                {
+                  out = "Inferno source:capture_${toString s.rxL}";
+                  inp = "${s.name}_from_inferno:input_1";
+                }
+                {
+                  out = "Inferno source:capture_${toString s.rxR}";
+                  inp = "${s.name}_from_inferno:input_2";
+                }
+              ]) routedSources;
+              dawLinkPairs = lib.genList (i: {
+                out = "daw_to_inferno:output_${toString (i + 1)}";
+                inp = "Inferno sink:playback_${toString (i + 1)}";
+              }) 128;
+              allPairs = sinkLinkPairs ++ sourceLinkPairs ++ dawLinkPairs;
+              pwLink = "${pkgs.pipewire}/bin/pw-link";
+              pwCli = "${pkgs.pipewire}/bin/pw-cli";
+              linkCmds = lib.concatMapStringsSep "\n" (p: ''try_link "${p.out}" "${p.inp}"'') allPairs;
+              linkScript = pkgs.writeShellScript "studio-routing-links" ''
+                set -u
+                export PIPEWIRE_RUNTIME_DIR=/run/pipewire
+
+                # Wait for Inferno sink/source to register. The ALSA plugin
+                # has to spin up its Dante DeviceServer first, which can
+                # take several seconds after pipewire start.
+                for i in $(seq 1 60); do
+                  if ${pwCli} ls Node 2>/dev/null \
+                       | grep -q 'node.name = "Inferno sink"' \
+                     && ${pwCli} ls Node 2>/dev/null \
+                       | grep -q 'node.name = "Inferno source"' ; then
+                    break
+                  fi
+                  sleep 1
+                done
+
+                # try_link: pw-link can fail if either port doesn't exist
+                # yet (loopback node not registered, etc). Retry up to 10
+                # times per pair before giving up. "exists" is success.
+                try_link() {
+                  local out="$1" inp="$2"
+                  for j in $(seq 1 10); do
+                    out_msg=$(${pwLink} "$out" "$inp" 2>&1) && return 0
+                    case "$out_msg" in
+                      *"exists"*|*"link exists"*) return 0 ;;
+                    esac
+                    sleep 1
+                  done
+                  echo "studio-routing-links: failed after retries: $out -> $inp ($out_msg)" >&2
+                  return 1
+                }
+
+                ${linkCmds}
+                exit 0
+              '';
+            in
+            {
+              description = "Wire studio loopback nodes to specific Inferno channel pairs";
+              after = [ "pipewire.service" ];
+              wants = [ "pipewire.service" ];
+              wantedBy = [ "multi-user.target" ];
+              serviceConfig = {
+                Type = "oneshot";
+                RemainAfterExit = true;
+                User = "pipewire";
+                Group = "pipewire";
+                ExecStart = linkScript;
+              };
             };
 
           # --- Dante / Inferno audio network configuration ---
