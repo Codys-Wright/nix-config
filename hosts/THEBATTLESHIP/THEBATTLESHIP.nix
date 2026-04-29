@@ -93,6 +93,54 @@
           pkgs,
           ...
         }:
+        let
+          # Studio routing channel map. One source of truth for both the
+          # PipeWire loopback definitions and the studio-routing-links
+          # systemd oneshot. Channel numbers reference the
+          # THEBATTLESHIP.ReaperChanMap entries on Inferno TX/RX.
+          studioRoutedSinks = [
+            {
+              name = "system_audio";
+              desc = "System Audio";
+              txL = 97;
+              txR = 98;
+            }
+            {
+              name = "system_notifications";
+              desc = "System Notifications";
+              txL = 99;
+              txR = 100;
+            }
+            {
+              name = "voice_chat";
+              desc = "Voice Chat";
+              txL = 101;
+              txR = 102;
+            }
+            # Games shares TX with System Audio but stays a separate
+            # Audio/Sink so OBS / recordings can capture Games alone.
+            {
+              name = "games";
+              desc = "Games";
+              txL = 97;
+              txR = 98;
+            }
+          ];
+          studioRoutedSources = [
+            {
+              name = "talkback_mic";
+              desc = "Talkback Mic";
+              rxL = 51;
+              rxR = 52;
+            }
+            {
+              name = "talkback_mic_dsp";
+              desc = "Talkback Mic [DSP]";
+              rxL = 90;
+              rxR = 91;
+            }
+          ];
+        in
         {
           time.timeZone = "America/Los_Angeles";
           boot.loader.grub.configurationLimit = 15;
@@ -281,50 +329,8 @@
                   };
                 };
 
-              # Channel pairs match the THEBATTLESHIP ReaperChanMap. Games
-              # gets 107/108 (Speakers L/R) until the chanmap grows
-              # dedicated Games L/R entries.
-              routedSinks = [
-                {
-                  name = "system_audio";
-                  desc = "System Audio";
-                  txL = 97;
-                  txR = 98;
-                }
-                {
-                  name = "system_notifications";
-                  desc = "System Notifications";
-                  txL = 99;
-                  txR = 100;
-                }
-                {
-                  name = "voice_chat";
-                  desc = "Voice Chat";
-                  txL = 101;
-                  txR = 102;
-                }
-                {
-                  name = "games";
-                  desc = "Games";
-                  txL = 107;
-                  txR = 108;
-                }
-              ];
-              routedSources = [
-                {
-                  name = "talkback_mic";
-                  desc = "Talkback Mic";
-                  rxL = 51;
-                  rxR = 52;
-                }
-                {
-                  name = "talkback_mic_dsp";
-                  desc = "Talkback Mic [DSP]";
-                  rxL = 90;
-                  rxR = 91;
-                }
-              ];
-
+              routedSinks = studioRoutedSinks;
+              routedSources = studioRoutedSources;
             in
             {
               extraConfig.pipewire."93-studio-virtual-nodes" = {
@@ -392,40 +398,6 @@
           # 60-second budget runs out.
           systemd.services.studio-routing-links =
             let
-              routedSinks = [
-                {
-                  name = "system_audio";
-                  txL = 97;
-                  txR = 98;
-                }
-                {
-                  name = "system_notifications";
-                  txL = 99;
-                  txR = 100;
-                }
-                {
-                  name = "voice_chat";
-                  txL = 101;
-                  txR = 102;
-                }
-                {
-                  name = "games";
-                  txL = 107;
-                  txR = 108;
-                }
-              ];
-              routedSources = [
-                {
-                  name = "talkback_mic";
-                  rxL = 51;
-                  rxR = 52;
-                }
-                {
-                  name = "talkback_mic_dsp";
-                  rxL = 90;
-                  rxR = 91;
-                }
-              ];
               sinkLinkPairs = builtins.concatMap (s: [
                 {
                   out = "${s.name}_to_inferno:output_1";
@@ -435,7 +407,7 @@
                   out = "${s.name}_to_inferno:output_2";
                   inp = "Inferno sink:playback_${toString s.txR}";
                 }
-              ]) routedSinks;
+              ]) studioRoutedSinks;
               sourceLinkPairs = builtins.concatMap (s: [
                 {
                   out = "Inferno source:capture_${toString s.rxL}";
@@ -445,7 +417,7 @@
                   out = "Inferno source:capture_${toString s.rxR}";
                   inp = "${s.name}_from_inferno:input_2";
                 }
-              ]) routedSources;
+              ]) studioRoutedSources;
               dawLinkPairs = lib.genList (i: {
                 out = "daw_to_inferno:output_${toString (i + 1)}";
                 inp = "Inferno sink:playback_${toString (i + 1)}";
