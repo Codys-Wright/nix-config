@@ -165,6 +165,7 @@
                   ln -sf /run/pipewire/pipewire-0         "$XDG_RUNTIME_DIR/pipewire-0"
                   ln -sf /run/pipewire/pipewire-0-manager "$XDG_RUNTIME_DIR/pipewire-0-manager"
                   ln -sf /run/pulse/native                "$XDG_RUNTIME_DIR/pulse/native"
+                  systemctl --user set-environment "PULSE_SERVER=$XDG_RUNTIME_DIR/pulse/native"
                 '';
               };
             };
