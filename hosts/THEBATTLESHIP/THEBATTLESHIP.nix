@@ -9,7 +9,10 @@
     THEBATTLESHIP = {
       description = "The Main System, ready for everyday battle";
       users.cody = {
-        extraGroups = [ "audio" ];
+        extraGroups = [
+          "audio"
+          "davfs2"
+        ];
       };
       users.joshua = { };
       users.guest = { };
@@ -157,6 +160,14 @@
               rxR = 91;
             }
           ];
+
+          # Starcommand hosts Nextcloud. Keep the WebDAV URL on the canonical
+          # TLS hostname, but resolve it to Starcommand's 10G/Dante address on
+          # THEBATTLESHIP so traffic stays on the direct 10.10 link.
+          nextcloudWebdavHost = "cloud.starcommand.live";
+          nextcloudWebdavUser = "codywright";
+          nextcloudWebdavMount = "/mnt/nextcloud/codywright";
+          nextcloudWebdavUrl = "https://${nextcloudWebdavHost}/remote.php/dav/files/${nextcloudWebdavUser}/";
         in
         {
           time.timeZone = "America/Los_Angeles";
@@ -214,6 +225,43 @@
             ];
           };
 
+          # Starcommand Nextcloud over WebDAV/davfs2. The endpoint remains the
+          # public/certificate-valid hostname, while networking.hosts below pins
+          # that hostname to Starcommand's 10G address from THEBATTLESHIP.
+          networking.hosts."10.10.10.1" = [ nextcloudWebdavHost ];
+          services.davfs2 = {
+            enable = true;
+            settings.globalSection = {
+              # Nextcloud works best with davfs2 client-side LOCKs disabled;
+              # the server still performs normal Nextcloud/WebDAV conflict handling.
+              use_locks = false;
+            };
+          };
+          environment.etc."davfs2/secrets".source = config.sops.secrets."cody/nextcloud/davfs2-secrets".path;
+          fileSystems."${nextcloudWebdavMount}" = {
+            device = nextcloudWebdavUrl;
+            fsType = "davfs";
+            options = [
+              "rw"
+              "noauto"
+              "nofail"
+              "_netdev"
+              "x-systemd.automount"
+              "x-systemd.idle-timeout=600"
+              "x-systemd.requires=run-secrets.d.mount"
+              "x-systemd.after=run-secrets.d.mount"
+              "uid=1000"
+              "gid=100"
+              "file_mode=0664"
+              "dir_mode=0775"
+            ];
+          };
+
+          # Davfs2 reads credentials from /etc/davfs2/secrets. This SOPS secret
+          # should contain exactly one line, for example:
+          #   /mnt/nextcloud/codywright codywright <nextcloud-app-password>
+          # Do not put the app password directly in Nix; keep it in SOPS.
+
           # Mount starcommand storage over 10G NFS
           fileSystems."/mnt/starcommand" = {
             device = "10.10.10.1:/";
@@ -242,6 +290,8 @@
           # The agent user lands in /home/cody/agent and gets symlinks to the source
           # trees it most commonly needs without having to bounce between shells.
           systemd.tmpfiles.rules = [
+            "d /mnt/nextcloud 0755 root root -"
+            "d ${nextcloudWebdavMount} 0775 cody users -"
             "d /home/cody/agent 0755 cody users -"
             "L+ /home/cody/agent/.starcommand 0644 cody users - /home/cody/.starcommand"
             "L+ /home/cody/agent/.flake 0644 cody users - /home/cody/.flake"
@@ -255,6 +305,11 @@
           sops = {
             defaultSopsFile = ../../users/cody/secrets.yaml;
             age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
+            secrets."cody/nextcloud/davfs2-secrets" = {
+              owner = "root";
+              group = "root";
+              mode = "0400";
+            };
             secrets."cody/proton/privatekey" = {
               owner = "root";
               group = "root";
