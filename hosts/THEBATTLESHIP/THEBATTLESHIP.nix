@@ -12,6 +12,7 @@
         extraGroups = [
           "audio"
           "davfs2"
+          "wireshark"
         ];
       };
       users.joshua = { };
@@ -607,6 +608,34 @@
               };
             };
 
+          # --- Network sniffing / WiFi-hotspot toolkit for Yamaha TF reverse-engineering ---
+          # Lets cody capture packets without sudo and stand up an ad-hoc AP so the
+          # iPad TF StageMix app can be MITM'd through this host's wifi adapter
+          # (wlp14s0u4i2). Wireshark group membership is added to cody above.
+          programs.wireshark = {
+            enable = true;
+            package = pkgs.wireshark;
+          };
+          # Permissive dumpcap wrapper so the agent shell (started before
+          # the wireshark group landed) can capture without re-login.
+          security.wrappers.dumpcap-any = {
+            source = "${pkgs.wireshark-cli}/bin/dumpcap";
+            capabilities = "cap_net_raw,cap_net_admin+eip";
+            owner = "root";
+            group = "root";
+            permissions = "u+rx,g+rx,o+rx";
+          };
+          environment.systemPackages = with pkgs; [
+            iw
+            hostapd
+            dnsmasq
+            tcpdump
+            wireshark-cli
+            dsniff
+            bettercap
+            aircrack-ng
+          ];
+
           # --- Dante / Inferno audio network configuration ---
 
           # Disable systemd-timesyncd — it conflicts with statime-inferno PTP daemon
@@ -629,7 +658,10 @@
             # Dante allocates ephemeral receive ports dynamically, so we need
             # the full ephemeral range open on the Dante interface (enp12s0).
             # A more precise approach: trust the dedicated Dante interface.
-            trustedInterfaces = [ "enp12s0" ];
+            trustedInterfaces = [
+              "enp12s0"
+              "wlp14s0u4i2"
+            ];
           };
         };
     };
