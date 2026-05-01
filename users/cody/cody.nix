@@ -35,13 +35,13 @@
               "starcommand" = {
                 hostname = "192.168.0.106";
                 user = "starcommand";
-                identityFile = "~/.ssh/starcommand-deploy";
+                identityFile = "~/.ssh/id_ed25519";
               };
               "starcommand-root" = {
                 host = "starcommand-root";
                 hostname = "192.168.0.106";
                 user = "root";
-                identityFile = "~/.ssh/starcommand-deploy";
+                identityFile = "~/.ssh/id_ed25519";
               };
               "THEBATTLESHIP" = {
                 host = "THEBATTLESHIP thebattleship thebattleship-1";
