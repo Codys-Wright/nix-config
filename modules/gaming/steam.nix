@@ -14,6 +14,31 @@
         lib,
         ...
       }:
+      let
+        steamPackage =
+          (pkgs.steam.override {
+            extraArgs = "-cef-disable-gpu-compositing";
+            extraPreBwrapCmds = ''
+              if [ -r "$HOME/.steam/steam.pid" ]; then
+                steam_pid="$(cat "$HOME/.steam/steam.pid" 2>/dev/null || true)"
+                if [ -n "$steam_pid" ] && ! kill -0 "$steam_pid" 2>/dev/null; then
+                  rm -f "$HOME/.steam/steam.pid" "$HOME/.steam/steam.pipe" "$HOME/.steam/starting" "$HOME/.local/share/Steam/.crash"
+                fi
+              fi
+            '';
+          }).overrideAttrs
+            (old: {
+              buildCommand = (old.buildCommand or "") + ''
+                share_target="$(readlink "$out/share")"
+                rm "$out/share"
+                cp -R "$share_target" "$out/share"
+                chmod -R u+w "$out/share"
+
+                substituteInPlace "$out/share/applications/steam.desktop" \
+                  --replace-fail "Exec=steam" "Exec=$out/bin/steam"
+              '';
+            });
+      in
       {
         # NOTE: do NOT add `pkgs.steam` here. `programs.steam.enable = true`
         # installs a correctly-wrapped Steam (honoring extraCompatPackages,
@@ -28,6 +53,7 @@
 
         # Enable Steam with gamescope session
         programs.steam = {
+          package = steamPackage;
           enable = lib.mkForce true;
           gamescopeSession.enable = lib.mkForce true;
           remotePlay.openFirewall = lib.mkDefault true;
