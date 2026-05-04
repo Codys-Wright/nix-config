@@ -48,8 +48,9 @@
           # supported GPUs is at:
           # https://github.com/NVIDIA/open-gpu-kernel-modules#compatible-gpus
           # Only available from driver 515.43.04+
-          # Disabled due to build failures with kernel 6.17.9+
-          open = false;
+          # RTX 4080 is supported by NVIDIA's open kernel module, which is the
+          # preferred path for recent drivers and Wayland.
+          open = true;
 
           # Enable the Nvidia settings menu,
           # accessible via `nvidia-settings`.

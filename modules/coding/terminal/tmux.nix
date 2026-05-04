@@ -135,7 +135,7 @@
                     pkgs.findutils
                     pkgs.bc
                   ]
-                }:/run/current-system/sw/bin:/etc/profiles/per-user/%u/bin:$PATH"
+                }:/run/wrappers/bin:/etc/profiles/per-user/%u/bin:/run/current-system/sw/bin:$PATH"
 
                 # catppuccin v2 options (US spelling "flavor", not "flavour")
                 set -g @catppuccin_flavor "mocha"
