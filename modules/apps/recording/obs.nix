@@ -8,13 +8,6 @@
     description = "OBS Studio with Wayland capture, pipewire audio, and NVIDIA encoding";
 
     nixos =
-      { config, ... }:
-      {
-        # Virtual camera support (v4l2loopback + polkit)
-        programs.obs-studio.enableVirtualCamera = true;
-      };
-
-    homeManager =
       { pkgs, ... }:
       {
         programs.obs-studio = {
@@ -32,7 +25,14 @@
             obs-vkcapture # Vulkan/OpenGL game capture
             obs-backgroundremoval # AI background removal
           ];
+
+          # Virtual camera support (v4l2loopback + polkit)
+          enableVirtualCamera = true;
         };
+
+        environment.systemPackages = [
+          pkgs.v4l-utils
+        ];
       };
   };
 }
