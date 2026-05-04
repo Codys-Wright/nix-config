@@ -101,9 +101,12 @@
         den.aspects.hm-backup
 
         <fleet/apps>
+        fleet.apps._.misc._.cuteatum
+        <fleet.apps._.misc/opendeck>
         <fleet.apps/browsers/firefox_webapps>
         (<fleet.apps/default-file-manager> "nautilus")
         (<fleet.apps/default-browser> "brave")
+        cody.opendeck
 
         (fleet.coding {
           editor = {
@@ -126,6 +129,7 @@
           value = "$6$0C2OSNBUmq/740g7$VfDQJvfYnxCwlV/KlmAIz.z5jYpIVc7Qa.1pzL/Fu3UGprNVLSKljI310/gyeCiYOPhJ.TVijW62wTmY54Ols1";
         })
         <den/primary-user>
+        <fleet.user/admin>
 
         cody.dots
         cody.fish

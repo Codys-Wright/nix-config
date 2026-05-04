@@ -1,0 +1,35 @@
+{
+  ".obs-wrapped": {
+    "sd-CL49L2A01247": "OBS"
+  },
+  ".reaper-wrapped": {
+    "sd-CL49L2A01247": "Reaper"
+  },
+  "Brave": {
+    "sd-CL49L2A01247": "Browser"
+  },
+  "REAPER": {
+    "sd-CL49L2A01247": "Reaper"
+  },
+  "brave": {
+    "sd-CL49L2A01247": "Browser"
+  },
+  "brave-browser": {
+    "sd-CL49L2A01247": "Browser"
+  },
+  "com.obsproject.Studio": {
+    "sd-CL49L2A01247": "OBS"
+  },
+  "fts-reaper": {
+    "sd-CL49L2A01247": "Reaper"
+  },
+  "obs": {
+    "sd-CL49L2A01247": "OBS"
+  },
+  "opendeck_default": {
+    "sd-CL49L2A01247": "Default"
+  },
+  "reaper": {
+    "sd-CL49L2A01247": "Reaper"
+  }
+}
