@@ -1,0 +1,39 @@
+workspace "main" {
+    open-on-output "DP-2"
+}
+
+workspace "code" {
+    open-on-output "DP-2"
+}
+
+workspace "music" {
+    open-on-output "DP-2"
+}
+
+workspace "gaming" {
+    open-on-output "DP-2"
+}
+
+workspace "recording" {
+    open-on-output "DP-1"
+}
+
+workspace "setup" {
+    open-on-output "DP-1"
+}
+
+workspace "comms" {
+    open-on-output "DP-3"
+}
+
+workspace "media" {
+    open-on-output "DP-3"
+}
+
+workspace "notes" {
+    open-on-output "DP-3"
+}
+
+workspace "research" {
+    open-on-output "DP-1"
+}

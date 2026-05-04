@@ -1,0 +1,9 @@
+spawn-at-startup "noctalia-shell"
+spawn-at-startup "bash" "-lc" "pgrep -u \"$USER\" -f \"[n]octalia-workspace-theme\" >/dev/null || exec \"$HOME/.config/niri/bin/noctalia-workspace-theme\""
+spawn-at-startup "bash" "-lc" "pgrep -u \"$USER\" -f \"[n]iri-workspace-wallpaper\" >/dev/null || exec \"$HOME/.config/niri/bin/niri-workspace-wallpaper\""
+
+prefer-no-csd
+
+xwayland-satellite {
+    path "xwayland-satellite"
+}

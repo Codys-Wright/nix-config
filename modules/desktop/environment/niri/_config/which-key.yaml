@@ -1,0 +1,59 @@
+font: JetBrainsMono Nerd Font 12
+background: "#1e1e2ed0"
+color: "#cdd6f4"
+border: "#89b4fa"
+separator: " -> "
+border_width: 2
+corner_r: 12
+padding: 15
+column_padding: 25
+rows_per_column: 6
+anchor: bottom-right
+margin_bottom: 5
+margin_right: 5
+menu:
+  - key: b
+    desc: "🌐 Browser"
+    cmd: librewolf
+  - key: "1"
+    desc: "🏠 Main"
+    cmd: niri msg action focus-workspace main
+  - key: "2"
+    desc: "💻 Code"
+    cmd: niri msg action focus-workspace code
+  - key: m
+    desc: "🎛 Music"
+    cmd: niri msg action focus-workspace music
+  - key: c
+    desc: "💬 Comms"
+    cmd: niri msg action focus-workspace comms
+  - key: r
+    desc: "🔎 Research"
+    cmd: niri msg action focus-workspace research
+  - key: n
+    desc: "📝 Notes"
+    cmd: niri msg action focus-workspace notes
+  - key: g
+    desc: "🎮 Gaming"
+    cmd: niri msg action focus-workspace gaming
+  - key: o
+    desc: "⏺ Recording"
+    cmd: niri msg action focus-workspace recording
+  - key: s
+    desc: "🛠 Setup"
+    cmd: niri msg action focus-workspace setup
+  - key: p
+    desc: "🎬 Media"
+    cmd: niri msg action focus-workspace media
+  - key: t
+    desc: "↔ Width preset"
+    cmd: niri msg action switch-preset-column-width
+  - key: f
+    desc: "▣ Fill available"
+    cmd: niri msg action expand-column-to-available-width
+  - key: v
+    desc: "◎ Center visible"
+    cmd: niri msg action center-visible-columns
+  - key: l
+    desc: "⏻ Logout"
+    cmd: niri msg action quit

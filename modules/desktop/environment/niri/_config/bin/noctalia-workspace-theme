@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+main_output="${NIRI_MAIN_OUTPUT:-DP-2}"
+last_scheme=""
+log_file="${XDG_RUNTIME_DIR:-/tmp}/noctalia-workspace-theme.log"
+
+log() {
+    printf '%s %s\n' "$(date --iso-8601=seconds)" "$*" >>"$log_file"
+}
+
+set_niri_socket() {
+    local socket
+
+    if [[ -n "${NIRI_SOCKET:-}" && -S "${NIRI_SOCKET}" ]]; then
+        return
+    fi
+
+    socket="$(find "${XDG_RUNTIME_DIR:-/run/user/$(id -u)}" -maxdepth 1 -type s -name 'niri*.sock' -print -quit)"
+    if [[ -n "$socket" ]]; then
+        export NIRI_SOCKET="$socket"
+    fi
+}
+
+niri_msg() {
+    set_niri_socket
+    niri msg "$@"
+}
+
+scheme_for_workspace() {
+    case "$1" in
+        main) printf '%s\n' "Rose Pine" ;;
+        code) printf '%s\n' "Tokyo Night Moon" ;;
+        music) printf '%s\n' "Lilac AMOLED" ;;
+        gaming) printf '%s\n' "Rosey AMOLED" ;;
+        recording) printf '%s\n' "Vesper" ;;
+        *) printf '%s\n' "Rose Pine" ;;
+    esac
+}
+
+apply_scheme_for_workspaces() {
+    local workspaces="$1"
+    local workspace scheme
+
+    workspace="$(
+        jq -r --arg output "$main_output" '
+            (
+                map(select(.output == $output and .is_focused == true))[0].name
+                // map(select(.output == $output and .is_active == true))[0].name
+                // "main"
+            )
+        ' <<<"$workspaces"
+    )"
+
+    scheme="$(scheme_for_workspace "$workspace")"
+    if [[ "$scheme" != "$last_scheme" ]]; then
+        log "workspace=${workspace} scheme=${scheme}"
+        noctalia-shell ipc call colorScheme set "$scheme" >/dev/null
+        last_scheme="$scheme"
+    fi
+}
+
+apply_scheme_for_current_state() {
+    local workspaces
+
+    if workspaces="$(niri_msg -j workspaces 2>/dev/null)"; then
+        apply_scheme_for_workspaces "$workspaces"
+    fi
+}
+
+log "started main_output=${main_output}"
+apply_scheme_for_current_state
+
+niri_msg -j event-stream | while IFS= read -r event; do
+    if jq -e '
+        has("WorkspacesChanged")
+        or has("WorkspaceActivated")
+    ' >/dev/null <<<"$event"; then
+        sleep 0.15
+        apply_scheme_for_current_state
+    fi
+done
