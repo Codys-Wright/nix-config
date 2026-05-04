@@ -1,0 +1,109 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+last_wallpaper=""
+log_file="${XDG_RUNTIME_DIR:-/tmp}/niri-workspace-wallpaper.log"
+config_dir="${NIRI_CONFIG_DIR:-$HOME/.config/niri}"
+wallpaper_dir="${config_dir}/wallpapers"
+noctalia_shell="${NOCTALIA_SHELL:-/run/current-system/sw/bin/noctalia-shell}"
+
+log() {
+    printf '%s %s\n' "$(date --iso-8601=seconds)" "$*" >>"$log_file"
+}
+
+set_niri_socket() {
+    local socket
+
+    if [[ -n "${NIRI_SOCKET:-}" && -S "${NIRI_SOCKET}" ]]; then
+        return
+    fi
+
+    socket="$(find "${XDG_RUNTIME_DIR:-/run/user/$(id -u)}" -maxdepth 1 -type s -name 'niri*.sock' -print -quit)"
+    if [[ -n "$socket" ]]; then
+        export NIRI_SOCKET="$socket"
+    fi
+}
+
+niri_msg() {
+    set_niri_socket
+    niri msg "$@"
+}
+
+wallpaper_for_workspace() {
+    case "$1" in
+        main) printf '%s\n' "solid://#101419" ;;
+        code) printf '%s\n' "solid://#0d1117" ;;
+        music) printf '%s\n' "solid://#11151c" ;;
+        gaming) printf '%s\n' "solid://#111318" ;;
+        comms) printf '%s\n' "solid://#0f1416" ;;
+        media) printf '%s\n' "solid://#111217" ;;
+        notes) printf '%s\n' "solid://#12140f" ;;
+        research) printf '%s\n' "solid://#0f1318" ;;
+        recording) printf '%s\n' "solid://#160f12" ;;
+        setup) printf '%s\n' "solid://#101215" ;;
+        *) printf '%s\n' "solid://#101419" ;;
+    esac
+}
+
+apply_wallpaper() {
+    local spec="$1"
+    local kind="${spec%%:*}"
+    local value="${spec#*://}"
+    local image_path
+
+    if [[ "$kind" == "image" ]]; then
+        image_path="$wallpaper_dir/$value"
+        if [[ -f "$image_path" ]]; then
+            "$noctalia_shell" ipc call wallpaper set "$image_path" all >/dev/null
+        else
+            log "missing image=${image_path}, falling back to main color"
+            apply_wallpaper "solid://#101419"
+            return
+        fi
+    elif [[ "$kind" == "solid" ]]; then
+        "$noctalia_shell" ipc call wallpaper set "$spec" all >/dev/null
+    fi
+}
+
+apply_wallpaper_for_workspaces() {
+    local workspaces="$1"
+    local workspace spec
+
+    workspace="$(
+        jq -r '
+            (
+                map(select(.is_focused == true))[0].name
+                // map(select(.is_active == true))[0].name
+                // "main"
+            )
+        ' <<<"$workspaces"
+    )"
+
+    spec="$(wallpaper_for_workspace "$workspace")"
+    if [[ "$spec" != "$last_wallpaper" ]]; then
+        log "workspace=${workspace} wallpaper=${spec}"
+        apply_wallpaper "$spec"
+        last_wallpaper="$spec"
+    fi
+}
+
+apply_wallpaper_for_current_state() {
+    local workspaces
+
+    if workspaces="$(niri_msg -j workspaces 2>/dev/null)"; then
+        apply_wallpaper_for_workspaces "$workspaces"
+    fi
+}
+
+log "started wallpaper_dir=${wallpaper_dir}"
+apply_wallpaper_for_current_state
+
+niri_msg -j event-stream | while IFS= read -r event; do
+    if jq -e '
+        has("WorkspacesChanged")
+        or has("WorkspaceActivated")
+    ' >/dev/null <<<"$event"; then
+        sleep 0.15
+        apply_wallpaper_for_current_state
+    fi
+done

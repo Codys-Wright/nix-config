@@ -1,0 +1,4 @@
+debug {
+    // Work around NVIDIA/browser presentation tearing on the ultrawide.
+    disable-direct-scanout
+}

@@ -1,0 +1,24 @@
+input {
+    // niri Mod = Mod5 via XKB lv3:ralt_switch. xremap routes Caps Lock,
+    // Escape, and Right Ctrl to Alt_R, which XKB maps to Mod5.
+    mod-key "Mod5"
+    focus-follows-mouse
+
+    keyboard {
+        xkb {
+            layout "us"
+            options "lv3:ralt_switch,lv3:lwin_switch"
+        }
+        repeat-rate 40
+        repeat-delay 250
+    }
+
+    touchpad {
+        natural-scroll
+        tap
+    }
+
+    mouse {
+        accel-profile "flat"
+    }
+}
