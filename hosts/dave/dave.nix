@@ -1,6 +1,7 @@
 {
   inputs,
   fleet,
+  den,
   __findFile,
   ...
 }:
@@ -10,7 +11,7 @@
       description = "Dave system configuration";
       # users.carter = { };
       users.cody = { };
-      aspect = "dave";
+      aspect = den.aspects.dave;
     };
   };
 
@@ -25,7 +26,7 @@
         # Complete desktop setup with GNOME
 
         <fleet.kernel>
-        <fleet.hardware>
+        (fleet.hardware { })
       ];
 
       # Manually set fileSystems and bootloader for now

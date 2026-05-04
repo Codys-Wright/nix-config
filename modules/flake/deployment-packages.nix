@@ -161,20 +161,11 @@
           }
         );
 
-      # Generate packages for all hosts (NixOS only — skip on darwin)
-      isLinux = lib.hasSuffix "-linux" system;
-      allHostPackages =
-        if !isLinux then
-          { }
-        else
-          lib.foldl' (
-            acc: hostname:
-            let
-              hostConfig = nixosConfigs.${hostname};
-              hostSystem = hostConfig.pkgs.stdenv.hostPlatform.system or null;
-            in
-            if hostSystem == system then acc // (mkHostPackages hostname hostConfig) else acc
-          ) { } (builtins.attrNames nixosConfigs);
+      # Avoid walking inputs.self.nixosConfigurations from perSystem.packages.
+      # With den's effects resolver enabled, forcing full host configs while
+      # flake-parts is still evaluating packages enters aspect resolution
+      # without a host context handler.
+      allHostPackages = { };
 
     in
     {

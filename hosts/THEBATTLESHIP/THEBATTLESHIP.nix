@@ -19,7 +19,6 @@
       users.guest = { };
       users.bri = { };
       users.carter = { };
-      aspect = "THEBATTLESHIP";
     };
   };
 
@@ -173,6 +172,7 @@
         {
           time.timeZone = "America/Los_Angeles";
           boot.loader.grub.configurationLimit = 15;
+          services.dbus.implementation = "dbus";
 
           # Prevent Intel I226-V (igc/enp11s0) PCIe link loss after extended uptime.
           # The I226-V has a hardware errata where the NIC self-initiates PCIe L1
@@ -205,6 +205,20 @@
           };
 
           programs.nh.enable = true;
+
+          environment.variables = {
+            TASK_VAULT = "/mnt/nextcloud/codywright/Projects";
+            TASK_SERVER = "http://10.10.10.1:3456";
+            NEXTCLOUD_URL = "https://cloud.starcommand.live";
+            NEXTCLOUD_USER = "codywright";
+            NEXTCLOUD_PASSWORD_FILE = config.sops.secrets."cody/task/nextcloud-password".path;
+          };
+
+          sops.secrets."cody/task/nextcloud-password" = {
+            owner = "cody";
+            group = "users";
+            mode = "0400";
+          };
 
           # NTFS games partition
           fileSystems."/run/media/GAMES" = {
@@ -627,6 +641,7 @@
           };
           environment.systemPackages = with pkgs; [
             iw
+            inputs.task.packages.${pkgs.system}.task-cli
             hostapd
             dnsmasq
             tcpdump

@@ -37,7 +37,7 @@
     flake-file.url = "github:vic/flake-file";
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
-      inputs.nixpkgs-lib.follows = "nixpkgs-lib";
+      inputs.nixpkgs-lib.follows = "nixpkgs";
     };
     fts-reaper-flake.url = "github:FastTrackStudios/fts-reaper-flake";
     ghidra-cli.url = "github:Codys-Wright/ghidra-cli/fix/ghidra-12-compat";
@@ -79,7 +79,6 @@
       };
     };
     nixpkgs.url = "https://channels.nixos.org/nixpkgs-unstable/nixexprs.tar.xz";
-    nixpkgs-lib.follows = "nixpkgs";
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.11";
     nvf = {
       url = "github:notashelf/nvf";
@@ -103,6 +102,7 @@
       url = "github:danth/stylix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    task.url = "path:/home/cody/Development/Task";
     wrapper-modules.url = "github:BirdeeHub/nix-wrapper-modules";
     wrappers.url = "github:lassulus/wrappers";
     xremap-flake.url = "github:xremap/nix-flake";

@@ -11,13 +11,11 @@
       # Darwin (macOS) home configuration
       aarch64-darwin.cody = {
         userName = "CodyWright";
-        aspect = "cody";
       };
 
       # NixOS home configuration
       x86_64-linux.cody = {
         userName = "cody";
-        aspect = "cody";
       };
     };
 

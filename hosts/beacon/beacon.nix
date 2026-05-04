@@ -1,4 +1,5 @@
 {
+  den,
   fleet,
   __findFile,
   ...
@@ -6,7 +7,7 @@
 {
   den.hosts.x86_64-linux.beacon = {
     description = "Universal installation beacon ISO";
-    aspect = "beacon-aspect";
+    aspect = den.aspects.beacon-aspect;
     includes = [ ]; # skip home-manager defaults for ISO
   };
 

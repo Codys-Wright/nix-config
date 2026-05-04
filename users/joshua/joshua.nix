@@ -110,7 +110,6 @@ in
 {
   den.homes.x86_64-linux.joshua = {
     userName = "joshua";
-    aspect = "joshua";
   };
 
   den.aspects.joshua = {

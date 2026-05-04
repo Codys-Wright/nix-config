@@ -13,7 +13,6 @@
       users.cody = {
         userName = "CodyWright";
       };
-      aspect = "voyager";
     };
   };
 
