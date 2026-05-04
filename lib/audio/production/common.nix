@@ -9,13 +9,14 @@ let
     "dssi"
   ];
 
-  defaultProductionPackages = pkgs: with pkgs; [
-    alsa-utils
-    sox
-    wineWowPackages.stable
-    yabridge
-    yabridgectl
-  ];
+  defaultProductionPackages =
+    pkgs: with pkgs; [
+      alsa-utils
+      sox
+      wineWowPackages.stable
+      yabridge
+      yabridgectl
+    ];
 
   mkHomePluginLinks =
     {
@@ -23,13 +24,10 @@ let
       pluginDirs ? defaultPluginDirs,
     }:
     builtins.listToAttrs (
-      map (
-        dir:
-        {
-          name = ".${dir}/nixos";
-          value.source = config.lib.file.mkOutOfStoreSymlink "${config.home.profileDirectory}/lib/${dir}";
-        }
-      ) pluginDirs
+      map (dir: {
+        name = ".${dir}/nixos";
+        value.source = config.lib.file.mkOutOfStoreSymlink "${config.home.profileDirectory}/lib/${dir}";
+      }) pluginDirs
     );
 in
 {

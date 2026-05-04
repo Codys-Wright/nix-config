@@ -8,7 +8,7 @@ switch:
 switch-host host:
     @if command -v nixos-rebuild >/dev/null 2>&1 || [ -f /etc/nixos/configuration.nix ]; then \
         echo "Switching to NixOS configuration: {{host}}"; \
-        NIX_CONFIG="experimental-features = nix-command flakes" nix develop --extra-experimental-features 'nix-command flakes' --command bash -c "nh os switch 'path:.#' -H {{host}}"; \
+        NIX_CONFIG="experimental-features = nix-command flakes" nix develop --extra-experimental-features 'nix-command flakes' --command bash -c "nh os switch --elevation-strategy /run/wrappers/bin/sudo 'path:.#' -H {{host}}"; \
     elif command -v darwin-rebuild >/dev/null 2>&1 || [ "$(uname -s)" = "Darwin" ]; then \
         echo "Switching to Darwin configuration: {{host}}"; \
         NIX_CONFIG="experimental-features = nix-command flakes" nix develop --extra-experimental-features 'nix-command flakes' --command bash -c "nh darwin switch 'path:.#' -H {{host}}"; \

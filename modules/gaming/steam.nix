@@ -17,7 +17,6 @@
       let
         steamPackage =
           (pkgs.steam.override {
-            extraArgs = "-cef-disable-gpu-compositing";
             extraPreBwrapCmds = ''
               if [ -r "$HOME/.steam/steam.pid" ]; then
                 steam_pid="$(cat "$HOME/.steam/steam.pid" 2>/dev/null || true)"
@@ -51,11 +50,12 @@
           # steamcmd    # temporarily disabled - Steam CDN rate limiting
         ];
 
-        # Enable Steam with gamescope session
+        # Enable Steam without forcing a gamescope session. Gamescope stays
+        # installed below for per-game launch options when desired.
         programs.steam = {
           package = steamPackage;
           enable = lib.mkForce true;
-          gamescopeSession.enable = lib.mkForce true;
+          gamescopeSession.enable = lib.mkForce false;
           remotePlay.openFirewall = lib.mkDefault true;
           dedicatedServer.openFirewall = lib.mkDefault true;
           localNetworkGameTransfers.openFirewall = lib.mkDefault true;
