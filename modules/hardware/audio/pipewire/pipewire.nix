@@ -28,6 +28,7 @@
         defaultSink ? null,
         defaultSource ? null,
         stickyNodes ? [ ],
+        lingerUsers ? [ ],
         clockRate ? 48000,
         clockQuantum ? 256,
         clockMinQuantum ? 32,
@@ -69,8 +70,16 @@
           )
           (
             { host, ... }:
+            let
+              selectedLingerUsers = builtins.filter (userName: builtins.hasAttr userName host.users) lingerUsers;
+            in
             {
-              nixos.users.users = builtins.mapAttrs (_: _: { linger = true; }) host.users;
+              nixos.users.users = builtins.listToAttrs (
+                map (userName: {
+                  name = userName;
+                  value.linger = true;
+                }) selectedLingerUsers
+              );
             }
           )
         ];

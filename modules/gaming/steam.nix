@@ -49,6 +49,11 @@
         # Enable gamemode for better gaming performance
         programs.gamemode.enable = lib.mkForce true;
 
+        programs.gamescope = {
+          enable = lib.mkForce true;
+          capSysNice = lib.mkDefault true;
+        };
+
         # =============================================================================
         # GAMING LAUNCH OPTIONS
         # =============================================================================
