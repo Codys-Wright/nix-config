@@ -86,7 +86,11 @@
                       serviceConfig = {
                         Type = "oneshot";
                         RemainAfterExit = true;
-                        ExecStart = "${netaudioPkg}/bin/netaudio --name ${preferredLeader} device config preferred-leader on";
+                        ExecStart = pkgs.writeShellScript "dante-preferred-leader" ''
+                          if ! ${netaudioPkg}/bin/netaudio --name ${preferredLeader} device config preferred-leader on; then
+                            echo "Dante preferred leader ${preferredLeader} is not available; skipping."
+                          fi
+                        '';
                       };
                     };
                   };

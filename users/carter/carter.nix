@@ -7,7 +7,6 @@
 {
   den.homes.x86_64-linux.carter = {
     userName = "carter";
-    aspect = "carter";
   };
 
   den.aspects.carter = {

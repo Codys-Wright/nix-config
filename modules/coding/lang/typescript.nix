@@ -8,9 +8,6 @@
     nixos =
       { pkgs, lib, ... }:
       {
-        # Make nix-ld libraries available to dlopen (e.g. pip pygame's bundled SDL2)
-        environment.variables.LD_LIBRARY_PATH = lib.mkForce "/run/current-system/sw/share/nix-ld/lib";
-
         programs.nix-ld = {
           enable = true;
           # Common libraries needed by dynamically linked binaries

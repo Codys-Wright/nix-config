@@ -7,7 +7,6 @@
 {
   den.homes.x86_64-linux.guest = {
     userName = "guest";
-    aspect = "guest";
   };
 
   den.aspects.guest = {
