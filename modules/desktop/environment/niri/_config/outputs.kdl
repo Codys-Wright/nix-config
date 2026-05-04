@@ -1,0 +1,44 @@
+output "DP-3" {
+    // Acer XV271U M3 - left portrait
+    mode "2560x1440@179.999"
+    transform "90"
+    position x=0 y=0
+
+    layout {
+        default-column-width { proportion 1.0; }
+    }
+}
+
+output "DP-2" {
+    // MSI MPG491CX OLED ultrawide - center
+    // VRR disabled: causes flickering on this panel.
+    mode "5120x1440@240.000"
+    position x=1440 y=0
+    focus-at-startup
+
+    layout {
+        center-focused-column "on-overflow"
+
+        preset-column-widths {
+            proportion 0.25
+            proportion 0.33333
+            proportion 0.5
+            proportion 0.66667
+            proportion 0.75
+            proportion 1.0
+        }
+
+        default-column-width { proportion 0.5; }
+    }
+}
+
+output "DP-1" {
+    // Acer XV271U M3 - right portrait
+    mode "2560x1440@179.999"
+    transform "270"
+    position x=6560 y=0
+
+    layout {
+        default-column-width { proportion 1.0; }
+    }
+}

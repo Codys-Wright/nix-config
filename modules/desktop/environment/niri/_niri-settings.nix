@@ -62,12 +62,13 @@ in
   config.v2-settings = true;
 
   config.settings = {
-    # Monitor layout: ultrawide on top, two 1440p below
+    # Monitor layout copied from KDE runtime config:
+    # left portrait, center ultrawide, right portrait.
     outputs = {
-      "DP-4" = {
-        # MSI MPG491CX OLED ultrawide — top center
-        # VRR disabled — causes flickering on this panel
-        mode = "5120x1440@240.000";
+      "DP-3" = {
+        # Acer XV271U M3 — left portrait
+        mode = "2560x1440@179.999";
+        transform = "90";
         position = _: {
           props = {
             x = 0;
@@ -75,24 +76,26 @@ in
           };
         };
       };
-      "DP-5" = {
-        # Acer XV271U M3 — bottom left
-        mode = "2560x1440@179.999";
-        variable-refresh-rate = _: { };
+      "DP-2" = {
+        # MSI MPG491CX OLED ultrawide — center
+        # VRR disabled — causes flickering on this panel
+        mode = "5120x1440@240.000";
         position = _: {
           props = {
-            x = 0;
-            y = 1440;
+            x = 1440;
+            y = 0;
           };
         };
       };
-      "HDMI-A-2" = {
-        # Acer XV271U M3 — bottom right
-        mode = "2560x1440@60.000";
+      "DP-1" = {
+        # Acer XV271U M3 — right portrait
+        # Temporarily lowered from 179.999 to test NVIDIA atomic commit failures.
+        mode = "2560x1440@120.000";
+        transform = "270";
         position = _: {
           props = {
-            x = 2560;
-            y = 1440;
+            x = 6560;
+            y = 0;
           };
         };
       };
@@ -131,6 +134,11 @@ in
       };
     };
 
+    debug = {
+      # Work around NVIDIA/browser presentation tearing on the ultrawide.
+      disable-direct-scanout = _: { };
+    };
+
     workspaces = {
       w0 = { };
       w1 = { };
@@ -143,22 +151,22 @@ in
       w8 = { };
       w9 = { };
       music = {
-        open-on-output = "DP-4";
+        open-on-output = "DP-2";
       };
       comms = {
-        open-on-output = "DP-5";
+        open-on-output = "DP-3";
       };
       media = {
-        open-on-output = "DP-5";
+        open-on-output = "DP-3";
       };
       notes = {
-        open-on-output = "HDMI-A-2";
+        open-on-output = "DP-1";
       };
       research = {
-        open-on-output = "HDMI-A-2";
+        open-on-output = "DP-1";
       };
       gaming = {
-        open-on-output = "DP-4";
+        open-on-output = "DP-2";
       };
     };
 

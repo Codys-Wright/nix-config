@@ -1,7 +1,6 @@
 # Niri - Scrollable-tiling Wayland compositor
-# Config is defined in _niri-settings.nix (wrapper-modules format).
-# The wrapper evaluates the settings into a store-path config.kdl.
-# homeManager symlinks ~/.config/niri/config.kdl → that store path.
+# Config lives in _config as plain niri KDL.
+# homeManager symlinks ~/.config/niri to that editable tree for live reloads.
 {
   fleet,
   den,
@@ -19,7 +18,7 @@
 
       Homepage: https://github.com/niri-wm/niri
       NixOS module: github:sodiboo/niri-flake
-      Config format: github:BirdeeHub/nix-wrapper-modules (_niri-settings.nix)
+      Config format: plain niri KDL in modules/desktop/environment/niri/_config
     '';
 
     includes = [
@@ -33,6 +32,7 @@
         imports = [ inputs.niri-flake.nixosModules.niri ];
 
         programs.niri.enable = true;
+        programs.niri.package = pkgs.niri;
 
         # XDG portals for screen sharing, file picker, etc.
         xdg.portal = {
@@ -67,44 +67,98 @@
 
     homeManager =
       {
-        pkgs,
+        config,
         lib,
+        pkgs,
         ...
       }:
       let
-        # Evaluate the wrapper to get the baked config.kdl in the nix store.
-        # This is the single source of truth for the niri config — defined in
-        # _niri-settings.nix using wrapper-modules format, not programs.niri.settings.
-        wrappedNiri = inputs.wrapper-modules.wrappers.niri.wrap {
-          inherit pkgs;
-          imports = [ (import ./_niri-settings.nix) ];
-        };
+        configRoot = "${config.home.homeDirectory}/.flake/modules/desktop/environment/niri/_config";
+        mutableNoctaliaColors = "${configRoot}/noctalia/colors.json";
       in
       {
         # Override niri-flake's homeModules.config which sets enable = (finalConfig != null).
-        # Since we use wrapper-modules instead of programs.niri.settings, finalConfig is null
+        # Since we use a plain KDL tree instead of programs.niri.settings, finalConfig is null
         # and niri-flake disables the xdg config file. Force it back on.
-        xdg.configFile."niri/config.kdl".enable = lib.mkForce true;
-        xdg.configFile."niri/config.kdl".source = "${wrappedNiri}/niri-config.kdl";
+        xdg.configFile."niri".enable = lib.mkForce true;
+        xdg.configFile."niri".force = true;
+        xdg.configFile."niri".source = config.lib.file.mkOutOfStoreSymlink configRoot;
 
-        # Noctalia colors — Catppuccin Mocha with blue as primary accent.
-        xdg.configFile."noctalia/colors.json".text = builtins.toJSON {
-          mPrimary = "#89b4fa"; # blue
-          mOnPrimary = "#11111b";
-          mSecondary = "#cba6f7"; # mauve
-          mOnSecondary = "#11111b";
-          mTertiary = "#94e2d5"; # teal
-          mOnTertiary = "#11111b";
-          mError = "#f38ba8"; # red
-          mOnError = "#11111b";
-          mSurface = "#1e1e2e"; # base
-          mOnSurface = "#cdd6f4"; # text
-          mSurfaceVariant = "#313244"; # surface1
-          mOnSurfaceVariant = "#a3b4eb";
-          mOutline = "#4c4f69";
-          mShadow = "#11111b";
-          mHover = "#89dceb"; # sky
-          mOnHover = "#11111b";
+        # Noctalia colors are editable live so the shell can update themes in place.
+        xdg.configFile."noctalia/colors.json".source =
+          config.lib.file.mkOutOfStoreSymlink mutableNoctaliaColors;
+
+        home.activation.configureNoctaliaWallpaper = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+          settings="$HOME/.config/noctalia/settings.json"
+          if [ -f "$settings" ]; then
+            tmp="$(${pkgs.coreutils}/bin/mktemp -t noctalia-settings.XXXXXX)"
+            ${lib.getExe pkgs.jq} '
+              .wallpaper.enabled = true
+              | .wallpaper.overviewEnabled = true
+              | .wallpaper.skipStartupTransition = true
+              | .wallpaper.transitionDuration = 0
+              | .noctaliaPerformance.disableWallpaper = false
+            ' "$settings" > "$tmp"
+            install -m 0644 "$tmp" "$settings"
+            rm -f "$tmp"
+          fi
+        '';
+
+        systemd.user.services.noctalia-workspace-theme = lib.mkIf (config.home.username == "cody") {
+          Unit = {
+            Description = "Switch Noctalia color scheme from the active niri workspace";
+            After = [ "graphical-session.target" ];
+            PartOf = [ "graphical-session.target" ];
+          };
+
+          Service = {
+            ExecStart = "${config.home.homeDirectory}/.config/niri/bin/noctalia-workspace-theme";
+            Restart = "always";
+            RestartSec = 2;
+            Environment = [
+              "PATH=${
+                lib.makeBinPath [
+                  pkgs.bash
+                  pkgs.coreutils
+                  pkgs.findutils
+                  pkgs.jq
+                  pkgs.niri
+                  pkgs.noctalia-shell
+                ]
+              }"
+            ];
+          };
+
+          Install.WantedBy = [ "graphical-session.target" ];
+        };
+
+        systemd.user.services.niri-workspace-wallpaper = lib.mkIf (config.home.username == "cody") {
+          Unit = {
+            Description = "Switch niri wallpaper from the active workspace";
+            After = [ "graphical-session.target" ];
+            PartOf = [ "graphical-session.target" ];
+          };
+
+          Service = {
+            ExecStart = "${config.home.homeDirectory}/.config/niri/bin/niri-workspace-wallpaper";
+            Restart = "always";
+            RestartSec = 2;
+            Environment = [
+              "PATH=${
+                lib.makeBinPath [
+                  pkgs.bash
+                  pkgs.coreutils
+                  pkgs.findutils
+                  pkgs.jq
+                  pkgs.niri
+                  pkgs.noctalia-shell
+                  pkgs.procps
+                ]
+              }"
+            ];
+          };
+
+          Install.WantedBy = [ "graphical-session.target" ];
         };
       };
   };
