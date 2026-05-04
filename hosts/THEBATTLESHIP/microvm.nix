@@ -11,7 +11,6 @@
   den.hosts.x86_64-linux.THEBATTLESHIP-vm = {
     description = "THEBATTLESHIP MicroVM — graphical niri desktop for local testing";
     users.cody = { };
-    aspect = "THEBATTLESHIP-vm";
   };
 
   den.aspects.THEBATTLESHIP-vm = {

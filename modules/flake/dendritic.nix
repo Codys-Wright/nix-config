@@ -8,6 +8,7 @@
   flake-file.inputs.microvm.inputs.nixpkgs.follows = "nixpkgs";
   flake-file.inputs.wrapper-modules.url = lib.mkDefault "github:BirdeeHub/nix-wrapper-modules";
   flake-file.inputs.xremap-flake.url = lib.mkDefault "github:xremap/nix-flake";
+  flake-file.inputs.task.url = lib.mkDefault "path:/home/cody/Development/Task";
 
   imports = [
     (inputs.flake-file.flakeModules.dendritic)

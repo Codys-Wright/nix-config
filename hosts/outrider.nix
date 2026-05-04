@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{ inputs, den, ... }:
 
 {
 
@@ -6,7 +6,7 @@
     outrider = {
       description = "WSL system that goes where no other system has gone before (Windows)";
       users.cody = { };
-      aspect = "wsl";
+      aspect = den.aspects.wsl;
       intoAttr = [ "wslConfigurations" ];
       # custom nixpkgs channel.
       instantiate = inputs.nixpkgs-stable.lib.nixosSystem;

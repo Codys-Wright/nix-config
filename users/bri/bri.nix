@@ -7,7 +7,6 @@
 {
   den.homes.x86_64-linux.bri = {
     userName = "bri";
-    aspect = "bri";
   };
 
   den.aspects.bri = {

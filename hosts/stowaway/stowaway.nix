@@ -10,7 +10,6 @@
     stowaway = {
       description = "MacBookPro15,1 (T2) — covert field unit, dual-booted with macOS";
       users.cody = { };
-      aspect = "stowaway";
     };
   };
 
