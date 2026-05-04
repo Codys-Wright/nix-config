@@ -171,7 +171,7 @@
         in
         {
           time.timeZone = "America/Los_Angeles";
-          boot.loader.grub.configurationLimit = 15;
+          boot.loader.grub.configurationLimit = 3;
           services.dbus.implementation = "dbus";
 
           # Prevent Intel I226-V (igc/enp11s0) PCIe link loss after extended uptime.
