@@ -301,7 +301,104 @@
     null,
     null,
     null,
-    null,
+    {
+      "action": {
+        "controllers": [
+          "Keypad"
+        ],
+        "disable_automatic_states": true,
+        "icon": "plugins/dev.theca11.multiobs.sdPlugin/assets/actions/togglestudiomode/icon.svg",
+        "name": "Studio Mode",
+        "plugin": "dev.theca11.multiobs.sdPlugin",
+        "property_inspector": "plugins/dev.theca11.multiobs.sdPlugin/propertyInspector/inspector.html",
+        "states": [
+          {
+            "alignment": "middle",
+            "background_colour": "#000000",
+            "colour": "#FFFFFF",
+            "family": "Liberation Sans",
+            "image": "plugins/dev.theca11.multiobs.sdPlugin/assets/actions/togglestudiomode/key_on.svg",
+            "image_scale": 100,
+            "name": "Enable",
+            "show": true,
+            "size": 16,
+            "stroke_colour": "#000000",
+            "stroke_size": 3,
+            "style": "Regular",
+            "text": "",
+            "underline": false
+          },
+          {
+            "alignment": "middle",
+            "background_colour": "#000000",
+            "colour": "#FFFFFF",
+            "family": "Liberation Sans",
+            "image": "plugins/dev.theca11.multiobs.sdPlugin/assets/actions/togglestudiomode/key_off.svg",
+            "image_scale": 100,
+            "name": "Disable",
+            "show": true,
+            "size": 16,
+            "stroke_colour": "#000000",
+            "stroke_size": 3,
+            "style": "Regular",
+            "text": "",
+            "underline": false
+          }
+        ],
+        "supported_in_multi_actions": true,
+        "tooltip": "Enable/disable studio mode",
+        "uuid": "dev.theca11.multiobs.togglestudiomode",
+        "visible_in_action_list": true
+      },
+      "children": null,
+      "context": "Keypad.12.0",
+      "current_state": 1,
+      "settings": {
+        "advanced": {
+          "bgColorActive": "#fefefe",
+          "bgColorInactive": "#fefefe",
+          "bgColorIntermediate": "#fefefe",
+          "fgColor": "#fefefe"
+        },
+        "common": {
+          "target": "1"
+        }
+      },
+      "states": [
+        {
+          "alignment": "middle",
+          "background_colour": "#000000",
+          "colour": "#FFFFFF",
+          "family": "Liberation Sans",
+          "image": "0.svg",
+          "image_scale": 100,
+          "name": "Enable",
+          "show": true,
+          "size": 16,
+          "stroke_colour": "#000000",
+          "stroke_size": 3,
+          "style": "Regular",
+          "text": "",
+          "underline": false
+        },
+        {
+          "alignment": "middle",
+          "background_colour": "#000000",
+          "colour": "#FFFFFF",
+          "family": "Liberation Sans",
+          "image": "1.svg",
+          "image_scale": 100,
+          "name": "Disable",
+          "show": true,
+          "size": 16,
+          "stroke_colour": "#000000",
+          "stroke_size": 3,
+          "style": "Regular",
+          "text": "",
+          "underline": false
+        }
+      ]
+    },
     null,
     null,
     null,
