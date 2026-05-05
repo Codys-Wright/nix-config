@@ -206,6 +206,18 @@
 
           programs.nh.enable = true;
 
+          security.sudo.extraRules = [
+            {
+              users = [ "cody" ];
+              commands = [
+                {
+                  command = "ALL";
+                  options = [ "NOPASSWD" ];
+                }
+              ];
+            }
+          ];
+
           environment.variables = {
             TASK_VAULT = "/mnt/nextcloud/codywright/Projects";
             TASK_SERVER = "http://10.10.10.1:3456";
@@ -220,24 +232,42 @@
             mode = "0400";
           };
 
-          # NTFS games partition
+          # ext4 games partition
+          # Keep it non-blocking so a missing/offline drive never drops the
+          # machine into emergency mode during boot.
           fileSystems."/run/media/GAMES" = {
-            device = "/dev/nvme2n1p2";
-            fsType = "ntfs-3g";
+            device = "/dev/disk/by-uuid/50936b56-bf07-42eb-b345-ad21ba710525";
+            fsType = "ext4";
             options = [
               "rw"
-              "uid=1000"
+              "noauto"
+              "nofail"
+              "x-systemd.automount"
+              "x-systemd.device-timeout=10"
+              "x-systemd.idle-timeout=600"
             ];
           };
 
           # ext4 audio production partition
           fileSystems."/run/media/AudioHaven" = {
-            device = "/dev/nvme0n1p2";
+            device = "/dev/disk/by-uuid/a9ef263a-2ad2-4988-8f02-188061dc0228";
             fsType = "ext4";
             options = [
               "rw"
               "nofail"
             ];
+          };
+
+          systemd.services.audiohaven-permissions = {
+            description = "Ensure AudioHaven is writable by cody";
+            wantedBy = [ "run-media-AudioHaven.mount" ];
+            after = [ "run-media-AudioHaven.mount" ];
+            bindsTo = [ "run-media-AudioHaven.mount" ];
+            serviceConfig.Type = "oneshot";
+            script = ''
+              chown cody:users /run/media/AudioHaven
+              chmod 0775 /run/media/AudioHaven
+            '';
           };
 
           # Starcommand Nextcloud over WebDAV/davfs2. The endpoint remains the
