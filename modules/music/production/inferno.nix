@@ -74,7 +74,11 @@
                       DEVICE_ID "${deviceId}"
                       BIND_IP "${bindIp}"
                       PROCESS_ID "1"
-                      ALT_PORT "4400"
+                      # ARC port intentionally left at the inferno_aoip default
+                      # (4440 — the standard Dante ARC port) so controllers
+                      # discover this device alongside hardware Dante endpoints.
+                      # Both PCMs share one DeviceServer per DEVICE_ID, so only
+                      # one ARC socket is bound regardless of open order.
                       SAMPLE_RATE "${toString sampleRate}"
                       RX_CHANNELS "${toString channels}"
                       TX_CHANNELS "${toString channels}"
@@ -93,7 +97,8 @@
                       DEVICE_ID "${deviceId}"
                       BIND_IP "${bindIp}"
                       PROCESS_ID "2"
-                      ALT_PORT "4410"
+                      # See sink PCM above — no ALT_PORT, share the default
+                      # 4440 ARC socket from the singleton DeviceServer.
                       SAMPLE_RATE "${toString sampleRate}"
                       RX_CHANNELS "${toString channels}"
                       TX_CHANNELS "${toString channels}"
