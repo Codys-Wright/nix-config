@@ -60,6 +60,7 @@ window-rule {
 
 window-rule {
     match app-id="^steam$"
+    match app-id="^steam_app_.*$"
     open-on-workspace "gaming"
     open-focused true
     open-maximized true

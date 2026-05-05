@@ -33,8 +33,36 @@
                 cp -R "$share_target" "$out/share"
                 chmod -R u+w "$out/share"
 
+                cat > "$out/bin/steam-niri-launch" <<'EOF'
+                #!${pkgs.bash}/bin/bash
+                set -euo pipefail
+
+                args=()
+                for arg in "$@"; do
+                  case "$arg" in
+                    %U|%u|%F|%f) ;;
+                    *) args+=("$arg") ;;
+                  esac
+                done
+
+                export PULSE_SINK="''${PULSE_SINK:-games}"
+
+                if [ "''${#args[@]}" -eq 0 ] && [ -n "''${NIRI_SOCKET:-}" ]; then
+                  steam_window="$(${lib.getExe pkgs.niri} msg -j windows 2>/dev/null | ${lib.getExe pkgs.jq} -r 'map(select((.app_id // "") == "steam")) | first | .id // empty' 2>/dev/null || true)"
+                  if [ -n "$steam_window" ]; then
+                    ${lib.getExe pkgs.niri} msg action focus-window --id "$steam_window" >/dev/null 2>&1 && exit 0
+                  fi
+                fi
+
+                exec "@steam@" "''${args[@]}"
+                EOF
+                substituteInPlace "$out/bin/steam-niri-launch" \
+                  --replace-fail "@steam@" "$out/bin/steam"
+                chmod +x "$out/bin/steam-niri-launch"
+
                 substituteInPlace "$out/share/applications/steam.desktop" \
-                  --replace-fail "Exec=steam" "Exec=$out/bin/steam"
+                  --replace-fail "Exec=steam %U" "Exec=$out/bin/steam-niri-launch %U" \
+                  --replace-quiet "Exec=steam steam://" "Exec=$out/bin/steam-niri-launch steam://"
               '';
             });
       in
@@ -45,6 +73,8 @@
         # `pkgs.steam` on top creates a second unwrapped Steam that wins in
         # PATH, and GE-Proton / extraPackages silently disappear.
         environment.systemPackages = with pkgs; [
+          alsa-plugins
+          pkgsi686Linux.alsa-plugins
           mangohud
           # steam-tui   # temporarily disabled - Steam CDN rate limiting
           # steamcmd    # temporarily disabled - Steam CDN rate limiting
@@ -62,6 +92,8 @@
 
           # PulseAudio client libs for Proton audio output
           extraPackages = with pkgs; [
+            alsa-plugins
+            pkgsi686Linux.alsa-plugins
             libpulseaudio
           ];
 
