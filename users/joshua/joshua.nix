@@ -156,8 +156,10 @@ in
         };
 
         systemd.services."persist-home-joshua-init" = {
-          description = "Create /persist/home/joshua before bind mount";
-          wantedBy = [ "home-joshua.mount" ];
+          description = "Create /persist/home/joshua before the /home/joshua bind mount";
+          # Start this from persist.mount, not home-joshua.mount, to avoid a
+          # boot-order cycle with local-fs.target and nix-daemon.socket.
+          wantedBy = [ "persist.mount" ];
           before = [ "home-joshua.mount" ];
           after = [ "persist.mount" ];
           unitConfig.RequiresMountsFor = "/persist";

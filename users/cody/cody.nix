@@ -26,6 +26,8 @@
       homeManager =
         { ... }:
         {
+          systemd.user.startServices = "suggest";
+
           # SSH host aliases for easy access to deployed machines
           programs.ssh = {
             enable = true;
