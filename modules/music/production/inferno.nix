@@ -36,6 +36,14 @@
         latencyNs ? 1000000,
         headroom ? 128,
         card ? 999,
+        # Declarative channel-name defaults. Either an attrset
+        # `{ "1" = "Master Bus L"; "91" = "Snare"; }` or a list of
+        # strings indexed from channel 1. Channels without an entry
+        # keep the default `TX N` / `RX N` placeholder.
+        # Consumed by inferno_aoip's `TX_CHANNEL_NAMES` /
+        # `RX_CHANNEL_NAMES` config keys (see fts/main).
+        txChannelNames ? { },
+        rxChannelNames ? { },
         ...
       }:
       {
@@ -55,6 +63,40 @@
                   # routing where positions are meaningless and we wire
                   # specific channel pairs with pw-link.
                   positions = lib.replicate channels "UNK";
+
+                  # Serialize a channel-names map (attrset of `id → name`,
+                  # or a list of names indexed from 1) into the
+                  # `id=name;id=name;…` format inferno_aoip expects.
+                  # Names containing `;` would break the parser; reject
+                  # them at eval time so the error surfaces here, not at
+                  # device runtime.
+                  formatChannelNames =
+                    src:
+                    let
+                      asAttrs =
+                        if builtins.isList src then
+                          lib.listToAttrs (
+                            lib.imap1 (i: name: {
+                              name = toString i;
+                              value = name;
+                            }) src
+                          )
+                        else
+                          src;
+                      pairs = lib.attrsToList asAttrs;
+                      check =
+                        p:
+                        if lib.hasInfix ";" p.value then
+                          throw "inferno: channel name for ${p.name} contains ';' which is the entry separator: ${p.value}"
+                        else
+                          "${p.name}=${p.value}";
+                    in
+                    lib.concatMapStringsSep ";" check pairs;
+
+                  txNamesStr = formatChannelNames txChannelNames;
+                  rxNamesStr = formatChannelNames rxChannelNames;
+                  txNamesLine = if txNamesStr == "" then "" else ''TX_CHANNEL_NAMES "${txNamesStr}"'';
+                  rxNamesLine = if rxNamesStr == "" then "" else ''RX_CHANNEL_NAMES "${rxNamesStr}"'';
                 in
                 {
                   environment.systemPackages = [ infernoPkg ];
@@ -84,6 +126,8 @@
                       TX_CHANNELS "${toString channels}"
                       TX_LATENCY_NS "${toString latencyNs}"
                       RX_LATENCY_NS "${toString latencyNs}"
+                      ${txNamesLine}
+                      ${rxNamesLine}
 
                       hint {
                         show on
@@ -104,6 +148,8 @@
                       TX_CHANNELS "${toString channels}"
                       TX_LATENCY_NS "${toString latencyNs}"
                       RX_LATENCY_NS "${toString latencyNs}"
+                      ${txNamesLine}
+                      ${rxNamesLine}
 
                       hint {
                         show on
