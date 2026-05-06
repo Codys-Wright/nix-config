@@ -73,7 +73,285 @@
           bindIp = "10.10.10.10";
           deviceId = "00000A0A0A0A0001";
           channels = 128;
+          # RX channel names ≡ THEBATTLESHIP's "inputs" — these are
+          # what Reaper records from. Sourced from the Reaper chanmap
+          # at ~/.fasttrackstudio/Reaper/ChanMaps/THEBATTLESHIP.ReaperChanMap;
+          # regenerate with `~/.flake/scripts/set_dante_channel_names.py`
+          # if/when the chanmap changes.
+          rxChannelNames = {
+            "1" = "1 - Kick In";
+            "2" = "2 - Kick Out";
+            "3" = "3 - Snare Top";
+            "4" = "4 - Snare Bottom";
+            "5" = "5 - Tom 1";
+            "6" = "6 - Tom 2";
+            "7" = "7 - Tom 3";
+            "8" = "8 - Tom 4";
+            "9" = "9 - Hi-Hat";
+            "10" = "10 - Ride";
+            "11" = "11 - OH L";
+            "12" = "12 - OH R";
+            "13" = "13 - Room L";
+            "14" = "14 - Room R";
+            "15" = "15 - Room Far L";
+            "16" = "16 - Room Far R";
+            "17" = "17 - Electronic Kit L";
+            "18" = "18 - Electronic Kit R";
+            "19" = "19 - Drum Pad L";
+            "20" = "20 - Drum Pad R";
+            "21" = "21 - Bass DI";
+            "22" = "22 - Bass Amp";
+            "23" = "23 - Bass Synth L";
+            "24" = "24 - Bass Synth R";
+            "25" = "25 - Guitar 1 L";
+            "26" = "26 - Guitar 1 R";
+            "27" = "27 - Guitar 2 L";
+            "28" = "28 - Guitar 2 R";
+            "29" = "29 - Guitar 3 L";
+            "30" = "30 - Guitar 3 R";
+            "31" = "31 - Guitar 1 DI";
+            "32" = "32 - Guitar 2 DI";
+            "33" = "33 - Guitar 3 DI";
+            "34" = "34 - Keys 1 L";
+            "35" = "35 - Keys 1 R";
+            "36" = "36 - Keys 2 L";
+            "37" = "37 - Keys 2 R";
+            "38" = "38 - Keys 3 L";
+            "39" = "39 - Keys 3 R";
+            "40" = "40 - Lead Mic L";
+            "41" = "41 - Lead Mic R";
+            "42" = "42 - Engineer Vocal";
+            "43" = "43 - Drummer Mic";
+            "44" = "44 - Bass Talkback";
+            "45" = "45 - Guitar 1 Talkback";
+            "46" = "46 - Guitar 2 Talkback";
+            "47" = "47 - Keys 1 Talkback";
+            "48" = "48 - Keys 2 Talkback";
+            "49" = "49 - Wireless Mic 1";
+            "50" = "50 - Wireless Mic 2";
+            "51" = "51 - Producer Talkback";
+            "52" = "52 - Generic Talkback";
+            "53" = "53 - Spare 1";
+            "54" = "54 - Spare 2";
+            "55" = "55 - Spare 3";
+            "56" = "56 - Spare 4";
+            "57" = "57 - Spare 5";
+            "58" = "58 - Spare 6";
+            "59" = "59 - Spare 7";
+            "60" = "60 - Spare 8";
+            "61" = "61 - Spare 9";
+            "62" = "62 - Spare 10";
+            "63" = "63 - Spare 11";
+            "64" = "64 - Spare 12";
+            "65" = "65 - Kick In [DSP]";
+            "66" = "66 - Kick Out [DSP]";
+            "67" = "67 - Snare Top [DSP]";
+            "68" = "68 - Snare Bottom [DSP]";
+            "69" = "69 - Tom 1 [DSP]";
+            "70" = "70 - Tom 2 [DSP]";
+            "71" = "71 - Tom 3 [DSP]";
+            "72" = "72 - Tom 4 [DSP]";
+            "73" = "73 - Hi-Hat [DSP]";
+            "74" = "74 - Ride [DSP]";
+            "75" = "75 - OH L [DSP]";
+            "76" = "76 - OH R [DSP]";
+            "77" = "77 - Room L [DSP]";
+            "78" = "78 - Room R [DSP]";
+            "79" = "79 - Lead Mic L [DSP]";
+            "80" = "80 - Lead Mic R [DSP]";
+            "81" = "81 - Engineer Vocal [DSP]";
+            "82" = "82 - Drummer Mic [DSP]";
+            "83" = "83 - Bass Talkback [DSP]";
+            "84" = "84 - Guitar 1 Talkback [DSP]";
+            "85" = "85 - Guitar 2 Talkback [DSP]";
+            "86" = "86 - Keys 1 Talkback [DSP]";
+            "87" = "87 - Keys 2 Talkback [DSP]";
+            "88" = "88 - Wireless Mic 1 [DSP]";
+            "89" = "89 - Wireless Mic 2 [DSP]";
+            "90" = "90 - Producer Talkback [DSP]";
+            "91" = "91 - Generic Talkback [DSP]";
+            "92" = "92 - Bass DI [DSP]";
+            "93" = "93 - Bass Amp [DSP]";
+            "94" = "94 - Broadcast Master L [DSP]";
+            "95" = "95 - Broadcast Master R [DSP]";
+            "96" = "96 - Engineer Alt Vocal/Talkback [DSP]";
+            "97" = "97 - System L";
+            "98" = "98 - System R";
+            "99" = "99 - System Notifications L";
+            "100" = "100 - System Notifications R";
+            "101" = "101 - Voice Chat L";
+            "102" = "102 - Voice Chat R";
+            "103" = "103 - DAW L";
+            "104" = "104 - DAW R";
+            "105" = "105 - Talkback L";
+            "106" = "106 - Talkback R";
+            "107" = "107 - Speakers L";
+            "108" = "108 - Speakers R";
+            "109" = "109 - Engineer Mix L";
+            "110" = "110 - Engineer Mix R";
+            "111" = "111 - Vocal 1 Mix L";
+            "112" = "112 - Vocal 1 Mix R";
+            "113" = "113 - Click";
+            "114" = "114 - Guide";
+            "115" = "115 - Drums Mix L";
+            "116" = "116 - Drums Mix R";
+            "117" = "117 - Bass Mix L";
+            "118" = "118 - Bass Mix R";
+            "119" = "119 - Guitar 1 Mix L";
+            "120" = "120 - Guitar 1 Mix R";
+            "121" = "121 - Guitar 2 Mix L";
+            "122" = "122 - Guitar 2 Mix R";
+            "123" = "123 - Keys 1 Mix L";
+            "124" = "124 - Keys 1 Mix R";
+            "125" = "125 - Keys 2 Mix L";
+            "126" = "126 - Keys 2 Mix R";
+            "127" = "127 - Broadcast Mix L";
+            "128" = "128 - Broadcast Mix R";
+          };
+          # TX channel names — placeholder labels until we lock in the
+          # broadcast/output layout. `N - OUTN` makes every slot unique
+          # so Dante Controller and other receivers can target a specific
+          # channel without ambiguity, and identifies the slot number
+          # inline. Replace with meaningful labels alongside the
+          # rxChannelNames map when the routing is finalised.
+          txChannelNames = {
+            "1" = "1 - OUT1";
+            "2" = "2 - OUT2";
+            "3" = "3 - OUT3";
+            "4" = "4 - OUT4";
+            "5" = "5 - OUT5";
+            "6" = "6 - OUT6";
+            "7" = "7 - OUT7";
+            "8" = "8 - OUT8";
+            "9" = "9 - OUT9";
+            "10" = "10 - OUT10";
+            "11" = "11 - OUT11";
+            "12" = "12 - OUT12";
+            "13" = "13 - OUT13";
+            "14" = "14 - OUT14";
+            "15" = "15 - OUT15";
+            "16" = "16 - OUT16";
+            "17" = "17 - OUT17";
+            "18" = "18 - OUT18";
+            "19" = "19 - OUT19";
+            "20" = "20 - OUT20";
+            "21" = "21 - OUT21";
+            "22" = "22 - OUT22";
+            "23" = "23 - OUT23";
+            "24" = "24 - OUT24";
+            "25" = "25 - OUT25";
+            "26" = "26 - OUT26";
+            "27" = "27 - OUT27";
+            "28" = "28 - OUT28";
+            "29" = "29 - OUT29";
+            "30" = "30 - OUT30";
+            "31" = "31 - OUT31";
+            "32" = "32 - OUT32";
+            "33" = "33 - OUT33";
+            "34" = "34 - OUT34";
+            "35" = "35 - OUT35";
+            "36" = "36 - OUT36";
+            "37" = "37 - OUT37";
+            "38" = "38 - OUT38";
+            "39" = "39 - OUT39";
+            "40" = "40 - OUT40";
+            "41" = "41 - OUT41";
+            "42" = "42 - OUT42";
+            "43" = "43 - OUT43";
+            "44" = "44 - OUT44";
+            "45" = "45 - OUT45";
+            "46" = "46 - OUT46";
+            "47" = "47 - OUT47";
+            "48" = "48 - OUT48";
+            "49" = "49 - OUT49";
+            "50" = "50 - OUT50";
+            "51" = "51 - OUT51";
+            "52" = "52 - OUT52";
+            "53" = "53 - OUT53";
+            "54" = "54 - OUT54";
+            "55" = "55 - OUT55";
+            "56" = "56 - OUT56";
+            "57" = "57 - OUT57";
+            "58" = "58 - OUT58";
+            "59" = "59 - OUT59";
+            "60" = "60 - OUT60";
+            "61" = "61 - OUT61";
+            "62" = "62 - OUT62";
+            "63" = "63 - OUT63";
+            "64" = "64 - OUT64";
+            "65" = "65 - OUT65";
+            "66" = "66 - OUT66";
+            "67" = "67 - OUT67";
+            "68" = "68 - OUT68";
+            "69" = "69 - OUT69";
+            "70" = "70 - OUT70";
+            "71" = "71 - OUT71";
+            "72" = "72 - OUT72";
+            "73" = "73 - OUT73";
+            "74" = "74 - OUT74";
+            "75" = "75 - OUT75";
+            "76" = "76 - OUT76";
+            "77" = "77 - OUT77";
+            "78" = "78 - OUT78";
+            "79" = "79 - OUT79";
+            "80" = "80 - OUT80";
+            "81" = "81 - OUT81";
+            "82" = "82 - OUT82";
+            "83" = "83 - OUT83";
+            "84" = "84 - OUT84";
+            "85" = "85 - OUT85";
+            "86" = "86 - OUT86";
+            "87" = "87 - OUT87";
+            "88" = "88 - OUT88";
+            "89" = "89 - OUT89";
+            "90" = "90 - OUT90";
+            "91" = "91 - OUT91";
+            "92" = "92 - OUT92";
+            "93" = "93 - OUT93";
+            "94" = "94 - OUT94";
+            "95" = "95 - OUT95";
+            "96" = "96 - OUT96";
+            "97" = "97 - OUT97";
+            "98" = "98 - OUT98";
+            "99" = "99 - OUT99";
+            "100" = "100 - OUT100";
+            "101" = "101 - OUT101";
+            "102" = "102 - OUT102";
+            "103" = "103 - OUT103";
+            "104" = "104 - OUT104";
+            "105" = "105 - OUT105";
+            "106" = "106 - OUT106";
+            "107" = "107 - OUT107";
+            "108" = "108 - OUT108";
+            "109" = "109 - OUT109";
+            "110" = "110 - OUT110";
+            "111" = "111 - OUT111";
+            "112" = "112 - OUT112";
+            "113" = "113 - OUT113";
+            "114" = "114 - OUT114";
+            "115" = "115 - OUT115";
+            "116" = "116 - OUT116";
+            "117" = "117 - OUT117";
+            "118" = "118 - OUT118";
+            "119" = "119 - OUT119";
+            "120" = "120 - OUT120";
+            "121" = "121 - OUT121";
+            "122" = "122 - OUT122";
+            "123" = "123 - OUT123";
+            "124" = "124 - OUT124";
+            "125" = "125 - OUT125";
+            "126" = "126 - OUT126";
+            "127" = "127 - OUT127";
+            "128" = "128 - OUT128";
+          };
+
         })
+
+        # System-wide inferno-control CLI — Rust port of
+        # network-audio-controller. Pairs with the inferno_aoip
+        # soundcard above for ad-hoc Dante inspection / control without
+        # leaving the host.
+        <fleet.music/production/inferno-control>
 
         (fleet.selfhost._.samba-client { })
         <fleet.system/avahi>
@@ -167,6 +445,7 @@
           nextcloudWebdavHost = "cloud.starcommand.live";
           nextcloudWebdavUser = "codywright";
           nextcloudWebdavMount = "/mnt/nextcloud/codywright";
+          nextcloudWebdavMediaMount = "/run/media/starcommand";
           nextcloudWebdavUrl = "https://${nextcloudWebdavHost}/remote.php/dav/files/${nextcloudWebdavUser}/";
         in
         {
@@ -219,7 +498,7 @@
           ];
 
           environment.variables = {
-            TASK_VAULT = "/mnt/nextcloud/codywright/Projects";
+            TASK_VAULT = "${nextcloudWebdavMediaMount}/Projects";
             TASK_SERVER = "http://10.10.10.1:3456";
             NEXTCLOUD_URL = "https://cloud.starcommand.live";
             NEXTCLOUD_USER = "codywright";
@@ -288,11 +567,10 @@
             fsType = "davfs";
             options = [
               "rw"
-              "noauto"
               "nofail"
               "_netdev"
-              "x-systemd.automount"
-              "x-systemd.idle-timeout=600"
+              "x-systemd.requires=network-online.target"
+              "x-systemd.after=network-online.target"
               "x-systemd.requires=run-secrets.d.mount"
               "x-systemd.after=run-secrets.d.mount"
               "uid=1000"
@@ -302,9 +580,23 @@
             ];
           };
 
+          fileSystems."${nextcloudWebdavMediaMount}" = {
+            device = nextcloudWebdavMount;
+            fsType = "none";
+            options = [
+              "bind"
+              "nofail"
+              "_netdev"
+              "x-systemd.requires=mnt-nextcloud-codywright.mount"
+              "x-systemd.after=mnt-nextcloud-codywright.mount"
+            ];
+          };
+
           # Davfs2 reads credentials from /etc/davfs2/secrets. This SOPS secret
           # should contain exactly one line, for example:
           #   /mnt/nextcloud/codywright codywright <nextcloud-app-password>
+          # The user-facing mount lives at /run/media/starcommand via a bind
+          # mount so the existing davfs2 secret remains valid.
           # Do not put the app password directly in Nix; keep it in SOPS.
 
           # Mount starcommand storage over 10G NFS
@@ -337,6 +629,7 @@
           systemd.tmpfiles.rules = [
             "d /mnt/nextcloud 0755 root root -"
             "d ${nextcloudWebdavMount} 0775 cody users -"
+            "d ${nextcloudWebdavMediaMount} 0775 cody users -"
             "d /home/cody/agent 0755 cody users -"
             "L+ /home/cody/agent/.starcommand 0644 cody users - /home/cody/.starcommand"
             "L+ /home/cody/agent/.flake 0644 cody users - /home/cody/.flake"
