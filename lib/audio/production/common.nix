@@ -13,7 +13,7 @@ let
     pkgs: with pkgs; [
       alsa-utils
       sox
-      wineWowPackages.stable
+      wineWow64Packages.stable
       yabridge
       yabridgectl
     ];

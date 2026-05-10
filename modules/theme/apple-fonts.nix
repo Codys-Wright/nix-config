@@ -13,7 +13,7 @@
     homeManager =
       { pkgs, ... }:
       {
-        home.packages = with inputs.apple-fonts.packages.${pkgs.system}; [
+        home.packages = with inputs.apple-fonts.packages.${pkgs.stdenv.hostPlatform.system}; [
           sf-pro
           sf-mono
           sf-compact
@@ -23,7 +23,7 @@
     nixos =
       { pkgs, ... }:
       {
-        fonts.packages = with inputs.apple-fonts.packages.${pkgs.system}; [
+        fonts.packages = with inputs.apple-fonts.packages.${pkgs.stdenv.hostPlatform.system}; [
           sf-pro
           sf-mono
           sf-compact

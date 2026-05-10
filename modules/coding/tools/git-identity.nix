@@ -21,8 +21,8 @@
         homeManager =
           { lib, ... }:
           {
-            programs.git.userName = lib.mkForce name;
-            programs.git.userEmail = lib.mkForce email;
+            programs.git.settings.user.name = lib.mkForce name;
+            programs.git.settings.user.email = lib.mkForce email;
           };
       };
   };

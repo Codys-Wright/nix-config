@@ -19,7 +19,7 @@
       devShells.default = pkgs.mkShell {
         packages = with pkgs; [
           treefmt
-          nixfmt-rfc-style
+          nixfmt
           shfmt
           nixd
           git
@@ -41,7 +41,7 @@
       devShells.deploy = pkgsUnfree.mkShell {
         packages = with pkgsUnfree; [
           treefmt
-          nixfmt-rfc-style
+          nixfmt
           shfmt
           nixd
           just

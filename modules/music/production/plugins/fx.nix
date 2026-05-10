@@ -15,6 +15,9 @@
           [
             dragonfly-reverb
             lsp-plugins
+            zlequalizer
+            zlcompressor
+            zlsplitter
           ]
         );
       };

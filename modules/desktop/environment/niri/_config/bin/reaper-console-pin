@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+# Snap REAPER's "ReaScript console output" window to top-right of its
+# output whenever it appears or moves. REAPER (xwayland) requests a
+# centered position that overrides niri's default-floating-position
+# rule, so we reposition reactively via niri IPC.
+set -euo pipefail
+
+inset=16
+title_match='^ReaScript console output'
+seen=""
+
+set_niri_socket() {
+    if [[ -n "${NIRI_SOCKET:-}" && -S "${NIRI_SOCKET}" ]]; then return; fi
+    local s
+    s="$(find "${XDG_RUNTIME_DIR:-/run/user/$(id -u)}" -maxdepth 1 -type s -name 'niri*.sock' -print -quit)"
+    [[ -n "$s" ]] && export NIRI_SOCKET="$s"
+}
+
+reposition() {
+    local id="$1"
+    set_niri_socket
+    # Read window + workspace + output geometry in one shot.
+    local data
+    data="$(
+        jq -n \
+            --argjson w "$(niri msg -j windows)" \
+            --argjson ws "$(niri msg -j workspaces)" \
+            --argjson o "$(niri msg -j outputs)" \
+            --arg id "$id" \
+            --argjson inset "$inset" '
+            ($w[] | select(.id == ($id | tonumber))) as $win
+            | ($ws[] | select(.id == $win.workspace_id)) as $wsp
+            | ($o[$wsp.output] // (($o | to_entries[] | select(.key == $wsp.output) | .value))) as $out
+            | ($out.logical // ($out | .logical)) as $log
+            | { ow: $log.width, oh: $log.height,
+                ww: $win.layout.window_size[0], wh: $win.layout.window_size[1],
+                cx: $win.layout.tile_pos_in_workspace_view[0],
+                cy: $win.layout.tile_pos_in_workspace_view[1] }
+            | { x: (.ow - .ww - $inset), y: $inset, cx: .cx, cy: .cy }
+        ' 2>/dev/null
+    )"
+    local tx ty cx cy
+    tx="$(jq -r '.x' <<<"$data")"
+    ty="$(jq -r '.y' <<<"$data")"
+    cx="$(jq -r '.cx' <<<"$data")"
+    cy="$(jq -r '.cy' <<<"$data")"
+    [[ "$tx" == null || -z "$tx" ]] && return 0
+    # Skip if already in place (avoids fighting user drags).
+    if [[ "${cx%.*}" == "$tx" && "${cy%.*}" == "$ty" ]]; then return 0; fi
+    niri msg action move-floating-window --id "$id" --x "$tx" --y "$ty" >/dev/null 2>&1 || true
+}
+
+set_niri_socket
+
+# Initial sweep: snap any already-open console.
+initial_id="$(
+    niri msg -j windows \
+    | jq -r --arg t "$title_match" '
+        .[] | select(.app_id == "REAPER" and (.title // "" | test($t))) | .id
+    ' | head -1
+)"
+[[ -n "$initial_id" ]] && reposition "$initial_id"
+
+niri msg -j event-stream | while IFS= read -r event; do
+    # WindowOpenedOrChanged carries one window record.
+    id="$(jq -r --arg t "$title_match" '
+        .WindowOpenedOrChanged.window
+        | select(. != null and .app_id == "REAPER" and (.title // "" | test($t)))
+        | .id // empty
+    ' <<<"$event" 2>/dev/null || true)"
+    if [[ -n "$id" ]]; then
+        # Debounce repeated identical events.
+        key="$id:$(jq -r '.WindowOpenedOrChanged.window.layout.tile_pos_in_workspace_view | tostring' <<<"$event")"
+        if [[ "$key" != "$seen" ]]; then
+            seen="$key"
+            reposition "$id"
+        fi
+        continue
+    fi
+    # Reset memo on close so a re-open triggers another snap.
+    closed_id="$(jq -r '.WindowClosed.id // empty' <<<"$event" 2>/dev/null || true)"
+    if [[ -n "$closed_id" && "$seen" == "$closed_id":* ]]; then
+        seen=""
+    fi
+done

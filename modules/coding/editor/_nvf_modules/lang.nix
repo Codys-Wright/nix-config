@@ -38,12 +38,11 @@
 
     # Common languages (enabled in nvf's maximal config)
     # Web development
-    ts = {
+    typescript = {
       enable = true; # TypeScript/JavaScript
-      # Use ts_ls LSP server
       lsp = {
         enable = true;
-        servers = [ "ts_ls" ];
+        servers = [ "typescript-language-server" ];
       };
     };
     html = {
@@ -91,7 +90,9 @@
     # ruby.enable = false;
     # scala.enable = false;
     # svelte.enable = false;
-    tailwind.enable = false;
+    # Tailwind CSS LSP preset replaces the old vim.languages.tailwind option.
+    # Keep it disabled by default.
+
     # vala.enable = false;
     yaml.enable = false;
   };

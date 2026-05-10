@@ -8,9 +8,10 @@
     description = "Firefox Browser - Mozilla's open-source browser";
 
     homeManager =
-      { pkgs, ... }:
+      { config, pkgs, ... }:
       {
         home.packages = [ pkgs.firefox ];
+        programs.firefox.configPath = "${config.xdg.configHome}/mozilla/firefox";
       };
   };
 }

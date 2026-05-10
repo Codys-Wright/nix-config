@@ -162,7 +162,6 @@ in
     provides.plugins.vim =
       { pkgs, ... }:
       {
-        extraPlugins.nvim-treesitter.package = pkgs.vimPlugins.nvim-treesitter;
         extraPlugins.lzn-auto-require.package = pkgs.vimPlugins.lzn-auto-require;
         extraPlugins.friendly-snippets.package = pkgs.vimPlugins.friendly-snippets;
         extraPlugins.vtsls.package = pkgs.vimPlugins.nvim-vtsls;

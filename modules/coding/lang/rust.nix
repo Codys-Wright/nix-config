@@ -60,7 +60,7 @@
         # Configure shell environment for pkg-config
         # Exposes OpenSSL and other libraries' pkg-config files to cargo build scripts
         programs.zsh = {
-          initExtra = ''
+          initContent = ''
             export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$HOME/.nix-profile/lib/pkgconfig
           '';
         };

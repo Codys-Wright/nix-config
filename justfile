@@ -328,9 +328,9 @@ hosts-nixos:
 homes:
     nix eval ".#homeConfigurations" --apply "builtins.attrNames" --json
 
-# Format all .nix files with nixfmt-rfc-style
+# Format all .nix files with nixfmt
 fmt:
-    nix run nixpkgs#nixfmt-rfc-style -- $(git ls-files '*.nix')
+    nix run nixpkgs#nixfmt -- $(git ls-files '*.nix')
 
 # Regenerate flake.nix from flake-file
 write-flake:
