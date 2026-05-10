@@ -2,7 +2,15 @@ input {
     // niri Mod = Mod5 via XKB lv3:ralt_switch. xremap routes Caps Lock,
     // Escape, and Right Ctrl to Alt_R, which XKB maps to Mod5.
     mod-key "Mod5"
-    focus-follows-mouse
+    // focus-follows-mouse disabled while debugging xwayland-satellite +
+    // REAPER child-surface focus pingpong. xwayland-satellite promotes
+    // REAPER's WebKit / plugin-GUI child X11 windows into separate
+    // Wayland surfaces, and focus-follows-mouse routes keyboard to
+    // whichever surface the pointer is over — so REAPER's main UI loses
+    // input every time the cursor drifts over a plugin/WebView panel.
+    // Re-enable once we have a niri rule that ties those child surfaces
+    // back to REAPER for focus purposes.
+    // focus-follows-mouse
 
     keyboard {
         xkb {

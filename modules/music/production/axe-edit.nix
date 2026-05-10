@@ -15,8 +15,8 @@
     homeManager =
       { pkgs, ... }:
       let
-        erosanix = inputs.erosanix.packages.${pkgs.system};
-        erosanixLib = inputs.erosanix.lib.${pkgs.system};
+        erosanix = inputs.erosanix.packages.${pkgs.stdenv.hostPlatform.system};
+        erosanixLib = inputs.erosanix.lib.${pkgs.stdenv.hostPlatform.system};
       in
       {
         home.packages = [

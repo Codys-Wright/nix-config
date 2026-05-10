@@ -8,25 +8,56 @@ layer-rule {
     place-within-backdrop true
 }
 
+// Broad REAPER catch-all — every REAPER toplevel (main, Mixer, MIDI take,
+// FX windows, plugin floats, and any title we haven't enumerated) lands
+// on the music workspace. Specific titles below add layout overrides.
 window-rule {
-    match app-id="^REAPER$" title="REAPER v"
+    match app-id="^REAPER$"
     open-on-workspace "music"
     open-focused true
+}
+
+window-rule {
+    match app-id="^REAPER$" title="REAPER v"
     open-maximized true
 }
 
 window-rule {
     match app-id="^REAPER$" title="^Mixer$"
-    open-on-workspace "music"
-    open-focused true
     open-maximized true
 }
 
 window-rule {
     match app-id="^REAPER$" title="^MIDI take:"
-    open-on-workspace "music"
-    open-focused true
     open-maximized true
+}
+
+// ReaScript debug console: floating, must not steal focus from the main
+// REAPER window when it pops up.
+window-rule {
+    match app-id="^REAPER$" title="^ReaScript console output"
+    open-focused false
+    open-floating true
+    default-floating-position x=16 y=16 relative-to="top-right"
+}
+
+// xwayland-satellite child surfaces spawned by REAPER (WebKit
+// WebProcess, plugin GUIs, etc.) become independent Wayland surfaces
+// with synthesized app-ids distinct from "REAPER". Pin anything that
+// looks like one onto the music workspace so it never grabs focus on a
+// different workspace, and `open-focused false` so REAPER's main window
+// stays the active window when the child opens.
+//
+// We don't yet know the exact app-id pattern xwayland-satellite uses —
+// confirm with `niri msg windows` while a desktop-renderer panel is
+// open and tighten this match accordingly.
+window-rule {
+    match app-id="^xwayland-satellite"
+    match app-id="^WebKitWebProcess"
+    match title="^FTS Demo Desktop"
+    match title="^FTS UI Desktop"
+    open-on-workspace "music"
+    open-focused false
 }
 
 window-rule {

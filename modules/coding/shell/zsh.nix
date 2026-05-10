@@ -14,7 +14,7 @@
       {
         programs.zsh = {
           enable = true;
-          initExtra = ''
+          initContent = ''
             # Unbind Ctrl+l (default clear binding) to allow it to pass through to Zellij
             bindkey -r '^L'
           '';

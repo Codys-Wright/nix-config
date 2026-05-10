@@ -445,6 +445,7 @@
           nextcloudWebdavHost = "cloud.starcommand.live";
           nextcloudWebdavUser = "codywright";
           nextcloudWebdavMount = "/mnt/nextcloud/codywright";
+          nextcloudNfsFilesMount = "/mnt/starcommand/Operations/nextcloud-data/data/${nextcloudWebdavUser}/files";
           nextcloudWebdavMediaMount = "/run/media/starcommand";
           nextcloudWebdavUrl = "https://${nextcloudWebdavHost}/remote.php/dav/files/${nextcloudWebdavUser}/";
         in
@@ -567,8 +568,11 @@
             fsType = "davfs";
             options = [
               "rw"
+              "noauto"
               "nofail"
               "_netdev"
+              "x-systemd.automount"
+              "x-systemd.idle-timeout=600"
               "x-systemd.requires=network-online.target"
               "x-systemd.after=network-online.target"
               "x-systemd.requires=run-secrets.d.mount"
@@ -581,22 +585,23 @@
           };
 
           fileSystems."${nextcloudWebdavMediaMount}" = {
-            device = nextcloudWebdavMount;
+            device = nextcloudNfsFilesMount;
             fsType = "none";
             options = [
               "bind"
               "nofail"
               "_netdev"
-              "x-systemd.requires=mnt-nextcloud-codywright.mount"
-              "x-systemd.after=mnt-nextcloud-codywright.mount"
+              "x-systemd.requires=mnt-starcommand.mount"
+              "x-systemd.after=mnt-starcommand.mount"
             ];
           };
 
           # Davfs2 reads credentials from /etc/davfs2/secrets. This SOPS secret
           # should contain exactly one line, for example:
           #   /mnt/nextcloud/codywright codywright <nextcloud-app-password>
-          # The user-facing mount lives at /run/media/starcommand via a bind
-          # mount so the existing davfs2 secret remains valid.
+          # The user-facing /run/media/starcommand mount uses the faster 10G
+          # NFS view of the same Nextcloud files. Keep davfs2 available at
+          # /mnt/nextcloud/codywright only for explicit WebDAV testing.
           # Do not put the app password directly in Nix; keep it in SOPS.
 
           # Mount starcommand storage over 10G NFS
@@ -633,6 +638,8 @@
             "d /home/cody/agent 0755 cody users -"
             "L+ /home/cody/agent/.starcommand 0644 cody users - /home/cody/.starcommand"
             "L+ /home/cody/agent/.flake 0644 cody users - /home/cody/.flake"
+            "L+ /home/cody/agent/Task 0644 cody users - /home/cody/Development/Task"
+            "L+ /home/cody/agent/wiki 0644 cody users - ${nextcloudWebdavMount}"
           ];
 
           users.users.cody.openssh.authorizedKeys.keys = [
@@ -956,7 +963,7 @@
           # Permissive dumpcap wrapper so the agent shell (started before
           # the wireshark group landed) can capture without re-login.
           security.wrappers.dumpcap-any = {
-            source = "${pkgs.wireshark-cli}/bin/dumpcap";
+            source = "${pkgs.wireshark}/bin/dumpcap";
             capabilities = "cap_net_raw,cap_net_admin+eip";
             owner = "root";
             group = "root";
@@ -964,11 +971,10 @@
           };
           environment.systemPackages = with pkgs; [
             iw
-            inputs.task.packages.${pkgs.system}.task-cli
+            inputs.task.packages.${pkgs.stdenv.hostPlatform.system}.task-cli
             hostapd
             dnsmasq
             tcpdump
-            wireshark-cli
             dsniff
             bettercap
             aircrack-ng

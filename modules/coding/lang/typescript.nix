@@ -28,13 +28,13 @@
             SDL2_ttf
 
             # X11
-            xorg.libX11
-            xorg.libXcursor
-            xorg.libXrandr
-            xorg.libXi
-            xorg.libXext
-            xorg.libXinerama
-            xorg.libXScrnSaver
+            libx11
+            libxcursor
+            libxrandr
+            libxi
+            libxext
+            libxinerama
+            libxscrnsaver
 
             # Wayland
             wayland

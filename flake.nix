@@ -41,6 +41,10 @@
     };
     fts-reaper-flake.url = "github:FastTrackStudios/fts-reaper-flake";
     ghidra-cli.url = "github:Codys-Wright/ghidra-cli/fix/ghidra-12-compat";
+    hermes-agent = {
+      url = "github:Codys-Wright/hermes-agent/starcommand-nextcloud-v2026.5.7";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";

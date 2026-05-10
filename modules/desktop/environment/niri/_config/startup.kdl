@@ -1,6 +1,7 @@
 spawn-at-startup "noctalia-shell"
 spawn-at-startup "bash" "-lc" "pgrep -u \"$USER\" -f \"[n]octalia-workspace-theme\" >/dev/null || exec \"$HOME/.config/niri/bin/noctalia-workspace-theme\""
 spawn-at-startup "bash" "-lc" "pgrep -u \"$USER\" -f \"[n]iri-workspace-wallpaper\" >/dev/null || exec \"$HOME/.config/niri/bin/niri-workspace-wallpaper\""
+spawn-at-startup "bash" "-lc" "pgrep -u \"$USER\" -f \"[r]eaper-console-pin\" >/dev/null || exec \"$HOME/.config/niri/bin/reaper-console-pin\""
 
 prefer-no-csd
 

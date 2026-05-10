@@ -12,6 +12,8 @@
           enable = true;
           viAlias = true;
           vimAlias = false;
+          withRuby = false;
+          withPython3 = false;
         };
 
         # Set environment variables
