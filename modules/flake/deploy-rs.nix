@@ -99,18 +99,36 @@ in
             esac
           done
 
-          # If hostname specified, decrypt SSH key and add to SSH options
+          # If hostname specified, decrypt SSH key and build the full
+          # --ssh-opts string. The previous wiring relied on
+          # builtins.getEnv "DEPLOY_SSH_KEY" inside deploy.nodes.sshOpts,
+          # which is empty under flake pure-eval (the default), so the -i
+          # flag never reached ssh in CI. Pass --ssh-opts directly instead;
+          # deploy-rs's --ssh-opts replaces the per-node sshOpts, so we
+          # restate every flag we care about (identities, port, timeout,
+          # known hosts).
+          SSH_OPTS_FROM_SOPS=""
           if [ -n "$HOSTNAME" ]; then
             TEMP_KEY=$(decrypt_ssh_key "$HOSTNAME")
             trap "rm -f $TEMP_KEY" EXIT
 
-            # Add the decrypted key to SSH options via environment
-            # deploy-rs will pick this up from the deploy.nodes config
             export DEPLOY_SSH_KEY="$TEMP_KEY"
+            KNOWN_HOSTS_FILE="hosts/$HOSTNAME/known_hosts"
+            if [ -n "''${FLEET_REPO_ROOT:-}" ] && [ -f "$FLEET_REPO_ROOT/$KNOWN_HOSTS_FILE" ]; then
+              KNOWN_HOSTS_FILE="$FLEET_REPO_ROOT/$KNOWN_HOSTS_FILE"
+            fi
+            SSH_OPTS_FROM_SOPS="-i $TEMP_KEY -o IdentitiesOnly=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new"
+            if [ -f "$KNOWN_HOSTS_FILE" ]; then
+              SSH_OPTS_FROM_SOPS="$SSH_OPTS_FROM_SOPS -o UserKnownHostsFile=$KNOWN_HOSTS_FILE"
+            fi
           fi
 
           # Run deploy-rs with original arguments
-          exec deploy-rs "''${ARGS[@]}"
+          if [ -n "$SSH_OPTS_FROM_SOPS" ]; then
+            exec deploy-rs --ssh-opts "$SSH_OPTS_FROM_SOPS" "''${ARGS[@]}"
+          else
+            exec deploy-rs "''${ARGS[@]}"
+          fi
         '';
       };
     in
