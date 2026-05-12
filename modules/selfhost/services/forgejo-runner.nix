@@ -167,27 +167,28 @@
           # change you must manually run
           #   systemctl restart gitea-runner-${name}
           # once the deploy completes for the new settings to take effect.
-          systemd.services."gitea-runner-${name}".restartIfChanged = false;
-          systemd.services."gitea-runner-${name}".stopIfChanged = false;
-
-          systemd.services."gitea-runner-${name}".serviceConfig = {
-            # Upstream defaults to DynamicUser=true, which races with the
-            # sops-owned token (chowned to the static `gitea-runner` we
-            # declare above). Pin to the static user/group so the runner
-            # can actually read its registration token at start.
-            DynamicUser = lib.mkForce false;
-            User = lib.mkForce "gitea-runner";
-            Group = lib.mkForce "gitea-runner";
-            Nice = nice;
-            CPUWeight = cpuWeight;
-            IOWeight = ioWeight;
-            # When you're mixing, you don't want the runner stealing
-            # large blocks of CPU at once.  CPUQuota caps the runner's
-            # total CPU share to roughly `capacity * 200%` (i.e. 2 cores
-            # of headroom per concurrent job, with the rest being burst).
-            # 8 jobs * 200% = 1600%.  battleship has 3200% available so
-            # this still allows the runner to use half the box at peak.
-            CPUQuota = "${toString (capacity * 200)}%";
+          systemd.services."gitea-runner-${name}" = {
+            restartIfChanged = false;
+            stopIfChanged = false;
+            serviceConfig = {
+              # Upstream defaults to DynamicUser=true, which races with the
+              # sops-owned token (chowned to the static `gitea-runner` we
+              # declare above). Pin to the static user/group so the runner
+              # can actually read its registration token at start.
+              DynamicUser = lib.mkForce false;
+              User = lib.mkForce "gitea-runner";
+              Group = lib.mkForce "gitea-runner";
+              Nice = nice;
+              CPUWeight = cpuWeight;
+              IOWeight = ioWeight;
+              # When you're mixing, you don't want the runner stealing
+              # large blocks of CPU at once.  CPUQuota caps the runner's
+              # total CPU share to roughly `capacity * 200%` (i.e. 2 cores
+              # of headroom per concurrent job, with the rest being burst).
+              # 8 jobs * 200% = 1600%.  battleship has 3200% available so
+              # this still allows the runner to use half the box at peak.
+              CPUQuota = "${toString (capacity * 200)}%";
+            };
           };
 
           # State + cache dirs (the systemd unit's StateDirectory= covers
