@@ -156,33 +156,39 @@
           # there's contention. RT-priority audio threads are unaffected
           # either way; this just keeps the non-RT side of your workload
           # responsive while CI is grinding.
-          # When this host is also a deploy target, nixos activation can
-          # decide to restart the runner because its own unit definition
-          # changed — which kills the in-flight CD job that triggered the
-          # rebuild in the first place. Pin restartIfChanged=false so the
-          # runner survives self-deploys. After a runner-config change you
-          # must manually `systemctl restart gitea-runner-${name}` once the
-          # deploy completes.
-          systemd.services."gitea-runner-${name}".restartIfChanged = false;
-
-          systemd.services."gitea-runner-${name}".serviceConfig = {
-            # Upstream defaults to DynamicUser=true, which races with the
-            # sops-owned token (chowned to the static `gitea-runner` we
-            # declare above). Pin to the static user/group so the runner
-            # can actually read its registration token at start.
-            DynamicUser = lib.mkForce false;
-            User = lib.mkForce "gitea-runner";
-            Group = lib.mkForce "gitea-runner";
-            Nice = nice;
-            CPUWeight = cpuWeight;
-            IOWeight = ioWeight;
-            # When you're mixing, you don't want the runner stealing
-            # large blocks of CPU at once.  CPUQuota caps the runner's
-            # total CPU share to roughly `capacity * 200%` (i.e. 2 cores
-            # of headroom per concurrent job, with the rest being burst).
-            # 8 jobs * 200% = 1600%.  battleship has 3200% available so
-            # this still allows the runner to use half the box at peak.
-            CPUQuota = "${toString (capacity * 200)}%";
+          # When this host is also a deploy target, nixos activation will
+          # stop+restart the runner because its own unit definition changed
+          # — which kills the in-flight CD job that triggered the rebuild
+          # in the first place. Pin BOTH restartIfChanged and stopIfChanged
+          # to false: restartIfChanged alone leaves stopIfChanged at its
+          # true default, which still issues a stop before the new unit
+          # picks up. With both false, activation updates the unit symlink
+          # but leaves the running process alone. After a runner-config
+          # change you must manually run
+          #   systemctl restart gitea-runner-${name}
+          # once the deploy completes for the new settings to take effect.
+          systemd.services."gitea-runner-${name}" = {
+            restartIfChanged = false;
+            stopIfChanged = false;
+            serviceConfig = {
+              # Upstream defaults to DynamicUser=true, which races with the
+              # sops-owned token (chowned to the static `gitea-runner` we
+              # declare above). Pin to the static user/group so the runner
+              # can actually read its registration token at start.
+              DynamicUser = lib.mkForce false;
+              User = lib.mkForce "gitea-runner";
+              Group = lib.mkForce "gitea-runner";
+              Nice = nice;
+              CPUWeight = cpuWeight;
+              IOWeight = ioWeight;
+              # When you're mixing, you don't want the runner stealing
+              # large blocks of CPU at once.  CPUQuota caps the runner's
+              # total CPU share to roughly `capacity * 200%` (i.e. 2 cores
+              # of headroom per concurrent job, with the rest being burst).
+              # 8 jobs * 200% = 1600%.  battleship has 3200% available so
+              # this still allows the runner to use half the box at peak.
+              CPUQuota = "${toString (capacity * 200)}%";
+            };
           };
 
           # State + cache dirs (the systemd unit's StateDirectory= covers
