@@ -39,3 +39,4 @@ jobs:
         run: |
           nix run --no-write-lock-file nixpkgs#nixfmt-rfc-style -- --check \
             $(find . -name '*.nix' -not -path './.git/*' -not -path './result*')
+# CD smoke test marker — added 2026-05-12T05:08:19+00:00
