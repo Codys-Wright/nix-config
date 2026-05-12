@@ -257,7 +257,11 @@ deploy host *args:
     trap "rm -f $TEMP_KEY" EXIT
     
     echo "Extracting SSH key from SOPS..."
-    SOPS_AGE_KEY_FILE=sops.key nix develop --command sops --config sops.yaml \
+    # Honor an external SOPS_AGE_KEY_FILE (e.g. set by CI to point at the
+    # runner's host-derived age key), and fall back to the repo-local
+    # sops.key that cody uses interactively.
+    SOPS_AGE_KEY_FILE="${SOPS_AGE_KEY_FILE:-sops.key}" \
+        nix develop --command sops --config sops.yaml \
         --decrypt --extract '["{{host}}"]["system"]["sshPrivateKey"]' \
         "hosts/{{host}}/secrets.yaml" > "$TEMP_KEY"
     chmod 600 "$TEMP_KEY"
