@@ -156,14 +156,19 @@
           # there's contention. RT-priority audio threads are unaffected
           # either way; this just keeps the non-RT side of your workload
           # responsive while CI is grinding.
-          # When this host is also a deploy target, nixos activation can
-          # decide to restart the runner because its own unit definition
-          # changed — which kills the in-flight CD job that triggered the
-          # rebuild in the first place. Pin restartIfChanged=false so the
-          # runner survives self-deploys. After a runner-config change you
-          # must manually `systemctl restart gitea-runner-${name}` once the
-          # deploy completes.
+          # When this host is also a deploy target, nixos activation will
+          # stop+restart the runner because its own unit definition changed
+          # — which kills the in-flight CD job that triggered the rebuild
+          # in the first place. Pin BOTH restartIfChanged and stopIfChanged
+          # to false: restartIfChanged alone leaves stopIfChanged at its
+          # true default, which still issues a stop before the new unit
+          # picks up. With both false, activation updates the unit symlink
+          # but leaves the running process alone. After a runner-config
+          # change you must manually run
+          #   systemctl restart gitea-runner-${name}
+          # once the deploy completes for the new settings to take effect.
           systemd.services."gitea-runner-${name}".restartIfChanged = false;
+          systemd.services."gitea-runner-${name}".stopIfChanged = false;
 
           systemd.services."gitea-runner-${name}".serviceConfig = {
             # Upstream defaults to DynamicUser=true, which races with the
