@@ -354,6 +354,16 @@
         <fleet.music/production/inferno-control>
 
         (fleet.selfhost._.samba-client { })
+
+        # Forgejo Actions runner. Picks up CI jobs from
+        # https://git.starcommand.live and executes them here so
+        # starcommand (the always-on Forgejo host) doesn't have to
+        # bear compile / test / lint load. Token lives in
+        # hosts/THEBATTLESHIP/secrets.yaml under `forgejo/runner_token`.
+        (fleet.selfhost._.forgejo-runner {
+          tokenSopsFile = ./secrets.yaml;
+        })
+
         <fleet.system/avahi>
         <fleet.system/virtualization>
         (fleet.deploy { ip = "100.68.255.30"; })
