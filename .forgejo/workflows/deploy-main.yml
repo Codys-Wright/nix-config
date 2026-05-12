@@ -1,0 +1,69 @@
+name: Deploy main
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: thebattleship-main-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy-main:
+    name: Deploy main to THEBATTLESHIP
+    runs-on: nix
+    permissions:
+      contents: read
+    env:
+      DEPLOY_TARGET: THEBATTLESHIP
+      # Point sops at the runner's own host-derived age key. The runner
+      # user's HOME is /var/lib/gitea-runner/battleship, so this is the
+      # same place sops would search by default — set it explicitly so
+      # the justfile recipe doesn't fall back to repo-local sops.key
+      # (which the runner doesn't have).
+      SOPS_AGE_KEY_FILE: /var/lib/gitea-runner/battleship/.config/sops/age/keys.txt
+    steps:
+      - name: Check out exact commit
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Print deployment identity
+        run: |
+          set -euo pipefail
+          echo "repository=${GITHUB_REPOSITORY}"
+          echo "ref=${GITHUB_REF}"
+          echo "sha=${GITHUB_SHA}"
+          echo "checkout=$(git rev-parse HEAD)"
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+
+      - name: Expose NixOS system profile tools
+        run: |
+          set -euo pipefail
+          echo /run/current-system/sw/bin >> "$GITHUB_PATH"
+          echo "$HOME/.nix-profile/bin" >> "$GITHUB_PATH"
+
+      - name: Deploy main to THEBATTLESHIP
+        run: |
+          set -euo pipefail
+          echo "Deploying main from exact commit ${GITHUB_SHA}"
+          echo "Command: just deploy ${DEPLOY_TARGET}"
+          # deploy-rs builds + evaluates during just deploy; a broken
+          # flake fails the deploy naturally. dev and staging already
+          # ran flake check + just build before promotion, so no separate
+          # validation step here.
+          just deploy "$DEPLOY_TARGET"
+
+      - name: Deployment summary
+        if: always()
+        run: |
+          set -euo pipefail
+          {
+            echo "## nix-fleet main deploy"
+            echo "- Commit: ${GITHUB_SHA}"
+            echo "- Target: THEBATTLESHIP (self-deploy from the runner host)"
+            echo "- Command: just deploy ${DEPLOY_TARGET}"
+            echo "- Rollback: deploy-rs default auto-rollback enabled"
+          } >> "${GITHUB_STEP_SUMMARY:-/dev/stdout}"
