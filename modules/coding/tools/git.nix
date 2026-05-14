@@ -17,6 +17,26 @@
           lfs = {
             enable = true;
           };
+
+          # Starcommand Forgejo is Cody's source-of-truth git host. Keep the
+          # token in ~/.git-credentials (or the future SOPS-rendered equivalent),
+          # but make every git invocation consistently look there instead of
+          # prompting Codex/Claude sessions.
+          settings = {
+            credential = {
+              helper = lib.mkForce "store --file ~/.git-credentials";
+              "https://git.starcommand.live" = {
+                username = "codywright";
+                useHttpPath = false;
+              };
+            };
+            url = {
+              "https://git.starcommand.live/".insteadOf = [
+                "forgejo:"
+                "starcommand:"
+              ];
+            };
+          };
         };
 
         programs.delta = {
