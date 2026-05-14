@@ -560,10 +560,45 @@
             '';
           };
 
-          # Starcommand Nextcloud over WebDAV/davfs2. The endpoint remains the
-          # public/certificate-valid hostname, while networking.hosts below pins
-          # that hostname to Starcommand's 10G address from THEBATTLESHIP.
-          networking.hosts."10.10.10.1" = [ nextcloudWebdavHost ];
+          # Starcommand services over the 10G LAN. Keep public/certificate-valid
+          # hostnames in URLs, but pin them to Starcommand's 10.10.10.1 address
+          # locally so THEBATTLESHIP talks directly to nginx instead of hairpinning
+          # through Cloudflare Tunnel.
+          networking.hosts."10.10.10.1" = [
+            "starcommand.live"
+            "agent.starcommand.live"
+            "audiobooks.starcommand.live"
+            "auth.starcommand.live"
+            "bazarr.starcommand.live"
+            "bookmarks.starcommand.live"
+            "chat.starcommand.live"
+            "cloud.starcommand.live"
+            "finance.starcommand.live"
+            "git.starcommand.live"
+            "grafana.starcommand.live"
+            "grocy.starcommand.live"
+            "hermes.starcommand.live"
+            "home.starcommand.live"
+            "invoice.starcommand.live"
+            "jackett.starcommand.live"
+            "jdownloader.starcommand.live"
+            "ldap.starcommand.live"
+            "lidarr.starcommand.live"
+            "media.starcommand.live"
+            "office.starcommand.live"
+            "photos.starcommand.live"
+            "radarr.starcommand.live"
+            "readarr.starcommand.live"
+            "signaling.starcommand.live"
+            "sonarr.starcommand.live"
+            "task-preview.starcommand.live"
+            "task.starcommand.live"
+            "torrents.starcommand.live"
+            "vault.starcommand.live"
+            "workspace.starcommand.live"
+            "youtube.starcommand.live"
+            "invoice.fasttrackaudio.com"
+          ];
           services.davfs2 = {
             enable = true;
             settings.globalSection = {
