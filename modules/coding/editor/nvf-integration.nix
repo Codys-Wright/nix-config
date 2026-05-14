@@ -1,9 +1,6 @@
-# Den integration for NVF standalone
-# Provides den.lib.nvf.package and den.lib.nvf.module
-# which enable using den aspects to compose NVF configurations
-# via a custom `vim` class that forwards to nvf's `vim` config.
-#
-# Based on: https://den.oeiuwq.com/tutorials/nvf-standalone/
+# Den integration for NVF standalone.
+# Compose Den `vim` aspects into an nvf module (`vim.*` options) so
+# den.lib.nvf.package builds the full configured editor.
 {
   den,
   lib,
@@ -15,32 +12,36 @@
     pkgs: vimAspect: ctx:
     (inputs.nvf.lib.neovimConfiguration {
       inherit pkgs;
-      modules = [ (den.lib.nvf.module vimAspect ctx) ];
+      modules = [ (den.lib.nvf.module pkgs vimAspect ctx) ];
     }).neovim;
 
   den.lib.nvf.module =
-    vimAspect: ctx:
+    pkgs: vimAspect: _ctx:
     let
-      # A custom `vim` class that forwards to `nvf.vim`
-      vimClass =
-        { class, aspect-chain }:
-        den._.forward {
-          each = lib.singleton true;
-          fromClass = _: "vim";
-          intoClass = _: "nvf";
-          intoPath = _: [ "vim" ];
-          fromAspect = _: lib.head aspect-chain;
-          adaptArgs = lib.id;
-        };
+      # Resolve the source aspect's custom `vim` class directly.  The old
+      # implementation used a custom forward from `vim` -> `nvf.vim`, but after
+      # Den's fx-forward changes that resolved to an empty nvf module for this
+      # standalone-package use case.  nvf's own module system wants the composed
+      # vim config under top-level `vim`, so wrap each resolved vim module there.
+      vimModule = den.lib.aspects.resolve "vim" vimAspect;
 
-      aspect = den.lib.parametric.fixedTo ctx {
-        includes = [
-          vimClass
-          vimAspect
-        ];
+      cleanModule =
+        module: if builtins.isAttrs module then builtins.removeAttrs module [ "_file" ] else module;
+
+      wrapVimModule = sourceModule: args: {
+        vim = cleanModule (
+          if builtins.isFunction sourceModule then sourceModule ({ inherit pkgs; } // args) else sourceModule
+        );
       };
 
-      module = den.lib.aspects.resolve "nvf" aspect;
+      flattenVimModules =
+        module:
+        if builtins.isAttrs module && module ? imports then
+          lib.concatMap flattenVimModules module.imports
+        else
+          [ (wrapVimModule module) ];
     in
-    module;
+    {
+      imports = lib.concatMap flattenVimModules vimModule.imports;
+    };
 }
