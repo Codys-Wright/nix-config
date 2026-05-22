@@ -73,6 +73,21 @@
             ".." = "cd ..";
             vp = "nix run ~/.flake#nvf";
           };
+
+          # PATH additions for user-managed package managers (cargo, npm,
+          # pnpm). Lets external launchers like Claude Code MCP servers
+          # (dioxus-mcp from `cargo install`, claude from the npm installer)
+          # find their binaries when spawned from a nushell session.
+          # Nushell's $env.PATH is a list, not a colon-string, so this goes
+          # into env.nu via extraEnv (loaded before config.nu).
+          extraEnv = ''
+            $env.PATH = ($env.PATH | split row (char esep)
+              | prepend $"($env.HOME)/.cargo/bin"
+              | prepend $"($env.HOME)/.local/bin"
+              | prepend $"($env.HOME)/.npm-global/bin"
+              | prepend $"($env.HOME)/.local/share/pnpm"
+              | uniq)
+          '';
         };
       };
   };
