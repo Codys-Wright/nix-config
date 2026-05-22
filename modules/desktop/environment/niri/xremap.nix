@@ -145,6 +145,8 @@ let
   };
 in
 {
+  flake-file.inputs.xremap-flake.url = lib.mkDefault "github:xremap/nix-flake";
+
   fleet.desktop._.environment._.niri._.xremap = {
     description = ''
       macOS-style keyboard shortcuts via xremap.
