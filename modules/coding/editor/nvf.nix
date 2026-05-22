@@ -199,19 +199,9 @@ in
       };
   };
 
-  # ── fleet aspect for den host/home composition ──────────────────────────
-  fleet.coding._.editors._.nvf = {
-    description = "Neovim built with nvf configuration framework";
-    homeManager =
-      { pkgs, ... }:
-      {
-        home.packages = [
-          (buildWrappedNeovim { inherit pkgs; })
-        ];
-      };
-  };
-
-  # ── Standalone package and app ────────────────────────────────────────
+  # ── Standalone package and app (memoized — single eval per system) ────
+  # Built once per system in perSystem and referenced from every user's
+  # home.packages, so 5 home-managers don't trigger 5 nvf module-tree evals.
   perSystem =
     { pkgs, system, ... }:
     let
@@ -228,4 +218,16 @@ in
         program = "${wrappedNeovim}/bin/nvim";
       };
     };
+
+  # ── fleet aspect for den host/home composition ──────────────────────────
+  fleet.coding._.editors._.nvf = {
+    description = "Neovim built with nvf configuration framework";
+    homeManager =
+      { pkgs, ... }:
+      {
+        home.packages = [
+          inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.nvf
+        ];
+      };
+  };
 }

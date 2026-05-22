@@ -30,6 +30,10 @@
         stickyNodes ? [ ],
         lingerUsers ? [ ],
         clockRate ? 48000,
+        # 256 is the safe default — Inferno/Dante TX timing on THEBATTLESHIP
+        # gets unstable below this (transmitter stopped + tx-lag drops).
+        # Drop to 128 only on hosts without netaudio in the graph, or live
+        # via `pw-buffer 128` once a session is actually playing audio.
         clockQuantum ? 256,
         clockMinQuantum ? 32,
         clockMaxQuantum ? 1024,
@@ -88,6 +92,23 @@
           { pkgs, lib, ... }:
           {
             security.rtkit.enable = true;
+
+            # nixpkgs' services.pipewire module adds a default
+            #   @pipewire memlock 4194304   (= 4 GiB)
+            # PAM applies the last matching limits.conf line, so for users
+            # in BOTH @audio and @pipewire (cody) this clamps RLIMIT_MEMLOCK
+            # at 4 GiB even though musnix's @audio entry is `unlimited`.
+            # With 192 GiB of RAM that's pointlessly tight for large sample
+            # libraries pinned via mlock(). Re-state @pipewire memlock as
+            # unlimited so the audio path wins regardless of group order.
+            security.pam.loginLimits = [
+              {
+                domain = "@pipewire";
+                item = "memlock";
+                type = "-";
+                value = "unlimited";
+              }
+            ];
 
             services.pipewire = {
               enable = true;
@@ -163,6 +184,8 @@
               SystemCallFilter = [
                 "@system-service"
                 "@clock"
+                # SCHED_FIFO / SCHED_RR / sched_setaffinity for the DSP graph.
+                "@resources"
               ];
               # Each link allocates a few file descriptors (event fds, shm
               # segments). With ~150+ static link-factory pins a 128-ch
@@ -170,7 +193,37 @@
               # PipeWire logs `error alloc buffers: Too many open files`.
               # 524288 is the upstream-recommended ceiling.
               LimitNOFILE = 524288;
+              # systemWide PipeWire runs as the `pipewire` system user with
+              # no PAM session, so neither rtkit nor security.pam.loginLimits
+              # ever grant SCHED_FIFO to the daemon's DSP threads. The
+              # symptom downstream is JACK/Reaper clients logging
+              # `jack: non-realtime threads` because the graph they connect
+              # to is itself SCHED_OTHER. Pin the rlimits on the unit
+              # directly and hand it CAP_SYS_NICE so module-rt can promote.
+              LimitRTPRIO = 95;
+              LimitMEMLOCK = "infinity";
+              LimitNICE = -19;
+              IOSchedulingClass = "realtime";
+              IOSchedulingPriority = 4;
+              AmbientCapabilities = [
+                "CAP_SYS_NICE"
+                "CAP_IPC_LOCK"
+              ];
+              CapabilityBoundingSet = [
+                "CAP_SYS_NICE"
+                "CAP_IPC_LOCK"
+              ];
             };
+
+            # PipeWire's rt.time.soft default is 5_000_000 µs. RTKit's
+            # default rttime-usec-max is 200_000 µs, so any client asking
+            # for SCHED_FIFO via the RTKit path (Reaper's bundled libjack
+            # fallback, Flatpak apps, etc.) gets denied with EPERM. Lift
+            # the cap so RTKit can honour the request.
+            systemd.services.rtkit-daemon.serviceConfig.ExecStart = [
+              ""
+              "${pkgs.rtkit}/libexec/rtkit-daemon --rttime-usec-max=2000000"
+            ];
 
             systemd.user.services.pipewire-system-bridge = {
               description = "Bridge system-wide PipeWire sockets into user runtime dir";
@@ -198,6 +251,41 @@
               coppwr
               crosspipe
               alsa-utils
+              # Runtime buffer-size switcher. `pw-buffer` with no args prints
+              # the current quantum/rate; `pw-buffer 64|128|256|512|1024`
+              # forces a new quantum without restarting PipeWire or Reaper.
+              # `pw-buffer reset` clears force-quantum and returns to the
+              # Nix-configured default. Quantum is in frames; latency in ms
+              # is roughly quantum / rate * 1000 (e.g. 128 @ 48 kHz = 2.67).
+              (writeShellScriptBin "pw-buffer" ''
+                set -euo pipefail
+                pw_meta="${pkgs.pipewire}/bin/pw-metadata"
+                case "''${1:-}" in
+                  "")
+                    echo "current settings:"
+                    "$pw_meta" -n settings 0 | grep -E 'clock\.(rate|quantum|force-)' || true
+                    echo
+                    echo "usage: pw-buffer <frames|reset>"
+                    echo "  frames: 32 64 128 256 512 1024 2048"
+                    echo "  reset : clear force-quantum, return to default (${toString clockQuantum})"
+                    ;;
+                  reset)
+                    "$pw_meta" -n settings 0 clock.force-quantum 0
+                    echo "force-quantum cleared"
+                    ;;
+                  *[!0-9]*|"")
+                    echo "error: invalid argument '$1'" >&2
+                    exit 1
+                    ;;
+                  *)
+                    q=$1
+                    "$pw_meta" -n settings 0 clock.force-quantum "$q"
+                    rate=$("$pw_meta" -n settings 0 | awk -F"'" '/clock.rate/{print $4; exit}')
+                    : "''${rate:=${toString clockRate}}"
+                    awk -v q="$q" -v r="$rate" 'BEGIN{printf "quantum=%d rate=%d  ~%.2f ms\n", q, r, q/r*1000}'
+                    ;;
+                esac
+              '')
             ];
           };
       };

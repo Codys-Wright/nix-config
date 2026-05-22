@@ -23,7 +23,7 @@
         kde = "plasma";
       };
     in
-    den.lib.parametric {
+    {
       includes = [
         <fleet.desktop._.environment/niri>
         <fleet.desktop._.environment/gnome>

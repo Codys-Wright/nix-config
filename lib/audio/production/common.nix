@@ -16,6 +16,12 @@ let
       wineWow64Packages.stable
       yabridge
       yabridgectl
+      # ZL Audio plugins (https://github.com/ZL-Audio) — modern open-source
+      # VST3/LV2/CLAP processors. zlsplitter is the multi-band split that
+      # zlequalizer + zlcompressor are designed to feed into.
+      zlequalizer
+      zlcompressor
+      zlsplitter
     ];
 
   mkHomePluginLinks =

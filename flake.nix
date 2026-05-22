@@ -28,6 +28,10 @@
     };
     den.url = "github:vic/den";
     deploy-rs.url = "github:serokell/deploy-rs";
+    dioxus-flake = {
+      url = "github:FastTrackStudios/Dioxus-Flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     disko = {
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -110,7 +114,6 @@
       url = "github:danth/stylix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    task.url = "path:/home/cody/Development/Task";
     wrapper-modules.url = "github:BirdeeHub/nix-wrapper-modules";
     wrappers.url = "github:lassulus/wrappers";
     xremap-flake.url = "github:xremap/nix-flake";

@@ -52,7 +52,7 @@ in
         else
           null;
     in
-    <den.lib.parametric> {
+    {
       inherit description;
       includes = [
         ({ user, ... }: userShell default user)

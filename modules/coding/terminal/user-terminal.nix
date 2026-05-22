@@ -37,13 +37,11 @@ let
 
 in
 {
-  fleet.coding._.user-terminal =
-    terminal:
-    <den.lib.parametric> {
-      inherit description;
-      includes = [
-        ({ user, ... }: userTerminal terminal user)
-        ({ home, ... }: userTerminal terminal home)
-      ];
-    };
+  fleet.coding._.user-terminal = terminal: {
+    inherit description;
+    includes = [
+      ({ user, ... }: userTerminal terminal user)
+      ({ home, ... }: userTerminal terminal home)
+    ];
+  };
 }

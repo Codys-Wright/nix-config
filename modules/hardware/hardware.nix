@@ -21,7 +21,7 @@
       cuda ? false,
       ...
     }:
-    den.lib.parametric {
+    {
       # Redistributable firmware (AMD GPU, WiFi, etc.) — needed by most hardware
       nixos.hardware.enableRedistributableFirmware = lib.mkDefault true;
 

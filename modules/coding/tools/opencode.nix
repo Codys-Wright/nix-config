@@ -62,7 +62,10 @@
           '';
         };
 
-        home.file.".local/bin/claude" = {
+        # Nix-managed claude-code wrapper. Lives at claude-nix so the
+        # Anthropic npm installer can keep its own ~/.local/bin/claude symlink
+        # for fast version bumps (npm i -g @anthropic-ai/claude-code).
+        home.file.".local/bin/claude-nix" = {
           executable = true;
           text = ''
             #!/usr/bin/env bash
