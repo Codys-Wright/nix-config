@@ -203,13 +203,9 @@ in
   # Built once per system in perSystem and referenced from every user's
   # home.packages, so 5 home-managers don't trigger 5 nvf module-tree evals.
   perSystem =
-    { pkgs, system, ... }:
+    { pkgs, ... }:
     let
-      pkgsUnfree = import inputs.nixpkgs {
-        inherit system;
-        config.allowUnfree = true;
-      };
-      wrappedNeovim = buildWrappedNeovim { pkgs = pkgsUnfree; };
+      wrappedNeovim = buildWrappedNeovim { inherit pkgs; };
     in
     {
       packages.nvf = wrappedNeovim;

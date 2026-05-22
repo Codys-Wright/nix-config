@@ -6,14 +6,7 @@
 }:
 {
   perSystem =
-    { pkgs, system, ... }:
-    let
-      # Create a pkgs with unfree allowed for the deploy shell
-      pkgsUnfree = import inputs.nixpkgs {
-        inherit system;
-        config.allowUnfree = true;
-      };
-    in
+    { pkgs, ... }:
     {
       # Default dev shell - general development tools
       devShells.default = pkgs.mkShell {
@@ -38,8 +31,8 @@
       };
 
       # Deploy shell - includes Terraform and deployment tools
-      devShells.deploy = pkgsUnfree.mkShell {
-        packages = with pkgsUnfree; [
+      devShells.deploy = pkgs.mkShell {
+        packages = with pkgs; [
           treefmt
           nixfmt
           shfmt

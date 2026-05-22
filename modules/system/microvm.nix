@@ -22,6 +22,9 @@
   ...
 }:
 {
+  flake-file.inputs.microvm.url = lib.mkDefault "github:microvm-nix/microvm.nix";
+  flake-file.inputs.microvm.inputs.nixpkgs.follows = "nixpkgs";
+
   fleet.system._.microvm = {
     description = "MicroVM for local testing — wraps any host config as a QEMU VM";
 

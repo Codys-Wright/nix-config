@@ -1,6 +1,14 @@
 # CLI tools facet - All command-line tools
-{ fleet, inputs, ... }:
 {
+  fleet,
+  inputs,
+  lib,
+  ...
+}:
+{
+  flake-file.inputs.hermes-agent.url = lib.mkDefault "github:Codys-Wright/hermes-agent/starcommand-nextcloud-v2026.5.7";
+  flake-file.inputs.hermes-agent.inputs.nixpkgs.follows = "nixpkgs";
+
   fleet.coding._.cli = {
     description = "All CLI development tools - atuin, btop, direnv, eza, fzf, just, pi-coding-agent, sesh, yazi, zoxide";
 
