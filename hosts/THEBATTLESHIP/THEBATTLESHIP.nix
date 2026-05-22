@@ -507,19 +507,36 @@
             "pci=nommconf"
           ];
 
-          # Disable Energy Efficient Ethernet on the I226-V — EEE interaction with
-          # the PCIe L1 substates errata is a common trigger for spontaneous link loss.
+          # Disable Energy Efficient Ethernet on the I226-V — EEE interaction
+          # with PCIe L1 substates errata triggers spontaneous link loss.
+          # The boot-time oneshot below covers the initial bring-up, and the
+          # udev rule re-applies EEE=off every time the kernel binds the
+          # interface (after a PCIe rescan, suspend/resume, or NM bouncing
+          # the link), since NetworkManager has been observed to re-enable EEE
+          # on its own activations.
           systemd.services."igc-disable-eee" = {
             description = "Disable EEE on Intel I226-V (enp11s0) to prevent PCIe link drops";
             after = [ "network-online.target" ];
             wants = [ "network-online.target" ];
             wantedBy = [ "multi-user.target" ];
-            script = "${pkgs.ethtool}/sbin/ethtool --set-eee enp11s0 eee off || true";
+            script = "${pkgs.ethtool}/bin/ethtool --set-eee enp11s0 eee off || true";
             serviceConfig = {
               Type = "oneshot";
               RemainAfterExit = true;
             };
           };
+
+          services.udev.extraRules = ''
+            # Re-disable EEE every time the igc driver binds an I226-V (vendor
+            # 8086, device 125c). Matches on add+change so it fires after PCIe
+            # rescans and NetworkManager link cycles.
+            ACTION=="add|change", SUBSYSTEM=="net", DRIVERS=="igc", ATTRS{vendor}=="0x8086", ATTRS{device}=="0x125c", RUN+="${pkgs.ethtool}/bin/ethtool --set-eee %k eee off"
+          '';
+
+          # ethtool is added alongside iw/tcpdump/etc in the dedicated
+          # environment.systemPackages block lower in this file (search for
+          # "ethtool" there). Keep that single definition to avoid a second
+          # mergeable assignment in the same module.
 
           nix.gc = {
             automatic = true;
@@ -1420,6 +1437,7 @@
             dsniff
             bettercap
             aircrack-ng
+            ethtool # I226-V EEE-off recovery + manual debugging
           ];
 
           # --- Dante / Inferno audio network configuration ---
