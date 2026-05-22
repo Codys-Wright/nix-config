@@ -3,6 +3,30 @@
 switch:
     @just switch-host "$(hostname)"
 
+# Switch only if the flake source has changed since the last successful switch.
+# Hashes git HEAD + uncommitted diff + flake.lock and stores the result in
+# ~/.cache/flake-last-switch-<host>. Re-runs the full switch only when the
+# hash changes; otherwise prints "no changes" and exits in well under a second.
+switch-if-changed:
+    @just switch-if-changed-host "$(hostname)"
+
+switch-if-changed-host host:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cache_dir="$HOME/.cache"
+    mkdir -p "$cache_dir"
+    hash_file="$cache_dir/flake-last-switch-{{host}}"
+    head_rev="$(git -C "$(git rev-parse --show-toplevel)" rev-parse HEAD)"
+    diff_hash="$(git -C "$(git rev-parse --show-toplevel)" diff HEAD | sha256sum | cut -d' ' -f1)"
+    lock_hash="$(sha256sum "$(git rev-parse --show-toplevel)/flake.lock" | cut -d' ' -f1)"
+    current_hash="$head_rev:$diff_hash:$lock_hash"
+    if [ -f "$hash_file" ] && [ "$(cat "$hash_file")" = "$current_hash" ]; then
+        echo "No flake changes since last switch — skipping."
+        exit 0
+    fi
+    just switch-host "{{host}}"
+    echo "$current_hash" > "$hash_file"
+
 # Switch to a specific host configuration
 # Automatically detects NixOS or Darwin and uses the appropriate command
 switch-host host:

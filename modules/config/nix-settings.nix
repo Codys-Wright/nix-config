@@ -14,6 +14,10 @@ let
           experimental-features = [
             "nix-command"
             "flakes"
+            # lazy-trees: skip copying flake source into /nix/store unless a build
+            # actually needs it. Cuts wall-clock time on every eval, especially when
+            # the working tree is dirty. Requires Nix >= 2.30.
+            "lazy-trees"
           ];
           trusted-users = [
             "root"
