@@ -14,10 +14,9 @@ let
           experimental-features = [
             "nix-command"
             "flakes"
-            # lazy-trees: skip copying flake source into /nix/store unless a build
-            # actually needs it. Cuts wall-clock time on every eval, especially when
-            # the working tree is dirty. Requires Nix >= 2.30.
-            "lazy-trees"
+            # NOTE: lazy-trees is Determinate-Nix-only (not upstream Nix). If you
+            # ever switch nix.package to inputs.determinate, add "lazy-trees" here
+            # for big wins on dirty-tree evals.
           ];
           trusted-users = [
             "root"
