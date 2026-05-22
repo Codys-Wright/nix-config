@@ -1,13 +1,14 @@
 {
   inputs,
   fleet,
+  den,
   __findFile,
   ...
 }:
 {
   den.hosts.x86_64-linux = {
     THEBATTLESHIP = {
-      description = "The Main System, ready for everyday battle";
+      description = "The Main System, ready for everyday battle (all users)";
       users.cody = {
         extraGroups = [
           "audio"
@@ -19,6 +20,23 @@
       users.guest = { };
       users.bri = { };
       users.carter = { };
+    };
+
+    # Fast-path variant: same machine, same hostname, same system aspect,
+    # but only the primary user's home is evaluated/built. Drops ~4 HM
+    # evaluations (bri/carter/guest/joshua) from every `just switch`.
+    # Use `just switch-all` to activate the full multi-user variant.
+    THEBATTLESHIP-cody = {
+      description = "THEBATTLESHIP — cody only (fast switch)";
+      hostName = "THEBATTLESHIP";
+      aspect = den.aspects.THEBATTLESHIP;
+      users.cody = {
+        extraGroups = [
+          "audio"
+          "davfs2"
+          "wireshark"
+        ];
+      };
     };
   };
 
