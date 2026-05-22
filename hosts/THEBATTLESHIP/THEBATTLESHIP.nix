@@ -309,14 +309,25 @@
             "92" = "92 - OUT92";
             "93" = "93 - OUT93";
             "94" = "94 - OUT94";
-            "95" = "95 - OUT95";
-            "96" = "96 - OUT96";
-            "97" = "97 - OUT97";
-            "98" = "98 - OUT98";
+            # 95-96: Reaper master output. Reaper's hardware outputs 95/96
+            # land here via the daw → daw_to_inferno → Inferno TX 1:1 map.
+            # Galaxy 32 RX 59/60 are renamed "DAW L/R" and subscribed to
+            # this pair.
+            "95" = "DAW L";
+            "96" = "DAW R";
+            # 97-98: System audio mix sent to Galaxy 32 RX 61/62 ("System L/R").
+            # Notifications are NOT mixed in at the Dante level — they mix
+            # into system_audio inside PipeWire before this TX, so the
+            # `games` sink (which shares TX 97/98 via studioRoutedSinks) is
+            # the clean, notification-free signal OBS captures for screen
+            # recordings.
+            "97" = "System L";
+            "98" = "System R";
             "99" = "99 - OUT99";
             "100" = "100 - OUT100";
-            "101" = "101 - OUT101";
-            "102" = "102 - OUT102";
+            # 101-102: chat / call audio → Galaxy 32 RX 63/64 ("Voice Chat L/R").
+            "101" = "Voice Chat L";
+            "102" = "Voice Chat R";
             "103" = "103 - OUT103";
             "104" = "104 - OUT104";
             "105" = "105 - OUT105";
@@ -410,11 +421,15 @@
                 }
               ];
             }
+            # System notifications are a sink-only node (no Dante TX). Its
+            # monitor feeds into system_audio so the user hears the chime
+            # alongside other system audio on the Dante speakers, but the
+            # `games` sink (which OBS records) doesn't see notifications
+            # because the mix happens upstream of the games tap.
             {
               name = "system_notifications";
               desc = "System Notifications";
-              txL = 99;
-              txR = 100;
+              feedsInto = "system_audio";
               fanout = [ ];
             }
             {
@@ -734,11 +749,12 @@
                 "node.dont-reconnect" = true;
               };
               mkRoutedSink =
-                {
+                s@{
                   name,
                   desc,
-                  txL,
-                  txR,
+                  txL ? null,
+                  txR ? null,
+                  feedsInto ? null,
                   fanout ? [ ],
                 }:
                 {
@@ -754,13 +770,29 @@
                       "monitor.channel-volumes" = true;
                       "node.pause-on-idle" = false;
                     };
-                    "playback.props" = dontAutoconnect // {
-                      "node.name" = "${name}_to_inferno";
-                      "node.description" = "${desc} → Inferno TX ${toString txL}/${toString txR}";
-                      "audio.channels" = 2;
-                      "audio.position" = numericPos 2;
-                      "node.passive" = true;
-                    };
+                    "playback.props" =
+                      dontAutoconnect
+                      // (
+                        if feedsInto != null then
+                          # No Dante TX — playback side is a dummy. The actual
+                          # local feed into the target sink is wired by the
+                          # studio-routing-links service via pw-link.
+                          {
+                            "node.name" = "${name}_sink_back";
+                            "node.description" = desc;
+                            "audio.channels" = 2;
+                            "audio.position" = numericPos 2;
+                            "node.passive" = true;
+                          }
+                        else
+                          {
+                            "node.name" = "${name}_to_inferno";
+                            "node.description" = "${desc} → Inferno TX ${toString txL}/${toString txR}";
+                            "audio.channels" = 2;
+                            "audio.position" = numericPos 2;
+                            "node.passive" = true;
+                          }
+                      );
                   };
                 };
               mkRoutedSource =
@@ -796,6 +828,37 @@
               routedSources = studioRoutedSources;
             in
             {
+              # libpipewire-jack auto-connects every JACK client output
+              # port to the *default Audio/Sink* during jack_client_open(),
+              # which is too early for any WirePlumber `node.rules` to
+              # influence. Pin the target via jack.rules so every JACK
+              # client lands on the `daw` 128-channel proxy sink. From
+              # there, studio-routing-links wires daw_to_inferno into
+              # specific Inferno TX channels (DAW L/R = TX 95/96).
+              extraConfig.jack."93-studio-jack-target" = {
+                "jack.properties" = {
+                  "node.target" = "daw";
+                };
+                "jack.rules" = [
+                  {
+                    matches = [
+                      { "application.process.binary" = "reaper"; }
+                      { "application.name" = "REAPER"; }
+                      { "node.name" = "REAPER"; }
+                    ];
+                    actions.update-props = {
+                      "node.target" = "daw";
+                      "target.object" = "daw";
+                      # Belt-and-suspenders: turn the JACK auto-connect off
+                      # for this client so even if `node.target` is ignored
+                      # by the shim, we don't get spurious Inferno-direct
+                      # links re-created on every port registration.
+                      "jack.connect" = false;
+                    };
+                  }
+                ];
+              };
+
               extraConfig.pipewire."93-studio-virtual-nodes" = {
                 "context.modules" = [
                   # 128-ch DAW pass-through for Reaper. Linked 1:1 into
@@ -811,12 +874,53 @@
                         "audio.channels" = 128;
                         "audio.position" = numericPos 128;
                         "node.pause-on-idle" = false;
+                        # Inferno sink sets priority.session = 2000 to win
+                        # default-sink election; that makes PipeWire's JACK
+                        # shim auto-connect every Reaper output directly to
+                        # Inferno sink, bypassing the `daw` proxy. Pin daw
+                        # to 3000 so Reaper lands here and the channel
+                        # renames on daw_to_inferno actually apply.
+                        "priority.session" = 3000;
+                        "priority.driver" = 3000;
                       };
                       "playback.props" = dontAutoconnect // {
                         "node.name" = "daw_to_inferno";
                         "audio.channels" = 128;
                         "audio.position" = numericPos 128;
                         "node.passive" = true;
+                      };
+                    };
+                  }
+                  # 128-ch DAW input proxy — the mirror of `daw` for the
+                  # capture direction. `daw_from_inferno` is the upstream
+                  # leg whose inputs studio-routing-links wires 1:1 from
+                  # Inferno source's capture ports, and `daw_inputs` is
+                  # the Audio/Source the DAW (Reaper / Ardour / Bitwig)
+                  # actually opens for recording. Keeping the daw side
+                  # isolated from the Inferno source node means the
+                  # daw-router rewriter has a single canonical target
+                  # for any erroneous reaper:in_N -> {Yamaha capture,
+                  # Inferno source, …} links.
+                  {
+                    name = "libpipewire-module-loopback";
+                    args = {
+                      "node.description" = "DAW Inputs";
+                      "capture.props" = dontAutoconnect // {
+                        "node.name" = "daw_from_inferno";
+                        "node.description" = "Inferno → DAW";
+                        "audio.channels" = 128;
+                        "audio.position" = numericPos 128;
+                        "node.passive" = true;
+                      };
+                      "playback.props" = {
+                        "node.name" = "daw_inputs";
+                        "node.description" = "DAW Inputs";
+                        "media.class" = "Audio/Source";
+                        "audio.channels" = 128;
+                        "audio.position" = numericPos 128;
+                        "node.pause-on-idle" = false;
+                        "priority.session" = 3000;
+                        "priority.driver" = 3000;
                       };
                     };
                   }
@@ -847,6 +951,28 @@
                   actions.update-props = {
                     "node.autoconnect" = false;
                     "node.dont-reconnect" = true;
+                  };
+                }
+              ];
+
+              # Pin Reaper (and other JACK clients with DSP role) to the
+              # `daw` Audio/Sink instead of letting wireplumber auto-route
+              # them to "Inferno sink" — which it does today because Inferno
+              # sink has priority.session = 2000 and is the only ≥128-channel
+              # sink in the graph. Sending Reaper through `daw` is what
+              # studioRoutedSinks / studio-routing-links assume: daw's
+              # capture is the entry point, `daw_to_inferno` is its proxy
+              # to Dante, and bypassing it means the channel renaming on
+              # daw_to_inferno never applies to Reaper's signal.
+              wireplumber.extraConfig."96-reaper-to-daw"."node.rules" = [
+                {
+                  matches = [
+                    { "node.name" = "REAPER"; }
+                    { "application.name" = "REAPER"; }
+                  ];
+                  actions.update-props = {
+                    "target.object" = "daw";
+                    "node.target" = "daw";
                   };
                 }
               ];
@@ -907,16 +1033,32 @@
             let
               sinkLinkPairs = builtins.concatMap (
                 s:
-                [
-                  {
-                    out = "${s.name}_to_inferno:output_1";
-                    inp = "Inferno sink:playback_${toString s.txL}";
-                  }
-                  {
-                    out = "${s.name}_to_inferno:output_2";
-                    inp = "Inferno sink:playback_${toString s.txR}";
-                  }
-                ]
+                (
+                  if (s.feedsInto or null) != null then
+                    # Local-only sink: its monitor pours into another sink's
+                    # capture input. No Dante TX is wired.
+                    [
+                      {
+                        out = "${s.name}:monitor_1";
+                        inp = "${s.feedsInto}:playback_1";
+                      }
+                      {
+                        out = "${s.name}:monitor_2";
+                        inp = "${s.feedsInto}:playback_2";
+                      }
+                    ]
+                  else
+                    [
+                      {
+                        out = "${s.name}_to_inferno:output_1";
+                        inp = "Inferno sink:playback_${toString s.txL}";
+                      }
+                      {
+                        out = "${s.name}_to_inferno:output_2";
+                        inp = "Inferno sink:playback_${toString s.txR}";
+                      }
+                    ]
+                )
                 ++ builtins.concatMap (f: [
                   {
                     out = "${s.name}:monitor_1";
@@ -938,11 +1080,42 @@
                   inp = "${s.name}_from_inferno:input_2";
                 }
               ]) studioRoutedSources;
+              # DAW channel remap: by default daw output N → Inferno TX N,
+              # but Reaper's master sits on its first stereo output pair
+              # (out 1/2). To make Reaper's master land on the named DAW
+              # L/R TX channels (TX 95/96), override entries 1 and 2 to
+              # cross-route. Other channels stay 1:1 so per-track Reaper
+              # routing to higher channel numbers (3-128) still maps to
+              # the equivalent Inferno TX index for Galaxy 32 to subscribe.
+              dawChannelMap =
+                i:
+                let
+                  n = i + 1;
+                in
+                if n == 1 then
+                  95
+                else if n == 2 then
+                  96
+                # Free up the original 95/96 slots (used to be OUT95/96)
+                # so we don't double-send when DAW L/R also maps here.
+                else if n == 95 then
+                  1
+                else if n == 96 then
+                  2
+                else
+                  n;
               dawLinkPairs = lib.genList (i: {
                 out = "daw_to_inferno:output_${toString (i + 1)}";
-                inp = "Inferno sink:playback_${toString (i + 1)}";
+                inp = "Inferno sink:playback_${toString (dawChannelMap i)}";
               }) 128;
-              allPairs = sinkLinkPairs ++ sourceLinkPairs ++ dawLinkPairs;
+              # daw_inputs: mirror of dawLinkPairs in the capture direction.
+              # Reverse the same channel map so that Reaper recording on
+              # daw_inputs input 1/2 reads from Inferno RX 95/96, etc.
+              dawInputLinkPairs = lib.genList (i: {
+                out = "Inferno source:capture_${toString (dawChannelMap i)}";
+                inp = "daw_from_inferno:input_${toString (i + 1)}";
+              }) 128;
+              allPairs = sinkLinkPairs ++ sourceLinkPairs ++ dawLinkPairs ++ dawInputLinkPairs;
               pwLink = "${pkgs.pipewire}/bin/pw-link";
               pwCli = "${pkgs.pipewire}/bin/pw-cli";
               linkCmds = lib.concatMapStringsSep "\n" (p: ''try_link "${p.out}" "${p.inp}"'') allPairs;
@@ -987,6 +1160,14 @@
               description = "Wire studio loopback nodes to specific Inferno channel pairs";
               after = [ "pipewire.service" ];
               wants = [ "pipewire.service" ];
+              # bindsTo + partOf means: a restart of pipewire.service
+              # restarts us, and a stop of pipewire.service stops us. Without
+              # this, manually restarting pipewire (or having activation do
+              # it after a config change) leaves the studio routing graph
+              # un-linked, which surfaces as Reaper opening a JACK client
+              # against a sink with no monitor port — endless reconnect loop.
+              bindsTo = [ "pipewire.service" ];
+              partOf = [ "pipewire.service" ];
               wantedBy = [ "multi-user.target" ];
               serviceConfig = {
                 Type = "oneshot";
@@ -994,6 +1175,205 @@
                 User = "pipewire";
                 Group = "pipewire";
                 ExecStart = linkScript;
+              };
+            };
+
+          # --- DAW link router ---
+          #
+          # pipewire-jack 1.6 has no per-client mechanism to redirect the
+          # `system:playback_*` alias — `is_port_default()` in
+          # pipewire-jack.c only consults the GLOBAL `default.audio.sink`
+          # metadata. REAPER (and other JACK DAWs) auto-connect their
+          # outputs to whatever 128-channel sink they enumerate first,
+          # which in our graph is the ALSA-backed `Inferno sink` and
+          # therefore bypasses the `daw` proxy + per-channel renames that
+          # daw_to_inferno applies (DAW L/R = TX 95/96, etc).
+          #
+          # Solution: a tiny rule-driven daemon that watches
+          # `pw-mon` for new Link events and rewrites any
+          #   <DAW_BINARY>:outN -> Inferno sink:playback_M
+          # link into the equivalent
+          #   <DAW_BINARY>:outN -> daw:playback_M
+          # connection. The match list is declarative — adding Ardour,
+          # Bitwig, etc. is one line each. Same rule applies in reverse
+          # (input direction) if/when DAWs auto-connect Inferno source.
+          systemd.services.daw-router =
+            let
+              dawBinaries = [
+                "reaper"
+                "ardour"
+                "bitwig-studio"
+                "Bitwig Studio"
+                "harrison-mixbus"
+                "qtractor"
+                "rosegarden"
+                "carla"
+              ];
+              # DAW isolation policy: a DAW client's only legal peers are
+              # the `daw` Audio/Sink (output side) and `daw_inputs`
+              # Audio/Source (capture side). ANY other connection — to
+              # Inferno sink/source, Yamaha TF capture, webcams, etc. —
+              # is treated as an erroneous JACK auto-connect and
+              # rewritten/dropped by daw-router.
+              dawOutputProxy = "daw";
+              dawInputProxy = "daw_inputs";
+              dawRouter = pkgs.writeShellScript "daw-router" ''
+                set -u
+                export PIPEWIRE_RUNTIME_DIR=/run/pipewire
+                pwLink=${pkgs.pipewire}/bin/pw-link
+                pwMon=${pkgs.pipewire}/bin/pw-mon
+                pwDump=${pkgs.pipewire}/bin/pw-dump
+
+                outProxy='${dawOutputProxy}'
+                inProxy='${dawInputProxy}'
+
+                # Map node-name -> application.process.binary from pw-dump
+                # JSON; pw-cli's text listing omits some props for JACK
+                # clients which broke the prior bash-only parser.
+                declare -A nodeBin
+                refresh_node_binaries() {
+                  nodeBin=()
+                  while IFS=$'\t' read -r name bin; do
+                    [ -n "$name" ] || continue
+                    [ -n "$bin" ] || continue
+                    nodeBin["$name"]="$bin"
+                  done < <(
+                    "$pwDump" Node 2>/dev/null \
+                      | ${pkgs.jq}/bin/jq -r '
+                          .[]
+                          | select(.info != null and .info.props != null)
+                          | [ .info.props["node.name"] // ""
+                            , .info.props["application.process.binary"] // ""
+                            ]
+                          | @tsv
+                        '
+                  )
+                }
+
+                is_daw_node() {
+                  local node="$1"
+                  local bin="''${nodeBin[$node]:-}"
+                  case "$bin" in
+                    ${lib.concatMapStringsSep "|" (b: ''"${b}"'') dawBinaries}) return 0 ;;
+                  esac
+                  # Fallback: well-known DAW node names. application.process.binary
+                  # can be empty for JACK clients launched inside FHS wrappers.
+                  case "$node" in
+                    REAPER|REAPER[0-9]*|"Bitwig Studio"|Ardour|ardour*|Qtractor|qtractor*) return 0 ;;
+                  esac
+                  return 1
+                }
+
+                # Extract the trailing integer from a port name. Handles
+                # both PipeWire-native ("playback_42", "input_7") and
+                # JACK-style port names ("out95", "in12") where the
+                # number isn't underscore-separated.
+                port_index() {
+                  local p="$1"
+                  # Strip everything up to the last run of digits.
+                  echo "$p" | ${pkgs.gnused}/bin/sed -nE 's/^.*[^0-9]([0-9]+)$/\1/p; t; s/^([0-9]+)$/\1/p'
+                }
+
+                rewrite_now() {
+                  refresh_node_binaries
+                  local pairs rewrites=0
+                  pairs=$("$pwLink" -lo 2>/dev/null \
+                    | ${pkgs.gawk}/bin/awk '
+                        /^[^[:space:]]/ { src=$0; next }
+                        /-> / {
+                          dst=$0; sub(/^[[:space:]]*\|-> /, "", dst);
+                          printf "%s\t%s\n", src, dst;
+                        }
+                      ')
+                  while IFS=$'\t' read -r src dst; do
+                    [ -n "$src" ] || continue
+                    [ -n "$dst" ] || continue
+                    local srcNode="''${src%%:*}" srcPort="''${src#*:}"
+                    local dstNode="''${dst%%:*}" dstPort="''${dst#*:}"
+
+                    # Output direction: DAW source -> anything other than the
+                    # daw proxy. Drop and re-target onto daw:playback_<N>.
+                    if is_daw_node "$srcNode" && [ "$dstNode" != "$outProxy" ]; then
+                      local n
+                      n=$(port_index "$srcPort")
+                      "$pwLink" -d "$src" "$dst" >/dev/null 2>&1 || true
+                      if [ -n "$n" ] && [ "$n" -eq "$n" ] 2>/dev/null \
+                         && "$pwLink" "$src" "$outProxy:playback_$n" >/dev/null 2>&1; then
+                        echo "daw-router: OUT $src ->/ $dst => $outProxy:playback_$n" >&2
+                      else
+                        echo "daw-router: OUT $src ->/ $dst (dropped)" >&2
+                      fi
+                      rewrites=$((rewrites + 1))
+                      continue
+                    fi
+
+                    # Input direction: anything other than the daw_inputs
+                    # source -> DAW node. Drop and re-target onto
+                    # daw_inputs:capture_<N>.
+                    if is_daw_node "$dstNode" && [ "$srcNode" != "$inProxy" ]; then
+                      local n
+                      n=$(port_index "$dstPort")
+                      "$pwLink" -d "$src" "$dst" >/dev/null 2>&1 || true
+                      if [ -n "$n" ] && [ "$n" -eq "$n" ] 2>/dev/null \
+                         && "$pwLink" "$inProxy:capture_$n" "$dst" >/dev/null 2>&1; then
+                        echo "daw-router: IN  $src /-> $dst => $inProxy:capture_$n" >&2
+                      else
+                        echo "daw-router: IN  $src /-> $dst (dropped)" >&2
+                      fi
+                      rewrites=$((rewrites + 1))
+                      continue
+                    fi
+                  done <<< "$pairs"
+
+                  if [ "$rewrites" -gt 0 ]; then
+                    echo "daw-router: $rewrites rewrites this pass" >&2
+                  fi
+                }
+
+                # Initial pass, then watch for relevant pw-mon events.
+                # We only rescan when a *Link* is added/changed/removed,
+                # not on every node/port event — pw-mon's event stream is
+                # constant chatter from Inferno mDNS / etc and rescanning
+                # on every line burns 100% CPU.
+                rewrite_now
+                last_run=$(date +%s)
+                # pw-mon prints multi-line records:
+                #   added:
+                #   \tid: 123
+                #   \ttype: PipeWire:Interface:Link/3
+                # We can't easily filter to Link-only events without a
+                # full parser, so just fire on every event header — the
+                # 3 s debounce below caps the actual rescan rate.
+                "$pwMon" 2>/dev/null \
+                  | ${pkgs.gawk}/bin/awk '/^(added|changed|removed):/{print; fflush()}' \
+                  | while read -r _evt; do
+                      now=$(date +%s)
+                      # Hard debounce: at most one rescan every 3 seconds.
+                      # The libpipewire-jack auto-connect happens in bursts
+                      # (REAPER registers 128 ports + connects them in a
+                      # few hundred ms), so 3s catches the whole burst with
+                      # one rewrite pass.
+                      if [ $((now - last_run)) -ge 3 ]; then
+                        rewrite_now
+                        last_run=$now
+                      fi
+                    done
+              '';
+            in
+            {
+              description = "Rewrite DAW JACK auto-connects from Inferno sink onto the daw proxy";
+              after = [ "pipewire.service" ];
+              wants = [ "pipewire.service" ];
+              bindsTo = [ "pipewire.service" ];
+              partOf = [ "pipewire.service" ];
+              wantedBy = [ "multi-user.target" ];
+              serviceConfig = {
+                Type = "simple";
+                User = "pipewire";
+                Group = "pipewire";
+                Restart = "on-failure";
+                RestartSec = 2;
+                ExecStart = dawRouter;
               };
             };
 
@@ -1016,7 +1396,6 @@
           };
           environment.systemPackages = with pkgs; [
             iw
-            inputs.task.packages.${pkgs.stdenv.hostPlatform.system}.task-cli
             hostapd
             dnsmasq
             tcpdump

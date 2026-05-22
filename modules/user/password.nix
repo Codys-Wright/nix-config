@@ -39,7 +39,7 @@
       method = config.method;
       value = config.value;
     in
-    den.lib.parametric {
+    {
       inherit description;
       includes = [
         (

@@ -25,7 +25,7 @@
       shell ? { },
       ...
     }:
-    den.lib.parametric {
+    {
       includes = [
         # CLI tools
         <fleet.coding/cli>

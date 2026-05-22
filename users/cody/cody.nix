@@ -133,6 +133,19 @@
           shell = {
             default = "nushell";
           };
+          languages = [
+            "rust"
+            "typescript"
+            "python"
+          ];
+          tools = [
+            "android"
+            "dioxus"
+            "flyctl"
+            "reverse-engineering"
+            "opencode"
+            "podman"
+          ];
         })
         (fleet.git-identity {
           name = "Cody Wright";

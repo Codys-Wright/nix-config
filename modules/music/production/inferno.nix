@@ -178,6 +178,15 @@
                           "node.suspend-on-idle" = false;
                           "node.always-process" = true;
                           "object.linger" = true;
+                          # Hide Inferno from JACK clients — Reaper / other
+                          # JACK apps should always route through a higher-
+                          # level proxy sink (the host's `daw` 128-ch
+                          # loopback) so per-host channel routing rules
+                          # apply. Without this, libpipewire-jack auto-
+                          # connects every JACK output port to Inferno
+                          # sink's playback_N directly, bypassing the
+                          # daw_to_inferno indirection.
+                          "jack.show" = false;
                         };
                       }
                       {
@@ -193,6 +202,7 @@
                           "audio.channels" = channels;
                           "audio.position" = positions;
                           "priority.session" = 1900;
+                          "jack.show" = false;
                           "session.suspend-timeout-seconds" = 0;
                           "node.pause-on-idle" = false;
                           "node.suspend-on-idle" = false;

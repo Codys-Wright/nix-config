@@ -28,6 +28,17 @@
           gwenview
           okular
         ];
+
+        # drkonqi-coredump-launcher SEGV-loops on some crashes and floods
+        # the user systemd manager with transient units until the bus wedges
+        # ("Cannot add name, manager has too many units"). Mask the launcher;
+        # Plasma's on-demand crash dialog (drkonqi proper, via dbus) still works.
+        systemd.user.services."drkonqi-coredump-launcher@".enable = false;
+        systemd.user.sockets."drkonqi-coredump-launcher".enable = false;
+
+        systemd.user.extraConfig = ''
+          DefaultTasksMax=16384
+        '';
       };
 
     homeManager =

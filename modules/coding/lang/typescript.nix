@@ -83,7 +83,7 @@
             stylelint
 
             # CSS tooling
-            tailwindcss
+            tailwindcss_4
 
             bun
 
