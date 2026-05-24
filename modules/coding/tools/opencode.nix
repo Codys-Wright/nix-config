@@ -62,10 +62,15 @@
           '';
         };
 
-        home.file.".local/bin/claude" = {
+        # Fleet/agent claude: nix-pinned claude-code wrapped with forgejo-env,
+        # installed under a distinct name and config dir so it never collides
+        # with the user's native auto-updating `claude` (~/.local/bin/claude,
+        # config in ~/.claude). The native installer keeps that path untouched.
+        home.file.".local/bin/claude-fleet" = {
           executable = true;
           text = ''
             #!/usr/bin/env bash
+            export CLAUDE_CONFIG_DIR="''${CLAUDE_CONFIG_DIR:-$HOME/.config/claude-fleet}"
             if [[ -x "$HOME/.local/bin/forgejo-env" ]]; then
               exec "$HOME/.local/bin/forgejo-env" ${pkgs.claude-code}/bin/claude "$@"
             fi
@@ -75,7 +80,9 @@
 
         home.packages = with pkgs; [
           opencode
-          claude-code
+          # claude-code intentionally not in PATH: the claude-fleet wrapper
+          # above invokes it by absolute store path, so a bare `claude` in the
+          # profile stays the user's native auto-updating install.
 
           # amazon-q-cli
           # aider-chat
