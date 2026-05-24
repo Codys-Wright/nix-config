@@ -66,6 +66,18 @@
                 hostname = "100.65.190.11";
                 user = "root";
               };
+              # Forgejo git access. The Forgejo SSH login user is `forgejo`
+              # (no `git` user exists), so any clone of
+              # forgejo@git.starcommand.live:codywright/<repo>.git works, and a
+              # bare git.starcommand.live host resolves to the forgejo user too.
+              # Hostname stays DNS-resolved per machine (10G LAN on THEBATTLESHIP,
+              # public/tunnel elsewhere). Keys are already registered on the
+              # codywright account for both this host and voyager.
+              "git.starcommand.live" = {
+                hostname = "git.starcommand.live";
+                user = "forgejo";
+                identityFile = "~/.ssh/id_ed25519";
+              };
             };
           };
 
