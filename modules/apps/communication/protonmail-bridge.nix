@@ -27,13 +27,15 @@
   fleet.apps._.communications._.protonmail-bridge = {
     description = "ProtonMail Bridge — local IMAP/SMTP proxy for Proton Mail";
 
+    # ProtonMail Bridge relies on linux-only systemd user services; omit the
+    # whole aspect on darwin (e.g. voyager) so the shared cody aspect evaluates.
     homeManager =
       {
         lib,
         pkgs,
         ...
       }:
-      {
+      lib.mkIf pkgs.stdenv.isLinux {
         # Also expose pass + gnupg in the interactive shell PATH so
         # `protonmail-bridge --cli` (run by the user for login) can find
         # the keychain helper. The systemd service gets them via
