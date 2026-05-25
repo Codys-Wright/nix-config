@@ -56,12 +56,9 @@
                 user = "root";
                 identityFile = "~/.ssh/id_ed25519";
               };
-              "THEBATTLESHIP" = {
-                host = "THEBATTLESHIP thebattleship thebattleship-1";
-                hostname = "thebattleship-1";
-                user = "cody";
-                identityFile = "~/.ssh/id_ed25519";
-              };
+              # THEBATTLESHIP <-> voyager peer reachability (10G LAN / home LAN /
+              # Tailscale) is handled by the Match-exec tiers in extraConfig below,
+              # so no static THEBATTLESHIP host block here.
               "electric" = {
                 hostname = "100.65.190.11";
                 user = "root";
@@ -79,6 +76,32 @@
                 identityFile = "~/.ssh/id_ed25519";
               };
             };
+
+            # Peer reachability between THEBATTLESHIP and voyager, in priority
+            # order: 10G hardwired (10.10) -> home LAN (192) -> Tailscale
+            # MagicDNS (works across networks). Each Match-exec probes a port
+            # with a 1s timeout; the first reachable tier sets HostName (ssh
+            # uses the first value it sees), otherwise it falls through to the
+            # Tailscale FQDN. `nc` is /usr/bin/nc on macOS and in PATH on NixOS.
+            extraConfig = ''
+              Match host voyager exec "nc -z -w1 10.10.10.186 22 2>/dev/null"
+                HostName 10.10.10.186
+              Match host voyager exec "nc -z -w1 192.168.0.132 22 2>/dev/null"
+                HostName 192.168.0.132
+              Host voyager
+                HostName voyager.tail666c4b.ts.net
+                User cody
+                IdentityFile ~/.ssh/id_ed25519
+
+              Match host thebattleship,THEBATTLESHIP,thebattleship-1 exec "nc -z -w1 10.10.10.10 22 2>/dev/null"
+                HostName 10.10.10.10
+              Match host thebattleship,THEBATTLESHIP,thebattleship-1 exec "nc -z -w1 192.168.0.33 22 2>/dev/null"
+                HostName 192.168.0.33
+              Host thebattleship THEBATTLESHIP thebattleship-1
+                HostName thebattleship.tail666c4b.ts.net
+                User cody
+                IdentityFile ~/.ssh/id_ed25519
+            '';
           };
 
           # Firefox WebApps configuration
