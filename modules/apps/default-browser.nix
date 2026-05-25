@@ -21,9 +21,11 @@ in
           or (throw "default-browser: unknown browser '${browser}'. Valid options: ${validOptions}");
     in
     {
+      # xdg.mimeApps is a linux-only home-manager module; omit it entirely on
+      # darwin (e.g. voyager) so the shared cody aspect still evaluates there.
       homeManager =
-        { ... }:
-        {
+        { pkgs, ... }:
+        lib.mkIf pkgs.stdenv.isLinux {
           xdg.mimeApps = {
             enable = true;
             defaultApplications = {
