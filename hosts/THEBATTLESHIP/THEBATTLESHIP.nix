@@ -1,7 +1,6 @@
 {
   inputs,
   fleet,
-  den,
   __findFile,
   ...
 }:
@@ -20,23 +19,6 @@
       users.guest = { };
       users.bri = { };
       users.carter = { };
-    };
-
-    # Fast-path variant: same machine, same hostname, same system aspect,
-    # but only the primary user's home is evaluated/built. Drops ~4 HM
-    # evaluations (bri/carter/guest/joshua) from every `just switch`.
-    # Use `just switch-all` to activate the full multi-user variant.
-    THEBATTLESHIP-cody = {
-      description = "THEBATTLESHIP — cody only (fast switch)";
-      hostName = "THEBATTLESHIP";
-      aspect = den.aspects.THEBATTLESHIP;
-      users.cody = {
-        extraGroups = [
-          "audio"
-          "davfs2"
-          "wireshark"
-        ];
-      };
     };
   };
 
@@ -62,6 +44,7 @@
 
         <fleet/gaming>
         <fleet/apps>
+        (fleet.apps._.davinci-resolve { studio = true; })
         # controller-split bundles polkit + sudoers + InputPlumber config +
         # the launch-as / steam-as equivalents. Replaces the three modules
         # that used to live here (launch-as, inputplumber, coop-launcher).
@@ -86,6 +69,16 @@
         (fleet.music._.production._.statime {
           interface = "enp12s0";
           preferredLeader = "AA-4202524000109";
+          # MUST stay "debug" (or "trace"): at "warn" this statime fork loses a
+          # startup race — it hits the announce-receipt timeout and self-promotes
+          # to a PTPv1 master (unimplemented stub) before processing the leader's
+          # first Sync, so the clock never locks and no Dante audio flows. The
+          # extra per-packet logging delay lets the Sync win the race. Heisenbug.
+          loglevel = "debug";
+          # When the watchdog recovers a lost PTP lock, re-open the Inferno
+          # PipeWire node against the now-valid clock (otherwise it stays frozen
+          # in "init"). studio-routing-links is partOf wireplumber and re-wires.
+          reinitOnRecovery = [ "wireplumber.service" ];
         })
         (fleet.music._.production._.inferno {
           bindIp = "10.10.10.10";
@@ -1193,16 +1186,27 @@
             in
             {
               description = "Wire studio loopback nodes to specific Inferno channel pairs";
-              after = [ "pipewire.service" ];
+              after = [
+                "pipewire.service"
+                "wireplumber.service"
+              ];
               wants = [ "pipewire.service" ];
-              # bindsTo + partOf means: a restart of pipewire.service
-              # restarts us, and a stop of pipewire.service stops us. Without
-              # this, manually restarting pipewire (or having activation do
-              # it after a config change) leaves the studio routing graph
-              # un-linked, which surfaces as Reaper opening a JACK client
-              # against a sink with no monitor port — endless reconnect loop.
-              bindsTo = [ "pipewire.service" ];
-              partOf = [ "pipewire.service" ];
+              # bindsTo + partOf means: a restart of these services restarts
+              # us, and a stop stops us. Without this, restarting pipewire OR
+              # wireplumber (including the studio-clock-ready / watchdog
+              # re-init) leaves the studio routing graph un-linked — which
+              # surfaces as silent Dante TX (loopback->Inferno links stuck in
+              # "init") and Reaper reconnect loops. wireplumber is included
+              # because re-initialising the Inferno node is done by bouncing
+              # wireplumber, and that drops every pw-link it had made.
+              bindsTo = [
+                "pipewire.service"
+                "wireplumber.service"
+              ];
+              partOf = [
+                "pipewire.service"
+                "wireplumber.service"
+              ];
               wantedBy = [ "multi-user.target" ];
               serviceConfig = {
                 Type = "oneshot";
@@ -1212,6 +1216,45 @@
                 ExecStart = linkScript;
               };
             };
+
+          # --- Clock-ready re-init ---
+          #
+          # PipeWire opens the Inferno ALSA node at boot, before statime has
+          # locked the Dante PTP clock. Opened against a missing/invalid clock,
+          # the node comes up frozen ("init" links, silent TX) and never
+          # recovers on its own. So once statime is locked, bounce wireplumber
+          # once: the Inferno node re-opens against the valid clock and
+          # studio-routing-links (partOf wireplumber) re-wires the channels.
+          # This is the one manual step that fixed a total Dante outage,
+          # automated.
+          systemd.services.studio-clock-ready = {
+            description = "Re-init the audio session once the Dante PTP clock is locked";
+            after = [
+              "statime-inferno.service"
+              "pipewire.service"
+              "wireplumber.service"
+            ];
+            wants = [ "statime-inferno.service" ];
+            wantedBy = [ "multi-user.target" ];
+            serviceConfig = {
+              Type = "oneshot";
+              RemainAfterExit = true;
+              ExecStart = pkgs.writeShellScript "studio-clock-ready" ''
+                jctl=${pkgs.systemd}/bin/journalctl
+                sctl=${pkgs.systemd}/bin/systemctl
+                # Wait (up to ~2min) until statime is emitting Measurement
+                # lines, i.e. locked as a PTP follower.
+                for i in $(seq 1 60); do
+                  if [ "$("$jctl" -u statime-inferno.service --since '8 seconds ago' -o cat | grep -c 'Measurement:')" -gt 0 ]; then
+                    break
+                  fi
+                  sleep 2
+                done
+                # Re-open the Inferno node against the now-valid clock.
+                "$sctl" restart wireplumber.service
+              '';
+            };
+          };
 
           # --- DAW link router ---
           #
