@@ -1209,7 +1209,17 @@
               ];
               wantedBy = [ "multi-user.target" ];
               serviceConfig = {
-                Type = "oneshot";
+                # simple, NOT oneshot: linkScript can sleep for many minutes
+                # when Inferno nodes are missing (60s node wait + 10s of
+                # retries per link pair). As oneshot that whole wait lives
+                # inside the start job, blocking multi-user.target — which
+                # wedges every nixos-rebuild switch (pipewire restart →
+                # partOf restarts us → switch waits) and marks the unit
+                # failed if interrupted. simple + RemainAfterExit keeps the
+                # partOf/bindsTo re-wire semantics (unit stays "active
+                # (exited)" after the script finishes) without ever holding
+                # a start job open.
+                Type = "simple";
                 RemainAfterExit = true;
                 User = "pipewire";
                 Group = "pipewire";
