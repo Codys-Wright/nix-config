@@ -161,6 +161,7 @@
 
         cody.dots
         cody.fish
+        cody.secrets
         <fleet/apple-fonts>
         <fleet.coding/ghidra>
         <fleet.coding._.tools/game-dev>
