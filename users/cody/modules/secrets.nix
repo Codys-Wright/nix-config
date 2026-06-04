@@ -9,6 +9,7 @@
       { config, lib, ... }:
       let
         flyTokenPath = config.sops.secrets."cody/fly/api_token".path;
+        codebergTokenPath = config.sops.secrets."cody/codeberg/api_token".path;
         codebergKeyPath = "${config.home.homeDirectory}/.ssh/codeberg_ed25519";
       in
       {
@@ -26,6 +27,8 @@
           };
           # fly.io deploy/API token — exported as FLY_API_TOKEN by shells below
           "cody/fly/api_token" = { };
+          # Codeberg API token — exported as CODEBERG_TOKEN for tea/fj/berg
+          "cody/codeberg/api_token" = { };
         };
 
         programs.ssh.matchBlocks."codeberg.org" = {
@@ -41,10 +44,16 @@
           if ("${flyTokenPath}" | path exists) {
             $env.FLY_API_TOKEN = (open --raw "${flyTokenPath}" | str trim)
           }
+          if ("${codebergTokenPath}" | path exists) {
+            $env.CODEBERG_TOKEN = (open --raw "${codebergTokenPath}" | str trim)
+          }
         '';
         programs.fish.shellInit = ''
           if test -r "${flyTokenPath}"
             set -gx FLY_API_TOKEN (string trim < "${flyTokenPath}")
+          end
+          if test -r "${codebergTokenPath}"
+            set -gx CODEBERG_TOKEN (string trim < "${codebergTokenPath}")
           end
         '';
       };
