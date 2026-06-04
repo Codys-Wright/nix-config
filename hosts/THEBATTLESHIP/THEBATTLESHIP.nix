@@ -403,6 +403,20 @@
           ];
         })
 
+        # Second Codeberg runner, registered to the org rather than the
+        # codywright account. Same docker-only label policy.
+        (fleet.selfhost._.forgejo-runner {
+          url = "https://codeberg.org/";
+          name = "codeberg-org";
+          uuidKey = "codeberg-org-runner-uuid";
+          tokenKey = "codeberg-org-runner-token";
+          tokenSopsFile = ./secrets.yaml;
+          labels = [
+            "docker:docker://node:lts"
+            "ubuntu-latest:docker://catthehacker/ubuntu:act-latest"
+          ];
+        })
+
         <fleet.system/avahi>
         <fleet.system/virtualization>
         (fleet.deploy { ip = "100.68.255.30"; })
