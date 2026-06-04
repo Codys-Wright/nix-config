@@ -101,7 +101,12 @@
                       wants = [ "statime-inferno.service" ];
                       wantedBy = [ "multi-user.target" ];
                       serviceConfig = {
-                        Type = "oneshot";
+                        # simple, NOT oneshot: the retry loop below can run for
+                        # 3 minutes, and a oneshot start job blocks
+                        # multi-user.target — which wedges every
+                        # nixos-rebuild switch until the loop finishes (and
+                        # marks the unit failed if interrupted).
+                        Type = "simple";
                         ExecStart = pkgs.writeShellScript "dante-preferred-leader" ''
                           # Retry until the leader device answers. A Dante device
                           # absent at boot would otherwise never get locked (the
@@ -125,7 +130,10 @@
                       description = "Restart Statime if it loses PTP lock (self-promotes to broken PTPv1 master)";
                       after = [ "statime-inferno.service" ];
                       serviceConfig = {
-                        Type = "oneshot";
+                        # simple so the up-to-75s recovery loop never holds a
+                        # start job open (oneshot start jobs block switches
+                        # and go "failed" when interrupted).
+                        Type = "simple";
                         ExecStart = pkgs.writeShellScript "statime-watchdog" ''
                           jctl=${pkgs.systemd}/bin/journalctl
                           sctl=${pkgs.systemd}/bin/systemctl
@@ -137,7 +145,7 @@
                             exit 0
                           fi
                           echo "Statime not locked; restarting statime-inferno."
-                          "$sctl" restart statime-inferno.service
+                          "$sctl" restart statime-inferno.service || true
                           relocked=0
                           for i in $(seq 1 20); do
                             sleep 2
