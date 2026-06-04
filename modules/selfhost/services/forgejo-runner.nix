@@ -20,9 +20,19 @@
       # is one-time: on first start, the runner consumes it and stores its
       # persistent runner secret in /var/lib/gitea-runner/<instance>/.runner.
       tokenKey ? "forgejo/runner_token",
+      # SOPS-encrypted key holding a pre-created runner's UUID (Codeberg
+      # "Create runner" flow). When set, registration is skipped entirely:
+      # the daemon connects with --uuid/--token-url (forgejo-runner ≥ 9)
+      # and tokenKey holds the runner secret shown at creation time, not a
+      # registration token.
+      uuidKey ? null,
       # Path under hosts/<host>/secrets.yaml — defaults to the same path,
       # matches the conventional `cody/...` style of other secrets here.
       tokenSopsFile ? null,
+      # Container engine backing the `docker://` labels: "podman" (default)
+      # or "docker". Podman talks via its docker-compatible API socket at
+      # /run/podman/podman.sock — no Docker daemon needed.
+      backend ? "podman",
       # Labels exposed to workflows via `runs-on:`.
       # Defaults pick host-mode for nix/native and Docker-mode for the
       # GitHub-compat `ubuntu-latest` label so third-party actions work.
@@ -67,12 +77,50 @@
           pkgs,
           ...
         }:
-        {
-          # The runner needs Docker to back the `ubuntu-latest:docker://…`
-          # label. The `host` labels run jobs directly on the box and don't
+        let
+          # Shared runner settings (config.yml shape) for both flows.
+          runnerSettings = {
+            log.level = "info";
+            runner = {
+              capacity = capacity;
+              timeout = timeout;
+              # Don't pre-pull every label's image at startup — saves
+              # disk and time when the runner first comes up.
+              fetch_timeout = "10s";
+              fetch_interval = "5s";
+            };
+            cache = {
+              enabled = true;
+              dir = "/var/lib/gitea-runner/${name}/cache";
+            };
+            container = {
+              # Run docker-backed jobs against the configured engine, no
+              # privileged mode by default.
+              privileged = false;
+              network = "bridge";
+              # Mount the runner's nix store as read-only into containers
+              # so nix-based actions can reuse the host's binary cache.
+              options = "-v /nix/store:/nix/store:ro";
+            }
+            // lib.optionalAttrs (backend == "podman") {
+              # Podman's docker-compatible API socket (root podman,
+              # group-gated to `podman`, which gitea-runner joins below).
+              docker_host = "unix:///run/podman/podman.sock";
+            };
+            host = {
+              # Workdir for host-label jobs.
+              workdir_parent = "/var/lib/gitea-runner/${name}/work";
+            };
+          };
+        in
+        lib.mkMerge [
+          {
+          # The runner needs a container engine to back the `docker://…`
+          # labels. The `host` labels run jobs directly on the box and don't
           # need it, but enabling it here is the path of least surprise so
           # any imported workflow that says `runs-on: ubuntu-latest` works.
-          virtualisation.docker.enable = lib.mkDefault true;
+          virtualisation.docker.enable = lib.mkIf (backend == "docker") (lib.mkDefault true);
+          virtualisation.podman.enable = lib.mkIf (backend == "podman") (lib.mkDefault true);
 
           # Pre-create the runner user/group so the SOPS owner reference
           # below resolves at activation time. The gitea-actions-runner
@@ -84,70 +132,21 @@
             group = "gitea-runner";
             description = "Forgejo Actions runner";
             home = "/var/lib/gitea-runner";
-            # Add docker so this user can spawn `runs-on: ubuntu-latest`
-            # jobs in the host's Docker daemon.
-            extraGroups = [ "docker" ];
+            # Engine socket access so this user can spawn `runs-on:
+            # ubuntu-latest` jobs (podman socket is group-gated to `podman`,
+            # docker's to `docker`).
+            extraGroups = [ backend ];
           };
           users.groups.gitea-runner = { };
 
-          # Registration token (one-time use). SOPS-encrypted.
-          #
-          # The nixpkgs gitea-actions-runner module consumes `tokenFile` as a
-          # systemd EnvironmentFile and expects it to define TOKEN=..., not to
-          # contain the raw registration token. Keep the raw secret private, then
-          # render a tiny env file with the sops-nix placeholder substitution.
+          # Runner token. SOPS-encrypted. Register flow: one-time
+          # registration token. UUID flow: the pre-created runner's secret.
           sops.secrets.${tokenKey} = {
             sopsFile = lib.mkIf (tokenSopsFile != null) tokenSopsFile;
             owner = "gitea-runner";
             group = "gitea-runner";
             mode = "0400";
             restartUnits = [ "gitea-runner-${name}.service" ];
-          };
-          sops.templates."forgejo-runner-${name}-token-env" = {
-            content = ''
-              TOKEN=${config.sops.placeholder.${tokenKey}}
-            '';
-            owner = "gitea-runner";
-            group = "gitea-runner";
-            mode = "0400";
-            restartUnits = [ "gitea-runner-${name}.service" ];
-          };
-
-          services.gitea-actions-runner = {
-            package = pkgs.forgejo-runner;
-            instances.${name} = {
-              enable = true;
-              inherit name url labels;
-              tokenFile = config.sops.templates."forgejo-runner-${name}-token-env".path;
-              settings = {
-                log.level = "info";
-                runner = {
-                  capacity = capacity;
-                  timeout = timeout;
-                  # Don't pre-pull every label's image at startup — saves
-                  # disk and time when the runner first comes up.
-                  fetch_timeout = "10s";
-                  fetch_interval = "5s";
-                };
-                cache = {
-                  enabled = true;
-                  dir = "/var/lib/gitea-runner/${name}/cache";
-                };
-                container = {
-                  # Run docker-backed jobs as the host's Docker daemon, no
-                  # privileged mode by default.
-                  privileged = false;
-                  network = "bridge";
-                  # Mount the runner's nix store as read-only into containers
-                  # so nix-based actions can reuse the host's binary cache.
-                  options = "-v /nix/store:/nix/store:ro";
-                };
-                host = {
-                  # Workdir for `runs-on: nix:host` / `battleship:host` jobs.
-                  workdir_parent = "/var/lib/gitea-runner/${name}/work";
-                };
-              };
-            };
           };
 
           # Cgroup + scheduling priority. Lets the runner burst to `capacity`
@@ -188,6 +187,78 @@
             # .runner and .labels during registration.
             "Z /var/lib/gitea-runner             0750 gitea-runner gitea-runner -"
           ];
-        };
+          }
+
+          # ── Register flow ────────────────────────────────────────────────
+          # Classic registration-token flow via the nixpkgs module.
+          (lib.mkIf (uuidKey == null) {
+            # The nixpkgs gitea-actions-runner module consumes `tokenFile` as a
+            # systemd EnvironmentFile and expects it to define TOKEN=..., not to
+            # contain the raw registration token. Keep the raw secret private,
+            # then render a tiny env file with sops-nix placeholder substitution.
+            sops.templates."forgejo-runner-${name}-token-env" = {
+              content = ''
+                TOKEN=${config.sops.placeholder.${tokenKey}}
+              '';
+              owner = "gitea-runner";
+              group = "gitea-runner";
+              mode = "0400";
+              restartUnits = [ "gitea-runner-${name}.service" ];
+            };
+
+            services.gitea-actions-runner = {
+              package = pkgs.forgejo-runner;
+              instances.${name} = {
+                enable = true;
+                inherit name url labels;
+                tokenFile = config.sops.templates."forgejo-runner-${name}-token-env".path;
+                settings = runnerSettings;
+              };
+            };
+          })
+
+          # ── Pre-created (UUID) flow ──────────────────────────────────────
+          # Codeberg's "Create runner" UI hands out a UUID + secret; there is
+          # no registration step. Run the daemon directly with
+          # --uuid/--token-url. Both values are read from sops at runtime so
+          # neither lands in the nix store.
+          (lib.mkIf (uuidKey != null) {
+            sops.secrets.${uuidKey} = {
+              sopsFile = lib.mkIf (tokenSopsFile != null) tokenSopsFile;
+              owner = "gitea-runner";
+              group = "gitea-runner";
+              mode = "0400";
+              restartUnits = [ "gitea-runner-${name}.service" ];
+            };
+
+            systemd.services."gitea-runner-${name}" = {
+              description = "Forgejo Actions runner for ${url} (pre-registered)";
+              wantedBy = [ "multi-user.target" ];
+              after = [
+                "network-online.target"
+                (if backend == "podman" then "podman.socket" else "docker.service")
+              ];
+              wants = [ "network-online.target" ];
+              serviceConfig = {
+                ExecStart = pkgs.writeShellScript "forgejo-runner-${name}-daemon" ''
+                  exec ${lib.getExe pkgs.forgejo-runner} daemon \
+                    --config ${
+                      pkgs.writeText "forgejo-runner-${name}-config.json" (
+                        # JSON is valid YAML; forgejo-runner reads it fine.
+                        builtins.toJSON (runnerSettings // { runner = runnerSettings.runner // { inherit labels; }; })
+                      )
+                    } \
+                    --url ${url} \
+                    --uuid "$(cat ${config.sops.secrets.${uuidKey}.path})" \
+                    --token-url "file://${config.sops.secrets.${tokenKey}.path}"
+                '';
+                StateDirectory = "gitea-runner/${name}";
+                WorkingDirectory = "/var/lib/gitea-runner/${name}";
+                Restart = "always";
+                RestartSec = "10s";
+              };
+            };
+          })
+        ];
     };
 }
