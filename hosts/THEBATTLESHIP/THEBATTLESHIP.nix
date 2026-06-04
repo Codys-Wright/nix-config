@@ -386,6 +386,23 @@
           tokenSopsFile = ./secrets.yaml;
         })
 
+        # Codeberg Actions runner. Pre-created in the Codeberg UI (runner
+        # "THEBATTLESHIP" on the codywright account) — UUID + secret live in
+        # hosts/THEBATTLESHIP/secrets.yaml. Docker-only labels on purpose:
+        # no `:host` label, so Codeberg CI never executes directly on the
+        # workstation the way the trusted starcommand runner above does.
+        (fleet.selfhost._.forgejo-runner {
+          url = "https://codeberg.org/";
+          name = "codeberg";
+          uuidKey = "codeberg-runner-uuid";
+          tokenKey = "codeberg-runner-token";
+          tokenSopsFile = ./secrets.yaml;
+          labels = [
+            "docker:docker://node:lts"
+            "ubuntu-latest:docker://catthehacker/ubuntu:act-latest"
+          ];
+        })
+
         <fleet.system/avahi>
         <fleet.system/virtualization>
         (fleet.deploy { ip = "100.68.255.30"; })
