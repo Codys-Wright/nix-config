@@ -85,7 +85,11 @@
                       description = "Statime PTP daemon for ${host.name} Dante network";
                       after = [ "network-online.target" ];
                       wants = [ "network-online.target" ];
-                      wantedBy = [ "multi-user.target" ];
+                      # Gated behind dante.target (`dante on|off`): with the
+                      # Dante network absent the whole AoIP stack stays down
+                      # so a clockless Inferno can't wedge PipeWire.
+                      partOf = [ "dante.target" ];
+                      wantedBy = [ "dante.target" ];
                       serviceConfig = {
                         Type = "simple";
                         ExecStart = "${statimePkg}/bin/statime --config ${configPath}";
@@ -99,7 +103,8 @@
                       description = "Lock ${preferredLeader} as Dante PTP preferred leader";
                       after = [ "statime-inferno.service" ];
                       wants = [ "statime-inferno.service" ];
-                      wantedBy = [ "multi-user.target" ];
+                      partOf = [ "dante.target" ];
+                      wantedBy = [ "dante.target" ];
                       serviceConfig = {
                         # simple, NOT oneshot: the retry loop below can run for
                         # 3 minutes, and a oneshot start job blocks
@@ -129,6 +134,7 @@
                     statime-watchdog = {
                       description = "Restart Statime if it loses PTP lock (self-promotes to broken PTPv1 master)";
                       after = [ "statime-inferno.service" ];
+                      partOf = [ "dante.target" ];
                       serviceConfig = {
                         # simple so the up-to-75s recovery loop never holds a
                         # start job open (oneshot start jobs block switches
@@ -168,10 +174,14 @@
                     };
                   };
 
+                  # Timers ride dante.target too — with the stack off they
+                  # must not fire (the watchdog would endlessly restart
+                  # statime, the leader lock would spam an absent device).
                   systemd.timers =
                     lib.optionalAttrs (preferredLeader != null) {
                       dante-preferred-leader = {
-                        wantedBy = [ "timers.target" ];
+                        partOf = [ "dante.target" ];
+                        wantedBy = [ "dante.target" ];
                         timerConfig = {
                           OnBootSec = "3min";
                           OnUnitActiveSec = "10min";
@@ -180,7 +190,8 @@
                     }
                     // lib.optionalAttrs watchdogEnabled {
                       statime-watchdog = {
-                        wantedBy = [ "timers.target" ];
+                        partOf = [ "dante.target" ];
+                        wantedBy = [ "dante.target" ];
                         timerConfig = {
                           OnBootSec = "90s";
                           OnUnitActiveSec = "30s";
