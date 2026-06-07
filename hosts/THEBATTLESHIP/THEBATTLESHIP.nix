@@ -40,6 +40,7 @@
         (fleet.hardware {
           nvidia = true;
           tailscale = true;
+          zsa = true;
         })
 
         <fleet/gaming>
@@ -622,6 +623,28 @@
             ];
           };
 
+          # ext4 dedicated development partition (Samsung 990 EVO Plus 2TB)
+          fileSystems."/run/media/Development" = {
+            device = "/dev/disk/by-uuid/7e6024ba-a396-409f-92ae-27d74359240d";
+            fsType = "ext4";
+            options = [
+              "rw"
+              "nofail"
+            ];
+          };
+
+          systemd.services.development-permissions = {
+            description = "Ensure Development is writable by cody";
+            wantedBy = [ "run-media-Development.mount" ];
+            after = [ "run-media-Development.mount" ];
+            bindsTo = [ "run-media-Development.mount" ];
+            serviceConfig.Type = "oneshot";
+            script = ''
+              chown cody:users /run/media/Development
+              chmod 0775 /run/media/Development
+            '';
+          };
+
           systemd.services.audiohaven-permissions = {
             description = "Ensure AudioHaven is writable by cody";
             wantedBy = [ "run-media-AudioHaven.mount" ];
@@ -996,6 +1019,21 @@
                   ];
                   actions.update-props."api.alsa.use-acp" = false;
                 }
+                {
+                  # The TF is a fixed 34x34 interface. Without an explicit
+                  # channel count, raw-mode probing requests the spa-alsa
+                  # default (64), fails repeatedly ("Channels doesn't match
+                  # (requested 64, got 34)") and stretches the device-churn
+                  # window in which pipewire 1.6's link-creation lock race
+                  # can deadlock the core under a connecting JACK client
+                  # (REAPER stuck on launch).
+                  matches = [
+                    { "node.name" = "~alsa_(output|input)\\.usb-Yamaha_Corporation_Yamaha_TF.*"; }
+                  ];
+                  actions.update-props = {
+                    "audio.channels" = 34;
+                  };
+                }
               ];
 
               # Belt-and-suspenders: in case the per-loopback `node.autoconnect`
@@ -1237,8 +1275,12 @@
               partOf = [
                 "pipewire.service"
                 "wireplumber.service"
+                # Gated behind dante.target (`dante on|off`): the links pull
+                # the Inferno nodes into the active graph, which wedges
+                # PipeWire when the Dante network is absent.
+                "dante.target"
               ];
-              wantedBy = [ "multi-user.target" ];
+              wantedBy = [ "dante.target" ];
               serviceConfig = {
                 # simple, NOT oneshot: linkScript can sleep for many minutes
                 # when Inferno nodes are missing (60s node wait + 10s of
@@ -1268,6 +1310,42 @@
           # studio-routing-links (partOf wireplumber) re-wires the channels.
           # This is the one manual step that fixed a total Dante outage,
           # automated.
+          # ── PipeWire core watchdog ─────────────────────────────────────
+          # pipewire 1.6's link-creation path can deadlock the core's main
+          # loop against the data-loop lock during device churn (observed:
+          # REAPER's jack_connect during Yamaha TF bring-up → core wedged →
+          # REAPER stuck on launch forever). The watchdog probes the core
+          # with a short-timeout pw-cli round-trip; two consecutive misses
+          # restart the audio stack, which unblocks any client stuck in a
+          # jack do_sync (the dead socket errors their call out).
+          systemd.services.pipewire-watchdog = {
+            description = "Restart PipeWire if its core stops answering";
+            serviceConfig = {
+              Type = "oneshot";
+              ExecStart = pkgs.writeShellScript "pipewire-watchdog" ''
+                export PIPEWIRE_RUNTIME_DIR=/run/pipewire
+                probe() {
+                  ${pkgs.coreutils}/bin/timeout 3 \
+                    ${pkgs.pipewire}/bin/pw-cli info 0 >/dev/null 2>&1
+                }
+                if probe; then exit 0; fi
+                # One retry to ride out a momentarily busy loop.
+                sleep 2
+                if probe; then exit 0; fi
+                echo "PipeWire core unresponsive; restarting audio stack."
+                ${pkgs.systemd}/bin/systemctl restart \
+                  pipewire.service wireplumber.service pipewire-pulse.service
+              '';
+            };
+          };
+          systemd.timers.pipewire-watchdog = {
+            wantedBy = [ "timers.target" ];
+            timerConfig = {
+              OnBootSec = "30s";
+              OnUnitActiveSec = "10s";
+            };
+          };
+
           systemd.services.studio-clock-ready = {
             description = "Re-init the audio session once the Dante PTP clock is locked";
             after = [
@@ -1276,7 +1354,10 @@
               "wireplumber.service"
             ];
             wants = [ "statime-inferno.service" ];
-            wantedBy = [ "multi-user.target" ];
+            # Gated behind dante.target — without the Dante network there is
+            # no clock to wait for (and the wait would bounce wireplumber).
+            partOf = [ "dante.target" ];
+            wantedBy = [ "dante.target" ];
             serviceConfig = {
               Type = "oneshot";
               RemainAfterExit = true;
@@ -1409,6 +1490,14 @@
                     [ -n "$dst" ] || continue
                     local srcNode="''${src%%:*}" srcPort="''${src#*:}"
                     local dstNode="''${dst%%:*}" dstPort="''${dst#*:}"
+
+                    # MIDI links are not audio routing — leave them alone.
+                    # The daw/daw_inputs proxies are audio-only loopbacks, so
+                    # rewriting a MIDI link onto them always fails and just
+                    # disconnects the device (drums -> REAPER:MIDI Input N).
+                    case "$srcNode $srcPort $dstPort" in
+                      *Midi-Bridge*|*"MIDI Input"*|*"MIDI Output"*|*midi*) continue ;;
+                    esac
 
                     # Output direction: DAW source -> anything other than the
                     # daw proxy. Drop and re-target onto daw:playback_<N>.

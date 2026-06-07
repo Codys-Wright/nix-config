@@ -99,7 +99,47 @@
                   rxNamesLine = if rxNamesStr == "" then "" else ''RX_CHANNEL_NAMES "${rxNamesStr}"'';
                 in
                 {
-                  environment.systemPackages = [ infernoPkg ];
+                  environment.systemPackages = [
+                    infernoPkg
+                    # Toggle the whole Dante/AoIP stack: `dante on|off|status`.
+                    (pkgs.writeShellScriptBin "dante" ''
+                      set -e
+                      cmd="''${1:-status}"
+                      sctl() {
+                        if [ "$(id -u)" = 0 ]; then systemctl "$@"; else sudo systemctl "$@"; fi
+                      }
+                      case "$cmd" in
+                        on)
+                          sctl start dante.target
+                          echo "Dante stack starting (PTP clock, Inferno nodes, routing links)."
+                          ;;
+                        off)
+                          sctl stop dante.target
+                          echo "Dante stack stopped."
+                          ;;
+                        status)
+                          systemctl --no-pager list-units --all \
+                            'dante.target' 'inferno-nodes.service' 'statime-inferno.service' \
+                            'dante-preferred-leader.*' 'statime-watchdog.*' 'studio-routing-links.service'
+                          ;;
+                        *)
+                          echo "usage: dante on|off|status" >&2
+                          exit 2
+                          ;;
+                      esac
+                    '')
+                  ];
+
+                  # Inferno's mDNS server binds multicast on BIND_IP at module
+                  # load. If system PipeWire starts before the Dante NIC has
+                  # its address, the bind fails with ENODEV and the Inferno
+                  # main thread panics (mdns_server.rs) until a later PCM
+                  # reopen succeeds. Hold PipeWire until the network is up so
+                  # the first init is the one that sticks.
+                  systemd.services.pipewire = {
+                    wants = [ "network-online.target" ];
+                    after = [ "network-online.target" ];
+                  };
 
                   environment.pathsToLink = [ "/lib/alsa-lib" ];
                   environment.variables.ALSA_PLUGIN_DIR = "/run/current-system/sw/lib/alsa-lib";
@@ -158,60 +198,128 @@
                     }
                   '';
 
-                  services.pipewire.extraConfig.pipewire."91-inferno" = {
-                    "context.objects" = [
-                      {
-                        factory = "adapter";
-                        args = {
-                          "factory.name" = "api.alsa.pcm.sink";
-                          "node.name" = "Inferno sink";
-                          "node.description" = "Inferno Dante Sink";
-                          "media.class" = "Audio/Sink";
-                          "api.alsa.path" = pcmSink;
-                          "api.alsa.pcm.card" = toString card;
-                          "api.alsa.headroom" = toString headroom;
-                          "audio.channels" = channels;
-                          "audio.position" = positions;
-                          "priority.session" = 2000;
-                          "session.suspend-timeout-seconds" = 0;
-                          "node.pause-on-idle" = false;
-                          "node.suspend-on-idle" = false;
-                          "node.always-process" = true;
-                          "object.linger" = true;
-                          # Hide Inferno from JACK clients — Reaper / other
-                          # JACK apps should always route through a higher-
-                          # level proxy sink (the host's `daw` 128-ch
-                          # loopback) so per-host channel routing rules
-                          # apply. Without this, libpipewire-jack auto-
-                          # connects every JACK output port to Inferno
-                          # sink's playback_N directly, bypassing the
-                          # daw_to_inferno indirection.
-                          "jack.show" = false;
-                        };
-                      }
-                      {
-                        factory = "adapter";
-                        args = {
-                          "factory.name" = "api.alsa.pcm.source";
-                          "node.name" = "Inferno source";
-                          "node.description" = "Inferno Dante Source";
-                          "media.class" = "Audio/Source";
-                          "api.alsa.path" = pcmSource;
-                          "api.alsa.pcm.card" = toString card;
-                          "api.alsa.headroom" = toString headroom;
-                          "audio.channels" = channels;
-                          "audio.position" = positions;
-                          "priority.session" = 1900;
-                          "jack.show" = false;
-                          "session.suspend-timeout-seconds" = 0;
-                          "node.pause-on-idle" = false;
-                          "node.suspend-on-idle" = false;
-                          "node.always-process" = true;
-                          "object.linger" = true;
-                        };
-                      }
-                    ];
+                  # ── Dante runtime gating ──────────────────────────────────
+                  # The Inferno nodes used to live in PipeWire's *static*
+                  # config (91-inferno), so the ALSA plugin's DeviceServer
+                  # spun up at every PipeWire start. With the Dante network
+                  # absent (gear off) the clockless PCM wedges PipeWire's
+                  # main loop — JACK clients (REAPER) then block 40-90s per
+                  # sync call or hang outright. The nodes now live in a
+                  # standalone PipeWire *client* process gated behind
+                  # dante.target: `dante on` / `dante off` brings the whole
+                  # AoIP stack (PTP clock, soundcard nodes, routing links)
+                  # up or down without touching the core audio graph.
+                  systemd.targets.dante = {
+                    description = "Dante/Inferno AoIP stack (PTP clock, virtual soundcard, routing)";
+                    # Intentionally not wantedBy multi-user: bring it up
+                    # explicitly with `dante on` when the network is live.
                   };
+
+                  systemd.services.inferno-nodes =
+                    let
+                      # Store-path conf handed straight to `pipewire -c` (NixOS
+                      # disallows raw environment.etc."pipewire/…" entries).
+                      infernoNodesConf = pkgs.writeText "inferno-nodes.conf" (
+                        builtins.toJSON {
+                          "context.properties" = {
+                            "log.level" = 2;
+                          };
+                          "context.spa-libs" = {
+                            "audio.convert.*" = "audioconvert/libspa-audioconvert";
+                            "api.alsa.*" = "alsa/libspa-alsa";
+                            "support.*" = "support/libspa-support";
+                          };
+                          "context.modules" = [
+                            {
+                              name = "libpipewire-module-rt";
+                              flags = [
+                                "ifexists"
+                                "nofail"
+                              ];
+                            }
+                            { name = "libpipewire-module-protocol-native"; }
+                            { name = "libpipewire-module-client-node"; }
+                            { name = "libpipewire-module-adapter"; }
+                            { name = "libpipewire-module-metadata"; }
+                          ];
+                          "context.objects" = [
+                            {
+                              factory = "adapter";
+                              args = {
+                                "factory.name" = "api.alsa.pcm.sink";
+                                "node.name" = "Inferno sink";
+                                "node.description" = "Inferno Dante Sink";
+                                "media.class" = "Audio/Sink";
+                                "api.alsa.path" = pcmSink;
+                                "api.alsa.pcm.card" = toString card;
+                                "api.alsa.headroom" = toString headroom;
+                                "audio.channels" = channels;
+                                "audio.position" = positions;
+                                "priority.session" = 2000;
+                                "session.suspend-timeout-seconds" = 0;
+                                "node.pause-on-idle" = false;
+                                "node.suspend-on-idle" = false;
+                                "node.always-process" = true;
+                                "object.linger" = true;
+                                # Hide Inferno from JACK clients — Reaper / other
+                                # JACK apps should always route through a higher-
+                                # level proxy sink (the host's `daw` 128-ch
+                                # loopback) so per-host channel routing rules
+                                # apply. Without this, libpipewire-jack auto-
+                                # connects every JACK output port to Inferno
+                                # sink's playback_N directly, bypassing the
+                                # daw_to_inferno indirection.
+                                "jack.show" = false;
+                              };
+                            }
+                            {
+                              factory = "adapter";
+                              args = {
+                                "factory.name" = "api.alsa.pcm.source";
+                                "node.name" = "Inferno source";
+                                "node.description" = "Inferno Dante Source";
+                                "media.class" = "Audio/Source";
+                                "api.alsa.path" = pcmSource;
+                                "api.alsa.pcm.card" = toString card;
+                                "api.alsa.headroom" = toString headroom;
+                                "audio.channels" = channels;
+                                "audio.position" = positions;
+                                "priority.session" = 1900;
+                                "jack.show" = false;
+                                "session.suspend-timeout-seconds" = 0;
+                                "node.pause-on-idle" = false;
+                                "node.suspend-on-idle" = false;
+                                "node.always-process" = true;
+                                "object.linger" = true;
+                              };
+                            }
+                          ];
+                        }
+                      );
+                    in
+                    {
+                      description = "Inferno Dante virtual soundcard nodes (PipeWire client)";
+                      after = [
+                        "pipewire.service"
+                        "network-online.target"
+                      ];
+                      wants = [ "pipewire.service" ];
+                      partOf = [ "dante.target" ];
+                      wantedBy = [ "dante.target" ];
+                      environment = {
+                        PIPEWIRE_RUNTIME_DIR = "/run/pipewire";
+                        ALSA_PLUGIN_DIR = "/run/current-system/sw/lib/alsa-lib";
+                      };
+                      serviceConfig = {
+                        Type = "simple";
+                        User = "pipewire";
+                        Group = "pipewire";
+                        SupplementaryGroups = [ "audio" ];
+                        ExecStart = "${pkgs.pipewire}/bin/pipewire -c ${infernoNodesConf}";
+                        Restart = "on-failure";
+                        RestartSec = "3s";
+                      };
+                    };
                 };
             }
           )
