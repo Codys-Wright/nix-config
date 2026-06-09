@@ -29,6 +29,12 @@
         defaultSource ? null,
         stickyNodes ? [ ],
         lingerUsers ? [ ],
+        # System-wide PipeWire (runs as the `pipewire` user at boot, before
+        # login). Discouraged upstream — it disables session-dependent
+        # features like the xdg-desktop-portal Camera/permission-store path.
+        # Default per-user; only set true on hosts that genuinely need audio
+        # before any user logs in (and accept the broken camera portal).
+        systemWide ? false,
         clockRate ? 48000,
         # 256 is the safe default — Inferno/Dante TX timing on THEBATTLESHIP
         # gets unstable below this (transmitter stopped + tx-lag drops).
@@ -66,9 +72,11 @@
                         };
                       }) (builtins.attrNames host.users)
                     ))
-                    // {
+                    // (lib.optionalAttrs systemWide {
+                      # The `pipewire` system user only exists when running
+                      # system-wide; referencing it per-user is an eval error.
                       pipewire.extraGroups = [ "audio" ];
-                    };
+                    });
                 };
             }
           )
@@ -112,8 +120,10 @@
 
             services.pipewire = {
               enable = true;
-              systemWide = true;
-              socketActivation = false;
+              inherit systemWide;
+              # Eager start when system-wide (no session to socket-activate
+              # against); socket-activate in the normal per-user case.
+              socketActivation = !systemWide;
 
               alsa = {
                 enable = true;
@@ -171,15 +181,19 @@
             # that never starts. Wire both explicitly: socket into sockets.target so
             # the upstream Requires=pipewire.socket in pipewire.service is satisfied,
             # and the service into multi-user.target for eager boot-time startup.
-            systemd.sockets.pipewire.wantedBy = [ "sockets.target" ];
-            systemd.services.pipewire.wantedBy = [ "multi-user.target" ];
+            systemd.sockets.pipewire.wantedBy = lib.mkIf systemWide [ "sockets.target" ];
+            systemd.services.pipewire.wantedBy = lib.mkIf systemWide [ "multi-user.target" ];
             # Same fix for the PulseAudio bridge — without this, /run/pulse/native
             # never appears and KDE Plasma's plasma-pa client sits forever in
             # "connecting to sound server", and volume keys do nothing. Socket
             # activation is enough; the service starts on first connect.
-            systemd.sockets.pipewire-pulse.wantedBy = [ "sockets.target" ];
+            systemd.sockets.pipewire-pulse.wantedBy = lib.mkIf systemWide [ "sockets.target" ];
 
-            systemd.services.pipewire.serviceConfig = {
+            # Per-user PipeWire's upstream systemd.user.services.pipewire unit
+            # already carries the RT rlimits / NOFILE, and rtkit + PAM grant
+            # SCHED_FIFO to a real login session — so this manual system-service
+            # tuning is only needed (and only valid) in the system-wide case.
+            systemd.services.pipewire.serviceConfig = lib.mkIf systemWide {
               Environment = [ "ALSA_PLUGIN_DIR=/run/current-system/sw/lib/alsa-lib" ];
               SystemCallFilter = [
                 "@system-service"
@@ -225,7 +239,9 @@
               "${pkgs.rtkit}/libexec/rtkit-daemon --rttime-usec-max=2000000"
             ];
 
-            systemd.user.services.pipewire-system-bridge = {
+            # Only needed to expose the system-wide sockets to the user
+            # session. Per-user PipeWire owns $XDG_RUNTIME_DIR natively.
+            systemd.user.services.pipewire-system-bridge = lib.mkIf systemWide {
               description = "Bridge system-wide PipeWire sockets into user runtime dir";
               wantedBy = [ "default.target" ];
               after = [ "basic.target" ];
