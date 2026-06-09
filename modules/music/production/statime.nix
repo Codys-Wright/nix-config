@@ -107,6 +107,14 @@
                       wantedBy = [ "dante.target" ];
                       serviceConfig = {
                         Type = "simple";
+                        # A crashed statime leaves its usrvclock server socket
+                        # behind (/tmp/ptp-usrvclock); the next bind then fails
+                        # with EADDRINUSE and the service restart-loops. Remove
+                        # it before (re)binding. The `-` ignores failure — e.g. a
+                        # stale *root*-owned socket from a prior system-wide run
+                        # (cody can't rm that, but /tmp is tmpfs so a reboot
+                        # clears it anyway).
+                        ExecStartPre = "-${pkgs.coreutils}/bin/rm -f /tmp/ptp-usrvclock";
                         ExecStart = "/run/wrappers/bin/statime --config ${configPath}";
                         Restart = "always";
                         RestartSec = "3s";
