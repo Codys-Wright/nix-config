@@ -1,25 +1,5 @@
-# Switch to a fast per-user variant of the current host if one exists
-# (e.g. THEBATTLESHIP-cody) — only evaluates/builds the primary user's home.
-# Falls back to the full host config if no -<user> variant is declared.
-# Use `just switch-all` to activate every user defined on this host.
+# Build and activate the current host (auto-detects hostname).
 switch:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    host="$(hostname)"
-    user="${USER:-$(id -un)}"
-    variant="${host}-${user}"
-    if nix eval --raw ".#nixosConfigurations.${variant}.config.system.build.toplevel.drvPath" >/dev/null 2>&1; then
-        echo "Fast switch — ${variant} (cody-only home)"
-        just switch-host "${variant}"
-    else
-        echo "No ${variant} variant declared; falling back to ${host}"
-        just switch-host "${host}"
-    fi
-
-# Switch the full multi-user host configuration (evaluates every user's
-# home-manager closure). Slower; use this when you've changed something
-# that affects bri/carter/guest/joshua.
-switch-all:
     @just switch-host "$(hostname)"
 
 # Switch only if the flake source has changed since the last successful switch.

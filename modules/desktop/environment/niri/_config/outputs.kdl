@@ -1,3 +1,13 @@
+output "HDMI-A-1" {
+    // AOC Q32G1WG4 32" 1440p - far left of everything
+    mode "2560x1440@143.912"
+    position x=-2560 y=0
+
+    layout {
+        default-column-width { proportion 1.0; }
+    }
+}
+
 output "DP-3" {
     // Acer XV271U M3 - left portrait
     mode "2560x1440@179.999"

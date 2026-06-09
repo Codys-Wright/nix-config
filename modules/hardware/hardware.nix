@@ -1,6 +1,6 @@
 # Hardware parametric aspect
 # Common hardware (audio, bluetooth, networking, facter) always included.
-# Opt in to machine-specific components: nvidia, tailscale, cuda.
+# Opt in to machine-specific components: nvidia, tailscale, cuda, zsa.
 #
 # Usage: (fleet.hardware { nvidia = true; tailscale = true; })
 {
@@ -19,6 +19,7 @@
       nvidia ? false,
       tailscale ? false,
       cuda ? false,
+      zsa ? false,
       ...
     }:
     {
@@ -34,6 +35,7 @@
       ]
       ++ lib.optional tailscale <fleet.hardware._.networking/tailscale>
       ++ lib.optional nvidia <fleet.hardware/nvidia>
-      ++ lib.optional cuda <fleet.hardware/cuda>;
+      ++ lib.optional cuda <fleet.hardware/cuda>
+      ++ lib.optional zsa <fleet.hardware/zsa>;
     };
 }

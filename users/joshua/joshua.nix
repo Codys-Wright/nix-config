@@ -162,7 +162,16 @@ in
           wantedBy = [ "persist.mount" ];
           before = [ "home-joshua.mount" ];
           after = [ "persist.mount" ];
-          unitConfig.RequiresMountsFor = "/persist";
+          # DefaultDependencies pulls in After=sysinit.target, which closes a
+          # boot-order cycle: sysinit.target -> persist-home-joshua-init ->
+          # home-joshua.mount -> local-fs.target -> systemd-binfmt -> sysinit.
+          # systemd breaks the cycle by deleting a job at random, sometimes the
+          # one feeding the display manager (boots to a bare "_"). This service
+          # only needs /persist mounted, so drop the default ordering.
+          unitConfig = {
+            RequiresMountsFor = "/persist";
+            DefaultDependencies = false;
+          };
           serviceConfig.Type = "oneshot";
           script = ''
             mkdir -p /persist/home/joshua
@@ -191,7 +200,12 @@ in
 
         systemd.services.timekpr-joshua-setup = {
           description = "Configure Timekpr rules for Joshua";
-          wantedBy = [ "multi-user.target" ];
+          # Pulled in by timekpr.service, NOT multi-user.target. Being
+          # WantedBy=multi-user.target forces an implicit Before=multi-user.target,
+          # but timekpr.service is itself After=multi-user.target and we run
+          # After=timekpr.service -> ordering cycle. Hang off timekpr.service
+          # instead so it still runs once the daemon is up, no target ordering.
+          wantedBy = [ "timekpr.service" ];
           after = [ "timekpr.service" ];
           requires = [ "timekpr.service" ];
           serviceConfig = {
