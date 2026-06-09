@@ -14,6 +14,12 @@ workspace "gaming" {
     open-on-output "DP-2"
 }
 
+// Dedicated Sunshine game-streaming workspace on the AOC (HDMI-A-1), so a
+// stream runs on its own display without touching the main monitors.
+workspace "stream" {
+    open-on-output "HDMI-A-1"
+}
+
 workspace "recording" {
     open-on-output "DP-1"
 }

@@ -1,0 +1,811 @@
+{
+  "db_path": "/home/cody/.local/share/netaudio/packet_capture.sqlite",
+  "session_id": 3,
+  "session_name": "diagnose_10_10_10_200",
+  "scope": {
+    "device_ip": "10.10.10.200",
+    "device_name": ""
+  },
+  "count": 25,
+  "session_packet_count": 25,
+  "evidence_packet_count": 0,
+  "markers": [
+    {
+      "marker_type": "system",
+      "label": "session_started",
+      "note": "ProtocolVerifier session started",
+      "timestamp_iso": "2026-06-03T23:37:09.327816",
+      "timestamp_ns": 1780555029327816164
+    },
+    {
+      "marker_type": "system",
+      "label": "diagnose_started",
+      "note": "Device diagnostic: 10.10.10.200",
+      "timestamp_iso": "2026-06-03T23:37:09.327901",
+      "timestamp_ns": 1780555029327901004
+    },
+    {
+      "marker_type": "step",
+      "label": "send_device_info",
+      "note": "Sending packet: device_info",
+      "timestamp_iso": "2026-06-03T23:37:09.327939",
+      "timestamp_ns": 1780555029327938885
+    },
+    {
+      "marker_type": "step",
+      "label": "recv_device_info",
+      "note": "Response received: device_info",
+      "timestamp_iso": "2026-06-03T23:37:09.329552",
+      "timestamp_ns": 1780555029329551499,
+      "data": {
+        "received": true,
+        "response_len": 130
+      }
+    },
+    {
+      "marker_type": "step",
+      "label": "send_device_name",
+      "note": "Sending packet: device_name",
+      "timestamp_iso": "2026-06-03T23:37:09.329674",
+      "timestamp_ns": 1780555029329673688
+    },
+    {
+      "marker_type": "step",
+      "label": "recv_device_name",
+      "note": "Response received: device_name",
+      "timestamp_iso": "2026-06-03T23:37:09.330820",
+      "timestamp_ns": 1780555029330819517,
+      "data": {
+        "received": true,
+        "response_len": 39
+      }
+    },
+    {
+      "marker_type": "step",
+      "label": "send_channel_count",
+      "note": "Sending packet: channel_count",
+      "timestamp_iso": "2026-06-03T23:37:09.330870",
+      "timestamp_ns": 1780555029330870332
+    },
+    {
+      "marker_type": "step",
+      "label": "recv_channel_count",
+      "note": "Response received: channel_count",
+      "timestamp_iso": "2026-06-03T23:37:09.331942",
+      "timestamp_ns": 1780555029331942252,
+      "data": {
+        "received": true,
+        "response_len": 44
+      }
+    },
+    {
+      "marker_type": "step",
+      "label": "send_device_settings",
+      "note": "Sending packet: device_settings",
+      "timestamp_iso": "2026-06-03T23:37:09.331982",
+      "timestamp_ns": 1780555029331981706
+    },
+    {
+      "marker_type": "step",
+      "label": "recv_device_settings",
+      "note": "Response received: device_settings",
+      "timestamp_iso": "2026-06-03T23:37:09.333333",
+      "timestamp_ns": 1780555029333332500,
+      "data": {
+        "received": true,
+        "response_len": 168
+      }
+    },
+    {
+      "marker_type": "step",
+      "label": "send_tx_channels_p0",
+      "note": "Sending packet: tx_channels_p0",
+      "timestamp_iso": "2026-06-03T23:37:09.333368",
+      "timestamp_ns": 1780555029333367636
+    },
+    {
+      "marker_type": "step",
+      "label": "recv_tx_channels_p0",
+      "note": "Response received: tx_channels_p0",
+      "timestamp_iso": "2026-06-03T23:37:09.334853",
+      "timestamp_ns": 1780555029334852901,
+      "data": {
+        "received": true,
+        "response_len": 204
+      }
+    },
+    {
+      "marker_type": "step",
+      "label": "send_tx_channels_p1",
+      "note": "Sending packet: tx_channels_p1",
+      "timestamp_iso": "2026-06-03T23:37:09.334880",
+      "timestamp_ns": 1780555029334879641
+    },
+    {
+      "marker_type": "step",
+      "label": "recv_tx_channels_p1",
+      "note": "Response received: tx_channels_p1",
+      "timestamp_iso": "2026-06-03T23:37:09.335931",
+      "timestamp_ns": 1780555029335930833,
+      "data": {
+        "received": true,
+        "response_len": 140
+      }
+    },
+    {
+      "marker_type": "step",
+      "label": "send_tx_channels_p2",
+      "note": "Sending packet: tx_channels_p2",
+      "timestamp_iso": "2026-06-03T23:37:09.335955",
+      "timestamp_ns": 1780555029335955348
+    },
+    {
+      "marker_type": "step",
+      "label": "recv_tx_channels_p2",
+      "note": "Response received: tx_channels_p2",
+      "timestamp_iso": "2026-06-03T23:37:09.336952",
+      "timestamp_ns": 1780555029336952408,
+      "data": {
+        "received": true,
+        "response_len": 140
+      }
+    },
+    {
+      "marker_type": "step",
+      "label": "send_tx_channels_p3",
+      "note": "Sending packet: tx_channels_p3",
+      "timestamp_iso": "2026-06-03T23:37:09.336986",
+      "timestamp_ns": 1780555029336985510
+    },
+    {
+      "marker_type": "step",
+      "label": "recv_tx_channels_p3",
+      "note": "Response received: tx_channels_p3",
+      "timestamp_iso": "2026-06-03T23:37:09.338208",
+      "timestamp_ns": 1780555029338208614,
+      "data": {
+        "received": true,
+        "response_len": 140
+      }
+    },
+    {
+      "marker_type": "step",
+      "label": "send_tx_channel_names_p0",
+      "note": "Sending packet: tx_channel_names_p0",
+      "timestamp_iso": "2026-06-03T23:37:09.338268",
+      "timestamp_ns": 1780555029338268276
+    },
+    {
+      "marker_type": "step",
+      "label": "recv_tx_channel_names_p0",
+      "note": "Response received: tx_channel_names_p0",
+      "timestamp_iso": "2026-06-03T23:37:09.339786",
+      "timestamp_ns": 1780555029339785732,
+      "data": {
+        "received": true,
+        "response_len": 445
+      }
+    },
+    {
+      "marker_type": "step",
+      "label": "send_tx_channel_names_p1",
+      "note": "Sending packet: tx_channel_names_p1",
+      "timestamp_iso": "2026-06-03T23:37:09.339820",
+      "timestamp_ns": 1780555029339819656
+    },
+    {
+      "marker_type": "step",
+      "label": "recv_tx_channel_names_p1",
+      "note": "Response received: tx_channel_names_p1",
+      "timestamp_iso": "2026-06-03T23:37:09.340905",
+      "timestamp_ns": 1780555029340904700,
+      "data": {
+        "received": true,
+        "response_len": 268
+      }
+    },
+    {
+      "marker_type": "step",
+      "label": "send_tx_channel_names_p2",
+      "note": "Sending packet: tx_channel_names_p2",
+      "timestamp_iso": "2026-06-03T23:37:09.340951",
+      "timestamp_ns": 1780555029340951518
+    },
+    {
+      "marker_type": "step",
+      "label": "recv_tx_channel_names_p2",
+      "note": "Response received: tx_channel_names_p2",
+      "timestamp_iso": "2026-06-03T23:37:09.341925",
+      "timestamp_ns": 1780555029341924733,
+      "data": {
+        "received": true,
+        "response_len": 268
+      }
+    },
+    {
+      "marker_type": "step",
+      "label": "send_tx_channel_names_p3",
+      "note": "Sending packet: tx_channel_names_p3",
+      "timestamp_iso": "2026-06-03T23:37:09.341961",
+      "timestamp_ns": 1780555029341961262
+    },
+    {
+      "marker_type": "step",
+      "label": "recv_tx_channel_names_p3",
+      "note": "Response received: tx_channel_names_p3",
+      "timestamp_iso": "2026-06-03T23:37:09.343032",
+      "timestamp_ns": 1780555029343031910,
+      "data": {
+        "received": true,
+        "response_len": 268
+      }
+    },
+    {
+      "marker_type": "step",
+      "label": "send_rx_channels_p0",
+      "note": "Sending packet: rx_channels_p0",
+      "timestamp_iso": "2026-06-03T23:37:09.343065",
+      "timestamp_ns": 1780555029343064741
+    },
+    {
+      "marker_type": "step",
+      "label": "recv_rx_channels_p0",
+      "note": "Response received: rx_channels_p0",
+      "timestamp_iso": "2026-06-03T23:37:09.344141",
+      "timestamp_ns": 1780555029344141320,
+      "data": {
+        "received": true,
+        "response_len": 10
+      }
+    },
+    {
+      "marker_type": "step",
+      "label": "send_rx_channels_p1",
+      "note": "Sending packet: rx_channels_p1",
+      "timestamp_iso": "2026-06-03T23:37:09.344169",
+      "timestamp_ns": 1780555029344169393
+    },
+    {
+      "marker_type": "step",
+      "label": "recv_rx_channels_p1",
+      "note": "Response received: rx_channels_p1",
+      "timestamp_iso": "2026-06-03T23:37:09.345144",
+      "timestamp_ns": 1780555029345143670,
+      "data": {
+        "received": true,
+        "response_len": 10
+      }
+    },
+    {
+      "marker_type": "step",
+      "label": "send_rx_channels_p2",
+      "note": "Sending packet: rx_channels_p2",
+      "timestamp_iso": "2026-06-03T23:37:09.345174",
+      "timestamp_ns": 1780555029345173396
+    },
+    {
+      "marker_type": "step",
+      "label": "recv_rx_channels_p2",
+      "note": "Response received: rx_channels_p2",
+      "timestamp_iso": "2026-06-03T23:37:09.346174",
+      "timestamp_ns": 1780555029346174012,
+      "data": {
+        "received": true,
+        "response_len": 10
+      }
+    },
+    {
+      "marker_type": "step",
+      "label": "send_rx_channels_p3",
+      "note": "Sending packet: rx_channels_p3",
+      "timestamp_iso": "2026-06-03T23:37:09.346208",
+      "timestamp_ns": 1780555029346208257
+    },
+    {
+      "marker_type": "step",
+      "label": "recv_rx_channels_p3",
+      "note": "Response received: rx_channels_p3",
+      "timestamp_iso": "2026-06-03T23:37:09.347213",
+      "timestamp_ns": 1780555029347212790,
+      "data": {
+        "received": true,
+        "response_len": 10
+      }
+    },
+    {
+      "marker_type": "system",
+      "label": "diagnose_finished",
+      "note": "Diagnostic complete: 16 responses, 0 timeouts",
+      "timestamp_iso": "2026-06-03T23:37:09.347238",
+      "timestamp_ns": 1780555029347237647,
+      "data": {
+        "failed": 0,
+        "success": 16
+      }
+    },
+    {
+      "marker_type": "system",
+      "label": "session_stopped",
+      "note": "ProtocolVerifier session ended",
+      "timestamp_iso": "2026-06-03T23:37:09.347255",
+      "timestamp_ns": 1780555029347255460
+    }
+  ],
+  "samples": [
+    {
+      "file": "protocol_27FF_opcode_1003_id_54.bin",
+      "packet_id": 54,
+      "timestamp_iso": "2026-06-03T23:37:09.327961",
+      "timestamp_ns": 1780555029327960866,
+      "src_ip": "0.0.0.0",
+      "src_port": 50147,
+      "dst_ip": "10.10.10.200",
+      "dst_port": 4440,
+      "direction": "request",
+      "protocol_id": 10239,
+      "protocol_hex": "0x27FF",
+      "opcode": 4099,
+      "opcode_hex": "0x1003",
+      "opcode_name": "0x1003",
+      "evidence": false,
+      "session_id": 3,
+      "device_ip": "10.10.10.200"
+    },
+    {
+      "file": "protocol_27FF_opcode_1003_id_55.bin",
+      "packet_id": 55,
+      "timestamp_iso": "2026-06-03T23:37:09.329311",
+      "timestamp_ns": 1780555029329311158,
+      "src_ip": "10.10.10.200",
+      "src_port": 4440,
+      "dst_ip": "0.0.0.0",
+      "dst_port": 50147,
+      "direction": "response",
+      "protocol_id": 10239,
+      "protocol_hex": "0x27FF",
+      "opcode": 4099,
+      "opcode_hex": "0x1003",
+      "opcode_name": "0x1003",
+      "evidence": false,
+      "session_id": 3,
+      "device_ip": "10.10.10.200"
+    },
+    {
+      "file": "protocol_27FF_opcode_1002_id_56.bin",
+      "packet_id": 56,
+      "timestamp_iso": "2026-06-03T23:37:09.329704",
+      "timestamp_ns": 1780555029329703845,
+      "src_ip": "0.0.0.0",
+      "src_port": 50147,
+      "dst_ip": "10.10.10.200",
+      "dst_port": 4440,
+      "direction": "request",
+      "protocol_id": 10239,
+      "protocol_hex": "0x27FF",
+      "opcode": 4098,
+      "opcode_hex": "0x1002",
+      "opcode_name": "0x1002",
+      "evidence": false,
+      "session_id": 3,
+      "device_ip": "10.10.10.200"
+    },
+    {
+      "file": "protocol_27FF_opcode_1002_id_57.bin",
+      "packet_id": 57,
+      "timestamp_iso": "2026-06-03T23:37:09.330705",
+      "timestamp_ns": 1780555029330705333,
+      "src_ip": "10.10.10.200",
+      "src_port": 4440,
+      "dst_ip": "0.0.0.0",
+      "dst_port": 50147,
+      "direction": "response",
+      "protocol_id": 10239,
+      "protocol_hex": "0x27FF",
+      "opcode": 4098,
+      "opcode_hex": "0x1002",
+      "opcode_name": "0x1002",
+      "evidence": false,
+      "session_id": 3,
+      "device_ip": "10.10.10.200"
+    },
+    {
+      "file": "protocol_27FF_opcode_1000_id_58.bin",
+      "packet_id": 58,
+      "timestamp_iso": "2026-06-03T23:37:09.330887",
+      "timestamp_ns": 1780555029330886973,
+      "src_ip": "0.0.0.0",
+      "src_port": 50147,
+      "dst_ip": "10.10.10.200",
+      "dst_port": 4440,
+      "direction": "request",
+      "protocol_id": 10239,
+      "protocol_hex": "0x27FF",
+      "opcode": 4096,
+      "opcode_hex": "0x1000",
+      "opcode_name": "0x1000",
+      "evidence": false,
+      "session_id": 3,
+      "device_ip": "10.10.10.200"
+    },
+    {
+      "file": "protocol_27FF_opcode_1000_id_59.bin",
+      "packet_id": 59,
+      "timestamp_iso": "2026-06-03T23:37:09.331817",
+      "timestamp_ns": 1780555029331817138,
+      "src_ip": "10.10.10.200",
+      "src_port": 4440,
+      "dst_ip": "0.0.0.0",
+      "dst_port": 50147,
+      "direction": "response",
+      "protocol_id": 10239,
+      "protocol_hex": "0x27FF",
+      "opcode": 4096,
+      "opcode_hex": "0x1000",
+      "opcode_name": "0x1000",
+      "evidence": false,
+      "session_id": 3,
+      "device_ip": "10.10.10.200"
+    },
+    {
+      "file": "protocol_27FF_opcode_1100_id_60.bin",
+      "packet_id": 60,
+      "timestamp_iso": "2026-06-03T23:37:09.331998",
+      "timestamp_ns": 1780555029331997576,
+      "src_ip": "0.0.0.0",
+      "src_port": 50147,
+      "dst_ip": "10.10.10.200",
+      "dst_port": 4440,
+      "direction": "request",
+      "protocol_id": 10239,
+      "protocol_hex": "0x27FF",
+      "opcode": 4352,
+      "opcode_hex": "0x1100",
+      "opcode_name": "0x1100",
+      "evidence": false,
+      "session_id": 3,
+      "device_ip": "10.10.10.200"
+    },
+    {
+      "file": "protocol_27FF_opcode_1100_id_61.bin",
+      "packet_id": 61,
+      "timestamp_iso": "2026-06-03T23:37:09.333242",
+      "timestamp_ns": 1780555029333241990,
+      "src_ip": "10.10.10.200",
+      "src_port": 4440,
+      "dst_ip": "0.0.0.0",
+      "dst_port": 50147,
+      "direction": "response",
+      "protocol_id": 10239,
+      "protocol_hex": "0x27FF",
+      "opcode": 4352,
+      "opcode_hex": "0x1100",
+      "opcode_name": "0x1100",
+      "evidence": false,
+      "session_id": 3,
+      "device_ip": "10.10.10.200"
+    },
+    {
+      "file": "protocol_27FF_opcode_2000_id_62.bin",
+      "packet_id": 62,
+      "timestamp_iso": "2026-06-03T23:37:09.333383",
+      "timestamp_ns": 1780555029333382574,
+      "src_ip": "0.0.0.0",
+      "src_port": 50147,
+      "dst_ip": "10.10.10.200",
+      "dst_port": 4440,
+      "direction": "request",
+      "protocol_id": 10239,
+      "protocol_hex": "0x27FF",
+      "opcode": 8192,
+      "opcode_hex": "0x2000",
+      "opcode_name": "0x2000",
+      "evidence": false,
+      "session_id": 3,
+      "device_ip": "10.10.10.200"
+    },
+    {
+      "file": "protocol_27FF_opcode_2000_id_63.bin",
+      "packet_id": 63,
+      "timestamp_iso": "2026-06-03T23:37:09.334774",
+      "timestamp_ns": 1780555029334774264,
+      "src_ip": "10.10.10.200",
+      "src_port": 4440,
+      "dst_ip": "0.0.0.0",
+      "dst_port": 50147,
+      "direction": "response",
+      "protocol_id": 10239,
+      "protocol_hex": "0x27FF",
+      "opcode": 8192,
+      "opcode_hex": "0x2000",
+      "opcode_name": "0x2000",
+      "evidence": false,
+      "session_id": 3,
+      "device_ip": "10.10.10.200"
+    },
+    {
+      "file": "protocol_27FF_opcode_2000_id_64.bin",
+      "packet_id": 64,
+      "timestamp_iso": "2026-06-03T23:37:09.334894",
+      "timestamp_ns": 1780555029334893998,
+      "src_ip": "0.0.0.0",
+      "src_port": 50147,
+      "dst_ip": "10.10.10.200",
+      "dst_port": 4440,
+      "direction": "request",
+      "protocol_id": 10239,
+      "protocol_hex": "0x27FF",
+      "opcode": 8192,
+      "opcode_hex": "0x2000",
+      "opcode_name": "0x2000",
+      "evidence": false,
+      "session_id": 3,
+      "device_ip": "10.10.10.200"
+    },
+    {
+      "file": "protocol_27FF_opcode_2000_id_65.bin",
+      "packet_id": 65,
+      "timestamp_iso": "2026-06-03T23:37:09.335861",
+      "timestamp_ns": 1780555029335860801,
+      "src_ip": "10.10.10.200",
+      "src_port": 4440,
+      "dst_ip": "0.0.0.0",
+      "dst_port": 50147,
+      "direction": "response",
+      "protocol_id": 10239,
+      "protocol_hex": "0x27FF",
+      "opcode": 8192,
+      "opcode_hex": "0x2000",
+      "opcode_name": "0x2000",
+      "evidence": false,
+      "session_id": 3,
+      "device_ip": "10.10.10.200"
+    },
+    {
+      "file": "protocol_27FF_opcode_2000_id_66.bin",
+      "packet_id": 66,
+      "timestamp_iso": "2026-06-03T23:37:09.335969",
+      "timestamp_ns": 1780555029335969605,
+      "src_ip": "0.0.0.0",
+      "src_port": 50147,
+      "dst_ip": "10.10.10.200",
+      "dst_port": 4440,
+      "direction": "request",
+      "protocol_id": 10239,
+      "protocol_hex": "0x27FF",
+      "opcode": 8192,
+      "opcode_hex": "0x2000",
+      "opcode_name": "0x2000",
+      "evidence": false,
+      "session_id": 3,
+      "device_ip": "10.10.10.200"
+    },
+    {
+      "file": "protocol_27FF_opcode_2000_id_67.bin",
+      "packet_id": 67,
+      "timestamp_iso": "2026-06-03T23:37:09.337044",
+      "timestamp_ns": 1780555029337043329,
+      "src_ip": "0.0.0.0",
+      "src_port": 50147,
+      "dst_ip": "10.10.10.200",
+      "dst_port": 4440,
+      "direction": "request",
+      "protocol_id": 10239,
+      "protocol_hex": "0x27FF",
+      "opcode": 8192,
+      "opcode_hex": "0x2000",
+      "opcode_name": "0x2000",
+      "evidence": false,
+      "session_id": 3,
+      "device_ip": "10.10.10.200"
+    },
+    {
+      "file": "protocol_27FF_opcode_2010_id_68.bin",
+      "packet_id": 68,
+      "timestamp_iso": "2026-06-03T23:37:09.338285",
+      "timestamp_ns": 1780555029338285348,
+      "src_ip": "0.0.0.0",
+      "src_port": 50147,
+      "dst_ip": "10.10.10.200",
+      "dst_port": 4440,
+      "direction": "request",
+      "protocol_id": 10239,
+      "protocol_hex": "0x27FF",
+      "opcode": 8208,
+      "opcode_hex": "0x2010",
+      "opcode_name": "0x2010",
+      "evidence": false,
+      "session_id": 3,
+      "device_ip": "10.10.10.200"
+    },
+    {
+      "file": "protocol_27FF_opcode_2010_id_69.bin",
+      "packet_id": 69,
+      "timestamp_iso": "2026-06-03T23:37:09.339683",
+      "timestamp_ns": 1780555029339683129,
+      "src_ip": "10.10.10.200",
+      "src_port": 4440,
+      "dst_ip": "0.0.0.0",
+      "dst_port": 50147,
+      "direction": "response",
+      "protocol_id": 10239,
+      "protocol_hex": "0x27FF",
+      "opcode": 8208,
+      "opcode_hex": "0x2010",
+      "opcode_name": "0x2010",
+      "evidence": false,
+      "session_id": 3,
+      "device_ip": "10.10.10.200"
+    },
+    {
+      "file": "protocol_27FF_opcode_2010_id_70.bin",
+      "packet_id": 70,
+      "timestamp_iso": "2026-06-03T23:37:09.339835",
+      "timestamp_ns": 1780555029339834584,
+      "src_ip": "0.0.0.0",
+      "src_port": 50147,
+      "dst_ip": "10.10.10.200",
+      "dst_port": 4440,
+      "direction": "request",
+      "protocol_id": 10239,
+      "protocol_hex": "0x27FF",
+      "opcode": 8208,
+      "opcode_hex": "0x2010",
+      "opcode_name": "0x2010",
+      "evidence": false,
+      "session_id": 3,
+      "device_ip": "10.10.10.200"
+    },
+    {
+      "file": "protocol_27FF_opcode_2010_id_71.bin",
+      "packet_id": 71,
+      "timestamp_iso": "2026-06-03T23:37:09.340797",
+      "timestamp_ns": 1780555029340797529,
+      "src_ip": "10.10.10.200",
+      "src_port": 4440,
+      "dst_ip": "0.0.0.0",
+      "dst_port": 50147,
+      "direction": "response",
+      "protocol_id": 10239,
+      "protocol_hex": "0x27FF",
+      "opcode": 8208,
+      "opcode_hex": "0x2010",
+      "opcode_name": "0x2010",
+      "evidence": false,
+      "session_id": 3,
+      "device_ip": "10.10.10.200"
+    },
+    {
+      "file": "protocol_27FF_opcode_2010_id_72.bin",
+      "packet_id": 72,
+      "timestamp_iso": "2026-06-03T23:37:09.340969",
+      "timestamp_ns": 1780555029340968771,
+      "src_ip": "0.0.0.0",
+      "src_port": 50147,
+      "dst_ip": "10.10.10.200",
+      "dst_port": 4440,
+      "direction": "request",
+      "protocol_id": 10239,
+      "protocol_hex": "0x27FF",
+      "opcode": 8208,
+      "opcode_hex": "0x2010",
+      "opcode_name": "0x2010",
+      "evidence": false,
+      "session_id": 3,
+      "device_ip": "10.10.10.200"
+    },
+    {
+      "file": "protocol_27FF_opcode_2010_id_73.bin",
+      "packet_id": 73,
+      "timestamp_iso": "2026-06-03T23:37:09.341978",
+      "timestamp_ns": 1780555029341978464,
+      "src_ip": "0.0.0.0",
+      "src_port": 50147,
+      "dst_ip": "10.10.10.200",
+      "dst_port": 4440,
+      "direction": "request",
+      "protocol_id": 10239,
+      "protocol_hex": "0x27FF",
+      "opcode": 8208,
+      "opcode_hex": "0x2010",
+      "opcode_name": "0x2010",
+      "evidence": false,
+      "session_id": 3,
+      "device_ip": "10.10.10.200"
+    },
+    {
+      "file": "protocol_27FF_opcode_3000_id_74.bin",
+      "packet_id": 74,
+      "timestamp_iso": "2026-06-03T23:37:09.343079",
+      "timestamp_ns": 1780555029343079238,
+      "src_ip": "0.0.0.0",
+      "src_port": 50147,
+      "dst_ip": "10.10.10.200",
+      "dst_port": 4440,
+      "direction": "request",
+      "protocol_id": 10239,
+      "protocol_hex": "0x27FF",
+      "opcode": 12288,
+      "opcode_hex": "0x3000",
+      "opcode_name": "0x3000",
+      "evidence": false,
+      "session_id": 3,
+      "device_ip": "10.10.10.200"
+    },
+    {
+      "file": "protocol_27FF_opcode_3000_id_75.bin",
+      "packet_id": 75,
+      "timestamp_iso": "2026-06-03T23:37:09.344055",
+      "timestamp_ns": 1780555029344054928,
+      "src_ip": "10.10.10.200",
+      "src_port": 4440,
+      "dst_ip": "0.0.0.0",
+      "dst_port": 50147,
+      "direction": "response",
+      "protocol_id": 10239,
+      "protocol_hex": "0x27FF",
+      "opcode": 12288,
+      "opcode_hex": "0x3000",
+      "opcode_name": "0x3000",
+      "evidence": false,
+      "session_id": 3,
+      "device_ip": "10.10.10.200"
+    },
+    {
+      "file": "protocol_27FF_opcode_3000_id_76.bin",
+      "packet_id": 76,
+      "timestamp_iso": "2026-06-03T23:37:09.344186",
+      "timestamp_ns": 1780555029344186064,
+      "src_ip": "0.0.0.0",
+      "src_port": 50147,
+      "dst_ip": "10.10.10.200",
+      "dst_port": 4440,
+      "direction": "request",
+      "protocol_id": 10239,
+      "protocol_hex": "0x27FF",
+      "opcode": 12288,
+      "opcode_hex": "0x3000",
+      "opcode_name": "0x3000",
+      "evidence": false,
+      "session_id": 3,
+      "device_ip": "10.10.10.200"
+    },
+    {
+      "file": "protocol_27FF_opcode_3000_id_77.bin",
+      "packet_id": 77,
+      "timestamp_iso": "2026-06-03T23:37:09.345188",
+      "timestamp_ns": 1780555029345188314,
+      "src_ip": "0.0.0.0",
+      "src_port": 50147,
+      "dst_ip": "10.10.10.200",
+      "dst_port": 4440,
+      "direction": "request",
+      "protocol_id": 10239,
+      "protocol_hex": "0x27FF",
+      "opcode": 12288,
+      "opcode_hex": "0x3000",
+      "opcode_name": "0x3000",
+      "evidence": false,
+      "session_id": 3,
+      "device_ip": "10.10.10.200"
+    },
+    {
+      "file": "protocol_27FF_opcode_3000_id_78.bin",
+      "packet_id": 78,
+      "timestamp_iso": "2026-06-03T23:37:09.346222",
+      "timestamp_ns": 1780555029346222133,
+      "src_ip": "0.0.0.0",
+      "src_port": 50147,
+      "dst_ip": "10.10.10.200",
+      "dst_port": 4440,
+      "direction": "request",
+      "protocol_id": 10239,
+      "protocol_hex": "0x27FF",
+      "opcode": 12288,
+      "opcode_hex": "0x3000",
+      "opcode_name": "0x3000",
+      "evidence": false,
+      "session_id": 3,
+      "device_ip": "10.10.10.200"
+    }
+  ]
+}

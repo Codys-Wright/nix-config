@@ -731,8 +731,17 @@
             fsType = "none";
             options = [
               "bind"
+              # noauto + automount: do NOT pull this bind mount in at boot.
+              # Without these it mounts as part of remote-fs.target, which
+              # (via the requires below) triggers the mnt-starcommand NFS mount
+              # during boot. When the 10G/Dante network isn't up yet that NFS
+              # mount times out (30s) and fails this dependency, stalling boot.
+              # As an automount it only activates on first access instead.
+              "noauto"
               "nofail"
               "_netdev"
+              "x-systemd.automount"
+              "x-systemd.idle-timeout=600"
               "x-systemd.requires=mnt-starcommand.mount"
               "x-systemd.after=mnt-starcommand.mount"
             ];
@@ -1032,9 +1041,53 @@
                   ];
                   actions.update-props = {
                     "audio.channels" = 34;
+                    # Keep the TF node instantiated even when idle. The
+                    # local monitoring path is a set of pw-link pins from
+                    # system_audio/games/voice_chat:monitor → TF:playback
+                    # (studio-local-links below). If the device suspends on
+                    # idle, those ports vanish and the links are silently
+                    # dropped — audio then "works for a few seconds then
+                    # cuts out" until something re-wires. Never suspend it.
+                    "session.suspend-timeout-seconds" = 0;
+                    "node.always-process" = true;
                   };
                 }
               ];
+
+              # Make the `system_audio` virtual sink the default so every
+              # app funnels through it. studio-local-links fans system_audio
+              # (plus games/voice_chat) out to the Yamaha TF for local
+              # monitoring regardless of whether the Dante stack is up, and
+              # the dante-gated studio-routing-links adds the Inferno TX legs
+              # on top when `dante on`.
+              wireplumber.extraConfig."10-studio-defaults".wireplumber.settings = {
+                "default.configured.audio.sink" = "system_audio";
+              };
+
+              # Bump the graph quantum to 1024 (~21ms) over the pipewire
+              # aspect's 256 default. The TF shares a congested nested USB hub
+              # (Insta360 4K webcam + KONTROL S88 + Stream Deck), so isochronous
+              # audio packets get starved on the bus and glitch *below* the ALSA
+              # layer (no xruns logged). A larger buffer rides those out.
+              # mkForce because the audio facet's default pipewire instance
+              # also sets this key to 256. Revisit (back to 256) once the TF is
+              # on its own/direct USB port.
+              extraConfig.pipewire."92-low-latency".context.properties."default.clock.quantum" = lib.mkForce 1024;
+
+              # Disable the libcamera monitor. WirePlumber publishes every UVC
+              # webcam + the MS2109 HDMI grabber as BOTH a libcamera node and a
+              # v4l2 node; its built-in dedup is documented to fail on
+              # multi-interface / "complex" devices (the grabber especially), so
+              # two readers end up contending for one /dev/videoN — the cause of
+              # OBS's "decoder: failed to unpack jpeg" and "select timed out".
+              # Dropping libcamera leaves exactly one (v4l2, media.role=Camera)
+              # node per device, which is what both the direct-V4L2 path and the
+              # xdg-desktop-portal Camera path want. Profile is "main-systemwide"
+              # because PipeWire runs system-wide here (Dante/Inferno).
+              wireplumber.extraConfig."51-disable-libcamera"."wireplumber.profiles" = {
+                "main-systemwide"."monitor.libcamera" = "disabled";
+                main."monitor.libcamera" = "disabled";
+              };
 
               # Belt-and-suspenders: in case the per-loopback `node.autoconnect`
               # property doesn't make it through libpipewire-module-loopback's
@@ -1125,6 +1178,91 @@
               '';
             in
             [ "${seedScript}" ];
+
+          # --- Local monitoring link service (always on) ---
+          #
+          # Fans the user-facing virtual sinks out to the Yamaha TF console
+          # for local monitoring, independent of the Dante stack. This is
+          # what makes the box usable with `dante off`: apps land on
+          # `system_audio` (the default sink, set above), and these pw-link
+          # pins carry system_audio/games/voice_chat:monitor_1/2 →
+          # TF:playback_1/2 so audio reaches the console with no Inferno/PTP
+          # involvement.
+          #
+          # Deliberately NOT gated behind dante.target, and with no Inferno
+          # node wait (unlike studio-routing-links): these links only touch
+          # local PipeWire nodes, so they must come up at every boot. partOf
+          # pipewire+wireplumber re-creates them whenever the graph is rebuilt
+          # (device churn, `dante on/off` bouncing wireplumber, etc.). The TF
+          # node is pinned non-suspending (see the 80-pro-audio-usb rule) so
+          # these links never get dropped under it.
+          systemd.services.studio-local-links =
+            let
+              localSinks = [
+                "system_audio"
+                "games"
+                "voice_chat"
+              ];
+              localPairs = builtins.concatMap (s: [
+                {
+                  out = "${s}:monitor_1";
+                  inp = "${yamahaTF}:playback_1";
+                }
+                {
+                  out = "${s}:monitor_2";
+                  inp = "${yamahaTF}:playback_2";
+                }
+              ]) localSinks;
+              pwLink = "${pkgs.pipewire}/bin/pw-link";
+              linkCmds = lib.concatMapStringsSep "\n" (p: ''try_link "${p.out}" "${p.inp}"'') localPairs;
+              linkScript = pkgs.writeShellScript "studio-local-links" ''
+                set -u
+                export PIPEWIRE_RUNTIME_DIR=/run/pipewire
+
+                # try_link: ports may not exist yet at boot (loopback sink or
+                # the TF node still registering). Retry per pair before giving
+                # up; "exists" is success (idempotent re-runs on restart).
+                try_link() {
+                  local out="$1" inp="$2"
+                  for j in $(seq 1 20); do
+                    out_msg=$(${pwLink} "$out" "$inp" 2>&1) && return 0
+                    case "$out_msg" in
+                      *"exists"*|*"link exists"*) return 0 ;;
+                    esac
+                    sleep 1
+                  done
+                  echo "studio-local-links: failed after retries: $out -> $inp ($out_msg)" >&2
+                  return 1
+                }
+
+                ${linkCmds}
+                exit 0
+              '';
+            in
+            {
+              description = "Wire system_audio/games/voice_chat → Yamaha TF for local monitoring (Dante-independent)";
+              after = [
+                "pipewire.service"
+                "wireplumber.service"
+              ];
+              wants = [ "pipewire.service" ];
+              bindsTo = [
+                "pipewire.service"
+                "wireplumber.service"
+              ];
+              partOf = [
+                "pipewire.service"
+                "wireplumber.service"
+              ];
+              wantedBy = [ "multi-user.target" ];
+              serviceConfig = {
+                Type = "simple";
+                RemainAfterExit = true;
+                User = "pipewire";
+                Group = "pipewire";
+                ExecStart = linkScript;
+              };
+            };
 
           systemd.services.studio-routing-links =
             let

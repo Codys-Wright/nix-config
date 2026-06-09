@@ -115,78 +115,78 @@
         in
         lib.mkMerge [
           {
-          # The runner needs a container engine to back the `docker://…`
-          # labels. The `host` labels run jobs directly on the box and don't
-          # need it, but enabling it here is the path of least surprise so
-          # any imported workflow that says `runs-on: ubuntu-latest` works.
-          virtualisation.docker.enable = lib.mkIf (backend == "docker") (lib.mkDefault true);
-          virtualisation.podman.enable = lib.mkIf (backend == "podman") (lib.mkDefault true);
+            # The runner needs a container engine to back the `docker://…`
+            # labels. The `host` labels run jobs directly on the box and don't
+            # need it, but enabling it here is the path of least surprise so
+            # any imported workflow that says `runs-on: ubuntu-latest` works.
+            virtualisation.docker.enable = lib.mkIf (backend == "docker") (lib.mkDefault true);
+            virtualisation.podman.enable = lib.mkIf (backend == "podman") (lib.mkDefault true);
 
-          # Pre-create the runner user/group so the SOPS owner reference
-          # below resolves at activation time. The gitea-actions-runner
-          # module ordinarily creates these, but only at the moment its
-          # systemd unit activates — which is too late for sops-install-secrets
-          # to chown the token file.
-          users.users.gitea-runner = {
-            isSystemUser = true;
-            group = "gitea-runner";
-            description = "Forgejo Actions runner";
-            home = "/var/lib/gitea-runner";
-            # Engine socket access so this user can spawn `runs-on:
-            # ubuntu-latest` jobs (podman socket is group-gated to `podman`,
-            # docker's to `docker`).
-            extraGroups = [ backend ];
-          };
-          users.groups.gitea-runner = { };
+            # Pre-create the runner user/group so the SOPS owner reference
+            # below resolves at activation time. The gitea-actions-runner
+            # module ordinarily creates these, but only at the moment its
+            # systemd unit activates — which is too late for sops-install-secrets
+            # to chown the token file.
+            users.users.gitea-runner = {
+              isSystemUser = true;
+              group = "gitea-runner";
+              description = "Forgejo Actions runner";
+              home = "/var/lib/gitea-runner";
+              # Engine socket access so this user can spawn `runs-on:
+              # ubuntu-latest` jobs (podman socket is group-gated to `podman`,
+              # docker's to `docker`).
+              extraGroups = [ backend ];
+            };
+            users.groups.gitea-runner = { };
 
-          # Runner token. SOPS-encrypted. Register flow: one-time
-          # registration token. UUID flow: the pre-created runner's secret.
-          sops.secrets.${tokenKey} = {
-            sopsFile = lib.mkIf (tokenSopsFile != null) tokenSopsFile;
-            owner = "gitea-runner";
-            group = "gitea-runner";
-            mode = "0400";
-            restartUnits = [ "gitea-runner-${name}.service" ];
-          };
+            # Runner token. SOPS-encrypted. Register flow: one-time
+            # registration token. UUID flow: the pre-created runner's secret.
+            sops.secrets.${tokenKey} = {
+              sopsFile = lib.mkIf (tokenSopsFile != null) tokenSopsFile;
+              owner = "gitea-runner";
+              group = "gitea-runner";
+              mode = "0400";
+              restartUnits = [ "gitea-runner-${name}.service" ];
+            };
 
-          # Cgroup + scheduling priority. Lets the runner burst to `capacity`
-          # jobs when battleship is idle, but yields to interactive work
-          # (DAW, terminal, anything you're actively doing) the moment
-          # there's contention. RT-priority audio threads are unaffected
-          # either way; this just keeps the non-RT side of your workload
-          # responsive while CI is grinding.
-          systemd.services."gitea-runner-${name}".serviceConfig = {
-            # Upstream defaults to DynamicUser=true, which races with the
-            # sops-owned token (chowned to the static `gitea-runner` we
-            # declare above). Pin to the static user/group so the runner
-            # can actually read its registration token at start.
-            DynamicUser = lib.mkForce false;
-            User = lib.mkForce "gitea-runner";
-            Group = lib.mkForce "gitea-runner";
-            Nice = nice;
-            CPUWeight = cpuWeight;
-            IOWeight = ioWeight;
-            # When you're mixing, you don't want the runner stealing
-            # large blocks of CPU at once.  CPUQuota caps the runner's
-            # total CPU share to roughly `capacity * 200%` (i.e. 2 cores
-            # of headroom per concurrent job, with the rest being burst).
-            # 8 jobs * 200% = 1600%.  battleship has 3200% available so
-            # this still allows the runner to use half the box at peak.
-            CPUQuota = "${toString (capacity * 200)}%";
-          };
+            # Cgroup + scheduling priority. Lets the runner burst to `capacity`
+            # jobs when battleship is idle, but yields to interactive work
+            # (DAW, terminal, anything you're actively doing) the moment
+            # there's contention. RT-priority audio threads are unaffected
+            # either way; this just keeps the non-RT side of your workload
+            # responsive while CI is grinding.
+            systemd.services."gitea-runner-${name}".serviceConfig = {
+              # Upstream defaults to DynamicUser=true, which races with the
+              # sops-owned token (chowned to the static `gitea-runner` we
+              # declare above). Pin to the static user/group so the runner
+              # can actually read its registration token at start.
+              DynamicUser = lib.mkForce false;
+              User = lib.mkForce "gitea-runner";
+              Group = lib.mkForce "gitea-runner";
+              Nice = nice;
+              CPUWeight = cpuWeight;
+              IOWeight = ioWeight;
+              # When you're mixing, you don't want the runner stealing
+              # large blocks of CPU at once.  CPUQuota caps the runner's
+              # total CPU share to roughly `capacity * 200%` (i.e. 2 cores
+              # of headroom per concurrent job, with the rest being burst).
+              # 8 jobs * 200% = 1600%.  battleship has 3200% available so
+              # this still allows the runner to use half the box at peak.
+              CPUQuota = "${toString (capacity * 200)}%";
+            };
 
-          # State + cache dirs (the systemd unit's StateDirectory= covers
-          # /var/lib/gitea-runner/${name} but be explicit about subdirs).
-          systemd.tmpfiles.rules = [
-            "d /var/lib/gitea-runner/${name}        0750 gitea-runner gitea-runner -"
-            "d /var/lib/gitea-runner/${name}/cache  0750 gitea-runner gitea-runner -"
-            "d /var/lib/gitea-runner/${name}/work   0750 gitea-runner gitea-runner -"
-            # DynamicUser previously created /var/lib/private/gitea-runner and
-            # systemd migrated it back when DynamicUser was disabled. Recursively
-            # normalize the existing state tree so the static runner can replace
-            # .runner and .labels during registration.
-            "Z /var/lib/gitea-runner             0750 gitea-runner gitea-runner -"
-          ];
+            # State + cache dirs (the systemd unit's StateDirectory= covers
+            # /var/lib/gitea-runner/${name} but be explicit about subdirs).
+            systemd.tmpfiles.rules = [
+              "d /var/lib/gitea-runner/${name}        0750 gitea-runner gitea-runner -"
+              "d /var/lib/gitea-runner/${name}/cache  0750 gitea-runner gitea-runner -"
+              "d /var/lib/gitea-runner/${name}/work   0750 gitea-runner gitea-runner -"
+              # DynamicUser previously created /var/lib/private/gitea-runner and
+              # systemd migrated it back when DynamicUser was disabled. Recursively
+              # normalize the existing state tree so the static runner can replace
+              # .runner and .labels during registration.
+              "Z /var/lib/gitea-runner             0750 gitea-runner gitea-runner -"
+            ];
           }
 
           # ── Register flow ────────────────────────────────────────────────
@@ -245,7 +245,14 @@
                     --config ${
                       pkgs.writeText "forgejo-runner-${name}-config.json" (
                         # JSON is valid YAML; forgejo-runner reads it fine.
-                        builtins.toJSON (runnerSettings // { runner = runnerSettings.runner // { inherit labels; }; })
+                        builtins.toJSON (
+                          runnerSettings
+                          // {
+                            runner = runnerSettings.runner // {
+                              inherit labels;
+                            };
+                          }
+                        )
                       )
                     } \
                     --url ${url} \

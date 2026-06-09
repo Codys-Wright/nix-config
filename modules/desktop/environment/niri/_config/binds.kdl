@@ -58,8 +58,10 @@ binds {
 
     Mod+N { focus-workspace-down; }
     Mod+P { focus-workspace-up; }
-    Mod+Alt+N { move-column-to-workspace-down; }
-    Mod+Alt+P { move-column-to-workspace-up; }
+    Mod+Alt+N { move-workspace-down; }
+    Mod+Alt+P { move-workspace-up; }
+    Mod+Shift+N { move-column-to-workspace-down; }
+    Mod+Shift+P { move-column-to-workspace-up; }
 
     Mod+1 { focus-workspace "main"; }
     Mod+2 { focus-workspace "code"; }
