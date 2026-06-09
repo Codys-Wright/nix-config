@@ -105,20 +105,20 @@
                     (pkgs.writeShellScriptBin "dante" ''
                       set -e
                       cmd="''${1:-status}"
-                      sctl() {
-                        if [ "$(id -u)" = 0 ]; then systemctl "$@"; else sudo systemctl "$@"; fi
-                      }
+                      # The whole Dante stack is now per-user (statime gets the
+                      # PTP port-bind cap via a setcap wrapper), so everything
+                      # rides the user manager — no sudo, no system units.
                       case "$cmd" in
                         on)
-                          sctl start dante.target
+                          systemctl --user start dante.target
                           echo "Dante stack starting (PTP clock, Inferno nodes, routing links)."
                           ;;
                         off)
-                          sctl stop dante.target
+                          systemctl --user stop dante.target
                           echo "Dante stack stopped."
                           ;;
                         status)
-                          systemctl --no-pager list-units --all \
+                          systemctl --user --no-pager list-units --all \
                             'dante.target' 'inferno-nodes.service' 'statime-inferno.service' \
                             'dante-preferred-leader.*' 'statime-watchdog.*' 'studio-routing-links.service'
                           ;;
@@ -130,16 +130,10 @@
                     '')
                   ];
 
-                  # Inferno's mDNS server binds multicast on BIND_IP at module
-                  # load. If system PipeWire starts before the Dante NIC has
-                  # its address, the bind fails with ENODEV and the Inferno
-                  # main thread panics (mdns_server.rs) until a later PCM
-                  # reopen succeeds. Hold PipeWire until the network is up so
-                  # the first init is the one that sticks.
-                  systemd.services.pipewire = {
-                    wants = [ "network-online.target" ];
-                    after = [ "network-online.target" ];
-                  };
+                  # (Removed the old "hold system PipeWire until network-online"
+                  # hack: PipeWire is now per-user and Inferno's mDNS bind only
+                  # happens at `dante on`, which the user runs well after login
+                  # when the Dante static IP has long been up.)
 
                   environment.pathsToLink = [ "/lib/alsa-lib" ];
                   environment.variables.ALSA_PLUGIN_DIR = "/run/current-system/sw/lib/alsa-lib";
@@ -209,13 +203,13 @@
                   # dante.target: `dante on` / `dante off` brings the whole
                   # AoIP stack (PTP clock, soundcard nodes, routing links)
                   # up or down without touching the core audio graph.
-                  systemd.targets.dante = {
+                  systemd.user.targets.dante = {
                     description = "Dante/Inferno AoIP stack (PTP clock, virtual soundcard, routing)";
-                    # Intentionally not wantedBy multi-user: bring it up
+                    # Intentionally not wantedBy default.target: bring it up
                     # explicitly with `dante on` when the network is live.
                   };
 
-                  systemd.services.inferno-nodes =
+                  systemd.user.services.inferno-nodes =
                     let
                       # Store-path conf handed straight to `pipewire -c` (NixOS
                       # disallows raw environment.etc."pipewire/…" entries).
@@ -299,22 +293,19 @@
                     in
                     {
                       description = "Inferno Dante virtual soundcard nodes (PipeWire client)";
-                      after = [
-                        "pipewire.service"
-                        "network-online.target"
-                      ];
+                      # User unit now: order against the user pipewire.service,
+                      # no system network-online (Dante IP is up long before
+                      # `dante on`). Runs as the logged-in user against the
+                      # per-user $XDG_RUNTIME_DIR socket.
+                      after = [ "pipewire.service" ];
                       wants = [ "pipewire.service" ];
                       partOf = [ "dante.target" ];
                       wantedBy = [ "dante.target" ];
                       environment = {
-                        PIPEWIRE_RUNTIME_DIR = "/run/pipewire";
                         ALSA_PLUGIN_DIR = "/run/current-system/sw/lib/alsa-lib";
                       };
                       serviceConfig = {
                         Type = "simple";
-                        User = "pipewire";
-                        Group = "pipewire";
-                        SupplementaryGroups = [ "audio" ];
                         ExecStart = "${pkgs.pipewire}/bin/pipewire -c ${infernoNodesConf}";
                         Restart = "on-failure";
                         RestartSec = "3s";

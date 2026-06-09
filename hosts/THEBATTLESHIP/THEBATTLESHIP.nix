@@ -1082,10 +1082,9 @@
               # OBS's "decoder: failed to unpack jpeg" and "select timed out".
               # Dropping libcamera leaves exactly one (v4l2, media.role=Camera)
               # node per device, which is what both the direct-V4L2 path and the
-              # xdg-desktop-portal Camera path want. Profile is "main-systemwide"
-              # because PipeWire runs system-wide here (Dante/Inferno).
+              # xdg-desktop-portal Camera path want. Per-user WirePlumber uses
+              # the "main" profile.
               wireplumber.extraConfig."51-disable-libcamera"."wireplumber.profiles" = {
-                "main-systemwide"."monitor.libcamera" = "disabled";
                 main."monitor.libcamera" = "disabled";
               };
 
@@ -1142,11 +1141,11 @@
           # to come up active on every boot, so seed those entries before
           # wireplumber starts. Cards we don't list (e.g. the Axe-Fx) keep
           # whatever the file previously had.
-          systemd.services.wireplumber.serviceConfig.ExecStartPre =
+          systemd.user.services.wireplumber.serviceConfig.ExecStartPre =
             let
               seedScript = pkgs.writeShellScript "wireplumber-seed-profiles" ''
                 set -u
-                state=/var/lib/pipewire/.local/state/wireplumber/default-profile
+                state="''${XDG_STATE_HOME:-$HOME/.local/state}/wireplumber/default-profile"
                 mkdir -p "$(dirname "$state")"
                 touch "$state"
 
@@ -1196,7 +1195,7 @@
           # (device churn, `dante on/off` bouncing wireplumber, etc.). The TF
           # node is pinned non-suspending (see the 80-pro-audio-usb rule) so
           # these links never get dropped under it.
-          systemd.services.studio-local-links =
+          systemd.user.services.studio-local-links =
             let
               localSinks = [
                 "system_audio"
@@ -1217,7 +1216,6 @@
               linkCmds = lib.concatMapStringsSep "\n" (p: ''try_link "${p.out}" "${p.inp}"'') localPairs;
               linkScript = pkgs.writeShellScript "studio-local-links" ''
                 set -u
-                export PIPEWIRE_RUNTIME_DIR=/run/pipewire
 
                 # try_link: ports may not exist yet at boot (loopback sink or
                 # the TF node still registering). Retry per pair before giving
@@ -1254,17 +1252,15 @@
                 "pipewire.service"
                 "wireplumber.service"
               ];
-              wantedBy = [ "multi-user.target" ];
+              wantedBy = [ "default.target" ];
               serviceConfig = {
                 Type = "simple";
                 RemainAfterExit = true;
-                User = "pipewire";
-                Group = "pipewire";
                 ExecStart = linkScript;
               };
             };
 
-          systemd.services.studio-routing-links =
+          systemd.user.services.studio-routing-links =
             let
               sinkLinkPairs = builtins.concatMap (
                 s:
@@ -1356,7 +1352,6 @@
               linkCmds = lib.concatMapStringsSep "\n" (p: ''try_link "${p.out}" "${p.inp}"'') allPairs;
               linkScript = pkgs.writeShellScript "studio-routing-links" ''
                 set -u
-                export PIPEWIRE_RUNTIME_DIR=/run/pipewire
 
                 # Wait for Inferno sink/source to register. The ALSA plugin
                 # has to spin up its Dante DeviceServer first, which can
@@ -1432,8 +1427,6 @@
                 # a start job open.
                 Type = "simple";
                 RemainAfterExit = true;
-                User = "pipewire";
-                Group = "pipewire";
                 ExecStart = linkScript;
               };
             };
@@ -1456,12 +1449,11 @@
           # with a short-timeout pw-cli round-trip; two consecutive misses
           # restart the audio stack, which unblocks any client stuck in a
           # jack do_sync (the dead socket errors their call out).
-          systemd.services.pipewire-watchdog = {
+          systemd.user.services.pipewire-watchdog = {
             description = "Restart PipeWire if its core stops answering";
             serviceConfig = {
               Type = "oneshot";
               ExecStart = pkgs.writeShellScript "pipewire-watchdog" ''
-                export PIPEWIRE_RUNTIME_DIR=/run/pipewire
                 probe() {
                   ${pkgs.coreutils}/bin/timeout 3 \
                     ${pkgs.pipewire}/bin/pw-cli info 0 >/dev/null 2>&1
@@ -1471,12 +1463,12 @@
                 sleep 2
                 if probe; then exit 0; fi
                 echo "PipeWire core unresponsive; restarting audio stack."
-                ${pkgs.systemd}/bin/systemctl restart \
+                ${pkgs.systemd}/bin/systemctl --user restart \
                   pipewire.service wireplumber.service pipewire-pulse.service
               '';
             };
           };
-          systemd.timers.pipewire-watchdog = {
+          systemd.user.timers.pipewire-watchdog = {
             wantedBy = [ "timers.target" ];
             timerConfig = {
               OnBootSec = "30s";
@@ -1484,7 +1476,7 @@
             };
           };
 
-          systemd.services.studio-clock-ready = {
+          systemd.user.services.studio-clock-ready = {
             description = "Re-init the audio session once the Dante PTP clock is locked";
             after = [
               "statime-inferno.service"
@@ -1505,13 +1497,13 @@
                 # Wait (up to ~2min) until statime is emitting Measurement
                 # lines, i.e. locked as a PTP follower.
                 for i in $(seq 1 60); do
-                  if [ "$("$jctl" -u statime-inferno.service --since '8 seconds ago' -o cat | grep -c 'Measurement:')" -gt 0 ]; then
+                  if [ "$("$jctl" --user -u statime-inferno.service --since '8 seconds ago' -o cat | grep -c 'Measurement:')" -gt 0 ]; then
                     break
                   fi
                   sleep 2
                 done
                 # Re-open the Inferno node against the now-valid clock.
-                "$sctl" restart wireplumber.service
+                "$sctl" --user restart wireplumber.service
               '';
             };
           };
@@ -1535,7 +1527,7 @@
           # connection. The match list is declarative — adding Ardour,
           # Bitwig, etc. is one line each. Same rule applies in reverse
           # (input direction) if/when DAWs auto-connect Inferno source.
-          systemd.services.daw-router =
+          systemd.user.services.daw-router =
             let
               dawBinaries = [
                 "reaper"
@@ -1557,7 +1549,6 @@
               dawInputProxy = "daw_inputs";
               dawRouter = pkgs.writeShellScript "daw-router" ''
                 set -u
-                export PIPEWIRE_RUNTIME_DIR=/run/pipewire
                 pwLink=${pkgs.pipewire}/bin/pw-link
                 pwMon=${pkgs.pipewire}/bin/pw-mon
                 pwDump=${pkgs.pipewire}/bin/pw-dump
@@ -1712,11 +1703,9 @@
               wants = [ "pipewire.service" ];
               bindsTo = [ "pipewire.service" ];
               partOf = [ "pipewire.service" ];
-              wantedBy = [ "multi-user.target" ];
+              wantedBy = [ "default.target" ];
               serviceConfig = {
                 Type = "simple";
-                User = "pipewire";
-                Group = "pipewire";
                 Restart = "on-failure";
                 RestartSec = 2;
                 ExecStart = dawRouter;

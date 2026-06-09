@@ -80,19 +80,34 @@
                     protocol-version = "${protocolVersion}"
                   '';
 
-                  systemd.services = {
+                  # statime binds the PTP UDP ports (319/320), which are
+                  # privileged (<1024). But its clock is virtual
+                  # (virtual-system-clock = true, hardware-clock = "none"), so
+                  # it needs NO CAP_SYS_TIME and NO PTP-hardware-clock device
+                  # access — only the port bind. Grant exactly that one
+                  # capability via a setcap wrapper so statime can run as a
+                  # plain user service (the whole Dante stack is now per-user).
+                  security.wrappers.statime = {
+                    source = "${statimePkg}/bin/statime";
+                    capabilities = "cap_net_bind_service+ep";
+                    owner = "root";
+                    group = "root";
+                  };
+
+                  systemd.user.services = {
                     statime-inferno = {
                       description = "Statime PTP daemon for ${host.name} Dante network";
-                      after = [ "network-online.target" ];
-                      wants = [ "network-online.target" ];
-                      # Gated behind dante.target (`dante on|off`): with the
-                      # Dante network absent the whole AoIP stack stays down
-                      # so a clockless Inferno can't wedge PipeWire.
+                      # No network-online ordering: this is a user unit started
+                      # via `dante on` well after login, by which time the Dante
+                      # static IP has long been up (boot-time assignment).
+                      # Gated behind the user dante.target (`dante on|off`):
+                      # with the Dante network absent the whole AoIP stack stays
+                      # down so a clockless Inferno can't wedge PipeWire.
                       partOf = [ "dante.target" ];
                       wantedBy = [ "dante.target" ];
                       serviceConfig = {
                         Type = "simple";
-                        ExecStart = "${statimePkg}/bin/statime --config ${configPath}";
+                        ExecStart = "/run/wrappers/bin/statime --config ${configPath}";
                         Restart = "always";
                         RestartSec = "3s";
                       };
@@ -147,15 +162,15 @@
                           # locked as a PTP follower. Zero in the last 35s means
                           # it self-promoted to its unimplemented PTPv1 master
                           # stub (the heisenbug, or a lost grandmaster).
-                          if [ "$("$jctl" -u statime-inferno.service --since '35 seconds ago' -o cat | grep -c 'Measurement:')" -gt 0 ]; then
+                          if [ "$("$jctl" --user -u statime-inferno.service --since '35 seconds ago' -o cat | grep -c 'Measurement:')" -gt 0 ]; then
                             exit 0
                           fi
                           echo "Statime not locked; restarting statime-inferno."
-                          "$sctl" restart statime-inferno.service || true
+                          "$sctl" --user restart statime-inferno.service || true
                           relocked=0
                           for i in $(seq 1 20); do
                             sleep 2
-                            if [ "$("$jctl" -u statime-inferno.service --since '5 seconds ago' -o cat | grep -c 'Measurement:')" -gt 0 ]; then
+                            if [ "$("$jctl" --user -u statime-inferno.service --since '5 seconds ago' -o cat | grep -c 'Measurement:')" -gt 0 ]; then
                               relocked=1
                               break
                             fi
@@ -166,7 +181,7 @@
                           if [ "$relocked" = 1 ]; then
                             echo "Statime re-locked; re-initialising audio session."
                             ${lib.concatMapStringsSep "\n                            " (
-                              svc: ''"$sctl" restart ${svc} || true''
+                              svc: ''"$sctl" --user restart ${svc} || true''
                             ) reinitOnRecovery}
                           fi
                         '';
@@ -177,7 +192,7 @@
                   # Timers ride dante.target too — with the stack off they
                   # must not fire (the watchdog would endlessly restart
                   # statime, the leader lock would spam an absent device).
-                  systemd.timers =
+                  systemd.user.timers =
                     lib.optionalAttrs (preferredLeader != null) {
                       dante-preferred-leader = {
                         partOf = [ "dante.target" ];
