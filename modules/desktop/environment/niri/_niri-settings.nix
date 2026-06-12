@@ -76,7 +76,7 @@ in
           };
         };
       };
-      "DP-2" = {
+      "DP-4" = {
         # MSI MPG491CX OLED ultrawide — center
         # VRR disabled — causes flickering on this panel
         mode = "5120x1440@240.000";
@@ -87,10 +87,9 @@ in
           };
         };
       };
-      "DP-1" = {
+      "DP-5" = {
         # Acer XV271U M3 — right portrait
-        # Temporarily lowered from 179.999 to test NVIDIA atomic commit failures.
-        mode = "2560x1440@120.000";
+        mode = "2560x1440@179.999";
         transform = "270";
         position = _: {
           props = {
@@ -151,7 +150,7 @@ in
       w8 = { };
       w9 = { };
       music = {
-        open-on-output = "DP-2";
+        open-on-output = "DP-4";
       };
       comms = {
         open-on-output = "DP-3";
@@ -160,13 +159,13 @@ in
         open-on-output = "DP-3";
       };
       notes = {
-        open-on-output = "DP-1";
+        open-on-output = "DP-5";
       };
       research = {
-        open-on-output = "DP-1";
+        open-on-output = "DP-5";
       };
       gaming = {
-        open-on-output = "DP-2";
+        open-on-output = "DP-4";
       };
     };
 
