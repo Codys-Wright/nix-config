@@ -85,9 +85,11 @@ let
     }
   ];
 
+  # The octane image lives at /app (WORKDIR), so persistent state is
+  # /app/storage (uploads, logs, sessions, compiled views).
   storageMount = {
     name = "storage";
-    mountPath = "/var/www/app/storage";
+    mountPath = "/app/storage";
   };
   storageVolume = {
     name = "storage";
@@ -101,10 +103,13 @@ in
 
     resources = {
       persistentVolumeClaims = {
+        # Local (db-local), not NFS: the NAS export uses all_squash, which
+        # collides with the octane container's ninja(999) user when it writes
+        # framework/cache. Pinned to starcommand like the DB.
         "invoiceninja-storage".spec = {
-          accessModes = [ "ReadWriteMany" ];
-          storageClassName = "nas-nfs";
-          resources.requests.storage = "2Gi";
+          accessModes = [ "ReadWriteOnce" ];
+          storageClassName = "db-local";
+          resources.requests.storage = "5Gi";
         };
         "invoiceninja-db".spec = {
           accessModes = [ "ReadWriteOnce" ];
@@ -164,6 +169,30 @@ in
             spec = {
               enableServiceLinks = false;
               nodeSelector."kubernetes.io/hostname" = "starcommand";
+              # The empty PVC would shadow the image's /app/storage skeleton
+              # (framework/cache, sessions, views). Seed it once, then hand
+              # ownership to ninja(999).
+              initContainers.seed-storage = {
+                image = webImage;
+                command = [
+                  "sh"
+                  "-c"
+                  ''
+                    if [ ! -d /seed/framework ]; then
+                      cp -a /app/storage/. /seed/
+                      echo "seeded storage skeleton"
+                    fi
+                    chown -R 999:999 /seed
+                  ''
+                ];
+                securityContext.runAsUser = 0;
+                volumeMounts = [
+                  {
+                    name = "storage";
+                    mountPath = "/seed";
+                  }
+                ];
+              };
               containers.invoiceninja = {
                 image = webImage;
                 ports.http.containerPort = port;
