@@ -36,7 +36,7 @@
         { config, pkgs, ... }:
         let
           nodeName = lib.toLower config.networking.hostName;
-          drainCmd = "kubectl drain ${nodeName} --ignore-daemonsets --delete-emptydir-data --timeout=120s";
+          drainCmd = "KUBECONFIG=/etc/rancher/k3s/k3s.yaml kubectl drain ${nodeName} --ignore-daemonsets --delete-emptydir-data --timeout=120s";
           # v1: drain/uncordon run on the server over SSH (root@server has
           # cluster-admin kubectl). Phase 3 replaces this with a local
           # drain-scoped ServiceAccount kubeconfig from nix-secrets.
@@ -48,7 +48,7 @@
             text = ''
               sudo systemctl start k3s.service
               echo "k3s agent started; uncordoning ${nodeName}..."
-              ${serverSsh} "kubectl uncordon ${nodeName}" || \
+              ${serverSsh} "KUBECONFIG=/etc/rancher/k3s/k3s.yaml kubectl uncordon ${nodeName}" || \
                 echo "uncordon failed (node may not be registered yet — run cluster-on again in ~30s)"
             '';
           };
@@ -76,6 +76,10 @@
 
           services.k3s = {
             enable = true;
+            # Pin to the server minor: kubelet must never be NEWER than the
+            # API server (version-skew policy). starcommand (nixpkgs 25.11)
+            # runs k3s 1.33; fleet hosts on newer nixpkgs would drift ahead.
+            package = pkgs.k3s_1_33;
             role = "agent";
             inherit serverAddr;
             tokenFile = config.sops.secrets."k3s/token".path;
