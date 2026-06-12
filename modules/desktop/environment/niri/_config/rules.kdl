@@ -97,6 +97,31 @@ window-rule {
     open-maximized true
 }
 
+// Sunshine streaming surface -> the "stream" workspace on HDMI-A-1 (the AOC),
+// so game-streaming runs on its own display and games launched from Big
+// Picture stay there instead of escaping to the main "gaming" workspace.
+// Placed AFTER the generic steam rule so it overrides that placement.
+//
+// Primary path: the Sunshine "Steam Big Picture" app runs Big Picture inside
+// gamescope, so Big Picture + every game launched from it share one surface
+// (app-id "gamescope"). Open it fullscreen so the top bar is covered.
+window-rule {
+    match app-id="^gamescope$"
+    open-on-workspace "stream"
+    open-fullscreen true
+    open-focused true
+}
+
+// Fallback: Big Picture launched directly (not via gamescope). Window
+// identity confirmed via `niri msg windows`: app-id "steam", title
+// "Steam Big Picture Mode".
+window-rule {
+    match app-id="^steam$" title="^Steam Big Picture Mode$"
+    open-on-workspace "stream"
+    open-fullscreen true
+    open-focused true
+}
+
 window-rule {
     match app-id="^com\\.obsproject\\.Studio$"
     match app-id="^obs$"

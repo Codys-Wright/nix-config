@@ -1,39 +1,45 @@
 workspace "main" {
-    open-on-output "DP-2"
+    open-on-output "DP-4"
 }
 
 workspace "code" {
-    open-on-output "DP-2"
+    open-on-output "DP-4"
 }
 
 workspace "music" {
-    open-on-output "DP-2"
+    open-on-output "DP-4"
 }
 
 workspace "gaming" {
-    open-on-output "DP-2"
+    open-on-output "DP-4"
+}
+
+// Dedicated Sunshine game-streaming workspace on the AOC (HDMI-A-1), so a
+// stream runs on its own display without touching the main monitors.
+workspace "stream" {
+    open-on-output "HDMI-A-2"
 }
 
 workspace "recording" {
-    open-on-output "DP-1"
+    open-on-output "DP-3"
 }
 
 workspace "setup" {
-    open-on-output "DP-1"
+    open-on-output "DP-3"
 }
 
 workspace "comms" {
-    open-on-output "DP-3"
+    open-on-output "DP-5"
 }
 
 workspace "media" {
-    open-on-output "DP-3"
+    open-on-output "DP-5"
 }
 
 workspace "notes" {
-    open-on-output "DP-3"
+    open-on-output "DP-5"
 }
 
 workspace "research" {
-    open-on-output "DP-1"
+    open-on-output "DP-3"
 }

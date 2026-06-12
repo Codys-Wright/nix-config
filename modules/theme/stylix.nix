@@ -39,8 +39,11 @@
 
           icons = {
             enable = true;
-            dark = "MacTahoe";
-            light = "MacTahoe";
+            # The actual installed theme directory is MacTahoe-blue (-blue is the
+            # color variant). Bare "MacTahoe" resolves to nothing → missing-icon
+            # placeholders in GTK apps.
+            dark = "MacTahoe-blue";
+            light = "MacTahoe-blue";
             package = pkgs.callPackage ../../packages/mactahoe/icon-theme.nix { };
           };
 

@@ -8,13 +8,13 @@
 }:
 rustPlatform.buildRustPackage {
   pname = "inferno";
-  version = "0.5.0-unstable-2026-05-05";
+  version = "0.5.0-unstable-2026-06-03";
 
   src = fetchFromGitHub {
     owner = "FastTrackStudios";
     repo = "inferno";
-    rev = "44b9e6a87008c5a51f9570ea42704590770bfaac";
-    hash = "sha256-a5urdGykq2IMPgMfyIPXdaQ2LTLY1DCmVjTiD5furS8=";
+    rev = "58699531901ac6508ea607927a33e57f44505351";
+    hash = "sha256-3z78QMqtHa0fvz3UJKFaW6bYTuttvGPBuE2aEKAP64k=";
     fetchSubmodules = true;
   };
 

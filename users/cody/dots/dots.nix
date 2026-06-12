@@ -70,7 +70,8 @@
 
         home.file.".config/vscode-vim".source = dotsLink "config/vscode-vim";
         home.file.".config/doom".source = dotsLink "config/doom";
-        # home.file.".config/zed".source = dotsLink "config/zed";
+        home.file.".config/zed/settings.json".source = dotsLink "config/zed/settings.json";
+        home.file.".config/zed/keymap.json".source = dotsLink "config/zed/keymap.json";
         home.file.".config/ghostty".source = dotsLink "config/ghostty";
         home.file.".config/btca/btca.json".source = dotsLink "config/btca/btca.json";
 

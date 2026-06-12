@@ -7,7 +7,7 @@
 {
   den.hosts.x86_64-linux = {
     THEBATTLESHIP = {
-      description = "The Main System, ready for everyday battle";
+      description = "The Main System, ready for everyday battle (all users)";
       users.cody = {
         extraGroups = [
           "audio"
@@ -40,10 +40,12 @@
         (fleet.hardware {
           nvidia = true;
           tailscale = true;
+          zsa = true;
         })
 
         <fleet/gaming>
         <fleet/apps>
+        (fleet.apps._.davinci-resolve { studio = true; })
         # controller-split bundles polkit + sudoers + InputPlumber config +
         # the launch-as / steam-as equivalents. Replaces the three modules
         # that used to live here (launch-as, inputplumber, coop-launcher).
@@ -68,6 +70,16 @@
         (fleet.music._.production._.statime {
           interface = "enp12s0";
           preferredLeader = "AA-4202524000109";
+          # MUST stay "debug" (or "trace"): at "warn" this statime fork loses a
+          # startup race — it hits the announce-receipt timeout and self-promotes
+          # to a PTPv1 master (unimplemented stub) before processing the leader's
+          # first Sync, so the clock never locks and no Dante audio flows. The
+          # extra per-packet logging delay lets the Sync win the race. Heisenbug.
+          loglevel = "debug";
+          # When the watchdog recovers a lost PTP lock, re-open the Inferno
+          # PipeWire node against the now-valid clock (otherwise it stays frozen
+          # in "init"). studio-routing-links is partOf wireplumber and re-wires.
+          reinitOnRecovery = [ "wireplumber.service" ];
         })
         (fleet.music._.production._.inferno {
           bindIp = "10.10.10.10";
@@ -309,14 +321,25 @@
             "92" = "92 - OUT92";
             "93" = "93 - OUT93";
             "94" = "94 - OUT94";
-            "95" = "95 - OUT95";
-            "96" = "96 - OUT96";
-            "97" = "97 - OUT97";
-            "98" = "98 - OUT98";
+            # 95-96: Reaper master output. Reaper's hardware outputs 95/96
+            # land here via the daw → daw_to_inferno → Inferno TX 1:1 map.
+            # Galaxy 32 RX 59/60 are renamed "DAW L/R" and subscribed to
+            # this pair.
+            "95" = "DAW L";
+            "96" = "DAW R";
+            # 97-98: System audio mix sent to Galaxy 32 RX 61/62 ("System L/R").
+            # Notifications are NOT mixed in at the Dante level — they mix
+            # into system_audio inside PipeWire before this TX, so the
+            # `games` sink (which shares TX 97/98 via studioRoutedSinks) is
+            # the clean, notification-free signal OBS captures for screen
+            # recordings.
+            "97" = "System L";
+            "98" = "System R";
             "99" = "99 - OUT99";
             "100" = "100 - OUT100";
-            "101" = "101 - OUT101";
-            "102" = "102 - OUT102";
+            # 101-102: chat / call audio → Galaxy 32 RX 63/64 ("Voice Chat L/R").
+            "101" = "Voice Chat L";
+            "102" = "Voice Chat R";
             "103" = "103 - OUT103";
             "104" = "104 - OUT104";
             "105" = "105 - OUT105";
@@ -362,6 +385,37 @@
         # hosts/THEBATTLESHIP/secrets.yaml under `forgejo/runner_token`.
         (fleet.selfhost._.forgejo-runner {
           tokenSopsFile = ./secrets.yaml;
+        })
+
+        # Codeberg Actions runner. Pre-created in the Codeberg UI (runner
+        # "THEBATTLESHIP" on the codywright account) — UUID + secret live in
+        # hosts/THEBATTLESHIP/secrets.yaml. Docker-only labels on purpose:
+        # no `:host` label, so Codeberg CI never executes directly on the
+        # workstation the way the trusted starcommand runner above does.
+        (fleet.selfhost._.forgejo-runner {
+          url = "https://codeberg.org/";
+          name = "codeberg";
+          uuidKey = "codeberg-runner-uuid";
+          tokenKey = "codeberg-runner-token";
+          tokenSopsFile = ./secrets.yaml;
+          labels = [
+            "docker:docker://node:lts"
+            "ubuntu-latest:docker://catthehacker/ubuntu:act-latest"
+          ];
+        })
+
+        # Second Codeberg runner, registered to the org rather than the
+        # codywright account. Same docker-only label policy.
+        (fleet.selfhost._.forgejo-runner {
+          url = "https://codeberg.org/";
+          name = "codeberg-org";
+          uuidKey = "codeberg-org-runner-uuid";
+          tokenKey = "codeberg-org-runner-token";
+          tokenSopsFile = ./secrets.yaml;
+          labels = [
+            "docker:docker://node:lts"
+            "ubuntu-latest:docker://catthehacker/ubuntu:act-latest"
+          ];
         })
 
         <fleet.system/avahi>
@@ -410,11 +464,15 @@
                 }
               ];
             }
+            # System notifications are a sink-only node (no Dante TX). Its
+            # monitor feeds into system_audio so the user hears the chime
+            # alongside other system audio on the Dante speakers, but the
+            # `games` sink (which OBS records) doesn't see notifications
+            # because the mix happens upstream of the games tap.
             {
               name = "system_notifications";
               desc = "System Notifications";
-              txL = 99;
-              txR = 100;
+              feedsInto = "system_audio";
               fanout = [ ];
             }
             {
@@ -474,19 +532,36 @@
             "pci=nommconf"
           ];
 
-          # Disable Energy Efficient Ethernet on the I226-V — EEE interaction with
-          # the PCIe L1 substates errata is a common trigger for spontaneous link loss.
+          # Disable Energy Efficient Ethernet on the I226-V — EEE interaction
+          # with PCIe L1 substates errata triggers spontaneous link loss.
+          # The boot-time oneshot below covers the initial bring-up, and the
+          # udev rule re-applies EEE=off every time the kernel binds the
+          # interface (after a PCIe rescan, suspend/resume, or NM bouncing
+          # the link), since NetworkManager has been observed to re-enable EEE
+          # on its own activations.
           systemd.services."igc-disable-eee" = {
             description = "Disable EEE on Intel I226-V (enp11s0) to prevent PCIe link drops";
             after = [ "network-online.target" ];
             wants = [ "network-online.target" ];
             wantedBy = [ "multi-user.target" ];
-            script = "${pkgs.ethtool}/sbin/ethtool --set-eee enp11s0 eee off || true";
+            script = "${pkgs.ethtool}/bin/ethtool --set-eee enp11s0 eee off || true";
             serviceConfig = {
               Type = "oneshot";
               RemainAfterExit = true;
             };
           };
+
+          services.udev.extraRules = ''
+            # Re-disable EEE every time the igc driver binds an I226-V (vendor
+            # 8086, device 125c). Matches on add+change so it fires after PCIe
+            # rescans and NetworkManager link cycles.
+            ACTION=="add|change", SUBSYSTEM=="net", DRIVERS=="igc", ATTRS{vendor}=="0x8086", ATTRS{device}=="0x125c", RUN+="${pkgs.ethtool}/bin/ethtool --set-eee %k eee off"
+          '';
+
+          # ethtool is added alongside iw/tcpdump/etc in the dedicated
+          # environment.systemPackages block lower in this file (search for
+          # "ethtool" there). Keep that single definition to avoid a second
+          # mergeable assignment in the same module.
 
           nix.gc = {
             automatic = true;
@@ -546,6 +621,28 @@
               "rw"
               "nofail"
             ];
+          };
+
+          # ext4 dedicated development partition (Samsung 990 EVO Plus 2TB)
+          fileSystems."/run/media/Development" = {
+            device = "/dev/disk/by-uuid/7e6024ba-a396-409f-92ae-27d74359240d";
+            fsType = "ext4";
+            options = [
+              "rw"
+              "nofail"
+            ];
+          };
+
+          systemd.services.development-permissions = {
+            description = "Ensure Development is writable by cody";
+            wantedBy = [ "run-media-Development.mount" ];
+            after = [ "run-media-Development.mount" ];
+            bindsTo = [ "run-media-Development.mount" ];
+            serviceConfig.Type = "oneshot";
+            script = ''
+              chown cody:users /run/media/Development
+              chmod 0775 /run/media/Development
+            '';
           };
 
           systemd.services.audiohaven-permissions = {
@@ -634,8 +731,17 @@
             fsType = "none";
             options = [
               "bind"
+              # noauto + automount: do NOT pull this bind mount in at boot.
+              # Without these it mounts as part of remote-fs.target, which
+              # (via the requires below) triggers the mnt-starcommand NFS mount
+              # during boot. When the 10G/Dante network isn't up yet that NFS
+              # mount times out (30s) and fails this dependency, stalling boot.
+              # As an automount it only activates on first access instead.
+              "noauto"
               "nofail"
               "_netdev"
+              "x-systemd.automount"
+              "x-systemd.idle-timeout=600"
               "x-systemd.requires=mnt-starcommand.mount"
               "x-systemd.after=mnt-starcommand.mount"
             ];
@@ -705,6 +811,37 @@
               group = "root";
               mode = "0400";
             };
+
+            # FastTrackStudio Codeberg agent credentials.
+            # Codeberg API/git access token — decrypted to a file owned by cody.
+            secrets."cody/codeberg/fts-codeberg-access-token" = {
+              owner = "cody";
+              group = "users";
+              mode = "0400";
+            };
+            # Dedicated SSH key for the fts-agent Codeberg account (the public
+            # half is registered on that account). Used as an SSH IdentityFile.
+            secrets."cody/codeberg/fts-agent" = {
+              owner = "cody";
+              group = "users";
+              mode = "0400";
+            };
+
+            # Render the token into a dotenv file so any service can pull it in
+            # via `serviceConfig.EnvironmentFile`, and it's available to source
+            # for ad-hoc use — without the value ever landing in the nix store.
+            # Path: config.sops.templates."fts-codeberg.env".path
+            templates."fts-codeberg.env" = {
+              content = ''
+                FTS_CODEBERG_ACCESS_TOKEN=${config.sops.placeholder."cody/codeberg/fts-codeberg-access-token"}
+                FTS_CODEBERG_GIT_URL=https://fts-agent:${
+                  config.sops.placeholder."cody/codeberg/fts-codeberg-access-token"
+                }@codeberg.org
+              '';
+              owner = "cody";
+              group = "users";
+              mode = "0400";
+            };
           };
 
           # --- Virtual PipeWire routing nodes ---
@@ -734,11 +871,12 @@
                 "node.dont-reconnect" = true;
               };
               mkRoutedSink =
-                {
+                s@{
                   name,
                   desc,
-                  txL,
-                  txR,
+                  txL ? null,
+                  txR ? null,
+                  feedsInto ? null,
                   fanout ? [ ],
                 }:
                 {
@@ -754,13 +892,29 @@
                       "monitor.channel-volumes" = true;
                       "node.pause-on-idle" = false;
                     };
-                    "playback.props" = dontAutoconnect // {
-                      "node.name" = "${name}_to_inferno";
-                      "node.description" = "${desc} → Inferno TX ${toString txL}/${toString txR}";
-                      "audio.channels" = 2;
-                      "audio.position" = numericPos 2;
-                      "node.passive" = true;
-                    };
+                    "playback.props" =
+                      dontAutoconnect
+                      // (
+                        if feedsInto != null then
+                          # No Dante TX — playback side is a dummy. The actual
+                          # local feed into the target sink is wired by the
+                          # studio-routing-links service via pw-link.
+                          {
+                            "node.name" = "${name}_sink_back";
+                            "node.description" = desc;
+                            "audio.channels" = 2;
+                            "audio.position" = numericPos 2;
+                            "node.passive" = true;
+                          }
+                        else
+                          {
+                            "node.name" = "${name}_to_inferno";
+                            "node.description" = "${desc} → Inferno TX ${toString txL}/${toString txR}";
+                            "audio.channels" = 2;
+                            "audio.position" = numericPos 2;
+                            "node.passive" = true;
+                          }
+                      );
                   };
                 };
               mkRoutedSource =
@@ -796,6 +950,37 @@
               routedSources = studioRoutedSources;
             in
             {
+              # libpipewire-jack auto-connects every JACK client output
+              # port to the *default Audio/Sink* during jack_client_open(),
+              # which is too early for any WirePlumber `node.rules` to
+              # influence. Pin the target via jack.rules so every JACK
+              # client lands on the `daw` 128-channel proxy sink. From
+              # there, studio-routing-links wires daw_to_inferno into
+              # specific Inferno TX channels (DAW L/R = TX 95/96).
+              extraConfig.jack."93-studio-jack-target" = {
+                "jack.properties" = {
+                  "node.target" = "daw";
+                };
+                "jack.rules" = [
+                  {
+                    matches = [
+                      { "application.process.binary" = "reaper"; }
+                      { "application.name" = "REAPER"; }
+                      { "node.name" = "REAPER"; }
+                    ];
+                    actions.update-props = {
+                      "node.target" = "daw";
+                      "target.object" = "daw";
+                      # Belt-and-suspenders: turn the JACK auto-connect off
+                      # for this client so even if `node.target` is ignored
+                      # by the shim, we don't get spurious Inferno-direct
+                      # links re-created on every port registration.
+                      "jack.connect" = false;
+                    };
+                  }
+                ];
+              };
+
               extraConfig.pipewire."93-studio-virtual-nodes" = {
                 "context.modules" = [
                   # 128-ch DAW pass-through for Reaper. Linked 1:1 into
@@ -811,12 +996,53 @@
                         "audio.channels" = 128;
                         "audio.position" = numericPos 128;
                         "node.pause-on-idle" = false;
+                        # Inferno sink sets priority.session = 2000 to win
+                        # default-sink election; that makes PipeWire's JACK
+                        # shim auto-connect every Reaper output directly to
+                        # Inferno sink, bypassing the `daw` proxy. Pin daw
+                        # to 3000 so Reaper lands here and the channel
+                        # renames on daw_to_inferno actually apply.
+                        "priority.session" = 3000;
+                        "priority.driver" = 3000;
                       };
                       "playback.props" = dontAutoconnect // {
                         "node.name" = "daw_to_inferno";
                         "audio.channels" = 128;
                         "audio.position" = numericPos 128;
                         "node.passive" = true;
+                      };
+                    };
+                  }
+                  # 128-ch DAW input proxy — the mirror of `daw` for the
+                  # capture direction. `daw_from_inferno` is the upstream
+                  # leg whose inputs studio-routing-links wires 1:1 from
+                  # Inferno source's capture ports, and `daw_inputs` is
+                  # the Audio/Source the DAW (Reaper / Ardour / Bitwig)
+                  # actually opens for recording. Keeping the daw side
+                  # isolated from the Inferno source node means the
+                  # daw-router rewriter has a single canonical target
+                  # for any erroneous reaper:in_N -> {Yamaha capture,
+                  # Inferno source, …} links.
+                  {
+                    name = "libpipewire-module-loopback";
+                    args = {
+                      "node.description" = "DAW Inputs";
+                      "capture.props" = dontAutoconnect // {
+                        "node.name" = "daw_from_inferno";
+                        "node.description" = "Inferno → DAW";
+                        "audio.channels" = 128;
+                        "audio.position" = numericPos 128;
+                        "node.passive" = true;
+                      };
+                      "playback.props" = {
+                        "node.name" = "daw_inputs";
+                        "node.description" = "DAW Inputs";
+                        "media.class" = "Audio/Source";
+                        "audio.channels" = 128;
+                        "audio.position" = numericPos 128;
+                        "node.pause-on-idle" = false;
+                        "priority.session" = 3000;
+                        "priority.driver" = 3000;
                       };
                     };
                   }
@@ -833,7 +1059,65 @@
                   ];
                   actions.update-props."api.alsa.use-acp" = false;
                 }
+                {
+                  # The TF is a fixed 34x34 interface. Without an explicit
+                  # channel count, raw-mode probing requests the spa-alsa
+                  # default (64), fails repeatedly ("Channels doesn't match
+                  # (requested 64, got 34)") and stretches the device-churn
+                  # window in which pipewire 1.6's link-creation lock race
+                  # can deadlock the core under a connecting JACK client
+                  # (REAPER stuck on launch).
+                  matches = [
+                    { "node.name" = "~alsa_(output|input)\\.usb-Yamaha_Corporation_Yamaha_TF.*"; }
+                  ];
+                  actions.update-props = {
+                    "audio.channels" = 34;
+                    # Keep the TF node instantiated even when idle. The
+                    # local monitoring path is a set of pw-link pins from
+                    # system_audio/games/voice_chat:monitor → TF:playback
+                    # (studio-local-links below). If the device suspends on
+                    # idle, those ports vanish and the links are silently
+                    # dropped — audio then "works for a few seconds then
+                    # cuts out" until something re-wires. Never suspend it.
+                    "session.suspend-timeout-seconds" = 0;
+                    "node.always-process" = true;
+                  };
+                }
               ];
+
+              # Make the `system_audio` virtual sink the default so every
+              # app funnels through it. studio-local-links fans system_audio
+              # (plus games/voice_chat) out to the Yamaha TF for local
+              # monitoring regardless of whether the Dante stack is up, and
+              # the dante-gated studio-routing-links adds the Inferno TX legs
+              # on top when `dante on`.
+              wireplumber.extraConfig."10-studio-defaults".wireplumber.settings = {
+                "default.configured.audio.sink" = "system_audio";
+              };
+
+              # Bump the graph quantum to 1024 (~21ms) over the pipewire
+              # aspect's 256 default. The TF shares a congested nested USB hub
+              # (Insta360 4K webcam + KONTROL S88 + Stream Deck), so isochronous
+              # audio packets get starved on the bus and glitch *below* the ALSA
+              # layer (no xruns logged). A larger buffer rides those out.
+              # mkForce because the audio facet's default pipewire instance
+              # also sets this key to 256. Revisit (back to 256) once the TF is
+              # on its own/direct USB port.
+              extraConfig.pipewire."92-low-latency".context.properties."default.clock.quantum" = lib.mkForce 1024;
+
+              # Disable the libcamera monitor. WirePlumber publishes every UVC
+              # webcam + the MS2109 HDMI grabber as BOTH a libcamera node and a
+              # v4l2 node; its built-in dedup is documented to fail on
+              # multi-interface / "complex" devices (the grabber especially), so
+              # two readers end up contending for one /dev/videoN — the cause of
+              # OBS's "decoder: failed to unpack jpeg" and "select timed out".
+              # Dropping libcamera leaves exactly one (v4l2, media.role=Camera)
+              # node per device, which is what both the direct-V4L2 path and the
+              # xdg-desktop-portal Camera path want. Per-user WirePlumber uses
+              # the "main" profile.
+              wireplumber.extraConfig."51-disable-libcamera"."wireplumber.profiles" = {
+                main."monitor.libcamera" = "disabled";
+              };
 
               # Belt-and-suspenders: in case the per-loopback `node.autoconnect`
               # property doesn't make it through libpipewire-module-loopback's
@@ -847,6 +1131,28 @@
                   actions.update-props = {
                     "node.autoconnect" = false;
                     "node.dont-reconnect" = true;
+                  };
+                }
+              ];
+
+              # Pin Reaper (and other JACK clients with DSP role) to the
+              # `daw` Audio/Sink instead of letting wireplumber auto-route
+              # them to "Inferno sink" — which it does today because Inferno
+              # sink has priority.session = 2000 and is the only ≥128-channel
+              # sink in the graph. Sending Reaper through `daw` is what
+              # studioRoutedSinks / studio-routing-links assume: daw's
+              # capture is the entry point, `daw_to_inferno` is its proxy
+              # to Dante, and bypassing it means the channel renaming on
+              # daw_to_inferno never applies to Reaper's signal.
+              wireplumber.extraConfig."96-reaper-to-daw"."node.rules" = [
+                {
+                  matches = [
+                    { "node.name" = "REAPER"; }
+                    { "application.name" = "REAPER"; }
+                  ];
+                  actions.update-props = {
+                    "target.object" = "daw";
+                    "node.target" = "daw";
                   };
                 }
               ];
@@ -866,11 +1172,11 @@
           # to come up active on every boot, so seed those entries before
           # wireplumber starts. Cards we don't list (e.g. the Axe-Fx) keep
           # whatever the file previously had.
-          systemd.services.wireplumber.serviceConfig.ExecStartPre =
+          systemd.user.services.wireplumber.serviceConfig.ExecStartPre =
             let
               seedScript = pkgs.writeShellScript "wireplumber-seed-profiles" ''
                 set -u
-                state=/var/lib/pipewire/.local/state/wireplumber/default-profile
+                state="''${XDG_STATE_HOME:-$HOME/.local/state}/wireplumber/default-profile"
                 mkdir -p "$(dirname "$state")"
                 touch "$state"
 
@@ -903,20 +1209,118 @@
             in
             [ "${seedScript}" ];
 
-          systemd.services.studio-routing-links =
+          # --- Local monitoring link service (always on) ---
+          #
+          # Fans the user-facing virtual sinks out to the Yamaha TF console
+          # for local monitoring, independent of the Dante stack. This is
+          # what makes the box usable with `dante off`: apps land on
+          # `system_audio` (the default sink, set above), and these pw-link
+          # pins carry system_audio/games/voice_chat:monitor_1/2 →
+          # TF:playback_1/2 so audio reaches the console with no Inferno/PTP
+          # involvement.
+          #
+          # Deliberately NOT gated behind dante.target, and with no Inferno
+          # node wait (unlike studio-routing-links): these links only touch
+          # local PipeWire nodes, so they must come up at every boot. partOf
+          # pipewire+wireplumber re-creates them whenever the graph is rebuilt
+          # (device churn, `dante on/off` bouncing wireplumber, etc.). The TF
+          # node is pinned non-suspending (see the 80-pro-audio-usb rule) so
+          # these links never get dropped under it.
+          systemd.user.services.studio-local-links =
+            let
+              localSinks = [
+                "system_audio"
+                "games"
+                "voice_chat"
+              ];
+              localPairs = builtins.concatMap (s: [
+                {
+                  out = "${s}:monitor_1";
+                  inp = "${yamahaTF}:playback_1";
+                }
+                {
+                  out = "${s}:monitor_2";
+                  inp = "${yamahaTF}:playback_2";
+                }
+              ]) localSinks;
+              pwLink = "${pkgs.pipewire}/bin/pw-link";
+              linkCmds = lib.concatMapStringsSep "\n" (p: ''try_link "${p.out}" "${p.inp}"'') localPairs;
+              linkScript = pkgs.writeShellScript "studio-local-links" ''
+                set -u
+
+                # try_link: ports may not exist yet at boot (loopback sink or
+                # the TF node still registering). Retry per pair before giving
+                # up; "exists" is success (idempotent re-runs on restart).
+                try_link() {
+                  local out="$1" inp="$2"
+                  for j in $(seq 1 20); do
+                    out_msg=$(${pwLink} "$out" "$inp" 2>&1) && return 0
+                    case "$out_msg" in
+                      *"exists"*|*"link exists"*) return 0 ;;
+                    esac
+                    sleep 1
+                  done
+                  echo "studio-local-links: failed after retries: $out -> $inp ($out_msg)" >&2
+                  return 1
+                }
+
+                ${linkCmds}
+                exit 0
+              '';
+            in
+            {
+              description = "Wire system_audio/games/voice_chat → Yamaha TF for local monitoring (Dante-independent)";
+              after = [
+                "pipewire.service"
+                "wireplumber.service"
+              ];
+              wants = [ "pipewire.service" ];
+              bindsTo = [
+                "pipewire.service"
+                "wireplumber.service"
+              ];
+              partOf = [
+                "pipewire.service"
+                "wireplumber.service"
+              ];
+              wantedBy = [ "default.target" ];
+              serviceConfig = {
+                Type = "simple";
+                RemainAfterExit = true;
+                ExecStart = linkScript;
+              };
+            };
+
+          systemd.user.services.studio-routing-links =
             let
               sinkLinkPairs = builtins.concatMap (
                 s:
-                [
-                  {
-                    out = "${s.name}_to_inferno:output_1";
-                    inp = "Inferno sink:playback_${toString s.txL}";
-                  }
-                  {
-                    out = "${s.name}_to_inferno:output_2";
-                    inp = "Inferno sink:playback_${toString s.txR}";
-                  }
-                ]
+                (
+                  if (s.feedsInto or null) != null then
+                    # Local-only sink: its monitor pours into another sink's
+                    # capture input. No Dante TX is wired.
+                    [
+                      {
+                        out = "${s.name}:monitor_1";
+                        inp = "${s.feedsInto}:playback_1";
+                      }
+                      {
+                        out = "${s.name}:monitor_2";
+                        inp = "${s.feedsInto}:playback_2";
+                      }
+                    ]
+                  else
+                    [
+                      {
+                        out = "${s.name}_to_inferno:output_1";
+                        inp = "Inferno sink:playback_${toString s.txL}";
+                      }
+                      {
+                        out = "${s.name}_to_inferno:output_2";
+                        inp = "Inferno sink:playback_${toString s.txR}";
+                      }
+                    ]
+                )
                 ++ builtins.concatMap (f: [
                   {
                     out = "${s.name}:monitor_1";
@@ -938,17 +1342,47 @@
                   inp = "${s.name}_from_inferno:input_2";
                 }
               ]) studioRoutedSources;
+              # DAW channel remap: by default daw output N → Inferno TX N,
+              # but Reaper's master sits on its first stereo output pair
+              # (out 1/2). To make Reaper's master land on the named DAW
+              # L/R TX channels (TX 95/96), override entries 1 and 2 to
+              # cross-route. Other channels stay 1:1 so per-track Reaper
+              # routing to higher channel numbers (3-128) still maps to
+              # the equivalent Inferno TX index for Galaxy 32 to subscribe.
+              dawChannelMap =
+                i:
+                let
+                  n = i + 1;
+                in
+                if n == 1 then
+                  95
+                else if n == 2 then
+                  96
+                # Free up the original 95/96 slots (used to be OUT95/96)
+                # so we don't double-send when DAW L/R also maps here.
+                else if n == 95 then
+                  1
+                else if n == 96 then
+                  2
+                else
+                  n;
               dawLinkPairs = lib.genList (i: {
                 out = "daw_to_inferno:output_${toString (i + 1)}";
-                inp = "Inferno sink:playback_${toString (i + 1)}";
+                inp = "Inferno sink:playback_${toString (dawChannelMap i)}";
               }) 128;
-              allPairs = sinkLinkPairs ++ sourceLinkPairs ++ dawLinkPairs;
+              # daw_inputs: mirror of dawLinkPairs in the capture direction.
+              # Reverse the same channel map so that Reaper recording on
+              # daw_inputs input 1/2 reads from Inferno RX 95/96, etc.
+              dawInputLinkPairs = lib.genList (i: {
+                out = "Inferno source:capture_${toString (dawChannelMap i)}";
+                inp = "daw_from_inferno:input_${toString (i + 1)}";
+              }) 128;
+              allPairs = sinkLinkPairs ++ sourceLinkPairs ++ dawLinkPairs ++ dawInputLinkPairs;
               pwLink = "${pkgs.pipewire}/bin/pw-link";
               pwCli = "${pkgs.pipewire}/bin/pw-cli";
               linkCmds = lib.concatMapStringsSep "\n" (p: ''try_link "${p.out}" "${p.inp}"'') allPairs;
               linkScript = pkgs.writeShellScript "studio-routing-links" ''
                 set -u
-                export PIPEWIRE_RUNTIME_DIR=/run/pipewire
 
                 # Wait for Inferno sink/source to register. The ALSA plugin
                 # has to spin up its Dante DeviceServer first, which can
@@ -985,15 +1419,327 @@
             in
             {
               description = "Wire studio loopback nodes to specific Inferno channel pairs";
+              after = [
+                "pipewire.service"
+                "wireplumber.service"
+              ];
+              wants = [ "pipewire.service" ];
+              # bindsTo + partOf means: a restart of these services restarts
+              # us, and a stop stops us. Without this, restarting pipewire OR
+              # wireplumber (including the studio-clock-ready / watchdog
+              # re-init) leaves the studio routing graph un-linked — which
+              # surfaces as silent Dante TX (loopback->Inferno links stuck in
+              # "init") and Reaper reconnect loops. wireplumber is included
+              # because re-initialising the Inferno node is done by bouncing
+              # wireplumber, and that drops every pw-link it had made.
+              bindsTo = [
+                "pipewire.service"
+                "wireplumber.service"
+              ];
+              partOf = [
+                "pipewire.service"
+                "wireplumber.service"
+                # Gated behind dante.target (`dante on|off`): the links pull
+                # the Inferno nodes into the active graph, which wedges
+                # PipeWire when the Dante network is absent.
+                "dante.target"
+              ];
+              wantedBy = [ "dante.target" ];
+              serviceConfig = {
+                # simple, NOT oneshot: linkScript can sleep for many minutes
+                # when Inferno nodes are missing (60s node wait + 10s of
+                # retries per link pair). As oneshot that whole wait lives
+                # inside the start job, blocking multi-user.target — which
+                # wedges every nixos-rebuild switch (pipewire restart →
+                # partOf restarts us → switch waits) and marks the unit
+                # failed if interrupted. simple + RemainAfterExit keeps the
+                # partOf/bindsTo re-wire semantics (unit stays "active
+                # (exited)" after the script finishes) without ever holding
+                # a start job open.
+                Type = "simple";
+                RemainAfterExit = true;
+                ExecStart = linkScript;
+              };
+            };
+
+          # --- Clock-ready re-init ---
+          #
+          # PipeWire opens the Inferno ALSA node at boot, before statime has
+          # locked the Dante PTP clock. Opened against a missing/invalid clock,
+          # the node comes up frozen ("init" links, silent TX) and never
+          # recovers on its own. So once statime is locked, bounce wireplumber
+          # once: the Inferno node re-opens against the valid clock and
+          # studio-routing-links (partOf wireplumber) re-wires the channels.
+          # This is the one manual step that fixed a total Dante outage,
+          # automated.
+          # ── PipeWire core watchdog ─────────────────────────────────────
+          # pipewire 1.6's link-creation path can deadlock the core's main
+          # loop against the data-loop lock during device churn (observed:
+          # REAPER's jack_connect during Yamaha TF bring-up → core wedged →
+          # REAPER stuck on launch forever). The watchdog probes the core
+          # with a short-timeout pw-cli round-trip; two consecutive misses
+          # restart the audio stack, which unblocks any client stuck in a
+          # jack do_sync (the dead socket errors their call out).
+          systemd.user.services.pipewire-watchdog = {
+            description = "Restart PipeWire if its core stops answering";
+            serviceConfig = {
+              Type = "oneshot";
+              ExecStart = pkgs.writeShellScript "pipewire-watchdog" ''
+                probe() {
+                  ${pkgs.coreutils}/bin/timeout 3 \
+                    ${pkgs.pipewire}/bin/pw-cli info 0 >/dev/null 2>&1
+                }
+                if probe; then exit 0; fi
+                # One retry to ride out a momentarily busy loop.
+                sleep 2
+                if probe; then exit 0; fi
+                echo "PipeWire core unresponsive; restarting audio stack."
+                ${pkgs.systemd}/bin/systemctl --user restart \
+                  pipewire.service wireplumber.service pipewire-pulse.service
+              '';
+            };
+          };
+          systemd.user.timers.pipewire-watchdog = {
+            wantedBy = [ "timers.target" ];
+            timerConfig = {
+              OnBootSec = "30s";
+              OnUnitActiveSec = "10s";
+            };
+          };
+
+          systemd.user.services.studio-clock-ready = {
+            description = "Re-init the audio session once the Dante PTP clock is locked";
+            after = [
+              "statime-inferno.service"
+              "pipewire.service"
+              "wireplumber.service"
+            ];
+            wants = [ "statime-inferno.service" ];
+            # Gated behind dante.target — without the Dante network there is
+            # no clock to wait for (and the wait would bounce wireplumber).
+            partOf = [ "dante.target" ];
+            wantedBy = [ "dante.target" ];
+            serviceConfig = {
+              Type = "oneshot";
+              RemainAfterExit = true;
+              ExecStart = pkgs.writeShellScript "studio-clock-ready" ''
+                jctl=${pkgs.systemd}/bin/journalctl
+                sctl=${pkgs.systemd}/bin/systemctl
+                # Wait (up to ~2min) until statime is emitting Measurement
+                # lines, i.e. locked as a PTP follower.
+                for i in $(seq 1 60); do
+                  if [ "$("$jctl" --user -u statime-inferno.service --since '8 seconds ago' -o cat | grep -c 'Measurement:')" -gt 0 ]; then
+                    break
+                  fi
+                  sleep 2
+                done
+                # Re-open the Inferno node against the now-valid clock.
+                "$sctl" --user restart wireplumber.service
+              '';
+            };
+          };
+
+          # --- DAW link router ---
+          #
+          # pipewire-jack 1.6 has no per-client mechanism to redirect the
+          # `system:playback_*` alias — `is_port_default()` in
+          # pipewire-jack.c only consults the GLOBAL `default.audio.sink`
+          # metadata. REAPER (and other JACK DAWs) auto-connect their
+          # outputs to whatever 128-channel sink they enumerate first,
+          # which in our graph is the ALSA-backed `Inferno sink` and
+          # therefore bypasses the `daw` proxy + per-channel renames that
+          # daw_to_inferno applies (DAW L/R = TX 95/96, etc).
+          #
+          # Solution: a tiny rule-driven daemon that watches
+          # `pw-mon` for new Link events and rewrites any
+          #   <DAW_BINARY>:outN -> Inferno sink:playback_M
+          # link into the equivalent
+          #   <DAW_BINARY>:outN -> daw:playback_M
+          # connection. The match list is declarative — adding Ardour,
+          # Bitwig, etc. is one line each. Same rule applies in reverse
+          # (input direction) if/when DAWs auto-connect Inferno source.
+          systemd.user.services.daw-router =
+            let
+              dawBinaries = [
+                "reaper"
+                "ardour"
+                "bitwig-studio"
+                "Bitwig Studio"
+                "harrison-mixbus"
+                "qtractor"
+                "rosegarden"
+                "carla"
+              ];
+              # DAW isolation policy: a DAW client's only legal peers are
+              # the `daw` Audio/Sink (output side) and `daw_inputs`
+              # Audio/Source (capture side). ANY other connection — to
+              # Inferno sink/source, Yamaha TF capture, webcams, etc. —
+              # is treated as an erroneous JACK auto-connect and
+              # rewritten/dropped by daw-router.
+              dawOutputProxy = "daw";
+              dawInputProxy = "daw_inputs";
+              dawRouter = pkgs.writeShellScript "daw-router" ''
+                set -u
+                pwLink=${pkgs.pipewire}/bin/pw-link
+                pwMon=${pkgs.pipewire}/bin/pw-mon
+                pwDump=${pkgs.pipewire}/bin/pw-dump
+
+                outProxy='${dawOutputProxy}'
+                inProxy='${dawInputProxy}'
+
+                # Map node-name -> application.process.binary from pw-dump
+                # JSON; pw-cli's text listing omits some props for JACK
+                # clients which broke the prior bash-only parser.
+                declare -A nodeBin
+                refresh_node_binaries() {
+                  nodeBin=()
+                  while IFS=$'\t' read -r name bin; do
+                    [ -n "$name" ] || continue
+                    [ -n "$bin" ] || continue
+                    nodeBin["$name"]="$bin"
+                  done < <(
+                    "$pwDump" Node 2>/dev/null \
+                      | ${pkgs.jq}/bin/jq -r '
+                          .[]
+                          | select(.info != null and .info.props != null)
+                          | [ .info.props["node.name"] // ""
+                            , .info.props["application.process.binary"] // ""
+                            ]
+                          | @tsv
+                        '
+                  )
+                }
+
+                is_daw_node() {
+                  local node="$1"
+                  local bin="''${nodeBin[$node]:-}"
+                  case "$bin" in
+                    ${lib.concatMapStringsSep "|" (b: ''"${b}"'') dawBinaries}) return 0 ;;
+                  esac
+                  # Fallback: well-known DAW node names. application.process.binary
+                  # can be empty for JACK clients launched inside FHS wrappers.
+                  case "$node" in
+                    REAPER|REAPER[0-9]*|"Bitwig Studio"|Ardour|ardour*|Qtractor|qtractor*) return 0 ;;
+                  esac
+                  return 1
+                }
+
+                # Extract the trailing integer from a port name. Handles
+                # both PipeWire-native ("playback_42", "input_7") and
+                # JACK-style port names ("out95", "in12") where the
+                # number isn't underscore-separated.
+                port_index() {
+                  local p="$1"
+                  # Strip everything up to the last run of digits.
+                  echo "$p" | ${pkgs.gnused}/bin/sed -nE 's/^.*[^0-9]([0-9]+)$/\1/p; t; s/^([0-9]+)$/\1/p'
+                }
+
+                rewrite_now() {
+                  refresh_node_binaries
+                  local pairs rewrites=0
+                  pairs=$("$pwLink" -lo 2>/dev/null \
+                    | ${pkgs.gawk}/bin/awk '
+                        /^[^[:space:]]/ { src=$0; next }
+                        /-> / {
+                          dst=$0; sub(/^[[:space:]]*\|-> /, "", dst);
+                          printf "%s\t%s\n", src, dst;
+                        }
+                      ')
+                  while IFS=$'\t' read -r src dst; do
+                    [ -n "$src" ] || continue
+                    [ -n "$dst" ] || continue
+                    local srcNode="''${src%%:*}" srcPort="''${src#*:}"
+                    local dstNode="''${dst%%:*}" dstPort="''${dst#*:}"
+
+                    # MIDI links are not audio routing — leave them alone.
+                    # The daw/daw_inputs proxies are audio-only loopbacks, so
+                    # rewriting a MIDI link onto them always fails and just
+                    # disconnects the device (drums -> REAPER:MIDI Input N).
+                    case "$srcNode $srcPort $dstPort" in
+                      *Midi-Bridge*|*"MIDI Input"*|*"MIDI Output"*|*midi*) continue ;;
+                    esac
+
+                    # Output direction: DAW source -> anything other than the
+                    # daw proxy. Drop and re-target onto daw:playback_<N>.
+                    if is_daw_node "$srcNode" && [ "$dstNode" != "$outProxy" ]; then
+                      local n
+                      n=$(port_index "$srcPort")
+                      "$pwLink" -d "$src" "$dst" >/dev/null 2>&1 || true
+                      if [ -n "$n" ] && [ "$n" -eq "$n" ] 2>/dev/null \
+                         && "$pwLink" "$src" "$outProxy:playback_$n" >/dev/null 2>&1; then
+                        echo "daw-router: OUT $src ->/ $dst => $outProxy:playback_$n" >&2
+                      else
+                        echo "daw-router: OUT $src ->/ $dst (dropped)" >&2
+                      fi
+                      rewrites=$((rewrites + 1))
+                      continue
+                    fi
+
+                    # Input direction: anything other than the daw_inputs
+                    # source -> DAW node. Drop and re-target onto
+                    # daw_inputs:capture_<N>.
+                    if is_daw_node "$dstNode" && [ "$srcNode" != "$inProxy" ]; then
+                      local n
+                      n=$(port_index "$dstPort")
+                      "$pwLink" -d "$src" "$dst" >/dev/null 2>&1 || true
+                      if [ -n "$n" ] && [ "$n" -eq "$n" ] 2>/dev/null \
+                         && "$pwLink" "$inProxy:capture_$n" "$dst" >/dev/null 2>&1; then
+                        echo "daw-router: IN  $src /-> $dst => $inProxy:capture_$n" >&2
+                      else
+                        echo "daw-router: IN  $src /-> $dst (dropped)" >&2
+                      fi
+                      rewrites=$((rewrites + 1))
+                      continue
+                    fi
+                  done <<< "$pairs"
+
+                  if [ "$rewrites" -gt 0 ]; then
+                    echo "daw-router: $rewrites rewrites this pass" >&2
+                  fi
+                }
+
+                # Initial pass, then watch for relevant pw-mon events.
+                # We only rescan when a *Link* is added/changed/removed,
+                # not on every node/port event — pw-mon's event stream is
+                # constant chatter from Inferno mDNS / etc and rescanning
+                # on every line burns 100% CPU.
+                rewrite_now
+                last_run=$(date +%s)
+                # pw-mon prints multi-line records:
+                #   added:
+                #   \tid: 123
+                #   \ttype: PipeWire:Interface:Link/3
+                # We can't easily filter to Link-only events without a
+                # full parser, so just fire on every event header — the
+                # 3 s debounce below caps the actual rescan rate.
+                "$pwMon" 2>/dev/null \
+                  | ${pkgs.gawk}/bin/awk '/^(added|changed|removed):/{print; fflush()}' \
+                  | while read -r _evt; do
+                      now=$(date +%s)
+                      # Hard debounce: at most one rescan every 3 seconds.
+                      # The libpipewire-jack auto-connect happens in bursts
+                      # (REAPER registers 128 ports + connects them in a
+                      # few hundred ms), so 3s catches the whole burst with
+                      # one rewrite pass.
+                      if [ $((now - last_run)) -ge 3 ]; then
+                        rewrite_now
+                        last_run=$now
+                      fi
+                    done
+              '';
+            in
+            {
+              description = "Rewrite DAW JACK auto-connects from Inferno sink onto the daw proxy";
               after = [ "pipewire.service" ];
               wants = [ "pipewire.service" ];
-              wantedBy = [ "multi-user.target" ];
+              bindsTo = [ "pipewire.service" ];
+              partOf = [ "pipewire.service" ];
+              wantedBy = [ "default.target" ];
               serviceConfig = {
-                Type = "oneshot";
-                RemainAfterExit = true;
-                User = "pipewire";
-                Group = "pipewire";
-                ExecStart = linkScript;
+                Type = "simple";
+                Restart = "on-failure";
+                RestartSec = 2;
+                ExecStart = dawRouter;
               };
             };
 
@@ -1016,13 +1762,13 @@
           };
           environment.systemPackages = with pkgs; [
             iw
-            inputs.task.packages.${pkgs.stdenv.hostPlatform.system}.task-cli
             hostapd
             dnsmasq
             tcpdump
             dsniff
             bettercap
             aircrack-ng
+            ethtool # I226-V EEE-off recovery + manual debugging
           ];
 
           # --- Dante / Inferno audio network configuration ---

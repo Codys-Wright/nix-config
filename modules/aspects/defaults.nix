@@ -21,5 +21,5 @@
   # Enable mutual-provider: host aspects with homeManager blocks automatically
   # contribute to users, and user aspects with nixos blocks contribute to hosts.
   # Replaces the custom hm-host-forward workaround.
-  den.ctx.user.includes = [ den._.mutual-provider ];
+  den.schema.user.includes = [ den._.mutual-provider ];
 }

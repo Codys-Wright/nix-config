@@ -162,7 +162,16 @@ in
           wantedBy = [ "persist.mount" ];
           before = [ "home-joshua.mount" ];
           after = [ "persist.mount" ];
-          unitConfig.RequiresMountsFor = "/persist";
+          # DefaultDependencies pulls in After=sysinit.target, which closes a
+          # boot-order cycle: sysinit.target -> persist-home-joshua-init ->
+          # home-joshua.mount -> local-fs.target -> systemd-binfmt -> sysinit.
+          # systemd breaks the cycle by deleting a job at random, sometimes the
+          # one feeding the display manager (boots to a bare "_"). This service
+          # only needs /persist mounted, so drop the default ordering.
+          unitConfig = {
+            RequiresMountsFor = "/persist";
+            DefaultDependencies = false;
+          };
           serviceConfig.Type = "oneshot";
           script = ''
             mkdir -p /persist/home/joshua
@@ -183,31 +192,6 @@ in
           session   include       login
           account   required      pam_time.so conffile=/etc/security/time.conf
         '';
-
-        services.timekpr = {
-          enable = true;
-          adminUsers = [ "cody" ];
-        };
-
-        systemd.services.timekpr-joshua-setup = {
-          description = "Configure Timekpr rules for Joshua";
-          wantedBy = [ "multi-user.target" ];
-          after = [ "timekpr.service" ];
-          requires = [ "timekpr.service" ];
-          serviceConfig = {
-            Type = "oneshot";
-          };
-          script = ''
-            ${pkgs.timekpr}/bin/timekpra --setalloweddays joshua '1;2;3;4;5;6;7'
-            ${pkgs.timekpr}/bin/timekpra --setallowedhours joshua ALL '8;9;10;11;12;13;14;15;16;17;18;19;20;21'
-            ${pkgs.timekpr}/bin/timekpra --setlockouttype joshua terminate
-            ${pkgs.timekpr}/bin/timekpra --setplaytimeenabled joshua true
-            ${pkgs.timekpr}/bin/timekpra --setplaytimealloweddays joshua '1;2;3;4;5;6;7'
-            ${pkgs.timekpr}/bin/timekpra --setplaytimelimits joshua '3600;3600;3600;3600;3600;3600;3600'
-            ${pkgs.timekpr}/bin/timekpra --setplaytimeactivities joshua 'brave-browser[Brave Browser]'
-            ${pkgs.timekpr}/bin/timekpra --setplaytimeunaccountedintervalsflag joshua false
-          '';
-        };
 
         systemd.services.joshua-curfew = {
           description = "Terminate Joshua sessions outside allowed hours";
@@ -504,21 +488,6 @@ in
           name = "Virtual Machine Manager";
           noDisplay = true;
         };
-
-        # Timekpr client warnings for Joshua: 15m, 5m, and 1m remaining.
-        home.file.".config/timekpr/timekpr.conf".text = ''
-          [CONFIG]
-          LOG_LEVEL = 1
-          SHOW_LIMIT_NOTIFICATION = True
-          SHOW_ALL_NOTIFICATIONS = True
-          SHOW_SECONDS = True
-          USE_SPEECH_NOTIFICATIONS = False
-          NOTIFICATION_TIMEOUT = 4
-          NOTIFICATION_TIMEOUT_CRITICAL = 8
-          USE_NOTIFICATION_SOUNDS = False
-          NOTIFICATION_LEVELS = 900[3];300[2];60[1]
-          PLAYTIME_NOTIFICATION_LEVELS = 900[3];300[2];60[1]
-        '';
 
         # Default Joshua into Plasma on SDDM.
         home.file.".dmrc".text = ''
