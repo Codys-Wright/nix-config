@@ -18,7 +18,9 @@
         imports = [ inputs.sops-nix.homeManagerModules.sops ];
 
         sops.age.keyFile = lib.mkDefault "${config.home.homeDirectory}/.config/sops/age/keys.txt";
-        sops.defaultSopsFile = lib.mkDefault ../secrets.yaml;
+        sops.defaultSopsFile = lib.mkDefault "${inputs.nix-secrets}/sops/users/cody.yaml";
+        # store-path sops file (flake input) — not validatable at eval time
+        sops.validateSopsFiles = false;
 
         sops.secrets = {
           # Private key for Codeberg — symlinked into ~/.ssh so ssh picks it up

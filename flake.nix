@@ -77,6 +77,7 @@
       url = "github:nix-community/nix-index-database";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nix-secrets.url = "git+ssh://git@codeberg.org/codywright/nix-secrets.git?ref=main&shallow=1";
     nixos-facter-modules.url = "github:numtide/nixos-facter-modules";
     nixos-generators = {
       url = "github:nix-community/nixos-generators";

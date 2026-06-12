@@ -28,7 +28,6 @@ let
         # Public keys and known_hosts are still files
         hostKeyPub = "./hosts/${hostName}/host_key.pub";
         knownHostsPath = "./hosts/${hostName}/known_hosts";
-        secretsFilePath = "./hosts/${hostName}/secrets.yaml";
       }
     else
       null;
@@ -57,21 +56,25 @@ in
         text = ''
           set -e
 
-          # Decrypt SSH key from SOPS for the specified host
+          # Decrypt SSH key from SOPS for the specified host.
+          # Secrets live in the private nix-secrets checkout (default ~/nix-secrets,
+          # override with NIX_SECRETS_DIR).
           decrypt_ssh_key() {
             local hostname="$1"
-            local secrets_file="hosts/$hostname/secrets.yaml"
-            local sops_config="sops.yaml"
+            local secrets_dir="''${NIX_SECRETS_DIR:-$HOME/nix-secrets}"
+            local secrets_file="$secrets_dir/sops/hosts/$hostname.yaml"
+            local sops_config="$secrets_dir/.sops.yaml"
             local temp_key="/tmp/ssh-key-$hostname-$$"
 
             if [ ! -f "$secrets_file" ]; then
               echo "Error: secrets file not found: $secrets_file" >&2
+              echo "Clone codeberg.org/codywright/nix-secrets to ~/nix-secrets or set NIX_SECRETS_DIR." >&2
               exit 1
             fi
 
             # Decrypt the SSH key from SOPS
             # The key should be stored at <hostname>.system.sshPrivateKey
-            SOPS_AGE_KEY_FILE="''${SOPS_AGE_KEY_FILE:-sops.key}" \
+            SOPS_AGE_KEY_FILE="''${SOPS_AGE_KEY_FILE:-$HOME/.config/sops/age/keys.txt}" \
               sops --config "$sops_config" \
               --decrypt --extract "['$hostname']['system']['sshPrivateKey']" \
               "$secrets_file" > "$temp_key"

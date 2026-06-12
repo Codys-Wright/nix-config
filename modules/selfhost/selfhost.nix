@@ -212,7 +212,7 @@ in
               "immich_admin"
             ];
             passwordKey = "cody/personal/password";
-            passwordSopsFile = ../../users/cody/secrets.yaml;
+            passwordSopsFile = "${inputs.nix-secrets}/sops/users/cody.yaml";
           };
 
           amywright = {
@@ -225,7 +225,7 @@ in
               "grocy_user"
             ];
             passwordKey = "starcommand/selfhost/users/amy_wright/password";
-            passwordSopsFile = ../../users/starcommand/secrets.yaml;
+            passwordSopsFile = "${inputs.nix-secrets}/sops/users/starcommand.yaml";
           };
 
           tommywright = {
@@ -238,7 +238,7 @@ in
               "grocy_user"
             ];
             passwordKey = "starcommand/selfhost/users/tommy_wright/password";
-            passwordSopsFile = ../../users/starcommand/secrets.yaml;
+            passwordSopsFile = "${inputs.nix-secrets}/sops/users/starcommand.yaml";
           };
 
           brizacharias = {
@@ -251,7 +251,7 @@ in
               "grocy_user"
             ];
             passwordKey = "starcommand/selfhost/users/bri_zacharias/password";
-            passwordSopsFile = ../../users/starcommand/secrets.yaml;
+            passwordSopsFile = "${inputs.nix-secrets}/sops/users/starcommand.yaml";
           };
         };
       })
@@ -619,7 +619,9 @@ in
 
         # SOPS configuration - points to starcommand user secrets
         sops = {
-          defaultSopsFile = lib.mkDefault ../../users/starcommand/secrets.yaml;
+          defaultSopsFile = lib.mkDefault "${inputs.nix-secrets}/sops/users/starcommand.yaml";
+          # store-path sops file (flake input) — not validatable at eval time
+          validateSopsFiles = false;
           # Use host's SSH key for decryption during build
           age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
         };
@@ -640,7 +642,7 @@ in
         shb.sops.secret."cody/personal/password" = {
           request = config.shb.lldap.ensureUsers.codywright.password.request;
           settings = {
-            sopsFile = ../../users/cody/secrets.yaml;
+            sopsFile = "${inputs.nix-secrets}/sops/users/cody.yaml";
             key = "cody/personal/password";
           };
         };
