@@ -1,5 +1,9 @@
 # NVIDIA hardware aspect
-{ fleet, den, ... }:
+{
+  fleet,
+  den,
+  ...
+}:
 {
   fleet.hardware._.nvidia = {
     description = "NVIDIA graphics hardware support";
@@ -13,15 +17,6 @@
         ...
       }:
       {
-        # Load all NVIDIA modules in initrd so the DRM device is ready before SDDM starts.
-        # Without this, kwin_wayland races the driver and fails to find /dev/dri/card*.
-        boot.initrd.kernelModules = [
-          "nvidia"
-          "nvidia_modeset"
-          "nvidia_uvm"
-          "nvidia_drm"
-        ];
-
         hardware.graphics.enable = true;
 
         services.xserver.videoDrivers = [ "nvidia" ];
@@ -42,23 +37,13 @@
           # Experimental and only works on modern Nvidia GPUs (Turing or newer).
           powerManagement.finegrained = false;
 
-          # Open vs proprietary kernel module (NOT nouveau).
-          # The OPEN module (595.71.05) fails to bring up a 4th display head
-          # alongside the 5120x1440@240 OLED — that mode needs DSC + 2-Head-1-OR
-          # (2 of the GPU's 4 heads), and the open module errors on the 4th
-          # surface with "Invalid request parameters, planePitch ... surface
-          # registration". The proprietary module has more mature DSC /
-          # multi-head / surface-allocation handling. Trying it for the 4-display
-          # config. (Already the newest version available; the module type is
-          # the only meaningful lever here.)
-          open = false;
+          # Open kernel module (NOT nouveau). Proprietary (open = false) was tested
+          # for the 4-display / DSC + 2-Head-1-OR config but did not help; reverted.
+          open = true;
 
           # Enable the Nvidia settings menu,
           # accessible via `nvidia-settings`.
           nvidiaSettings = true;
-
-          # Use the default driver that matches the current kernel version
-          # The proprietary driver (open = false) works better with newer kernels
         };
       };
   };
