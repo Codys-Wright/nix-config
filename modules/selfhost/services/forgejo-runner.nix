@@ -233,6 +233,28 @@
 
             systemd.services."gitea-runner-${name}" = {
               description = "Forgejo Actions runner for ${url} (pre-registered)";
+              # Host-mode labels execute job steps directly on this box; the
+              # registered flow gets a tool PATH from the nixpkgs module's
+              # hostPackages, but this hand-rolled unit must provide its own.
+              # Mirror that set, plus nix + docker for image-publish
+              # workflows (Task images.yml: dev-shell wasm build + buildx).
+              path = lib.mkIf (lib.any (l: lib.hasSuffix ":host" l) labels) (
+                with pkgs;
+                [
+                  bash
+                  coreutils
+                  curl
+                  gawk
+                  git
+                  gnused
+                  gnutar
+                  gzip
+                  nodejs
+                  wget
+                  docker
+                  config.nix.package
+                ]
+              );
               wantedBy = [ "multi-user.target" ];
               after = [
                 "network-online.target"
