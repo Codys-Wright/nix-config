@@ -16,7 +16,7 @@
     ../apps/wave3a.nix
     ../apps/immich.nix
     ../apps/forgejo.nix
-    # ../apps/nextcloud.nix  # staged for the coordinated cutover (see nextcloud-bridge)
+    ../apps/nextcloud.nix
     ../apps/open-webui.nix
     ../apps/storage.nix
     ../apps/whoami.nix
