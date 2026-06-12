@@ -29,11 +29,11 @@ let
     mkSimpleApp {
       inherit name port;
       host = "${sub}.starcommand.live";
-      image =
-        if name == "readarr" then "blampe/readarr:nightly" else "lscr.io/linuxserver/${name}:latest";
+      image = "lscr.io/linuxserver/${name}:latest";
       state = {
         mountPath = "/config";
         size = "5Gi";
+        class = "db-local";
       };
       nfsMounts = [ storageMount ];
       auth = true;
