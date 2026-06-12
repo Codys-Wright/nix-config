@@ -25,7 +25,7 @@
       shell ? { },
       ...
     }:
-    den.lib.parametric {
+    {
       includes = [
         # CLI tools
         <fleet.coding/cli>
@@ -62,6 +62,7 @@
         <fleet.coding._.tools/android>
         <fleet.coding._.tools/dioxus>
         <fleet.coding._.tools/flyctl>
+        <fleet.coding._.tools/forge>
         <fleet.coding._.tools/reverse-engineering>
         <fleet.coding._.tools/opencode>
         <fleet.coding._.tools._.containers/podman>

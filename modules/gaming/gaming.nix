@@ -18,6 +18,7 @@
       <fleet.gaming/proton>
       <fleet.gaming/melonloader>
       <fleet.gaming/r2modman>
+      <fleet.gaming/sunshine>
     ];
   };
 }

@@ -27,15 +27,12 @@
           pkgs.nautilus
         ];
 
-        # GTK4 apps (including Nautilus) read from gtk-4.0/settings.ini —
-        # stylix sets GTK3 but not always GTK4 directly.
-        xdg.configFile."gtk-4.0/settings.ini".text = ''
-          [Settings]
-          gtk-theme-name=MacTahoe-Dark-Blue
-          gtk-icon-theme-name=MacTahoe
-          gtk-cursor-theme-name=MacTahoe-dark-cursors
-          gtk-cursor-theme-size=24
-        '';
+        # GTK4 settings.ini is managed by stylix's home-manager.gtk integration
+        # (uses gtk-icon-theme-name=MacTahoe-blue). A second xdg.configFile.text
+        # block here caused HM to concatenate two [Settings] sections; the second
+        # named a non-existent bare "MacTahoe" theme, so GTK-4 apps (Files, Zed,
+        # qpwgraph, niri launcher) fell back to hicolor and showed pink/black
+        # missing-icon placeholders. Trust stylix; do not double-write.
 
         # Nautilus as default file manager
         xdg.mimeApps = {

@@ -1,68 +1,84 @@
-# Dioxus desktop development environment
-# Provides native system libraries required to build Dioxus desktop apps on Linux.
-# Dioxus desktop uses wry (WebKitGTK2) for the webview backend.
-{ fleet, ... }:
+# Dioxus full-stack dev environment (web/wasm + desktop + mobile-ready).
+# Mirrors the toolchain from the dioxus-flake devShell so a system rebuild
+# leaves you ready to `dx serve` without entering a nix shell.
+#
+# The rust toolchain itself (including the wasm32-unknown-unknown target) is
+# provided by modules/coding/lang/rust.nix.
+{ lib, fleet, ... }:
 {
+  flake-file.inputs.dioxus-flake.url = lib.mkDefault "github:FastTrackStudios/Dioxus-Flake";
+  flake-file.inputs.dioxus-flake.inputs.nixpkgs.follows = "nixpkgs";
+
   fleet.coding._.tools._.dioxus = {
-    description = "Dioxus desktop native build dependencies (cairo, WebKitGTK, GTK3, etc.)";
+    description = "Dioxus dev environment: dx CLI, wasm tooling, and desktop (WebKitGTK) deps";
 
     homeManager =
       { pkgs, ... }:
       {
         home.packages = with pkgs; [
-          # Dioxus CLI
           dioxus-cli
+          wasm-bindgen-cli
+          binaryen
+          tailwindcss_4
+          cargo-watch
+          bacon
+          nodejs_22
+          flyctl
         ];
+
+        home.sessionVariables = {
+          GDK_BACKEND = "x11";
+          WEBKIT_DISABLE_COMPOSITING_MODE = "1";
+          WEBKIT_ENABLE_WEBGPU = "0";
+          GTK_USE_PORTAL = "0";
+        };
       };
 
     nixos =
       { pkgs, ... }:
       {
-        # System libraries needed by Dioxus desktop (wry/tao/webkit2gtk)
         environment.systemPackages = with pkgs; [
-          # Cairo graphics
+          # Desktop (wry / tao) — WebKitGTK stack
           cairo
           cairo.dev
-
-          # GTK3 (tao uses GTK3)
           gtk3
           gtk3.dev
-
-          # WebKitGTK (wry webview backend)
           webkitgtk_4_1
           webkitgtk_4_1.dev
-
-          # GLib / GObject
           glib
           glib.dev
-
-          # Pango text rendering
           pango
           pango.dev
-
-          # ATK accessibility
           atk
           atk.dev
-
-          # GDK PixBuf
           gdk-pixbuf
           gdk-pixbuf.dev
-
-          # libsoup (WebKit HTTP)
           libsoup_3
-
-          # JavaScriptCore (WebKit JS engine)
-          # Included transitively via webkitgtk
-
-          # X11 / Wayland display
           xdotool
           libappindicator-gtk3
 
-          # Build tooling already in rust aspect; repeated here for standalone use
+          # Build / wasm native deps
+          openssl
+          openssl.dev
           pkg-config
+          fontconfig
+          freetype
+
+          # Graphics
+          libGL
+          vulkan-loader
+
+          # X11 / Wayland
+          libxkbcommon
+          wayland
+
+          # WebKit media playback
+          gst_all_1.gstreamer
+          gst_all_1.gst-plugins-base
+          gst_all_1.gst-plugins-good
+          gst_all_1.gst-plugins-bad
         ];
 
-        # Expose all .pc files so cargo build scripts can find them
         environment.variables.PKG_CONFIG_PATH = pkgs.lib.makeSearchPathOutput "dev" "lib/pkgconfig" (
           with pkgs;
           [
@@ -74,6 +90,9 @@
             atk.dev
             gdk-pixbuf.dev
             libsoup_3
+            openssl.dev
+            fontconfig.dev
+            freetype.dev
           ]
         );
       };

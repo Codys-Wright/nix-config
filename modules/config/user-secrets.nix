@@ -22,20 +22,24 @@
         # Check if the secrets file exists
         secretsFileExists = builtins.pathExists userSecretsPath;
       in
-      lib.mkIf secretsFileExists {
-        # Import SOPS home-manager module
+      {
+        # Import SOPS home-manager module unconditionally — `imports` inside
+        # lib.mkIf is silently ignored by the module system, leaving the
+        # `sops` option undefined.
         imports = [ inputs.sops-nix.homeManagerModules.sops ];
 
-        sops = {
-          # Use the age key extracted by the host-level SOPS module
-          age.keyFile = "${homeDirectory}/.config/sops/age/keys.txt";
+        config = lib.mkIf secretsFileExists {
+          sops = {
+            # Use the age key extracted by the host-level SOPS module
+            age.keyFile = "${homeDirectory}/.config/sops/age/keys.txt";
 
-          # User-specific secrets file
-          defaultSopsFile = userSecretsPath;
-          validateSopsFiles = true;
+            # User-specific secrets file
+            defaultSopsFile = userSecretsPath;
+            validateSopsFiles = true;
 
-          # Secrets should be declared in modules that use them
-          secrets = { };
+            # Secrets should be declared in modules that use them
+            secrets = { };
+          };
         };
       };
   };

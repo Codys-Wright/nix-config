@@ -1,4 +1,14 @@
-output "DP-3" {
+output "HDMI-A-2" {
+    // AOC Q32G1WG4 32" 1440p - far left of everything
+    mode "2560x1440@143.912"
+    position x=-2560 y=0
+
+    layout {
+        default-column-width { proportion 1.0; }
+    }
+}
+
+output "DP-5" {
     // Acer XV271U M3 - left portrait
     mode "2560x1440@179.999"
     transform "90"
@@ -9,7 +19,7 @@ output "DP-3" {
     }
 }
 
-output "DP-2" {
+output "DP-4" {
     // MSI MPG491CX OLED ultrawide - center
     // VRR disabled: causes flickering on this panel.
     mode "5120x1440@240.000"
@@ -32,7 +42,7 @@ output "DP-2" {
     }
 }
 
-output "DP-1" {
+output "DP-3" {
     // Acer XV271U M3 - right portrait
     mode "2560x1440@179.999"
     transform "270"

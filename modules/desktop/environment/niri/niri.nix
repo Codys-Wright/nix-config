@@ -104,32 +104,27 @@
           fi
         '';
 
-        systemd.user.services.noctalia-workspace-theme = lib.mkIf (config.home.username == "cody") {
-          Unit = {
-            Description = "Switch Noctalia color scheme from the active niri workspace";
-            After = [ "graphical-session.target" ];
-            PartOf = [ "graphical-session.target" ];
+        # Wine/Steam export icons into ~/.local/share/icons/hicolor and write
+        # a minimal index.theme (48/128/256 apps only). XDG_DATA_HOME outranks
+        # XDG_DATA_DIRS in icon lookup, so that index shadows the real hicolor
+        # index for Qt/quickshell — every icon outside those sizes renders as
+        # the missing-texture grid in noctalia (e.g. zed, 512x512-only). Watch
+        # for the file and delete it the moment anything recreates it.
+        systemd.user.paths.fix-hicolor-index = {
+          Unit.Description = "Watch for Wine's bogus hicolor index.theme";
+          Path = {
+            PathExists = "%h/.local/share/icons/hicolor/index.theme";
+            Unit = "fix-hicolor-index.service";
           };
+          Install.WantedBy = [ "default.target" ];
+        };
 
+        systemd.user.services.fix-hicolor-index = {
+          Unit.Description = "Remove Wine's bogus hicolor index.theme (shadows real icon index)";
           Service = {
-            ExecStart = "${config.home.homeDirectory}/.config/niri/bin/noctalia-workspace-theme";
-            Restart = "always";
-            RestartSec = 2;
-            Environment = [
-              "PATH=${
-                lib.makeBinPath [
-                  pkgs.bash
-                  pkgs.coreutils
-                  pkgs.findutils
-                  pkgs.jq
-                  pkgs.niri
-                  pkgs.noctalia-shell
-                ]
-              }"
-            ];
+            Type = "oneshot";
+            ExecStart = "${pkgs.coreutils}/bin/rm -f %h/.local/share/icons/hicolor/index.theme %h/.local/share/icons/hicolor/.icon-theme.cache";
           };
-
-          Install.WantedBy = [ "graphical-session.target" ];
         };
 
         systemd.user.services.niri-workspace-wallpaper = lib.mkIf (config.home.username == "cody") {

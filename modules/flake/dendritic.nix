@@ -1,16 +1,11 @@
 { inputs, lib, ... }:
 {
+  # flake-file bootstrap itself + flake-aspects + nixos-generators stay here:
+  # flake-file is self-referential, and the other two have no single owning module.
   flake-file.inputs.flake-file.url = lib.mkDefault "github:vic/flake-file";
   flake-file.inputs.flake-aspects.url = lib.mkDefault "github:vic/flake-aspects";
   flake-file.inputs.nixos-generators.url = lib.mkDefault "github:nix-community/nixos-generators";
   flake-file.inputs.nixos-generators.inputs.nixpkgs.follows = "nixpkgs";
-  flake-file.inputs.microvm.url = lib.mkDefault "github:microvm-nix/microvm.nix";
-  flake-file.inputs.microvm.inputs.nixpkgs.follows = "nixpkgs";
-  flake-file.inputs.wrapper-modules.url = lib.mkDefault "github:BirdeeHub/nix-wrapper-modules";
-  flake-file.inputs.xremap-flake.url = lib.mkDefault "github:xremap/nix-flake";
-  flake-file.inputs.task.url = lib.mkDefault "path:/home/cody/Development/Task";
-  flake-file.inputs.hermes-agent.url = lib.mkDefault "github:Codys-Wright/hermes-agent/starcommand-nextcloud-v2026.5.7";
-  flake-file.inputs.hermes-agent.inputs.nixpkgs.follows = "nixpkgs";
 
   imports = [
     (inputs.flake-file.flakeModules.dendritic)

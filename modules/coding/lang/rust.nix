@@ -31,7 +31,9 @@
             # Rust toolchain from rust-overlay
             # Uses latest stable Rust with default profile (rustc, cargo, rustfmt, clippy, etc.)
             # This replaces rustup with a pure, reproducible Rust toolchain
-            rust-bin.stable.latest.default
+            (rust-bin.stable.latest.default.override {
+              targets = [ "wasm32-unknown-unknown" ];
+            })
             rust-analyzer
 
             # Common cargo utilities
