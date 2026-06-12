@@ -26,7 +26,7 @@
       url = "github:nix-darwin/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    den.url = "github:vic/den";
+    den.url = "github:denful/den";
     deploy-rs.url = "github:serokell/deploy-rs";
     dioxus-flake = {
       url = "github:FastTrackStudios/Dioxus-Flake";

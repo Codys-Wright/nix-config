@@ -5,9 +5,10 @@
   ...
 }:
 {
-  # mkForce: flake-file's bundled dendritic.nix defaults to github:denful/den
-  # at the same priority, causing a conflict. We want the vic/den fork.
-  flake-file.inputs.den.url = lib.mkForce "github:vic/den";
+  # den moved from vic/den to the denful org (vic/den is now just a redirect);
+  # matches flake-file's bundled dendritic.nix default. mkForce kept so any
+  # future bundled-default change can't silently repoint our den.
+  flake-file.inputs.den.url = lib.mkForce "github:denful/den";
 
   imports = [ inputs.den.flakeModule ];
 
