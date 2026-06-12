@@ -55,8 +55,9 @@
           service.DISABLE_REGISTRATION = true;
         };
 
-        # DB password from the bridge-rendered secret in this namespace.
-        additionalConfigFromEnvs = [
+        # DB password from the bridge-rendered secret (gitea.* namespace in
+        # the chart, injected into app.ini [database] PASSWD at runtime).
+        gitea.additionalConfigFromEnvs = [
           {
             name = "FORGEJO__database__PASSWD";
             valueFrom.secretKeyRef = {
