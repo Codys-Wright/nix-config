@@ -19,7 +19,7 @@ lib.mkMerge [
   (mkSimpleApp {
     name = "jellyfin";
     host = "media.starcommand.live";
-    image = "jellyfin/jellyfin:latest";
+    image = "jellyfin/jellyfin:10.10.7";
     port = 8096;
     state = {
       mountPath = "/config";
