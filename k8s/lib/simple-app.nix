@@ -82,6 +82,9 @@ in
           template = {
             metadata.labels.app = name;
             spec = {
+              # k8s injects <SVC>_PORT=tcp://... env vars for every service in
+              # the namespace — they collide with app config (bit hledger).
+              enableServiceLinks = false;
               securityContext = podSecurityContext;
               containers.${name} = {
                 inherit image env;
