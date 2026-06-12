@@ -59,7 +59,7 @@ in
 {
   applications.${name} = {
     inherit namespace;
-    createNamespace = true;
+    createNamespace = false; # shared selfhost ns owned by namespaces.nix
 
     resources =
       (

@@ -20,6 +20,7 @@
     ../apps/deluge.nix
     ../apps/observability.nix
     ../apps/open-webui.nix
+    ../apps/namespaces.nix
     ../apps/storage.nix
     ../apps/whoami.nix
   ];
