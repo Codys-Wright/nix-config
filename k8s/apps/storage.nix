@@ -25,6 +25,15 @@
       };
     };
 
+    # SQLite/embedded-DB config dirs go here, NOT on NFS (NFS file locking
+    # corrupts SQLite — pinchflat/arr "database is locked"). local-path pins
+    # the pod to starcommand, fine while it is the only anchor.
+    resources.storageClasses.db-local = {
+      provisioner = "rancher.io/local-path";
+      reclaimPolicy = "Retain";
+      volumeBindingMode = "WaitForFirstConsumer";
+    };
+
     resources.storageClasses.nas-nfs = {
       provisioner = "nfs.csi.k8s.io";
       parameters = {
