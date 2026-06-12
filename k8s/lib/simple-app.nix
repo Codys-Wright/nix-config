@@ -17,7 +17,7 @@
   image,
   port,
   namespace ? "selfhost",
-  state ? null, # { mountPath, size } -> PVC <name>-state on nas-nfs
+  state ? null, # { mountPath, size, class ? "nas-nfs" } -> PVC <name>-state
   nfsMounts ? [ ], # [{ name, path, mountPath }] straight NFS from the NAS
   auth ? false, # true = Authelia forward-auth at Traefik
   env ? [ ],
@@ -66,8 +66,9 @@ in
         if state != null then
           {
             persistentVolumeClaims."${name}-state".spec = {
-              accessModes = [ "ReadWriteMany" ];
-              storageClassName = "nas-nfs";
+              accessModes =
+                if (state.class or "nas-nfs") == "nas-nfs" then [ "ReadWriteMany" ] else [ "ReadWriteOnce" ];
+              storageClassName = state.class or "nas-nfs";
               resources.requests.storage = state.size;
             };
           }

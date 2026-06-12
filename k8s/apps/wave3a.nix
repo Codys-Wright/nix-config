@@ -29,7 +29,8 @@ let
     mkSimpleApp {
       inherit name port;
       host = "${sub}.starcommand.live";
-      image = if name == "readarr" then "blampe/readarr:nightly" else "lscr.io/linuxserver/${name}:latest";
+      image =
+        if name == "readarr" then "blampe/readarr:nightly" else "lscr.io/linuxserver/${name}:latest";
       state = {
         mountPath = "/config";
         size = "5Gi";
@@ -43,7 +44,6 @@ lib.mkMerge [
   (arrApp "radarr" "radarr" 7878)
   (arrApp "sonarr" "sonarr" 8989)
   (arrApp "bazarr" "bazarr" 6767)
-  (arrApp "readarr" "readarr" 8787)
   (arrApp "lidarr" "lidarr" 8686)
   (arrApp "jackett" "jackett" 9117)
 
