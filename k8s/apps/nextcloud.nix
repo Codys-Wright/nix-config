@@ -9,7 +9,7 @@
 # Host bridge: <FTS.cluster/nextcloud-bridge>.
 { ... }:
 let
-  image = "nextcloud:31-apache";
+  image = "nextcloud:33-apache";
 in
 {
   applications.nextcloud = {
