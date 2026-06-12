@@ -439,86 +439,43 @@ sops-gen-secret:
 sops-edit:
     @nix run .#sops-edit -- "''${@}"
 
-# Smart edit-secrets: finds and edits secrets.yaml for a given name
-# Searches in both hosts/ and users/ directories
+# Edit secrets in the central nix-secrets repo (~/nix-secrets or $NIX_SECRETS_DIR)
 # Usage: just edit-secrets <name> [--host|--user]
-# Example: just edit-secrets THEBATTLESHIP
-# Example: just edit-secrets cody --user
-# Example: just edit-secrets starcommand --host
-# Default: --user when both exist
+# Example: just edit-secrets THEBATTLESHIP --host
+# Example: just edit-secrets cody
+# Default: user file when both exist
 edit-secrets name *args:
     #!/usr/bin/env bash
     set -e
-    cd "{{justfile_directory()}}"
-    HOST_FILE="hosts/{{name}}/secrets.yaml"
-    USER_FILE="users/{{name}}/secrets.yaml"
-    
-    # Parse arguments for --host or --user flags
-    FORCE_HOST=0
-    FORCE_USER=0
-    for arg in {{args}}; do
-        case "$arg" in
-            --host|-h)
-                FORCE_HOST=1
-                ;;
-            --user|-u)
-                FORCE_USER=1
-                ;;
-        esac
-    done
-    
-    # Validate conflicting flags
-    if [ "$FORCE_HOST" -eq 1 ] && [ "$FORCE_USER" -eq 1 ]; then
-        echo "Error: Cannot specify both --host and --user"
+    DIR="${NIX_SECRETS_DIR:-$HOME/nix-secrets}"
+    if [ ! -d "$DIR" ]; then
+        echo "nix-secrets checkout not found at $DIR" >&2
+        echo "git clone git@codeberg.org:codywright/nix-secrets.git $DIR" >&2
         exit 1
     fi
-    
-    HOST_EXISTS=0
-    USER_EXISTS=0
-    
-    if [ -f "$HOST_FILE" ]; then
-        HOST_EXISTS=1
-    fi
-    
-    if [ -f "$USER_FILE" ]; then
-        USER_EXISTS=1
-    fi
-    
-    # Handle forced flags
-    if [ "$FORCE_HOST" -eq 1 ]; then
-        if [ "$HOST_EXISTS" -eq 1 ]; then
-            echo "Editing host secrets: $HOST_FILE"
-            SOPS_AGE_KEY_FILE=sops.key nix develop --command sops --config sops.yaml "$HOST_FILE"
-        else
-            echo "Error: Host secrets not found: $HOST_FILE"
-            exit 1
-        fi
-    elif [ "$FORCE_USER" -eq 1 ]; then
-        if [ "$USER_EXISTS" -eq 1 ]; then
-            echo "Editing user secrets: $USER_FILE"
-            SOPS_AGE_KEY_FILE=sops.key nix develop --command sops --config sops.yaml "$USER_FILE"
-        else
-            echo "Error: User secrets not found: $USER_FILE"
-            exit 1
-        fi
-    elif [ "$HOST_EXISTS" -eq 1 ] && [ "$USER_EXISTS" -eq 1 ]; then
-        # Default to user when both exist (no flag provided)
-        echo "Found secrets in both locations, defaulting to user (use --host to edit host secrets)"
-        echo "Editing user secrets: $USER_FILE"
-        SOPS_AGE_KEY_FILE=sops.key nix develop --command sops --config sops.yaml "$USER_FILE"
-    elif [ "$HOST_EXISTS" -eq 1 ]; then
-        echo "Editing host secrets: $HOST_FILE"
-        SOPS_AGE_KEY_FILE=sops.key nix develop --command sops --config sops.yaml "$HOST_FILE"
-    elif [ "$USER_EXISTS" -eq 1 ]; then
-        echo "Editing user secrets: $USER_FILE"
-        SOPS_AGE_KEY_FILE=sops.key nix develop --command sops --config sops.yaml "$USER_FILE"
-    else
-        echo "Error: No secrets.yaml found for '{{name}}'"
-        echo "Searched in:"
-        echo "  - hosts/{{name}}/secrets.yaml"
-        echo "  - users/{{name}}/secrets.yaml"
+    HOST_FILE="$DIR/sops/hosts/{{name}}.yaml"
+    USER_FILE="$DIR/sops/users/{{name}}.yaml"
+    TARGET=""
+    case "{{args}}" in
+        *--host*) TARGET="$HOST_FILE" ;;
+        *--user*) TARGET="$USER_FILE" ;;
+        *) if [ -f "$USER_FILE" ]; then TARGET="$USER_FILE"; else TARGET="$HOST_FILE"; fi ;;
+    esac
+    if [ ! -f "$TARGET" ]; then
+        echo "No secrets file for '{{name}}' (looked at $HOST_FILE and $USER_FILE)" >&2
         exit 1
     fi
+    cd "$DIR" && nix shell nixpkgs#sops --command sops "$TARGET"
+
+# Re-encrypt nix-secrets after key changes, then repin the flake input
+rekey-secrets:
+    cd "${NIX_SECRETS_DIR:-$HOME/nix-secrets}" && just rekey
+    nix flake update nix-secrets
+
+# Repin the nix-secrets input after editing secrets
+update-secrets:
+    cd "${NIX_SECRETS_DIR:-$HOME/nix-secrets}" && git pull --rebase --autostash || true
+    nix flake update nix-secrets
 
 # View secrets.yaml file (decrypted, read-only)
 # Usage: just sops-view [secrets.yaml]

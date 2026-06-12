@@ -16,8 +16,8 @@
         homeDirectory = config.home.homeDirectory;
         username = config.home.username;
 
-        # Path to user-specific secrets file
-        userSecretsPath = ../../users/${username}/secrets.yaml;
+        # Per-user secrets file in the private nix-secrets input
+        userSecretsPath = "${inputs.nix-secrets}/sops/users/${username}.yaml";
 
         # Check if the secrets file exists
         secretsFileExists = builtins.pathExists userSecretsPath;
@@ -33,9 +33,10 @@
             # Use the age key extracted by the host-level SOPS module
             age.keyFile = "${homeDirectory}/.config/sops/age/keys.txt";
 
-            # User-specific secrets file
+            # User-specific secrets file (store path from the input — sops-nix
+            # cannot validate non-local paths at eval time)
             defaultSopsFile = userSecretsPath;
-            validateSopsFiles = true;
+            validateSopsFiles = false;
 
             # Secrets should be declared in modules that use them
             secrets = { };
