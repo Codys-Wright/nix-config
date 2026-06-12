@@ -29,7 +29,9 @@
       provisioner = "nfs.csi.k8s.io";
       parameters = {
         server = "10.10.10.1";
-        share = "/mnt/storage";
+        # The export carries fsid=0, making /mnt/storage the NFSv4
+        # pseudo-root: v4 clients mount "/" (paths relative to the root).
+        share = "/";
         subDir = "k8s/\${pvc.metadata.namespace}-\${pvc.metadata.name}";
       };
       reclaimPolicy = "Retain";
