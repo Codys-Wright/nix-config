@@ -74,6 +74,11 @@
                 login: true
                 passwordSecret:
                   name: forgejo-pg
+              - name: nextcloud
+                ensure: present
+                login: true
+                passwordSecret:
+                  name: nextcloud-pg
       ''
       ''
         apiVersion: postgresql.cnpg.io/v1
@@ -96,6 +101,18 @@
         spec:
           name: forgejo
           owner: forgejo
+          cluster:
+            name: pg-main
+      ''
+      ''
+        apiVersion: postgresql.cnpg.io/v1
+        kind: Database
+        metadata:
+          name: pg-main-nextcloud
+          namespace: databases
+        spec:
+          name: nextcloud
+          owner: nextcloud
           cluster:
             name: pg-main
       ''
