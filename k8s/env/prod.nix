@@ -17,6 +17,7 @@
     ../apps/immich.nix
     ../apps/forgejo.nix
     ../apps/nextcloud.nix
+    ../apps/deluge.nix
     ../apps/open-webui.nix
     ../apps/storage.nix
     ../apps/whoami.nix
