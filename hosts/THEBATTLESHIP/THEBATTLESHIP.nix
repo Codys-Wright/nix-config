@@ -410,7 +410,14 @@
         })
 
         # Second Codeberg runner, registered to the org rather than the
-        # codywright account. Same docker-only label policy.
+        # codywright account. Carries the `nix-host` HOST-mode label for
+        # the FastTrackStudios image-publish workflows (Task images.yml
+        # needs nix + docker on the host) — a DELIBERATE relaxation of the
+        # docker-only policy above, decided 2026-06-12: only repos under
+        # the account/org can dispatch to this runner and Cody is
+        # effectively the sole committer, so the trust level matches the
+        # starcommand runner. The codywright-account runner above keeps
+        # the docker-only sandbox.
         (fleet.selfhost._.forgejo-runner {
           url = "https://codeberg.org/";
           name = "codeberg-org";
@@ -420,6 +427,7 @@
           labels = [
             "docker:docker://node:lts"
             "ubuntu-latest:docker://catthehacker/ubuntu:act-latest"
+            "nix-host:host"
           ];
         })
 
