@@ -1,14 +1,25 @@
 # Database layer for wave-3+ apps: CloudNativePG operator + the shared
 # postgres cluster. Postgres data lives on local-path (NVMe on starcommand)
 # — never on NFS — with nightly dumps to the NAS.
-{ charts, ... }:
+{ charts, lib, ... }:
 {
   applications.cnpg = {
     namespace = "cnpg-system";
     createNamespace = true;
     helm.releases.cloudnative-pg = {
       chart = charts.cloudnative-pg.cloudnative-pg;
+      # CNPG CRDs blow the client-side-apply annotation limit
+      transformer = map (
+        m:
+        if m.kind == "CustomResourceDefinition" then
+          lib.recursiveUpdate m {
+            metadata.annotations."argocd.argoproj.io/sync-options" = "ServerSideApply=true";
+          }
+        else
+          m
+      );
       values = {
+        crds.create = true;
         # operator on the always-on node
         nodeSelector."kubernetes.io/hostname" = "starcommand";
       };
