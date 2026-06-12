@@ -20,6 +20,11 @@
         service.type = "NodePort";
         ports.web.nodePort = 30880;
         ports.websecure.expose.default = false;
+        # The NodePort service never gets an EXTERNAL-IP, so Traefik can't
+        # publish a LoadBalancer address back to Ingress .status. Argo then
+        # marks every Ingress (and its app) "Progressing" forever. Pin the
+        # host IP so Traefik writes it into each Ingress status -> Healthy.
+        providers.kubernetesIngress.ingressEndpoint.ip = "10.10.10.1";
         # Visitors only ever arrive via https (CF edge + tunnel) — make sure
         # apps see that, since the original scheme does not survive the
         # tunnel in X-Forwarded-Proto.
