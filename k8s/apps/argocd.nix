@@ -11,6 +11,12 @@
         # No ingress yet — reach it with:
         #   kubectl -n argocd port-forward svc/argocd-server 8080:80
         configs.params."server.insecure" = "true";
+        # Exposed at https://argocd.starcommand.live through the cloudflare
+        # tunnel on starcommand (tunnelPortIngress -> this NodePort).
+        server.service = {
+          type = "NodePort";
+          nodePortHttp = 30080;
+        };
         # Single always-on node today; HA components are pointless until
         # more permanent nodes exist.
         controller.replicas = 1;
