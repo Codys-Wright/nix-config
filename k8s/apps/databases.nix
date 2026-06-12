@@ -69,6 +69,11 @@
                 login: true
                 passwordSecret:
                   name: vaultwarden-pg
+              - name: forgejo
+                ensure: present
+                login: true
+                passwordSecret:
+                  name: forgejo-pg
       ''
       ''
         apiVersion: postgresql.cnpg.io/v1
@@ -79,6 +84,18 @@
         spec:
           name: vaultwarden
           owner: vaultwarden
+          cluster:
+            name: pg-main
+      ''
+      ''
+        apiVersion: postgresql.cnpg.io/v1
+        kind: Database
+        metadata:
+          name: pg-main-forgejo
+          namespace: databases
+        spec:
+          name: forgejo
+          owner: forgejo
           cluster:
             name: pg-main
       ''
