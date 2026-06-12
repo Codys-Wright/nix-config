@@ -17,7 +17,10 @@
       values = {
         # TLS terminates at the Cloudflare edge; the tunnel reaches Traefik
         # over plain http on the NodePort.
-        service.type = "NodePort";
+        # chart v40: service type lives at service.spec.type (plain
+        # service.type is ignored). NodePort, since the tunnel hits :30880 and
+        # k3s has no LB controller to fill a LoadBalancer's external IP.
+        service.spec.type = "NodePort";
         ports.web.nodePort = 30880;
         ports.websecure.expose.default = false;
         # The NodePort service never gets an EXTERNAL-IP, so Traefik can't
