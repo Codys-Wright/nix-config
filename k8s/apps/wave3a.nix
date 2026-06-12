@@ -29,7 +29,7 @@ let
     mkSimpleApp {
       inherit name port;
       host = "${sub}.starcommand.live";
-      image = if name == "readarr" then "lscr.io/linuxserver/readarr:nightly" else "lscr.io/linuxserver/${name}:latest";
+      image = if name == "readarr" then "ghcr.io/hotio/readarr:release" else "lscr.io/linuxserver/${name}:latest";
       state = {
         mountPath = "/config";
         size = "5Gi";
