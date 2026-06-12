@@ -31,6 +31,14 @@ let
   appEnv = [
     (secretEnv "APP_KEY")
     (secretEnv "DB_PASSWORD1")
+    # init.sh (set -u) requires these to seed the first admin on an empty DB.
+    # Reuse the strong db_password as the seed login password — change it in
+    # the app after first login.
+    {
+      name = "IN_USER_EMAIL";
+      value = "acodywright@gmail.com";
+    }
+    (secretEnv "DB_PASSWORD1" // { name = "IN_USER_PASSWORD"; })
     {
       name = "APP_ENV";
       value = "production";
@@ -182,6 +190,15 @@ in
                       cp -a /app/storage/. /seed/
                       echo "seeded storage skeleton"
                     fi
+                    # The image omits framework/cache/data, so Laravel's file
+                    # cache flush returns false ("Failed to clear cache") on
+                    # boot. Ensure all the writable runtime dirs exist.
+                    mkdir -p \
+                      /seed/framework/cache/data \
+                      /seed/framework/sessions \
+                      /seed/framework/views \
+                      /seed/app/public \
+                      /seed/logs
                     chown -R 999:999 /seed
                   ''
                 ];
