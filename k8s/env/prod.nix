@@ -9,6 +9,7 @@
 
   imports = [
     ../apps/argocd.nix
+    ../apps/ingress.nix
     ../apps/open-webui.nix
     ../apps/storage.nix
     ../apps/whoami.nix
