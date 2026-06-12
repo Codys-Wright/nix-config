@@ -7,10 +7,11 @@ let
     name = "TZ";
     value = "America/Chicago";
   };
+  # same paths as on the host: jellyfin's library DB stores absolute paths
   mediaMount = name: sub: {
     inherit name;
     path = "/mnt/storage/Operations/media/${sub}";
-    mountPath = "/media/${sub}";
+    mountPath = "/mnt/storage/Operations/media/${sub}";
   };
 in
 lib.mkMerge [
@@ -33,7 +34,7 @@ lib.mkMerge [
       {
         name = "youtube";
         path = "/mnt/storage/Operations/youtube";
-        mountPath = "/media/youtube";
+        mountPath = "/mnt/storage/Operations/youtube";
       }
     ];
     env = [
