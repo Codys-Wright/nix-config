@@ -55,3 +55,4 @@ scripts/__pycache__/
 
 # initrd SSH host private keys (bootssh) — never commit; public halves are fine
 initrd_ssh_host_key
+generated-secrets.txt

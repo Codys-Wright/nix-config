@@ -1915,6 +1915,23 @@
         "type": "github"
       }
     },
+    "nix-secrets": {
+      "locked": {
+        "lastModified": 1781224416,
+        "narHash": "sha256-S+KClfdYE5d6gu9GnMGuRFUCs/Z/4dhRYhSja8iqXSA=",
+        "ref": "main",
+        "rev": "655c0fd1e4d0c390905dfa5b6699329de8eab7b4",
+        "shallow": true,
+        "type": "git",
+        "url": "ssh://git@codeberg.org/codywright/nix-secrets.git"
+      },
+      "original": {
+        "ref": "main",
+        "shallow": true,
+        "type": "git",
+        "url": "ssh://git@codeberg.org/codywright/nix-secrets.git"
+      }
+    },
     "nix-test-runner": {
       "flake": false,
       "locked": {
@@ -2892,6 +2909,7 @@
         "musnix": "musnix",
         "niri-flake": "niri-flake",
         "nix-index-database": "nix-index-database",
+        "nix-secrets": "nix-secrets",
         "nixos-facter-modules": "nixos-facter-modules",
         "nixos-generators": "nixos-generators",
         "nixos-hardware": "nixos-hardware",
