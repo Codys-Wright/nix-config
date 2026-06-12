@@ -100,6 +100,10 @@ lib.mkMerge [
         name = "HLEDGER_ARGS";
         value = "--allow=edit --forecast";
       }
+      {
+        name = "HOME";
+        value = "/data";
+      }
     ];
   })
 
