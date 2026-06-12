@@ -59,6 +59,25 @@
           postgresql:
             parameters:
               max_connections: "200"
+          managed:
+            roles:
+              - name: vaultwarden
+                ensure: present
+                login: true
+                passwordSecret:
+                  name: vaultwarden-pg
+
+
+        apiVersion: postgresql.cnpg.io/v1
+        kind: Database
+        metadata:
+          name: pg-main-vaultwarden
+          namespace: databases
+        spec:
+          name: vaultwarden
+          owner: vaultwarden
+          cluster:
+            name: pg-main
       ''
       # Nightly logical dumps of every database to the NAS.
       ''
