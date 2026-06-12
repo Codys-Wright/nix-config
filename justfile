@@ -652,7 +652,7 @@ gitops-push:
         git -C "$WT" checkout -q --orphan gitops/prod
         git -C "$WT" rm -rfq . 2>/dev/null || true
     fi
-    rsync -a --delete --exclude .git result/ "$WT"/
+    rsync -aL --delete --exclude .git --chmod=Du+rwx,Fu+rw result/ "$WT"/
     git -C "$WT" add -A
     git -C "$WT" commit -q -m "render from $(git rev-parse --short HEAD)" || echo "manifests unchanged"
     git -C "$WT" push -q origin HEAD:gitops/prod
