@@ -57,9 +57,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 | Command | Description |
 |---|---|
-| `just edit-secrets <name>` | Edit secrets for host or user (auto-detects) |
+| `just edit-secrets <name>` | Edit secrets in ~/nix-secrets (user file preferred) |
 | `just edit-secrets <name> --host` | Edit host secrets explicitly |
 | `just edit-secrets <name> --user` | Edit user secrets explicitly |
+| `just update-secrets` | Pull ~/nix-secrets + repin the flake input |
+| `just rekey-secrets` | Re-encrypt all sops files after key changes + repin |
 | `just sops-gen-key` | Generate new SOPS age key |
 | `just sops-get-host-key <hostname>` | Fetch host SSH key for SOPS |
 | `just sops-gen-secret` | Generate a random secret value |
@@ -597,13 +599,27 @@ Batteries are den's built-in cross-cutting providers. Access them via `<den/name
 
 ---
 
-## Secrets Management (SOPS)
+## Secrets Management (SOPS + central nix-secrets repo)
 
-- Host secrets: `hosts/<hostname>/secrets.yaml`
-- User secrets: `users/<username>/secrets.yaml`
-- Edit with: `just edit-secrets <name>` (auto-detects host vs user)
-- Keys: `hosts/<hostname>/facter.json` contains the host SSH key used for SOPS decryption
-- The SOPS age key is derived from `/etc/ssh/ssh_host_ed25519_key`
+All secrets live in the **private** repo `codeberg.org/codywright/nix-secrets`
+(local checkout: `~/nix-secrets`, override with `$NIX_SECRETS_DIR`), consumed
+as the `nix-secrets` flake input (`git+ssh://…?ref=main&shallow=1`). This repo
+is PUBLIC — never add secret material here, not even sops-encrypted files.
+
+- Hard secrets (sops): `${inputs.nix-secrets}/sops/hosts/<hostname>.yaml`,
+  `…/sops/users/<username>.yaml`, `…/sops/shared.yaml`
+- Soft secrets (plaintext vars — emails, LAN IPs, domains): flake outputs,
+  e.g. `inputs.nix-secrets.networking.domains.selfhost`
+- Always set `sops.validateSopsFiles = false` for input-based sops files
+  (store paths can't be validated at eval time)
+- Hosts decrypt with their SSH host key (`/etc/ssh/ssh_host_ed25519_key`
+  via ssh-to-age); the host-level secret `keys/age` bootstraps the user age
+  key into `~/.config/sops/age/keys.txt` for home-manager sops
+- Edit: `just edit-secrets <name> [--host|--user]` (delegates to ~/nix-secrets)
+- After editing: `just update-secrets` (repins the input — REQUIRED or hosts
+  keep building with the old secrets)
+- Key changes (.sops.yaml): `just rekey-secrets`; enroll hosts with
+  `just add-host <name> <ip>` inside ~/nix-secrets
 - **Never commit**: `sops.key`, `keys.txt`, or any unencrypted secret
 
 In NixOS modules, access secrets via `config.sops.secrets."path/to/secret".path`.
