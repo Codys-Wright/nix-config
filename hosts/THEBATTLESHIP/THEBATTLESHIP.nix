@@ -27,6 +27,11 @@
       provides.to-users.includes = [ <fleet.desktop/home> ];
 
       includes = [
+        # Opportunistic k3s agent: join with cluster-on, leave with cluster-off.
+        (<fleet.cluster/k3s-agent> {
+          nodeLabels = [ "fleet.fts/gpu=nvidia" ];
+        })
+
         <fleet/unfree>
         <fleet/fonts>
         <fleet/phoenix>
