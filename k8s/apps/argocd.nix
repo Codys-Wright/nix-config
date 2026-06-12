@@ -8,9 +8,32 @@
     helm.releases.argocd = {
       chart = charts.argoproj.argo-cd;
       values = {
-        # No ingress yet — reach it with:
-        #   kubectl -n argocd port-forward svc/argocd-server 8080:80
         configs.params."server.insecure" = "true";
+
+        # SSO via Authelia. The client secret arrives as k8s Secret
+        # argocd-oidc (starcommand <FTS.cluster/argocd-bridge>); the
+        # part-of=argocd label lets argocd-cm dereference it.
+        configs.cm = {
+          url = "https://argocd.starcommand.live";
+          "oidc.config" = ''
+            name: Authelia
+            issuer: https://auth.starcommand.live
+            clientID: argocd
+            clientSecret: $argocd-oidc:client-secret
+            requestedScopes:
+              - openid
+              - email
+              - profile
+              - groups
+          '';
+        };
+        configs.rbac = {
+          "policy.default" = "role:readonly";
+          "policy.csv" = ''
+            g, lldap_admin, role:admin
+          '';
+          scopes = "[groups]";
+        };
         # Exposed at https://argocd.starcommand.live through the cloudflare
         # tunnel on starcommand (tunnelPortIngress -> this NodePort).
         server.service = {
