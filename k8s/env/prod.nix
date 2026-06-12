@@ -5,8 +5,11 @@
 # the cluster via NixOS-side sops templates on starcommand, never via git).
 { ... }:
 {
+  nixidy.chartsDir = ../charts;
+
   imports = [
     ../apps/argocd.nix
+    ../apps/open-webui.nix
     ../apps/storage.nix
     ../apps/whoami.nix
   ];
