@@ -13,6 +13,7 @@
     ../apps/wave1.nix
     ../apps/wave2.nix
     ../apps/databases.nix
+    ../apps/wave3a.nix
     ../apps/open-webui.nix
     ../apps/storage.nix
     ../apps/whoami.nix

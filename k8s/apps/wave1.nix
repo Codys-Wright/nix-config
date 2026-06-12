@@ -27,7 +27,8 @@ lib.mkMerge [
       {
         name = "media";
         path = "/mnt/storage/Operations/youtube";
-        mountPath = "/downloads";
+        # same path as on the host: pinchflat's DB stores absolute paths
+        mountPath = "/mnt/storage/Operations/youtube";
       }
     ];
     auth = true;
@@ -59,7 +60,8 @@ lib.mkMerge [
       {
         name = "metadata-media";
         path = "/mnt/storage/Operations/media/audiobooks";
-        mountPath = "/audiobooks";
+        # same path as on the host: abs library config stores absolute paths
+        mountPath = "/mnt/storage/Operations/media/audiobooks";
       }
     ];
     env = [
