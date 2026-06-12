@@ -19,28 +19,6 @@
     # Import sops-nix module
     includes = [
       { nixos.imports = [ inputs.sops-nix.nixosModules.sops ]; }
-      # Bootstrap the age key for this host's users (host context needed)
-      (
-        { host, ... }:
-        {
-          nixos =
-            { config, lib, ... }:
-            let
-              users = builtins.attrNames host.users;
-            in
-            lib.mkIf (config.deployment.enable && config.deployment.secrets.enable && users != [ ]) {
-              sops.secrets = builtins.listToAttrs (
-                map (user: {
-                  name = "keys/age";
-                  value = {
-                    owner = user;
-                    path = "${config.users.users.${user}.home}/.config/sops/age/keys.txt";
-                  };
-                }) (lib.take 1 users)
-              );
-            };
-        }
-      )
     ];
 
     nixos =
@@ -59,6 +37,15 @@
           enable = lib.mkEnableOption "secrets management" // {
             default = hasSecretsFile;
           };
+          ageKeyUser = lib.mkOption {
+            type = lib.types.nullOr lib.types.str;
+            default = "cody";
+            description = ''
+              User whose age key is bootstrapped from the host secret
+              "keys/age" into ~/.config/sops/age/keys.txt, so home-manager
+              sops works without manual key copying. null disables.
+            '';
+          };
         };
 
         config = lib.mkIf (config.deployment.enable && config.deployment.secrets.enable) {
@@ -76,7 +63,16 @@
               generateKey = true;
             };
 
-            secrets = lib.mkDefault { };
+            # Bootstrap the admin user's age key from the host-decryptable
+            # secret "keys/age" so home-manager sops needs no manual copying.
+            secrets."keys/age" =
+              let
+                u = config.deployment.secrets.ageKeyUser;
+              in
+              lib.mkIf (u != null && config.users.users ? ${u}) {
+                owner = u;
+                path = "${config.users.users.${u}.home}/.config/sops/age/keys.txt";
+              };
           };
         };
       };
