@@ -9,7 +9,7 @@
 # Host bridge: <FTS.cluster/nextcloud-bridge>.
 { ... }:
 let
-  image = "nextcloud:31-apache";
+  image = "nextcloud:33-apache";
 in
 {
   applications.nextcloud = {
@@ -161,7 +161,8 @@ in
       };
     };
 
-    # well-known CalDAV/CardDAV redirects Nextcloud needs behind a proxy.
+    # Traefik forbids multi-type middleware, so headers-only here. (The
+    # .well-known caldav/carddav redirect is handled by Nextcloud itself.)
     yamls = [
       ''
         apiVersion: traefik.io/v1alpha1
@@ -173,10 +174,6 @@ in
           headers:
             customRequestHeaders:
               X-Forwarded-Proto: https
-          redirectRegex:
-            permanent: true
-            regex: "https://(.*)/.well-known/(card|cal)dav"
-            replacement: "https://$${1}/remote.php/dav/"
       ''
     ];
   };
