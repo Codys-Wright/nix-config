@@ -38,7 +38,7 @@ let
       name = "IN_USER_EMAIL";
       value = "acodywright@gmail.com";
     }
-    (secretEnv "DB_PASSWORD1" // { name = "IN_USER_PASSWORD"; })
+    (secretEnv "DB_PASSWORD1" // { name = "IN_PASSWORD"; })
     {
       name = "APP_ENV";
       value = "production";
