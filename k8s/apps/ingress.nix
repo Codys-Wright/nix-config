@@ -31,8 +31,26 @@
       };
     };
     # Set X-Forwarded-Proto https for everything entering via the tunnel.
-    # (Traefik CRD — not in nixidy's typed schema, so raw yaml.)
+    # (Traefik CRDs — not in nixidy's typed schema, so raw yaml.)
     yamls = [
+      # Authelia forward-auth (4.38+ endpoint). Apps opt in via annotation:
+      #   traefik.ingress.kubernetes.io/router.middlewares: traefik-authelia@kubernetescrd
+      ''
+        apiVersion: traefik.io/v1alpha1
+        kind: Middleware
+        metadata:
+          name: authelia
+          namespace: traefik
+        spec:
+          forwardAuth:
+            address: https://auth.starcommand.live/api/authz/forward-auth
+            trustForwardHeader: true
+            authResponseHeaders:
+              - Remote-User
+              - Remote-Groups
+              - Remote-Email
+              - Remote-Name
+      ''
       ''
         apiVersion: traefik.io/v1alpha1
         kind: Middleware
