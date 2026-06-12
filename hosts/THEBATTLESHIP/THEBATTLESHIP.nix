@@ -384,7 +384,7 @@
         # bear compile / test / lint load. Token lives in
         # hosts/THEBATTLESHIP/secrets.yaml under `forgejo/runner_token`.
         (fleet.selfhost._.forgejo-runner {
-          tokenSopsFile = ./secrets.yaml;
+          tokenSopsFile = "${inputs.nix-secrets}/sops/hosts/THEBATTLESHIP.yaml";
         })
 
         # Codeberg Actions runner. Pre-created in the Codeberg UI (runner
@@ -397,7 +397,7 @@
           name = "codeberg";
           uuidKey = "codeberg-runner-uuid";
           tokenKey = "codeberg-runner-token";
-          tokenSopsFile = ./secrets.yaml;
+          tokenSopsFile = "${inputs.nix-secrets}/sops/hosts/THEBATTLESHIP.yaml";
           labels = [
             "docker:docker://node:lts"
             "ubuntu-latest:docker://catthehacker/ubuntu:act-latest"
@@ -411,7 +411,7 @@
           name = "codeberg-org";
           uuidKey = "codeberg-org-runner-uuid";
           tokenKey = "codeberg-org-runner-token";
-          tokenSopsFile = ./secrets.yaml;
+          tokenSopsFile = "${inputs.nix-secrets}/sops/hosts/THEBATTLESHIP.yaml";
           labels = [
             "docker:docker://node:lts"
             "ubuntu-latest:docker://catthehacker/ubuntu:act-latest"
@@ -799,8 +799,16 @@
           # SOPS secrets
           imports = [ inputs.sops-nix.nixosModules.default ];
           sops = {
-            defaultSopsFile = ../../users/cody/secrets.yaml;
+            defaultSopsFile = "${inputs.nix-secrets}/sops/users/cody.yaml";
+            validateSopsFiles = false;
             age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
+            # Bootstrap cody's age key from the host secret so home-manager
+            # sops works without manually copying sops.key around.
+            secrets."keys/age" = {
+              sopsFile = "${inputs.nix-secrets}/sops/hosts/THEBATTLESHIP.yaml";
+              owner = "cody";
+              path = "/home/cody/.config/sops/age/keys.txt";
+            };
             secrets."cody/nextcloud/davfs2-secrets" = {
               owner = "root";
               group = "root";
