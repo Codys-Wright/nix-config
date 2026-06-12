@@ -44,6 +44,31 @@
         selector.app = "whoami";
         ports.http.port = 80;
       };
+
+      # Through the new ingress path: external-dns creates the CF record
+      # pointed at the tunnel; the tunnel falls through to Traefik.
+      ingresses.whoami = {
+        metadata.annotations."external-dns.alpha.kubernetes.io/target" =
+          "803700ac-6ca2-4041-94c7-3d1c9ef05e52.cfargotunnel.com";
+        spec = {
+          ingressClassName = "traefik";
+          rules = [
+            {
+              host = "whoami.starcommand.live";
+              http.paths = [
+                {
+                  path = "/";
+                  pathType = "Prefix";
+                  backend.service = {
+                    name = "whoami";
+                    port.number = 80;
+                  };
+                }
+              ];
+            }
+          ];
+        };
+      };
     };
   };
 }
