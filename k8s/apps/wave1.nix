@@ -22,6 +22,7 @@ lib.mkMerge [
     state = {
       mountPath = "/config";
       size = "5Gi";
+      class = "db-local";
     };
     nfsMounts = [
       {
