@@ -52,3 +52,14 @@ pg dumps daily 02:00 -> /mnt/disks/parity/backups/postgresql for [nextcloud auth
 - Removing a service: sweep restic instance + postgresqlBackup list + tunnel manualIngress entries +
   prometheus scrape jobs + lldap group references + parent secret decls (mkBackup references break eval).
 - Backup gaps today: /var/lib/immich, /var/lib/hass, lldap sqlite, grafana DB, vaultwarden DB.
+
+## K8S DEPLOY SPECIFICS (2026-06-12)
+- Immich DB image (ONLY CNPG+VectorChord): ghcr.io/tensorchord/cloudnative-vectorchord:16-1.1.1;
+  preload vchord.so; postInitSQL CREATE EXTENSION vchord CASCADE + earthdistance CASCADE.
+  server ghcr.io/immich-app/immich-server:v2.7.5 (2283) + machine-learning:v2.7.5; redis plain Deployment;
+  env DB_VECTOR_EXTENSION=vectorchord, IMMICH_MEDIA_LOCATION=/mnt/storage/Operations/photos (host path!).
+- Forgejo forgejo-helm v17.1.1 (FJ15, code.forgejo.org/forgejo/forgejo, rootless): external DB mandatory;
+  /data layout repos /data/git/repositories (VERIFY app.ini ROOT), uid 1000; SSH via service.ssh NodePort 32222
+  (container 2222, config SSH_PORT 22 SSH_LISTEN_PORT 2222); pg_restore --no-owner --role=forgejo; CNPG secret namespace-local.
+- Nextcloud chart 9.1.2 = NC33: BLOCKER NC31 cannot skip to NC33 — pin image.tag 31.x first OR upgrade host to 33.
+  external CNPG + redis.enabled false; preserve config.php instanceid/passwordsalt/secret/version; apache flavor.
