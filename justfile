@@ -631,3 +631,34 @@ generate-hardware hostname:
         echo "Check the output above for errors"
         exit 1
     fi
+
+# ── GitOps (nixidy → Argo CD) ────────────────────────────────────────────
+# Render cluster manifests to ./result for inspection
+gitops-render:
+    nix run .#nixidy -- build .#prod
+
+# Render and push manifests to the gitops/prod branch (Argo CD syncs it)
+gitops-push:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cd "{{justfile_directory()}}"
+    nix run .#nixidy -- build .#prod
+    WT=$(mktemp -d /tmp/gitops-prod.XXXX)
+    if git ls-remote --exit-code origin refs/heads/gitops/prod >/dev/null 2>&1; then
+        git fetch -q origin gitops/prod
+        git worktree add -q -B gitops/prod "$WT" origin/gitops/prod
+    else
+        git worktree add -q --detach "$WT"
+        git -C "$WT" checkout -q --orphan gitops/prod
+        git -C "$WT" rm -rfq . 2>/dev/null || true
+    fi
+    rsync -aL --delete --exclude .git --chmod=Du+rwx,Fu+rw result/ "$WT"/
+    git -C "$WT" add -A
+    git -C "$WT" commit -q -m "render from $(git rev-parse --short HEAD)" || echo "manifests unchanged"
+    git -C "$WT" push -q origin HEAD:gitops/prod
+    git worktree remove --force "$WT"
+    echo "gitops/prod updated"
+
+# One-time: apply the Argo CD app-of-apps root Application
+gitops-bootstrap:
+    nix run .#nixidy -- bootstrap .#prod | kubectl apply -f -

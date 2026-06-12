@@ -78,6 +78,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-secrets.url = "git+ssh://git@codeberg.org/codywright/nix-secrets.git?ref=main&shallow=1";
+    nixhelm = {
+      url = "github:farcaller/nixhelm";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    nixidy.url = "github:arnarg/nixidy/latest";
     nixos-facter-modules.url = "github:numtide/nixos-facter-modules";
     nixos-generators = {
       url = "github:nix-community/nixos-generators";
