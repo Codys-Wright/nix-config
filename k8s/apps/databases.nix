@@ -46,6 +46,9 @@
         metadata:
           name: pg-main
           namespace: databases
+          annotations:
+            # NEVER let a render bug delete the database cluster
+            argocd.argoproj.io/sync-options: Prune=false,Delete=false
         spec:
           instances: 1
           imageName: ghcr.io/cloudnative-pg/postgresql:16
@@ -66,8 +69,8 @@
                 login: true
                 passwordSecret:
                   name: vaultwarden-pg
-
-
+      ''
+      ''
         apiVersion: postgresql.cnpg.io/v1
         kind: Database
         metadata:
