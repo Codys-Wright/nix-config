@@ -19,6 +19,7 @@
     ../apps/nextcloud.nix
     ../apps/deluge.nix
     ../apps/invoiceninja.nix
+    ../apps/auth.nix
     ../apps/observability.nix
     ../apps/open-webui.nix
     ../apps/namespaces.nix
