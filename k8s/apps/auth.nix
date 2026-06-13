@@ -45,6 +45,33 @@ in
           spec = {
             enableServiceLinks = false;
             nodeSelector."kubernetes.io/hostname" = "starcommand";
+            # The image ships a default lldap_config.toml with an ACTIVE
+            # placeholder `key_seed`, which conflicts with the migrated
+            # server_key file (where the host's OPAQUE passwords are anchored)
+            # and makes LLDAP refuse to start ("private key has changed").
+            # Overwrite it each boot with a clean, seedless config that pins
+            # the key to the migrated file. Idempotent; survives PVC/pod
+            # recreation.
+            initContainers.seed-config = {
+              inherit image;
+              command = [
+                "sh"
+                "-c"
+                ''
+                  cat > /data/lldap_config.toml <<'EOF'
+                  database_url = "sqlite:///data/users.db?mode=rwc"
+                  ldap_base_dn = "dc=starcommand,dc=live"
+                  key_file = "/data/server_key"
+                  EOF
+                ''
+              ];
+              volumeMounts = [
+                {
+                  name = "data";
+                  mountPath = "/data";
+                }
+              ];
+            };
             containers.lldap = {
               inherit image;
               ports = {
