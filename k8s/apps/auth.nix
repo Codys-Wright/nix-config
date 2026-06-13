@@ -485,7 +485,9 @@ in
               nodeSelector."kubernetes.io/hostname" = "starcommand";
               containers.authelia = {
                 image = autheliaImage;
-                args = [ "--config=/config/configuration.yml" ];
+                # No args override — the image's default command already loads
+                # /config/configuration.yml (where the ConfigMap is mounted);
+                # overriding it trips the image's entrypoint wrapper.
                 ports.http.containerPort = 9091;
                 env = autheliaSecretFileEnv;
                 volumeMounts = [
