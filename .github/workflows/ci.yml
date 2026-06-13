@@ -86,3 +86,36 @@ jobs:
 
       - name: Build Darwin system
         run: nix build .#darwinConfigurations.voyager.config.system.build.toplevel -L
+
+  render-cluster:
+    name: Render + validate cluster manifests (nixidy)
+    runs-on: ubuntu-latest
+    needs: check
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: wimpysworld/nothing-but-nix@main
+
+      - uses: DeterminateSystems/nix-installer-action@main
+
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+
+      - uses: cachix/cachix-action@v15
+        with:
+          name: fleet
+          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
+
+      # Renders all k8s/ apps to plain YAML — catches eval errors, typed-resource
+      # mistakes, helm-inflation failures, and bad references before Argo ever
+      # sees them. The gen-secrets .enc.yaml files are copied verbatim (encrypted).
+      - name: Render gitops manifests
+        run: nix run .#nixidy -- build .#prod
+
+      # Schema-validate the rendered manifests. CRDs (Traefik/Argo/CNPG) lack
+      # schemas -> ignore-missing; the sops-encrypted Secrets aren't valid k8s
+      # until the CMP decrypts them -> skip *.enc.yaml.
+      - name: Validate manifests (kubeconform)
+        run: |
+          nix shell nixpkgs#kubeconform --command sh -c \
+            "find -L result -name '*.yaml' ! -name '*.enc.yaml' -print0 \
+               | xargs -0 kubeconform -strict -summary -ignore-missing-schemas"
