@@ -1,0 +1,15 @@
+# sops creation rules for cluster secrets committed to this repo (and rendered
+# into gitops/prod). These files are ciphertext — only data/stringData values
+# are encrypted, to the in-cluster age key. Argo CD's repo-server sops CMP
+# (k8s/apps/argocd.nix) decrypts them at sync with the matching PRIVATE key
+# (sops-age Secret, delivered by the host <FTS.cluster/age-bridge>).
+#
+# The PRIVATE half lives only in nix-secrets + the cluster. NEVER commit it.
+keys:
+  - &cluster age1l7zglp8h0s4zvpgzjkzgz265msl52ugha7en4k84ev68h8tz0pnsczx9hf
+creation_rules:
+  - path_regex: k8s/secrets/.*\.enc\.yaml$
+    encrypted_regex: "^(data|stringData)$"
+    key_groups:
+      - age:
+          - *cluster
