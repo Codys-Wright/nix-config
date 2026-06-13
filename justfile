@@ -477,6 +477,13 @@ update-secrets:
     cd "${NIX_SECRETS_DIR:-$HOME/nix-secrets}" && git pull --rebase --autostash || true
     nix flake update nix-secrets
 
+# Generate sops-encrypted cluster Secret manifests (k8s/secrets/*.enc.yaml) from
+# nix-secrets values, per k8s/secrets-decl.nix. Idempotent — only re-encrypts
+# entries whose plaintext changed. Run after editing the declaration or rotating
+# a value; then `just gitops-push`.
+gen-secrets:
+    nix shell nixpkgs#sops nixpkgs#python3 --command python3 scripts/gen-cluster-secrets.py
+
 # View secrets.yaml file (decrypted, read-only)
 # Usage: just sops-view [secrets.yaml]
 sops-view:
