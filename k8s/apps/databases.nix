@@ -79,6 +79,11 @@
                 login: true
                 passwordSecret:
                   name: nextcloud-pg
+              - name: authelia
+                ensure: present
+                login: true
+                passwordSecret:
+                  name: authelia-pg
       ''
       ''
         apiVersion: postgresql.cnpg.io/v1
@@ -113,6 +118,18 @@
         spec:
           name: nextcloud
           owner: nextcloud
+          cluster:
+            name: pg-main
+      ''
+      ''
+        apiVersion: postgresql.cnpg.io/v1
+        kind: Database
+        metadata:
+          name: pg-main-authelia
+          namespace: databases
+        spec:
+          name: authelia
+          owner: authelia
           cluster:
             name: pg-main
       ''
