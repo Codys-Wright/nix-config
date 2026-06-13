@@ -40,8 +40,10 @@
         # refuses HTTP registries unless they're declared insecure.
         virtualisation.docker.enable = true;
         virtualisation.docker.daemon.settings.insecure-registries = [
-          "10.10.10.1:30050"
+          "registry.starcommand.live:30050"
         ];
+        # Resolve the registry hostname to starcommand on the 10G LAN.
+        networking.extraHosts = "10.10.10.1 registry.starcommand.live";
 
         # Enable spice USB redirection for passthrough
         virtualisation.spiceUSBRedirection.enable = true;
