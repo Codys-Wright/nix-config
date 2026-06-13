@@ -53,14 +53,17 @@ lib.mkMerge [
 
       resources = {
         persistentVolumeClaims = {
+          # db-local (local-path NVMe, RWO): karakeep keeps a SQLite DB and
+          # meilisearch an LMDB index — both corrupt on NFS. Single-replica
+          # (Recreate), so RWO is fine.
           "karakeep-state".spec = {
-            accessModes = [ "ReadWriteMany" ];
-            storageClassName = "nas-nfs";
+            accessModes = [ "ReadWriteOnce" ];
+            storageClassName = "db-local";
             resources.requests.storage = "10Gi";
           };
           "meilisearch-state".spec = {
-            accessModes = [ "ReadWriteMany" ];
-            storageClassName = "nas-nfs";
+            accessModes = [ "ReadWriteOnce" ];
+            storageClassName = "db-local";
             resources.requests.storage = "5Gi";
           };
         };
