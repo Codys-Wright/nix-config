@@ -37,7 +37,7 @@
     resources.storageClasses.nas-nfs = {
       provisioner = "nfs.csi.k8s.io";
       parameters = {
-        server = "10.10.10.1";
+        server = (import ../lib/constants.nix).nasServer;
         # The export carries fsid=0, making /mnt/storage the NFSv4
         # pseudo-root: v4 clients mount "/" (paths relative to the root).
         share = "/";

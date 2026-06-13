@@ -106,7 +106,7 @@
               {
                 name = "downloads";
                 nfs = {
-                  server = "10.10.10.1";
+                  server = (import ../lib/constants.nix).nasServer;
                   path = "/mnt/storage/Operations/torrents";
                 };
               }
@@ -130,7 +130,7 @@
 
       ingresses.deluge = {
         metadata.annotations = {
-          "external-dns.alpha.kubernetes.io/target" = "803700ac-6ca2-4041-94c7-3d1c9ef05e52.cfargotunnel.com";
+          "external-dns.alpha.kubernetes.io/target" = (import ../lib/constants.nix).tunnelTarget;
           "traefik.ingress.kubernetes.io/router.middlewares" = "traefik-authelia@kubernetescrd";
         };
         spec = {

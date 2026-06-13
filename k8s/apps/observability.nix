@@ -83,8 +83,7 @@
           ingress = {
             enabled = true;
             ingressClassName = "traefik";
-            annotations."external-dns.alpha.kubernetes.io/target" =
-              "803700ac-6ca2-4041-94c7-3d1c9ef05e52.cfargotunnel.com";
+            annotations."external-dns.alpha.kubernetes.io/target" = (import ../lib/constants.nix).tunnelTarget;
             hosts = [ "grafana.starcommand.live" ];
             path = "/";
           };
