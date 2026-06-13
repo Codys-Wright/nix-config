@@ -613,8 +613,17 @@ Batteries are den's built-in cross-cutting providers. Access them via `<den/name
 
 All secrets live in the **private** repo `codeberg.org/codywright/nix-secrets`
 (local checkout: `~/nix-secrets`, override with `$NIX_SECRETS_DIR`), consumed
-as the `nix-secrets` flake input (`git+ssh://…?ref=main&shallow=1`). This repo
-is PUBLIC — never add secret material here, not even sops-encrypted files.
+as the `nix-secrets` flake input (`git+ssh://…?ref=main&shallow=1`).
+
+This `nix-fleet` repo is PUBLIC. **Never add PLAINTEXT secret material here.**
+One deliberate exception: **sops-ENCRYPTED** k8s Secrets in `gitops/prod` (the
+cluster's argocd-sops setup) — these are ciphertext, safe to publish (sops-in-git's
+whole premise), encrypted to the cluster age key whose PRIVATE half never leaves
+nix-secrets + the in-cluster `sops-age` Secret (delivered by the host
+`<FTS.cluster/age-bridge>`). Argo CD's repo-server sops CMP (`k8s/apps/argocd.nix`)
+decrypts them at sync; apps reference the encrypted files via nixidy
+`extraRawYamls`. Everything else (host sops values, the age private key) stays in
+the private nix-secrets repo.
 
 - Hard secrets (sops): `${inputs.nix-secrets}/sops/hosts/<hostname>.yaml`,
   `…/sops/users/<username>.yaml`, `…/sops/shared.yaml`
