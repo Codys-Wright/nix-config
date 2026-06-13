@@ -22,6 +22,8 @@
     ../apps/auth.nix
     ../apps/observability.nix
     ../apps/open-webui.nix
+    ../apps/registry.nix
+    ../apps/task.nix
     ../apps/namespaces.nix
     ../apps/storage.nix
     ../apps/whoami.nix
