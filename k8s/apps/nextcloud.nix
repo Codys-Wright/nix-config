@@ -142,21 +142,28 @@ in
         };
         spec = {
           ingressClassName = "traefik";
-          rules = [
-            {
-              host = "cloud.starcommand.live";
-              http.paths = [
-                {
-                  path = "/";
-                  pathType = "Prefix";
-                  backend.service = {
-                    name = "nextcloud";
-                    port.number = 80;
-                  };
-                }
-              ];
-            }
-          ];
+          rules =
+            let
+              ruleFor = host: {
+                inherit host;
+                http.paths = [
+                  {
+                    path = "/";
+                    pathType = "Prefix";
+                    backend.service = {
+                      name = "nextcloud";
+                      port.number = 80;
+                    };
+                  }
+                ];
+              };
+            in
+            [
+              (ruleFor "cloud.starcommand.live")
+              # fasttrackaudio alias (was a host nginx serverAlias; now routed
+              # via Caddy -> Traefik after the host edge moved off nginx).
+              (ruleFor "cloud.fasttrackaudio.com")
+            ];
         };
       };
     };
