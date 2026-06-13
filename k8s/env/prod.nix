@@ -24,6 +24,7 @@
     ../apps/open-webui.nix
     ../apps/registry.nix
     ../apps/task.nix
+    ../apps/cluster-secrets.nix
     ../apps/namespaces.nix
     ../apps/storage.nix
     ../apps/whoami.nix
