@@ -46,15 +46,54 @@
                 controlPersist = "no";
               };
               "starcommand" = {
-                hostname = "192.168.0.106";
+                hostname = "10.10.10.1";
                 user = "starcommand";
                 identityFile = "~/.ssh/id_ed25519";
               };
               "starcommand-root" = {
                 host = "starcommand-root";
-                hostname = "192.168.0.106";
+                hostname = "10.10.10.1";
                 user = "root";
                 identityFile = "~/.ssh/id_ed25519";
+              };
+              # Task server tunnels — the auth-independent escape hatch:
+              # as long as root SSH to starcommand works, the task CLI can
+              # reach either environment regardless of TLS/ingress/auth
+              # state. `ssh -f -N task-prod-tunnel` then point the CLI at
+              # ws://127.0.0.1:18098/vox (dev: 18099). Targets are k8s
+              # Service ClusterIPs — stable until the Service is recreated
+              # (refresh: kubectl get svc task-server -n task).
+              "task-prod-tunnel" = {
+                hostname = "10.10.10.1";
+                user = "root";
+                identityFile = "~/.ssh/id_ed25519";
+                localForwards = [
+                  {
+                    bind.port = 18098;
+                    host.address = "10.43.152.234";
+                    host.port = 80;
+                  }
+                ];
+                extraOptions = {
+                  ExitOnForwardFailure = "yes";
+                  ServerAliveInterval = "30";
+                };
+              };
+              "task-dev-tunnel" = {
+                hostname = "10.10.10.1";
+                user = "root";
+                identityFile = "~/.ssh/id_ed25519";
+                localForwards = [
+                  {
+                    bind.port = 18099;
+                    host.address = "10.43.93.81";
+                    host.port = 80;
+                  }
+                ];
+                extraOptions = {
+                  ExitOnForwardFailure = "yes";
+                  ServerAliveInterval = "30";
+                };
               };
               # THEBATTLESHIP <-> voyager peer reachability (10G LAN / home LAN /
               # Tailscale) is handled by the Match-exec tiers in extraConfig below,
