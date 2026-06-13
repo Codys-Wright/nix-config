@@ -138,13 +138,7 @@ in
                     external-dns.alpha.kubernetes.io/target: ${tunnelTarget}
                 backup:
                   git:
-                    # Snapshots COMMIT LOCALLY to the PV's .gitstate (per-org +
-                    # full-state history — the valuable part) but PUSH NOWHERE.
-                    # An empty remoteBase makes the engine skip the push phase.
-                    enabled: true
-                    remoteBase: ""
-                    fullRepo: task-data
-                    existingSecret: task-git-backup
+                    enabled: false
           destination:
             server: https://kubernetes.default.svc
             namespace: task
