@@ -104,7 +104,7 @@
                 {
                   name = "photos";
                   nfs = {
-                    server = "10.10.10.1";
+                    server = (import ../lib/constants.nix).nasServer;
                     path = "/mnt/storage/Operations/photos";
                   };
                 }
@@ -160,7 +160,7 @@
 
       ingresses.immich = {
         metadata.annotations."external-dns.alpha.kubernetes.io/target" =
-          "803700ac-6ca2-4041-94c7-3d1c9ef05e52.cfargotunnel.com";
+          (import ../lib/constants.nix).tunnelTarget;
         spec = {
           ingressClassName = "traefik";
           rules = [
