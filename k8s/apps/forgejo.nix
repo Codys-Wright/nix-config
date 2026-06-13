@@ -75,21 +75,28 @@
         "803700ac-6ca2-4041-94c7-3d1c9ef05e52.cfargotunnel.com";
       spec = {
         ingressClassName = "traefik";
-        rules = [
-          {
-            host = "git.starcommand.live";
-            http.paths = [
-              {
-                path = "/";
-                pathType = "Prefix";
-                backend.service = {
-                  name = "forgejo-http";
-                  port.number = 3000;
-                };
-              }
-            ];
-          }
-        ];
+        rules =
+          let
+            ruleFor = host: {
+              inherit host;
+              http.paths = [
+                {
+                  path = "/";
+                  pathType = "Prefix";
+                  backend.service = {
+                    name = "forgejo-http";
+                    port.number = 3000;
+                  };
+                }
+              ];
+            };
+          in
+          [
+            (ruleFor "git.starcommand.live")
+            # fasttrackstudio.app alias (was a host nginx serverAlias; now via
+            # Caddy -> Traefik after the host edge moved off nginx).
+            (ruleFor "git.fasttrackstudio.app")
+          ];
       };
     };
   };
