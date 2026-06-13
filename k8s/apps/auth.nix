@@ -543,6 +543,53 @@ in
           };
         };
       };
+
+      ingresses = {
+        authelia = {
+          metadata.annotations."external-dns.alpha.kubernetes.io/target" =
+            "803700ac-6ca2-4041-94c7-3d1c9ef05e52.cfargotunnel.com";
+          spec = {
+            ingressClassName = "traefik";
+            rules = [
+              {
+                host = "auth.starcommand.live";
+                http.paths = [
+                  {
+                    path = "/";
+                    pathType = "Prefix";
+                    backend.service = {
+                      name = "authelia";
+                      port.number = 80;
+                    };
+                  }
+                ];
+              }
+            ];
+          };
+        };
+        lldap = {
+          metadata.annotations."external-dns.alpha.kubernetes.io/target" =
+            "803700ac-6ca2-4041-94c7-3d1c9ef05e52.cfargotunnel.com";
+          spec = {
+            ingressClassName = "traefik";
+            rules = [
+              {
+                host = "ldap.starcommand.live";
+                http.paths = [
+                  {
+                    path = "/";
+                    pathType = "Prefix";
+                    backend.service = {
+                      name = "lldap";
+                      port.number = 17170;
+                    };
+                  }
+                ];
+              }
+            ];
+          };
+        };
+      };
     };
   };
 }
