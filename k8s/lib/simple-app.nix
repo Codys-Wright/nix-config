@@ -22,9 +22,10 @@
   auth ? false, # true = Authelia forward-auth at Traefik
   env ? [ ],
   podSecurityContext ? { },
-  tunnelTarget ? "803700ac-6ca2-4041-94c7-3d1c9ef05e52.cfargotunnel.com",
+  tunnelTarget ? (import ./constants.nix).tunnelTarget,
 }:
 let
+  consts = import ./constants.nix;
   stateVolume =
     if state != null then
       [
@@ -48,7 +49,7 @@ let
   mediaVolumes = map (m: {
     inherit (m) name;
     nfs = {
-      server = "10.10.10.1";
+      server = consts.nasServer;
       path = m.path;
     };
   }) nfsMounts;

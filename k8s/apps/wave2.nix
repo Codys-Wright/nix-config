@@ -244,7 +244,7 @@ lib.mkMerge [
 
         ingresses.karakeep = {
           metadata.annotations."external-dns.alpha.kubernetes.io/target" =
-            "803700ac-6ca2-4041-94c7-3d1c9ef05e52.cfargotunnel.com";
+            (import ../lib/constants.nix).tunnelTarget;
           spec = {
             ingressClassName = "traefik";
             rules = [

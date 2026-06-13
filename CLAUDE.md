@@ -71,7 +71,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Code Style
 
 - **Formatter**: nixfmt-rfc-style (2-space indent, opening braces on same line)
-- **Standard module header**: `{ inputs, den, pkgs, FTS, __findFile, ... }:` — include only what the module uses
+- **Standard module header**: `{ inputs, den, pkgs, fleet, __findFile, ... }:` — include only what the module uses
 - **Angle brackets are preferred** over dotted paths for aspect references in `includes` lists
 - Use `lib.mkDefault` for values that hosts/users should be able to override; use `lib.mkForce` for invariants
 - Aspect files define exactly one aspect; facet files aggregate aspects from the same category
@@ -98,7 +98,7 @@ This is a modular NixOS (and nix-darwin) flake using **den** (declarative aspect
 ├── flake.lock             # Lock file — safe to commit
 ├── justfile               # All build/deploy/secret commands
 ├── modules/
-│   ├── namespace.nix      # Declares FTS, deployment, cody namespaces
+│   ├── namespace.nix      # Declares fleet (exported) + cody (private) namespaces
 │   ├── aspects/           # Global defaults (defaults.nix)
 │   ├── flake/             # Flake-level config (dendritic.nix, home-manager.nix, …)
 │   ├── desktop/           # Desktop environments, bootloaders, display managers
@@ -156,15 +156,18 @@ This is a modular NixOS (and nix-darwin) flake using **den** (declarative aspect
 
 ```nix
 imports = [
-  (inputs.den.namespace "FTS" true)         # Feature/Tool System — exported, used everywhere
-  (inputs.den.namespace "deployment" true)  # Deployment tools — exported
-  (inputs.den.namespace "cody" false)       # User-specific — NOT exported
+  (inputs.den.namespace "fleet" true)   # all reusable feature aspects — exported, used everywhere
+  (inputs.den.namespace "cody" false)   # personal user namespace — NOT exported
 ];
 ```
 
-- `FTS` — all reusable feature aspects (`FTS.gaming`, `FTS.grub`, `FTS.system._.disk`, …)
-- `deployment` — deployment tooling aspects
+- `fleet` — all reusable feature aspects (`fleet.gaming`, `fleet.grub`, `fleet.system._.disk`, `fleet.deployment`, …)
 - `cody` — personal user namespace for dotfiles and overrides (`cody.dots`, `cody.fish`)
+
+> **Note:** `deployment` is **not** its own namespace — deployment tooling lives under
+> the `fleet` namespace as the `fleet.deployment.*` facet. (The sibling `starcommand`
+> repo still uses an `FTS` namespace for its own aspects and imports this repo's `fleet`
+> namespace as an input; only `.flake` was renamed `FTS` → `fleet`.)
 
 **Batteries** (`den.provides.*` / `den._.*`) are den's built-in cross-cutting providers (home-manager integration, user definition, unfree packages, etc.). They are referenced with `<den/name>` or `den._.name`.
 
@@ -198,12 +201,12 @@ Enabled globally via `_module.args.__findFile = den.lib.__findFile` in `modules/
 
 | Syntax | Resolves to |
 |---|---|
-| `<FTS/gaming>` | `den.ful.FTS.gaming` |
-| `<FTS/gaming/steam>` | `den.ful.FTS.gaming._.steam` |
-| `<FTS.gaming/steam>` | `den.ful.FTS.gaming._.steam` |
-| `<FTS.system/disk>` | `den.ful.FTS.system._.disk` |
-| `<FTS.user/password>` | `den.ful.FTS.user._.password` |
-| `<FTS.hardware._.networking/tailscale>` | `den.ful.FTS.hardware._.networking._.tailscale` |
+| `<fleet/gaming>` | `den.ful.fleet.gaming` |
+| `<fleet/gaming/steam>` | `den.ful.fleet.gaming._.steam` |
+| `<fleet.gaming/steam>` | `den.ful.fleet.gaming._.steam` |
+| `<fleet.system/disk>` | `den.ful.fleet.system._.disk` |
+| `<fleet.user/password>` | `den.ful.fleet.user._.password` |
+| `<fleet.hardware._.networking/tailscale>` | `den.ful.fleet.hardware._.networking._.tailscale` |
 | `<den/home-manager>` | `den.provides.home-manager` |
 | `<den/primary-user>` | `den.provides.primary-user` |
 | `<den/user-shell>` | `den.provides.user-shell` (callable) |
@@ -213,9 +216,9 @@ Enabled globally via `_module.args.__findFile = den.lib.__findFile` in `modules/
 **Calling parametric aspects** — wrap with `(…)` and pass an attrset:
 ```nix
 includes = [
-  (<FTS.user/password> { method = "hashed"; value = "$6$…"; })
-  (<FTS.system/disk> { type = "btrfs-impermanence"; device = "/dev/nvme0n1"; })
-  (FTS.grub { uefi = true; theme = "minegrub"; })
+  (<fleet.user/password> { method = "hashed"; value = "$6$…"; })
+  (<fleet.system/disk> { type = "btrfs-impermanence"; device = "/dev/nvme0n1"; })
+  (fleet.grub { uefi = true; theme = "minegrub"; })
   (<den/user-shell> "fish")
 ];
 ```
@@ -231,9 +234,9 @@ includes = [ den.aspects.hm  den.aspects.hm-backup ];
 
 ```nix
 # modules/gaming/steam.nix
-{ FTS, ... }:
+{ fleet, ... }:
 {
-  FTS.gaming._.steam = {
+  fleet.gaming._.steam = {
     description = "Steam gaming platform with performance optimizations";
     nixos = { pkgs, lib, ... }: {
       programs.steam.enable = lib.mkForce true;
@@ -246,7 +249,7 @@ includes = [ den.aspects.hm  den.aspects.hm-backup ];
 **Cross-platform shorthand**: Use `os` instead of duplicate `nixos`/`darwin` blocks when both classes get identical config. Den forwards `os.*` to both `nixos.*` and `darwin.*` automatically:
 
 ```nix
-FTS.coding._.cli._.just = {
+fleet.coding._.cli._.just = {
   description = "Just command runner";
   os = { pkgs, ... }: {
     environment.systemPackages = [ pkgs.just ];
@@ -270,14 +273,14 @@ A facet has only `description` and `includes` — no `nixos`/`homeManager` block
 
 ```nix
 # modules/gaming/gaming.nix
-{ FTS, ... }:
+{ fleet, ... }:
 {
-  FTS.gaming = {
+  fleet.gaming = {
     description = "All gaming platforms and tools";
     includes = [
-      FTS.gaming._.steam
-      FTS.gaming._.minecraft
-      FTS.gaming._.lutris
+      fleet.gaming._.steam
+      fleet.gaming._.minecraft
+      fleet.gaming._.lutris
     ];
   };
 }
@@ -285,20 +288,27 @@ A facet has only `description` and `includes` — no `nixos`/`homeManager` block
 
 #### 3. Parametric via `__functor`
 
-Used when an aspect needs caller-supplied parameters. The functor signature is:
-`_self: {params}@args: { class, aspect-chain }: { includes, nixos, … }`
+Used when an aspect needs caller-supplied parameters. Two valid signatures:
+
+- **Simple** (most common — caller params only): `_self: {params}@args: { includes, nixos, … }`
+- **Full** (when the aspect also needs `class`/`aspect-chain` context): `_self: {params}@args: { class, aspect-chain }: { includes, nixos, … }`
+
+The `{ class, aspect-chain }:` layer is **optional** — only add it when you actually
+reference `class` or `aspect-chain`. Many working aspects (e.g. `fleet.coding`,
+`fleet.user._.password`) use the simple form and return the attrset directly. The
+example below uses the full form because it references both.
 
 ```nix
 # modules/desktop/bootloader/grub/grub.nix
-{ lib, FTS, ... }:
+{ lib, fleet, ... }:
 {
-  FTS.grub.description = "GRUB boot loader configuration";
-  FTS.grub.__functor =
+  fleet.grub.description = "GRUB boot loader configuration";
+  fleet.grub.__functor =
     _self:
     { uefi ? true, devices ? [], theme ? null, ... }@args:
     { class, aspect-chain }:
     let
-      themeIncludes = if theme == "minegrub" then [ FTS.grub._.themes._.minegrub ] else [];
+      themeIncludes = if theme == "minegrub" then [ fleet.grub._.themes._.minegrub ] else [];
     in
     {
       includes = themeIncludes;
@@ -310,7 +320,7 @@ Used when an aspect needs caller-supplied parameters. The functor signature is:
 }
 ```
 
-Call site: `(FTS.grub { uefi = true; theme = "minegrub"; })`
+Call site: `(fleet.grub { uefi = true; theme = "minegrub"; })`
 
 #### 4. Parametric via `den.lib.parametric`
 
@@ -318,9 +328,9 @@ Used when an aspect needs **context** (host/user info) but no caller parameters.
 
 ```nix
 # modules/aspects/hostname.nix
-{ den, lib, FTS, ... }:
+{ den, lib, fleet, ... }:
 {
-  FTS.hostname = den.lib.parametric {
+  fleet.hostname = den.lib.parametric {
     description = "Set hostname from den host context";
     includes = [
       ({ host, ... }: {
@@ -337,9 +347,9 @@ Used when an aspect needs **both** caller parameters and context injection. The 
 
 ```nix
 # modules/system/password.nix
-{ den, lib, FTS, __findFile, ... }:
+{ den, lib, fleet, __findFile, ... }:
 {
-  FTS.user._.password.__functor =
+  fleet.user._.password.__functor =
     _self: arg:
     let config = mkPasswordConfig arg;
     in
@@ -353,7 +363,7 @@ Used when an aspect needs **both** caller parameters and context injection. The 
 }
 ```
 
-Call site: `(<FTS.user/password> { method = "hashed"; value = "$6$…"; })`
+Call site: `(<fleet.user/password> { method = "hashed"; value = "$6$…"; })`
 
 #### 6. Direct `den.aspects.*`
 
@@ -396,7 +406,7 @@ Hosts live in `hosts/<hostname>/<hostname>.nix`. A host file has two parts:
 
 ```nix
 # hosts/THEBATTLESHIP/THEBATTLESHIP.nix
-{ inputs, FTS, __findFile, ... }:
+{ inputs, fleet, __findFile, ... }:
 {
   # ── Part 1: Register the host with den ──────────────────────────────────
   den.hosts.x86_64-linux = {
@@ -410,12 +420,12 @@ Hosts live in `hosts/<hostname>/<hostname>.nix`. A host file has two parts:
   # ── Part 2: Define the host aspect ──────────────────────────────────────
   den.aspects.THEBATTLESHIP = {
     includes = [
-      <FTS/fonts>
-      <FTS/gaming>
-      (FTS.grub { uefi = true; })
-      (<FTS.system/disk> { type = "btrfs-impermanence"; device = "/dev/nvme0n1"; })
-      (<FTS.user/password> { method = "hashed"; value = "$6$…"; })
-      (<FTS.deployment> {})
+      <fleet/fonts>
+      <fleet/gaming>
+      (fleet.grub { uefi = true; })
+      (<fleet.system/disk> { type = "btrfs-impermanence"; device = "/dev/nvme0n1"; })
+      (<fleet.user/password> { method = "hashed"; value = "$6$…"; })
+      (<fleet.deployment> {})
     ];
 
     # Inline NixOS config for host-specific settings that don't belong in an aspect
@@ -440,7 +450,7 @@ Users live in `users/<username>/<username>.nix`. A user file has two parts:
 
 ```nix
 # users/cody/cody.nix
-{ FTS, den, cody, __findFile, ... }:
+{ fleet, den, cody, __findFile, ... }:
 {
   # ── Part 1: Register homes with den ─────────────────────────────────────
   den.homes = {
@@ -454,13 +464,13 @@ Users live in `users/<username>/<username>.nix`. A user file has two parts:
 
     includes = [
       den.aspects.hm-backup          # Built-in den aspect (use den.aspects.* syntax)
-      <FTS.apps/browsers>            # Angle bracket FTS aspect
-      <FTS.coding/editors>
+      <fleet.apps/browsers>            # Angle bracket fleet aspect
+      <fleet.coding/editors>
       <den/primary-user>             # Battery: marks this as the primary user
       (<den/user-shell> "fish")      # Battery: sets fish as default shell
       cody.dots                      # Private namespace aspect (dotfiles)
       cody.fish                      # Private namespace aspect (fish config)
-      FTS.apple-fonts                # Direct dotted reference (also valid)
+      fleet.apple-fonts                # Direct dotted reference (also valid)
     ];
 
     # Inline home-manager config for things that don't belong in a separate aspect
@@ -493,16 +503,16 @@ Every host and home automatically includes the aspects defined in `modules/aspec
       den.aspects.hm        # home-manager CLI helper
       den._.inputs'         # makes flake inputs available as inputs'
       den._.self'           # makes flake self available as self'
-      <FTS/base-host>       # base host configuration
-      <FTS/nix-settings>    # nix daemon settings (substituters, trusted users, …)
-      <FTS/state-version>   # NixOS state version tracking
-      <FTS/hostname>        # sets networking.hostName from den context
-      <FTS/no-man-cache>    # disables man-db caching (speeds up builds)
+      <fleet/base-host>       # base host configuration
+      <fleet/nix-settings>    # nix daemon settings (substituters, trusted users, …)
+      <fleet/state-version>   # NixOS state version tracking
+      <fleet/hostname>        # sets networking.hostName from den context
+      <fleet/no-man-cache>    # disables man-db caching (speeds up builds)
     ];
 
     home.includes = [
-      <FTS/nix>             # nix CLI settings for home-manager
-      <FTS/user-secrets>    # SOPS user secret management
+      <fleet/nix>             # nix CLI settings for home-manager
+      <fleet/user-secrets>    # SOPS user secret management
     ];
   };
 }
@@ -521,13 +531,13 @@ You do **not** need to re-include these in host or user aspects — they are aut
 
 2. Define the aspect:
    ```nix
-   { FTS, ... }:
+   { fleet, ... }:
    {
-     FTS.<category>._.<name> = {
+     fleet.<category>._.<name> = {
        description = "What this does";
        nixos = { pkgs, lib, ... }: { /* NixOS config */ };
        homeManager = { pkgs, ... }: { /* home-manager config */ };
-       includes = [ <FTS/other/aspect> ];
+       includes = [ <fleet/other/aspect> ];
      };
    }
    ```
@@ -539,7 +549,7 @@ You do **not** need to re-include these in host or user aspects — they are aut
 
 4. Reference it in a host or user's `includes`:
    ```nix
-   includes = [ <FTS.<category>/<name>> ];
+   includes = [ <fleet.<category>/<name>> ];
    ```
 
 5. Build and test: `just build-host <host>` or `just test`.
@@ -591,7 +601,7 @@ Batteries are den's built-in cross-cutting providers. Access them via `<den/name
 | `primary-user` | `<den/primary-user>` | Marks a home as the primary user (first in list) |
 | `user-shell` | `(<den/user-shell> "fish")` | Sets default shell; enables it on OS + home |
 | `unfree` | `(<den/unfree> true)` or `(<den/unfree> ["steam"])` | Allows unfree packages globally or by name |
-| `hostname` | via `den._.` | Hostname battery (usually via `<FTS/hostname>`) |
+| `hostname` | via `den._.` | Hostname battery (usually via `<fleet/hostname>`) |
 | `inputs'` | `den._.inputs'` | Exposes flake inputs as `inputs'` in modules |
 | `self'` | `den._.self'` | Exposes flake self as `self'` in modules |
 | `mutual-provider` | Den internals | Coordinates mutual dependencies |
@@ -659,10 +669,10 @@ Example: `btca ask -t den -q "how does den.lib.parametric work with user context
    The file is overwritten by `nix run .#write-flake`. All changes are lost. Edit `modules/flake/dendritic.nix` instead.
 
 3. **Missing `__findFile` in module args**
-   Angle bracket syntax (`<FTS/foo>`) requires `__findFile` to be in the module's argument list. If you see "undefined variable `__FTS`" or similar errors, add `__findFile` to the args.
+   Angle bracket syntax (`<fleet/foo>`) requires `__findFile` to be in the module's argument list. If you see "undefined variable `__fleet`" or similar errors, add `__findFile` to the args.
 
-4. **Forgetting `{ class, aspect-chain }:` in `__functor` return**
-   A `__functor` must return a function that accepts `{ class, aspect-chain }`. Omitting this makes the aspect non-callable by den's composition engine.
+4. **Over-wrapping a `__functor` with `{ class, aspect-chain }:`**
+   This layer is **optional** — den accepts a `__functor` that returns the result attrset directly (`_self: args: { includes = …; }`). Only add the `{ class, aspect-chain }:` layer when the body actually references `class` or `aspect-chain`; adding it needlessly just adds noise. (Don't trust an audit that flags the simple form as "broken" — it isn't.)
 
 5. **Using angle brackets for `den.aspects.*`**
    `<den/home-manager>` works (resolves to `den.provides.home-manager`), but `den.aspects.cody` and `den.aspects.THEBATTLESHIP` are accessed by dotted path — they are not in `den.provides`.
