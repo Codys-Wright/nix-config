@@ -35,8 +35,15 @@
           };
         };
 
-        # Docker daemon
+        # Docker daemon. The CI runner pushes images to the in-cluster
+        # OCI registry on the 10G LAN (plain HTTP, LAN-only) — docker
+        # refuses HTTP registries unless they're declared insecure.
         virtualisation.docker.enable = true;
+        virtualisation.docker.daemon.settings.insecure-registries = [
+          "registry.starcommand.live:30050"
+        ];
+        # Resolve the registry hostname to starcommand on the 10G LAN.
+        networking.extraHosts = "10.10.10.1 registry.starcommand.live";
 
         # Enable spice USB redirection for passthrough
         virtualisation.spiceUSBRedirection.enable = true;
