@@ -14,7 +14,11 @@ let
   registry = "registry.starcommand.live:30050";
 in
 {
-  applications.task = {
+  # NB: the nixidy app name MUST differ from every inner Application name
+  # (task-dev / task / argocd-image-updater) — the app-of-apps creates a wrapper
+  # Application of this same name, which would otherwise collide with the inner
+  # "task" Application. Hence "task-apps".
+  applications.task-apps = {
     namespace = "argocd";
     createNamespace = false;
 
