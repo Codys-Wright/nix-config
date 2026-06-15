@@ -30,19 +30,9 @@
   `users/<username>/secrets.yaml`
 - Edit with `just edit-secrets <name>`, never commit `sops.key` or `keys.txt`
 
-## btca
+## Framework docs
 
-When the user says "use btca", use btca before you answer the question. It will
-give you up to date information about the technology. Run:
-
-- btca ask -t <tech> -q "<question>"
-
-Available <tech>:
-
-- `deploy-rs` - NixOS deployment tool
-- `flake-aspects` - How aspects are structured
-- `import-tree` - How files are imported
-- `flake-file` - How the flake file is generated
-- `den` - How hosts are defined
-- `selfhostblocks` - All selfhosting related services
-- `skarabox` - Example system deployment for secrets management and deployments
+For den/framework specifics, read the source — don't guess. den is
+`github:denful/den` (clone it; `docs/src/content/docs/` guides + `templates/ci/`
+tests are the reference; site: den.denful.dev). Other inputs have their own
+repos/READMEs: selfhostblocks, deploy-rs, import-tree, flake-file, flake-aspects.
