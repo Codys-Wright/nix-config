@@ -372,7 +372,6 @@
             "127" = "127 - OUT127";
             "128" = "128 - OUT128";
           };
-
         })
 
         # System-wide inferno-control CLI — Rust port of
@@ -569,6 +568,11 @@
             # 8086, device 125c). Matches on add+change so it fires after PCIe
             # rescans and NetworkManager link cycles.
             ACTION=="add|change", SUBSYSTEM=="net", DRIVERS=="igc", ATTRS{vendor}=="0x8086", ATTRS{device}=="0x125c", RUN+="${pkgs.ethtool}/bin/ethtool --set-eee %k eee off"
+
+            # Keychron K2 HE registers a HID joystick interface that claims js0,
+            # bumping real gamepads to controller 2 in Steam. Strip joystick from
+            # its input class so it stays a keyboard/mouse only.
+            SUBSYSTEMS=="usb", ATTRS{idVendor}=="3434", ATTRS{idProduct}=="0e20", ENV{ID_INPUT_JOYSTICK}="", ENV{ID_INPUT_KEY}="1"
           '';
 
           # ethtool is added alongside iw/tcpdump/etc in the dedicated
@@ -1242,11 +1246,18 @@
           #
           # Deliberately NOT gated behind dante.target, and with no Inferno
           # node wait (unlike studio-routing-links): these links only touch
-          # local PipeWire nodes, so they must come up at every boot. partOf
-          # pipewire+wireplumber re-creates them whenever the graph is rebuilt
-          # (device churn, `dante on/off` bouncing wireplumber, etc.). The TF
-          # node is pinned non-suspending (see the 80-pro-audio-usb rule) so
-          # these links never get dropped under it.
+          # local PipeWire nodes, so they must come up at every boot AND every
+          # time the graph is rebuilt (device churn, `dante on/off` bouncing
+          # wireplumber, a plain `systemctl --user restart pipewire`). partOf +
+          # bindsTo only propagate *stop/restart* — they tear this unit down
+          # with pipewire/wireplumber but never start it back up. So this is
+          # ALSO wantedBy those two units: each (re)start of pipewire/
+          # wireplumber pulls the helper back in (After= orders it last), which
+          # re-creates the pw-links the restart just dropped. Without this, any
+          # pipewire restart short of a reboot leaves games/voice_chat/system
+          # audio silent on the TF until next login. The TF node is pinned
+          # non-suspending (see the 80-pro-audio-usb rule) so once wired the
+          # links never get dropped under it.
           systemd.user.services.studio-local-links =
             let
               localSinks = [
@@ -1304,9 +1315,17 @@
                 "pipewire.service"
                 "wireplumber.service"
               ];
-              wantedBy = [ "default.target" ];
+              # wantedBy the graph units (not default.target): a Wants edge from
+              # pipewire/wireplumber re-pulls this oneshot on every (re)start,
+              # so the links are recreated after a graph rebuild — partOf alone
+              # would only have stopped it. default.target start is covered
+              # transitively (those units are themselves up by login).
+              wantedBy = [
+                "pipewire.service"
+                "wireplumber.service"
+              ];
               serviceConfig = {
-                Type = "simple";
+                Type = "oneshot";
                 RemainAfterExit = true;
                 ExecStart = linkScript;
               };
