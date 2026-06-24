@@ -1158,13 +1158,6 @@
                     # cuts out" until something re-wires. Never suspend it.
                     "session.suspend-timeout-seconds" = 0;
                     "node.always-process" = true;
-                    # Low-latency attempt: small ALSA period (256) but several
-                    # periods, so the device ring (period-size × period-num) still
-                    # buffers the congested USB hub's packet starvation while the
-                    # graph quantum stays low. Raise period-num if it glitches.
-                    "api.alsa.period-size" = 256;
-                    "api.alsa.period-num" = 3;
-                    "api.alsa.headroom" = 128;
                   };
                 }
               ];
@@ -1179,17 +1172,14 @@
                 "default.configured.audio.sink" = "system_audio";
               };
 
-              # Graph quantum = latency. Lowered from the old 1024 (~21 ms USB-
-              # congestion workaround) to 256 (~5.3 ms) for low latency. The TF
-              # still shares a congested nested USB hub (Insta360 + KONTROL S88 +
-              # Stream Deck) where isochronous packets starve and glitch *below*
-              # the ALSA layer (no xruns logged), so the mitigation moves to the
-              # ALSA side: a small period with several periods (see the TF rule in
-              # 80-pro-audio-usb above) buffers the bus starvation without the big
-              # latency hit. If it still crackles, raise api.alsa.period-num — or
-              # move the TF to its own direct USB port (the real fix). mkForce
+              # Graph quantum = the device's default/idle latency. Kept SAFE/high
+              # (1024, ~21 ms) so everyday audio (browser/system) stays glitch-free
+              # on the shared USB bus. Low latency is requested ON DEMAND per-app:
+              # the guitar rig launches with PIPEWIRE_LATENCY=128/48000 (signal's
+              # `just rig`), which pulls the interface down to ~2.7 ms only while it
+              # runs, then idles back here (min-quantum=32 permits it). mkForce
               # because the audio facet's default pipewire instance also sets this.
-              extraConfig.pipewire."92-low-latency".context.properties."default.clock.quantum" = lib.mkForce 256;
+              extraConfig.pipewire."92-low-latency".context.properties."default.clock.quantum" = lib.mkForce 1024;
 
               # Disable the libcamera monitor. WirePlumber publishes every UVC
               # webcam + the MS2109 HDMI grabber as BOTH a libcamera node and a
