@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **MUST `git add` new `.nix` files before building** — import-tree uses git tracking; untracked files are silently ignored by `nix build` and `nix run .#write-flake`.
 - **Never commit `sops.key` or `keys.txt`** — these contain private decryption keys.
 - **Format before committing** — run `just fmt` to apply nixfmt-rfc-style.
-- **Use `btca` for up-to-date den/framework docs** — `btca ask -t den -q "..."` (see btca section below).
+- **For den/framework specifics, read the source** — den lives at `github:denful/den` (clone it; the `docs/src/content/docs/` guides + `templates/ci/` tests are the reference). The den docs site is den.denful.dev.
 
 ---
 
@@ -642,30 +642,6 @@ the private nix-secrets repo.
 - **Never commit**: `sops.key`, `keys.txt`, or any unencrypted secret
 
 In NixOS modules, access secrets via `config.sops.secrets."path/to/secret".path`.
-
----
-
-## btca Tool
-
-Run this when you need accurate, up-to-date documentation for the frameworks used in this repo:
-
-```bash
-btca ask -t <tech> -q "<question>"
-```
-
-Available tech identifiers:
-
-| Identifier | Framework |
-|---|---|
-| `den` | den aspect system (aspects, parametric, context pipeline, batteries) |
-| `flake-file` | flake-file (dendritic.nix, write-flake) |
-| `flake-aspects` | flake-parts + flake-aspects integration |
-| `import-tree` | import-tree (git-tracking, directory imports) |
-| `deploy-rs` | deploy-rs (remote deployment, magic rollback) |
-| `selfhostblocks` | selfhostblocks (self-hosting service blocks) |
-| `skarabox` | skarabox (server provisioning) |
-
-Example: `btca ask -t den -q "how does den.lib.parametric work with user context?"`
 
 ---
 

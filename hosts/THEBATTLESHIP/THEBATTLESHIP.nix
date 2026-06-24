@@ -372,7 +372,6 @@
             "127" = "127 - OUT127";
             "128" = "128 - OUT128";
           };
-
         })
 
         # System-wide inferno-control CLI — Rust port of
@@ -543,7 +542,59 @@
           boot.kernelParams = [
             "pcie_aspm=off"
             "pci=nommconf"
+            # Never auto-suspend USB — the TF audio interface must not be
+            # power-managed mid-session.
+            "usbcore.autosuspend=-1"
           ];
+
+          # ── Low-latency audio (user-level PipeWire) ──────────────────────────
+          # PREEMPT_RT real-time kernel on mainline 6.18 (CONFIG_PREEMPT_RT).
+          # Cuts worst-case scheduling jitter (~500 µs generic → <100 µs RT) — the
+          # real limiter on minimum audio buffer size. Build-tested: Nvidia 595.x
+          # compiles against it. PREEMPT_DYNAMIC off (mutually exclusive with RT).
+          boot.kernelPackages = lib.mkForce (
+            pkgs.linuxPackagesFor (
+              pkgs.linux_6_18.override {
+                structuredExtraConfig = with lib.kernel; {
+                  PREEMPT_RT = yes;
+                  PREEMPT_DYNAMIC = lib.mkForce no;
+                };
+                ignoreConfigErrors = true;
+              }
+            )
+          );
+
+          # Hold CPU PM-QoS DMA latency at 0 — disables the deep C-states that add
+          # CPU wakeup jitter (AMD's are aggressive). The wakeup-latency half of
+          # the jitter floor; the RT kernel is the other half.
+          systemd.services.cpu-dma-latency = {
+            description = "Pin cpu_dma_latency to 0 (no deep C-states) for low audio jitter";
+            wantedBy = [ "multi-user.target" ];
+            serviceConfig = {
+              Type = "simple";
+              Restart = "always";
+              ExecStart = ''${pkgs.python3}/bin/python3 -c "import os,struct,signal; fd=os.open('/dev/cpu_dma_latency', os.O_WRONLY); os.write(fd, struct.pack('i', 0)); signal.pause()"'';
+            };
+          };
+
+          # Raise RT priority of the threaded xHCI USB IRQ handlers so the TF's USB
+          # completions aren't preempted (threadirqs makes these kernel threads).
+          systemd.services.audio-usb-irq-prio = {
+            description = "Bump xHCI USB IRQ threads to RT priority for audio";
+            wantedBy = [ "multi-user.target" ];
+            after = [ "multi-user.target" ];
+            serviceConfig = {
+              Type = "oneshot";
+              RemainAfterExit = true;
+            };
+            script = ''
+              for pid in $(${pkgs.procps}/bin/ps -eLo pid=,comm= \
+                  | ${pkgs.gnugrep}/bin/grep -E 'irq/[0-9]+-xhci' \
+                  | ${pkgs.gawk}/bin/awk '{print $1}'); do
+                ${pkgs.util-linux}/bin/chrt -f -p 85 "$pid" 2>/dev/null || true
+              done
+            '';
+          };
 
           # Disable Energy Efficient Ethernet on the I226-V — EEE interaction
           # with PCIe L1 substates errata triggers spontaneous link loss.
@@ -569,6 +620,11 @@
             # 8086, device 125c). Matches on add+change so it fires after PCIe
             # rescans and NetworkManager link cycles.
             ACTION=="add|change", SUBSYSTEM=="net", DRIVERS=="igc", ATTRS{vendor}=="0x8086", ATTRS{device}=="0x125c", RUN+="${pkgs.ethtool}/bin/ethtool --set-eee %k eee off"
+
+            # Keychron K2 HE registers a HID joystick interface that claims js0,
+            # bumping real gamepads to controller 2 in Steam. Strip joystick from
+            # its input class so it stays a keyboard/mouse only.
+            SUBSYSTEMS=="usb", ATTRS{idVendor}=="3434", ATTRS{idProduct}=="0e20", ENV{ID_INPUT_JOYSTICK}="", ENV{ID_INPUT_KEY}="1"
           '';
 
           # ethtool is added alongside iw/tcpdump/etc in the dedicated
@@ -1102,6 +1158,13 @@
                     # cuts out" until something re-wires. Never suspend it.
                     "session.suspend-timeout-seconds" = 0;
                     "node.always-process" = true;
+                    # Low-latency attempt: small ALSA period (256) but several
+                    # periods, so the device ring (period-size × period-num) still
+                    # buffers the congested USB hub's packet starvation while the
+                    # graph quantum stays low. Raise period-num if it glitches.
+                    "api.alsa.period-size" = 256;
+                    "api.alsa.period-num" = 3;
+                    "api.alsa.headroom" = 128;
                   };
                 }
               ];
@@ -1116,15 +1179,17 @@
                 "default.configured.audio.sink" = "system_audio";
               };
 
-              # Bump the graph quantum to 1024 (~21ms) over the pipewire
-              # aspect's 256 default. The TF shares a congested nested USB hub
-              # (Insta360 4K webcam + KONTROL S88 + Stream Deck), so isochronous
-              # audio packets get starved on the bus and glitch *below* the ALSA
-              # layer (no xruns logged). A larger buffer rides those out.
-              # mkForce because the audio facet's default pipewire instance
-              # also sets this key to 256. Revisit (back to 256) once the TF is
-              # on its own/direct USB port.
-              extraConfig.pipewire."92-low-latency".context.properties."default.clock.quantum" = lib.mkForce 1024;
+              # Graph quantum = latency. Lowered from the old 1024 (~21 ms USB-
+              # congestion workaround) to 256 (~5.3 ms) for low latency. The TF
+              # still shares a congested nested USB hub (Insta360 + KONTROL S88 +
+              # Stream Deck) where isochronous packets starve and glitch *below*
+              # the ALSA layer (no xruns logged), so the mitigation moves to the
+              # ALSA side: a small period with several periods (see the TF rule in
+              # 80-pro-audio-usb above) buffers the bus starvation without the big
+              # latency hit. If it still crackles, raise api.alsa.period-num — or
+              # move the TF to its own direct USB port (the real fix). mkForce
+              # because the audio facet's default pipewire instance also sets this.
+              extraConfig.pipewire."92-low-latency".context.properties."default.clock.quantum" = lib.mkForce 256;
 
               # Disable the libcamera monitor. WirePlumber publishes every UVC
               # webcam + the MS2109 HDMI grabber as BOTH a libcamera node and a
@@ -1242,11 +1307,18 @@
           #
           # Deliberately NOT gated behind dante.target, and with no Inferno
           # node wait (unlike studio-routing-links): these links only touch
-          # local PipeWire nodes, so they must come up at every boot. partOf
-          # pipewire+wireplumber re-creates them whenever the graph is rebuilt
-          # (device churn, `dante on/off` bouncing wireplumber, etc.). The TF
-          # node is pinned non-suspending (see the 80-pro-audio-usb rule) so
-          # these links never get dropped under it.
+          # local PipeWire nodes, so they must come up at every boot AND every
+          # time the graph is rebuilt (device churn, `dante on/off` bouncing
+          # wireplumber, a plain `systemctl --user restart pipewire`). partOf +
+          # bindsTo only propagate *stop/restart* — they tear this unit down
+          # with pipewire/wireplumber but never start it back up. So this is
+          # ALSO wantedBy those two units: each (re)start of pipewire/
+          # wireplumber pulls the helper back in (After= orders it last), which
+          # re-creates the pw-links the restart just dropped. Without this, any
+          # pipewire restart short of a reboot leaves games/voice_chat/system
+          # audio silent on the TF until next login. The TF node is pinned
+          # non-suspending (see the 80-pro-audio-usb rule) so once wired the
+          # links never get dropped under it.
           systemd.user.services.studio-local-links =
             let
               localSinks = [
@@ -1304,9 +1376,17 @@
                 "pipewire.service"
                 "wireplumber.service"
               ];
-              wantedBy = [ "default.target" ];
+              # wantedBy the graph units (not default.target): a Wants edge from
+              # pipewire/wireplumber re-pulls this oneshot on every (re)start,
+              # so the links are recreated after a graph rebuild — partOf alone
+              # would only have stopped it. default.target start is covered
+              # transitively (those units are themselves up by login).
+              wantedBy = [
+                "pipewire.service"
+                "wireplumber.service"
+              ];
               serviceConfig = {
-                Type = "simple";
+                Type = "oneshot";
                 RemainAfterExit = true;
                 ExecStart = linkScript;
               };
@@ -1790,6 +1870,16 @@
             bettercap
             aircrack-ng
             ethtool # I226-V EEE-off recovery + manual debugging
+
+            # ── Realtime-audio diagnostics / tuning ──
+            rt-tests # cyclictest — worst-case scheduling jitter
+            jack-example-tools # jack_iodelay (round-trip), jack_lsp -L (port latency)
+            stress-ng # load generator for cyclictest-under-load
+            cpufrequtils # cpupower — inspect / pin CPU frequency
+            # rtcqs (realTimeConfigQuickScan) isn't in nixpkgs; thin wrapper runs
+            # it from PyPI via uv (downloads on first use, then cached).
+            uv
+            (writeShellScriptBin "rtcqs" ''exec ${uv}/bin/uvx rtcqs "$@"'')
           ];
 
           # --- Dante / Inferno audio network configuration ---

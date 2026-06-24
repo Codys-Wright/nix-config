@@ -1,12 +1,18 @@
-# Opportunistic k3s agent — fleet machines join the cluster on demand.
+# k3s agent — fleet machines join the cluster. Two modes:
 #
-# Membership is OPT-IN: the k3s service never starts at boot. `cluster-on`
-# joins (and uncordons), `cluster-off` drains and leaves, `cluster-off --hard`
-# also kills remaining containers to reclaim CPU/GPU instantly.
+#   Opportunistic (default): membership is OPT-IN, never starts at boot.
+#   `cluster-on` joins (+ uncordons), `cluster-off` drains and leaves,
+#   `cluster-off --hard` also k3s-killalls to reclaim CPU/GPU instantly. The
+#   node carries taint fleet.fts/opportunistic=true:NoSchedule, so only
+#   workloads that tolerate interruption (a service's placement.opportunistic)
+#   ever burst here. E.g. THEBATTLESHIP.
 #
-# The node carries taint fleet.fts/opportunistic=true:NoSchedule so only
-# workloads that explicitly tolerate interruption ever land here.
-# Design doc: docs/cluster-design.md
+#   Dedicated (`dedicatedTo = [ "svc" ]`): a permanent home for specific
+#   services — per-service taint fleet.fts/dedicated=<svc>:NoSchedule + label
+#   fleet.fts/svc.<svc>=true, and JOINS AT BOOT. Pairs with a service's
+#   placement.node = "<svc>". E.g. a Raspberry Pi running only pihole.
+#
+# Design doc: docs/cluster-design.md; see also docs/add-a-cluster-node.md.
 {
   fleet,
   inputs,
@@ -23,6 +29,13 @@
       extraTaints ? [ ],
       # extra node labels, e.g. [ "fleet.fts/gpu=nvidia" ]
       nodeLabels ? [ ],
+      # Dedicate this node to one or more services. Instead of the opportunistic
+      # taint, apply `fleet.fts/dedicated=<svc>:NoSchedule` + label
+      # `fleet.fts/svc.<svc>=true` per service, and JOIN AT BOOT — a dedicated
+      # node is a permanent home for its service, not an on-demand burst node.
+      # Matches a service's `placement.node`. E.g. a pihole Raspberry Pi:
+      #   (<fleet.cluster/k3s-agent> { dedicatedTo = [ "pihole" ]; })
+      dedicatedTo ? [ ],
       # future: VPS/offsite agents join over tailscale
       viaTailscale ? false,
       ...
@@ -36,6 +49,15 @@
         { config, pkgs, ... }:
         let
           nodeName = lib.toLower config.networking.hostName;
+          # Dedicated nodes carry per-service taints/labels and join at boot;
+          # the default (non-dedicated) node is an opt-in opportunistic burst node.
+          isDedicated = dedicatedTo != [ ];
+          nodeTaints =
+            if isDedicated then
+              map (s: "fleet.fts/dedicated=${s}:NoSchedule") dedicatedTo
+            else
+              [ "fleet.fts/opportunistic=true:NoSchedule" ];
+          svcLabels = map (s: "fleet.fts/svc.${s}=true") dedicatedTo;
           drainCmd = "KUBECONFIG=/etc/rancher/k3s/k3s.yaml kubectl drain ${nodeName} --ignore-daemonsets --delete-emptydir-data --timeout=120s";
           # v1: drain/uncordon run on the server over SSH (root@server has
           # cluster-admin kubectl). Phase 3 replaces this with a local
@@ -85,18 +107,18 @@
             tokenFile = config.sops.secrets."k3s/token".path;
             extraFlags = [
               "--node-name=${nodeName}"
-              "--node-taint=fleet.fts/opportunistic=true:NoSchedule"
             ]
-            ++ map (t: "--node-taint=${t}") extraTaints
-            ++ map (l: "--node-label=${l}") nodeLabels
+            ++ map (t: "--node-taint=${t}") (nodeTaints ++ extraTaints)
+            ++ map (l: "--node-label=${l}") (nodeLabels ++ svcLabels)
             ++ lib.optionals viaTailscale [
               # requires tailscale up + a join key; see docs/cluster-design.md
               "--vpn-auth-file=/run/secrets/k3s/tailscale-auth"
             ];
           };
 
-          # membership is opt-in: never join at boot
-          systemd.services.k3s.wantedBy = lib.mkForce [ ];
+          # Opportunistic nodes are opt-in (cluster-on); dedicated nodes are the
+          # permanent home for their service, so they join at boot.
+          systemd.services.k3s.wantedBy = lib.mkForce (lib.optional isDedicated "multi-user.target");
 
           sops.secrets."k3s/token" = {
             sopsFile = "${inputs.nix-secrets}/sops/shared.yaml";
