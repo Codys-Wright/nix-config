@@ -35,16 +35,30 @@
         programs.niri.package = pkgs.niri;
 
         # XDG portals for screen sharing, file picker, etc.
+        #
+        # niri implements the GNOME/Mutter ScreenCast D-Bus API (verify with
+        # `busctl --user list | grep Mutter.ScreenCast`), so xdg-desktop-portal-gnome
+        # is the correct — and niri-recommended — screencast backend: it gives a
+        # real monitor+window picker with restore tokens, which is what
+        # Discord/equibop need to share screen. xdg-desktop-portal-wlr only does
+        # whole-output capture and is unreliable for app screensharing here.
+        # gtk handles the file chooser and other interfaces. grim/slurp talk to
+        # niri's wlr-screencopy directly, so dropping the wlr *portal* does not
+        # affect screenshots.
         xdg.portal = {
           enable = true;
           extraPortals = [
-            pkgs.xdg-desktop-portal-wlr
+            pkgs.xdg-desktop-portal-gnome
             pkgs.xdg-desktop-portal-gtk
           ];
-          config.niri.default = [
-            "wlr"
-            "gtk"
-          ];
+          config.niri = {
+            default = [
+              "gnome"
+              "gtk"
+            ];
+            "org.freedesktop.impl.portal.ScreenCast" = [ "gnome" ];
+            "org.freedesktop.impl.portal.Screenshot" = [ "gnome" ];
+          };
         };
 
         security.polkit.enable = true;

@@ -2,6 +2,13 @@
 set -euo pipefail
 
 last_wallpaper=""
+last_bar=""
+# The noctalia dock only exposes a relative toggle() over IPC (no hide/show),
+# so persist our intended visibility to survive service restarts. On reboot the
+# runtime file is gone and we fall back to "shown" — which matches the dock's
+# default state, keeping the toggle in sync.
+dock_state_file="${XDG_RUNTIME_DIR:-/tmp}/niri-gaming-dock.state"
+last_dock="$(cat "$dock_state_file" 2>/dev/null || echo shown)"
 log_file="${XDG_RUNTIME_DIR:-/tmp}/niri-workspace-wallpaper.log"
 config_dir="${NIRI_CONFIG_DIR:-$HOME/.config/niri}"
 wallpaper_dir="${config_dir}/wallpapers"
@@ -65,6 +72,42 @@ apply_wallpaper() {
     fi
 }
 
+apply_bar_for_workspace() {
+    # Hide the noctalia top bar on the gaming workspace; show it everywhere else.
+    local workspace="$1"
+    local want
+
+    case "$workspace" in
+        gaming) want="hideBar" ;;
+        *) want="showBar" ;;
+    esac
+
+    if [[ "$want" != "$last_bar" ]]; then
+        log "workspace=${workspace} bar=${want}"
+        "$noctalia_shell" ipc call bar "$want" >/dev/null 2>&1 || true
+        last_bar="$want"
+    fi
+}
+
+apply_dock_for_workspace() {
+    # Hide the noctalia bottom dock on the gaming workspace; show it elsewhere.
+    # Only verb available is a relative toggle(), so act on state transitions.
+    local workspace="$1"
+    local want
+
+    case "$workspace" in
+        gaming) want="hidden" ;;
+        *) want="shown" ;;
+    esac
+
+    if [[ "$want" != "$last_dock" ]]; then
+        log "workspace=${workspace} dock=${want}"
+        "$noctalia_shell" ipc call dock toggle >/dev/null 2>&1 || true
+        last_dock="$want"
+        printf '%s\n' "$want" >"$dock_state_file" 2>/dev/null || true
+    fi
+}
+
 apply_wallpaper_for_workspaces() {
     local workspaces="$1"
     local workspace spec
@@ -85,6 +128,9 @@ apply_wallpaper_for_workspaces() {
         apply_wallpaper "$spec"
         last_wallpaper="$spec"
     fi
+
+    apply_bar_for_workspace "$workspace"
+    apply_dock_for_workspace "$workspace"
 }
 
 apply_wallpaper_for_current_state() {
