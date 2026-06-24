@@ -12,6 +12,22 @@ workspace "music" {
 
 workspace "gaming" {
     open-on-output "DP-4"
+
+    // No focus ring / border / top strut on this workspace so the game fills
+    // the screen cleanly (the top bar is already hidden here by the
+    // niri-workspace-wallpaper listener). Floating windows still work — they
+    // just lose the outline too.
+    layout {
+        struts {
+            top 0
+        }
+        focus-ring {
+            off
+        }
+        border {
+            off
+        }
+    }
 }
 
 // Dedicated Sunshine game-streaming workspace on the AOC (HDMI-A-1), so a
