@@ -1170,6 +1170,15 @@
                     # cuts out" until something re-wires. Never suspend it.
                     "session.suspend-timeout-seconds" = 0;
                     "node.always-process" = true;
+                    # Low-latency device buffer. The device period + headroom is
+                    # the fixed latency FLOOR (independent of the graph quantum) —
+                    # PipeWire's default 512/512 added ~21 ms/dir. The PREEMPT_RT
+                    # kernel's worst-case jitter is ~17 µs (≈1 frame), so a tiny
+                    # headroom is safe: 128-frame periods + 32 headroom ≈ 3.3 ms/
+                    # dir. period-num stays at the default depth (xrun safety
+                    # without adding latency). Raise headroom if USB underruns.
+                    "api.alsa.period-size" = 128;
+                    "api.alsa.headroom" = 32;
                   };
                 }
               ];
