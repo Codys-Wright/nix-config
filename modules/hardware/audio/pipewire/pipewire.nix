@@ -36,11 +36,10 @@
         # before any user logs in (and accept the broken camera portal).
         systemWide ? false,
         clockRate ? 48000,
-        # 256 is the safe default — Inferno/Dante TX timing on THEBATTLESHIP
-        # gets unstable below this (transmitter stopped + tx-lag drops).
-        # Drop to 128 only on hosts without netaudio in the graph, or live
-        # via `pw-buffer 128` once a session is actually playing audio.
-        clockQuantum ? 256,
+        # 1024 is the safe default — high idle latency keeps Inferno/Dante TX
+        # timing stable on THEBATTLESHIP. Apps that need low latency (REAPER,
+        # OBS) pull it down via force-quantum; `pw-buffer 128` works live too.
+        clockQuantum ? 1024,
         clockMinQuantum ? 32,
         clockMaxQuantum ? 1024,
         pulseMinReq ? "32/48000",
