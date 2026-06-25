@@ -1137,6 +1137,18 @@
                   actions.update-props."api.alsa.use-acp" = false;
                 }
                 {
+                  # Inferno's ALSA virtual soundcard (hw_Controller_0) has
+                  # priority.driver = 2100 by default (same as TF capture),
+                  # so it wins the PipeWire clock-driver election by node-ID
+                  # tiebreak. With dante off its clock is invalid — any active
+                  # audio path produces white noise via the broken SRC.
+                  # Drop it below TF (2100) so TF always drives the graph clock.
+                  matches = [
+                    { "node.name" = "~alsa_(output|input)\\.hw_Controller_0"; }
+                  ];
+                  actions.update-props."priority.driver" = 500;
+                }
+                {
                   # The TF is a fixed 34x34 interface. Without an explicit
                   # channel count, raw-mode probing requests the spa-alsa
                   # default (64), fails repeatedly ("Channels doesn't match
