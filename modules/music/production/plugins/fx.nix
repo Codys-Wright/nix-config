@@ -18,7 +18,10 @@
             zlcompressor
             zlsplitter
           ])
-          ++ [ (pkgs.callPackage ../../../../packages/qpitch/qpitch.nix { }) ]
+          ++ [
+            (pkgs.callPackage ../../../../packages/qpitch/qpitch.nix { })
+            (pkgs.callPackage ../../../../packages/dusk-audio-plugins/dusk-audio-plugins.nix { })
+          ]
         );
       };
   };
