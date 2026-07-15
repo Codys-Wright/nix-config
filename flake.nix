@@ -128,5 +128,6 @@
       url = "github:0xc000022070/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    zig-overlay.url = "github:mitchellh/zig-overlay";
   };
 }
