@@ -11,14 +11,14 @@
       { pkgs, lib, ... }:
       {
         home.packages = lib.optionals pkgs.stdenv.isLinux (
-          with pkgs;
-          [
+          (with pkgs; [
             dragonfly-reverb
             lsp-plugins
             zlequalizer
             zlcompressor
             zlsplitter
-          ]
+          ])
+          ++ [ (pkgs.callPackage ../../../../packages/qpitch/qpitch.nix { }) ]
         );
       };
   };
