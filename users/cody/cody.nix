@@ -188,6 +188,11 @@
       includes = [
         den.aspects.hm-backup
 
+        # Music production plugins (VST3/CLAP) — homeManager-only aspect;
+        # host-level includes of <fleet.music/production> only reach nixos
+        # config, not per-user home.packages, so it must be included here.
+        <fleet.music/production/plugins>
+
         <fleet/apps>
         fleet.apps._.misc._.cuteatum
         <fleet.apps._.misc/opendeck>
