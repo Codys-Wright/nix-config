@@ -11,10 +11,11 @@
       { pkgs, lib, ... }:
       {
         home.packages = lib.optionals pkgs.stdenv.isLinux (
-          with pkgs;
-          [
+          (with pkgs; [
             vital
-          ]
+            cardinal
+          ])
+          ++ [ (pkgs.callPackage ../../../../packages/vcv-rack/vcv-rack.nix { }) ]
         );
       };
   };
