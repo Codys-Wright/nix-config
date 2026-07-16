@@ -24,9 +24,9 @@
         terminal = {
           default = "ghostty";
         };
-        shell = {
-          default = "fish";
-        };
+        # No host-level shell default: cody's user aspect sets nushell, and
+        # under current den a host-level value here would conflict with it
+        # (old den silently dropped this binding — nushell always won).
       })
     ];
 
