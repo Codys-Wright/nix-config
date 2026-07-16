@@ -34,6 +34,10 @@ in
         environment.pathsToLink = map (dir: "/lib/${dir}") audioProduction.defaultPluginDirs;
       };
 
-    homeManager = { config, ... }: audioProduction.mkHomePluginLinks { inherit config; };
+    homeManager =
+      { config, ... }:
+      {
+        home.file = audioProduction.mkHomePluginLinks { inherit config; };
+      };
   };
 }

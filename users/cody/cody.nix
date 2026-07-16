@@ -188,10 +188,13 @@
       includes = [
         den.aspects.hm-backup
 
-        # Music production plugins (VST3/CLAP) — homeManager-only aspect;
-        # host-level includes of <fleet.music/production> only reach nixos
-        # config, not per-user home.packages, so it must be included here.
+        # Music production plugins (VST3/CLAP) and the ~/.vst3/nixos,
+        # ~/.clap/nixos, ~/.lv2/nixos plugin-dir symlinks DAWs scan —
+        # homeManager-only aspects; host-level includes of
+        # <fleet.music/production> only reach nixos config, not per-user
+        # home.packages/home.file, so both must be included here.
         <fleet.music/production/plugins>
+        <fleet.music/production/environment>
 
         <fleet/apps>
         fleet.apps._.misc._.cuteatum
