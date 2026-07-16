@@ -382,15 +382,6 @@
 
         (fleet.selfhost._.samba-client { })
 
-        # Forgejo Actions runner. Picks up CI jobs from
-        # https://git.starcommand.live and executes them here so
-        # starcommand (the always-on Forgejo host) doesn't have to
-        # bear compile / test / lint load. Token lives in
-        # hosts/THEBATTLESHIP/secrets.yaml under `forgejo/runner_token`.
-        (fleet.selfhost._.forgejo-runner {
-          tokenSopsFile = "${inputs.nix-secrets}/sops/hosts/THEBATTLESHIP.yaml";
-        })
-
         # Codeberg Actions runner. Pre-created in the Codeberg UI (runner
         # "THEBATTLESHIP" on the codywright account) — UUID + secret live in
         # hosts/THEBATTLESHIP/secrets.yaml. Docker-only labels on purpose:
