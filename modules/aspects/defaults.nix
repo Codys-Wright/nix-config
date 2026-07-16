@@ -18,8 +18,8 @@
     ];
   };
 
-  # Enable mutual-provider: host aspects with homeManager blocks automatically
-  # contribute to users, and user aspects with nixos blocks contribute to hosts.
-  # Replaces the custom hm-host-forward workaround.
-  den.schema.user.includes = [ den._.mutual-provider ];
+  # NOTE: cross-entity routing (host aspects with homeManager blocks
+  # contributing to users and vice versa) is built into den's pipeline now;
+  # the old `den._.mutual-provider` battery is an inert compatibility shim
+  # and its include was removed when bumping den past 2026-07.
 }
