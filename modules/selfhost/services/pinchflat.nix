@@ -26,10 +26,6 @@
       ...
     }@args:
     {
-      class,
-      aspect-chain,
-    }:
-    {
       description = ''
         Pinchflat - YouTube video downloader.
 

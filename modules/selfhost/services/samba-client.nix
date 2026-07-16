@@ -14,10 +14,6 @@
       ...
     }@args:
     {
-      class,
-      aspect-chain,
-    }:
-    {
       description = ''
         Samba Client Tools - SMB/CIFS client utilities for network file sharing.
 

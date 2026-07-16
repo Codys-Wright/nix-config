@@ -6,7 +6,9 @@
   ...
 }:
 {
-  fleet.selfhost._.jellyfin =
+  fleet.selfhost._.jellyfin.description = "Jellyfin media server with LLDAP groups and Authelia SSO";
+  fleet.selfhost._.jellyfin.__functor =
+    _self:
     {
       domain,
       subdomain ? "jellyfin",
@@ -17,10 +19,6 @@
       authEndpoint,
       ...
     }@aspectArgs:
-    {
-      class,
-      aspect-chain,
-    }:
     {
       nixos =
         {

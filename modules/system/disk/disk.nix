@@ -52,7 +52,6 @@
       dataPool ? null,
       initialBackupDataset ? true,
     }:
-    { class, aspect-chain }:
     let
       types = {
         "btrfs-impermanence" = fleet.system._.disk._.btrfs {

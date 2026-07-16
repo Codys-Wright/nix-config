@@ -12,7 +12,10 @@
   # Function that produces a musnix real-time audio configuration aspect
   # Takes named parameters: { alsaSeq, ffado, rtcqs, soundcardPciId, ... }
   # Usage: (<fleet/hardware/audio/musnix> { rtcqs = true; })
-  fleet.hardware._.audio._.musnix =
+  fleet.hardware._.audio._.musnix.description =
+    "musnix real-time audio tuning (RT kernel options, limits, IRQ threading)";
+  fleet.hardware._.audio._.musnix.__functor =
+    _self:
     {
       alsaSeq ? true,
       ffado ? false,
@@ -20,10 +23,6 @@
       soundcardPciId ? "",
       ...
     }@args:
-    {
-      class,
-      aspect-chain,
-    }:
     {
       nixos =
         {

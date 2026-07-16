@@ -17,10 +17,6 @@
       ...
     }@args:
     {
-      class,
-      aspect-chain,
-    }:
-    {
       description = ''
         Let's Encrypt certificates - Production SSL certificates using Cloudflare DNS validation.
 

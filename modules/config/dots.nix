@@ -1,6 +1,7 @@
 {
   # Use hjem instead of mkOutOfStoreSymlink !
   fleet.dots = {
+    description = "Out-of-store dotfile symlink helper (dotsLink) for live-editable configs";
     homeManager =
       {
         config,

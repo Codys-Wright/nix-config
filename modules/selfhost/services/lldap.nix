@@ -26,10 +26,6 @@
       ...
     }@args:
     {
-      class,
-      aspect-chain,
-    }:
-    {
       description = ''
         LLDAP - Lightweight LDAP identity provider.
 

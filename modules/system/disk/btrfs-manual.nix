@@ -20,7 +20,10 @@
   #     persist = "@persist";
   #   };
   # })
-  fleet.system._.disk._.btrfs-manual =
+  fleet.system._.disk._.btrfs-manual.description =
+    "Btrfs mounts for an already-partitioned disk (no disko formatting)";
+  fleet.system._.disk._.btrfs-manual.__functor =
+    _self:
     {
       device,
       partition ? 3,
@@ -39,7 +42,6 @@
         "space_cache=v2"
       ],
     }:
-    { class, aspect-chain }:
     let
       # Build partition path from device
       partitionPath =

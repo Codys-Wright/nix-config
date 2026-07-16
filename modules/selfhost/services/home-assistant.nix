@@ -30,10 +30,6 @@
       ...
     }@args:
     {
-      class,
-      aspect-chain,
-    }:
-    {
       description = ''
         Home-Assistant - Home automation platform.
 

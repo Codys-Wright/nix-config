@@ -21,7 +21,10 @@
   ...
 }:
 {
-  fleet.system._.disk._.btrfs-partitions =
+  fleet.system._.disk._.btrfs-partitions.description =
+    "disko-formats only the named partitions; neighboring OSes stay untouched";
+  fleet.system._.disk._.btrfs-partitions.__functor =
+    _self:
     {
       rootPartlabel,
       espPartlabel,
@@ -42,7 +45,6 @@
       withSwap ? false,
       swapSize ? "8",
     }:
-    { class, aspect-chain }:
     {
       nixos =
         { pkgs, lib, ... }:

@@ -33,10 +33,6 @@
       ...
     }@args:
     {
-      class,
-      aspect-chain,
-    }:
-    {
       description = ''
         Immich - Self-hosted photo and video backup solution.
 

@@ -12,9 +12,10 @@ let
   validOptions = lib.concatStringsSep ", " (builtins.attrNames desktopFiles);
 in
 {
+  fleet.apps._.default-browser.description =
+    "Sets the default web browser via xdg.mimeApps (brave/firefox/zen/chromium)";
   fleet.apps._.default-browser.__functor =
     _self: browser:
-    { class, aspect-chain }:
     let
       desktop =
         desktopFiles.${browser}

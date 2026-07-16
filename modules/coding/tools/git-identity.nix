@@ -16,7 +16,6 @@
         name,
         email,
       }:
-      { class, aspect-chain }:
       {
         homeManager =
           { lib, ... }:

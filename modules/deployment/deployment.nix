@@ -40,10 +40,6 @@
       ...
     }@args:
     {
-      class,
-      aspect-chain,
-    }:
-    {
       includes = [
         # Base deployment configuration with parameters
         (fleet.deployment._.config args)

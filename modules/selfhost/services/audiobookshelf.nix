@@ -25,10 +25,6 @@
       ...
     }@args:
     {
-      class,
-      aspect-chain,
-    }:
-    {
       description = ''
         Audiobookshelf - Self-hosted audiobook and podcast server.
 

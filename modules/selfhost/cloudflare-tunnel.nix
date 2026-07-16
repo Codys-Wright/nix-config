@@ -27,11 +27,6 @@
       ...
     }@args:
     {
-      class,
-      aspect-chain,
-      ...
-    }:
-    {
       nixos =
         {
           config,

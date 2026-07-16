@@ -20,6 +20,8 @@
   ...
 }:
 {
+  fleet.cluster._.k3s-agent.description =
+    "Opt-in k3s agent joining the starcommand cluster (cluster-on/off toggles)";
   fleet.cluster._.k3s-agent.__functor =
     _self:
     {
@@ -39,10 +41,6 @@
       # future: VPS/offsite agents join over tailscale
       viaTailscale ? false,
       ...
-    }:
-    {
-      class,
-      aspect-chain,
     }:
     {
       nixos =

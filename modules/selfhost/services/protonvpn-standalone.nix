@@ -24,10 +24,6 @@
       ...
     }@args:
     {
-      class,
-      aspect-chain,
-    }:
-    {
       description = ''
         ProtonVPN Standalone - OpenVPN client with kill switch for desktop systems.
 

@@ -21,7 +21,6 @@
       studio ? false,
       ...
     }:
-    { class, aspect-chain }:
     {
       nixos =
         { pkgs, ... }:

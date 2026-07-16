@@ -36,10 +36,6 @@
       ...
     }@args:
     {
-      class,
-      aspect-chain,
-    }:
-    {
       description = ''
         Karakeep - LLM-powered bookmarking service.
 

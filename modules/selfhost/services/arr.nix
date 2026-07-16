@@ -7,7 +7,10 @@
   ...
 }:
 {
-  fleet.selfhost._.arr =
+  fleet.selfhost._.arr.description =
+    "*arr media automation stack (radarr/sonarr/prowlarr/…) behind Authelia";
+  fleet.selfhost._.arr.__functor =
+    _self:
     {
       domain,
       authEndpoint,
@@ -16,10 +19,6 @@
       jackettApiKey,
       ...
     }@aspectArgs:
-    {
-      class,
-      aspect-chain,
-    }:
     {
       includes = [ (den.lib.groups [ "media" ]) ];
 

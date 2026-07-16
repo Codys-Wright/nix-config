@@ -28,10 +28,6 @@
       ...
     }@args:
     {
-      class,
-      aspect-chain,
-    }:
-    {
       description = ''
         Open-WebUI - Web UI for LLMs.
 
