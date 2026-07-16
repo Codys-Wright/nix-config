@@ -191,7 +191,7 @@ Context keys available in includes:
 - `user` — user attrset (`user.userName`, `user.name`)
 - `home` — home attrset (the `den.homes.*.*` entry)
 - `class` — current class string (`"nixos"`, `"darwin"`, or `"homeManager"`)
-- `aspect-chain` — remaining unprocessed aspects (used with `den.lib.take.*`)
+- `aspect-chain` — remaining unprocessed aspects (rarely needed; only bind `{ class, aspect-chain }:` when the body actually uses them)
 
 Den uses `builtins.functionArgs` to detect which context keys a function needs and silently skips functions whose required keys are absent (e.g., a `{ user, ... }:` include in a host-only context is silently skipped).
 
@@ -211,7 +211,6 @@ Enabled globally via `_module.args.__findFile = den.lib.__findFile` in `modules/
 | `<den/primary-user>` | `den.provides.primary-user` |
 | `<den/user-shell>` | `den.provides.user-shell` (callable) |
 | `<den/define-user>` | `den.provides.define-user` |
-| `<den.lib.parametric>` | `den.lib.parametric` (function) |
 
 **Calling parametric aspects** — wrap with `(…)` and pass an attrset:
 ```nix
@@ -322,38 +321,45 @@ example below uses the full form because it references both.
 
 Call site: `(fleet.grub { uefi = true; theme = "minegrub"; })`
 
-#### 4. Parametric via `den.lib.parametric`
+#### 4. Context aspect (bare function / context includes)
 
-Used when an aspect needs **context** (host/user info) but no caller parameters. `den.lib.parametric` marks the aspect so den passes context to its `includes` functions.
+Used when an aspect needs **context** (host/user info) but no caller parameters.
+A bare context function IS a valid aspect, and includes-list entries can be
+context functions too — `den.lib.parametric` is **deprecated upstream** (it is
+now an identity shim that warns); never use it in new code.
 
 ```nix
-# modules/aspects/hostname.nix
-{ den, lib, fleet, ... }:
-{
-  fleet.hostname = den.lib.parametric {
-    description = "Set hostname from den host context";
-    includes = [
-      ({ host, ... }: {
-        ${host.class}.networking.hostName = lib.mkDefault (host.hostName or host.name);
-      })
-    ];
-  };
-}
+# Bare-function form: the whole aspect is context-driven
+fleet.hostname = { host, ... }: {
+  nixos.networking.hostName = lib.mkDefault (host.hostName or host.name);
+};
+
+# Attrset form with a description and context includes (modules/user/autologin.nix)
+fleet.user._.autologin = {
+  description = "Display-manager autologin for the associated user (VM/testing)";
+  includes = [
+    ({ user, ... }: {
+      nixos.services.displayManager.autoLogin.user = user.userName;
+    })
+  ];
+};
 ```
 
-#### 5. Combined `__functor` + `den.lib.parametric`
+#### 5. `__functor` + context includes (caller parameters AND context)
 
-Used when an aspect needs **both** caller parameters and context injection. The `__functor` processes caller args, then returns `<den.lib.parametric> { … }`.
+Used when an aspect needs **both** caller parameters and context injection.
+The `__functor` processes caller args and returns a plain attrset whose
+`includes` entries are context functions — no parametric wrapper.
 
 ```nix
-# modules/system/password.nix
+# modules/user/password.nix
 { den, lib, fleet, __findFile, ... }:
 {
   fleet.user._.password.__functor =
     _self: arg:
     let config = mkPasswordConfig arg;
     in
-    <den.lib.parametric> {
+    {
       description = "System password configuration";
       includes = [
         ({ user, ... }: { nixos.users.users.${user.userName}.hashedPassword = config.value; })
@@ -560,20 +566,52 @@ You do **not** need to re-include these in host or user aspects — they are aut
 
 `flake.nix` is generated — never edit it directly. To add a new input:
 
-1. Open `modules/flake/dendritic.nix` and add the input declaration:
+1. Declare the input **inline in the feature module that owns it** (the
+   dendritic idiom — see `modules/coding/cli/herdr.nix`); only core/shared
+   inputs live in `modules/flake/dendritic.nix`:
    ```nix
-   flake-file.inputs.<input-name>.url = lib.mkDefault "github:owner/repo";
+   flake-file.inputs.<input-name>.url = lib.mkDefault "github:owner/repo/vX.Y.Z";
    flake-file.inputs.<input-name>.inputs.nixpkgs.follows = "nixpkgs"; # if applicable
    ```
+   Pin a release tag, not a branch, when upstream tags releases.
 
 2. Regenerate `flake.nix`:
    ```bash
    nix run .#write-flake
    ```
 
-3. `git add flake.nix flake.lock modules/flake/dendritic.nix` and commit.
+3. `git add flake.nix flake.lock <the module>` and commit.
 
 4. Access the input in modules via the standard `inputs.<input-name>` argument.
+
+---
+
+## Custom Packages (fleet-packages overlay)
+
+Every `packages/<name>/package.nix` is auto-discovered by
+`modules/nix/fleet-packages.nix` into ONE overlay applied to nixos, darwin,
+and homeManager — consumers just use `pkgs.<name>` (or
+`pkgs.<name>.override { … }`); never write relative
+`callPackage ../../packages/...` paths in aspects.
+
+- Names colliding with nixpkgs attrs get a `fleet-` prefix (listed in the
+  module's `collides`) so the overlay never shadows nixpkgs.
+- Packages needing args from flake inputs go in the module's `extraArgs`,
+  guarded per-system with `lib.optionalAttrs (input ? ${system})`.
+- Multi-package dirs (mactahoe, tiagolr) are wired explicitly with flattened
+  names (`mactahoe-gtk-theme`, `tiagolr-time12`, …).
+- The same attrset backs the flake's `packages.x86_64-linux.*` outputs.
+
+Underscore-prefixed files/dirs (`_data/`, `_lib/`, `_nvf_modules/`) are
+invisible to import-tree — use them for plain-Nix data and helper functions.
+Host-specific config lives in `hosts/<host>/<concern>.nix` as
+`den.aspects.<HOST>-<concern>` added to the host's includes; do not grow a
+host file's inline nixos block.
+
+For verifying pure refactors (drvPath / nix-diff workflow, the registry.json
+cascade, and the list-reorder caveat) see `docs/refactor-verification.md`.
+The `den-fleet` agent skill (`skills/den-fleet/SKILL.md`, installed to
+`~/.claude/skills/` via home-manager) carries the same conventions.
 
 ---
 
@@ -582,11 +620,17 @@ You do **not** need to re-include these in host or user aspects — they are aut
 | Function | Purpose | Example file |
 |---|---|---|
 | `den.lib.__findFile` | Enables angle bracket syntax | `modules/namespace.nix` |
-| `den.lib.parametric` | Marks an aspect for context injection | `modules/aspects/hostname.nix` |
-| `den.lib.take.unused` | Takes unprocessed aspect-chain remainder | `den.provides.unfree` internals |
-| `den.lib.take.exactly` | Takes exactly the specified module from chain | Den internals |
+| `den.lib.nh.denPackages` | nh wrapper packages (`nix run .#<host>`) | den upstream `templates/default/modules/nh.nix` |
+| `den.lib.resolveEntity` | Current public entity resolver | den internals |
+| `den.lib.strict` | Freeform type behind `flakeModules.strict` | `modules/flake/` (strict mode) |
 
-The most common are `parametric` (for context-aware aspects) and `__findFile` (for angle brackets).
+**Deprecated — do not use in new code** (upstream warns): `den.lib.parametric`
+(bare attrsets/context functions replace it), `den.lib.take.*`,
+`den.lib.perHost`/`perUser`/`perHome`. The `den._.mutual-provider` battery is an
+inert shim — cross-entity routing is built into the pipeline.
+
+The most common by far is `__findFile` (angle brackets); everything else is
+plain attrsets and functions.
 
 ---
 
