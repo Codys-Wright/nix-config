@@ -14,16 +14,10 @@
 
     homeManager =
       { pkgs, ... }:
-      let
-        erosanix = inputs.erosanix.packages.${pkgs.stdenv.hostPlatform.system};
-        erosanixLib = inputs.erosanix.lib.${pkgs.stdenv.hostPlatform.system};
-      in
       {
         home.packages = [
-          (pkgs.callPackage ../../../packages/axe-edit-iii/axe-edit-iii.nix {
-            inherit (erosanixLib) mkWindowsApp makeDesktopIcon copyDesktopIcons;
-            wine = pkgs.wineWow64Packages.full;
-          })
+          # Built by the fleet-packages overlay (wine + erosanix args live there)
+          pkgs.axe-edit-iii
         ];
       };
   };

@@ -9,7 +9,7 @@
       { pkgs, ... }:
       {
         environment.systemPackages = [
-          (pkgs.callPackage ../../../packages/mioctl/mioctl.nix { })
+          pkgs.mioctl
         ];
       };
   };

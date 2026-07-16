@@ -9,7 +9,7 @@
       { pkgs, ... }:
       {
         environment.systemPackages = [
-          (pkgs.callPackage ../../../packages/netaudio/netaudio.nix { })
+          pkgs.netaudio
         ];
       };
   };

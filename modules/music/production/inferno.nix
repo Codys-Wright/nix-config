@@ -54,7 +54,7 @@
               nixos =
                 { pkgs, lib, ... }:
                 let
-                  infernoPkg = pkgs.callPackage ../../../packages/inferno/inferno.nix { };
+                  infernoPkg = pkgs.fleet-inferno;
                   pcmSink = "inferno_sink";
                   pcmSource = "inferno_source";
                   # Plain numeric channel layout. UNK on every slot makes

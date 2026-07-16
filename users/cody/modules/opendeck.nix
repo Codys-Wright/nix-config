@@ -12,7 +12,7 @@
       }:
       let
         configRoot = "${config.home.homeDirectory}/.flake/users/cody/opendeck/config";
-        opendeck = pkgs.callPackage ../../../packages/opendeck/opendeck.nix { };
+        opendeck = pkgs.opendeck;
         syncConfig = pkgs.writeShellScript "sync-opendeck-config" ''
           set -eu
 

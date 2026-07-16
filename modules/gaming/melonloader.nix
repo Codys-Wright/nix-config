@@ -11,7 +11,7 @@
       { pkgs, lib, ... }:
       lib.mkIf (!pkgs.stdenv.isDarwin) {
         home.packages = [
-          (pkgs.callPackage ../../packages/melonloader-installer/melonloader-installer.nix { })
+          pkgs.fleet-melonloader-installer
         ];
       };
   };

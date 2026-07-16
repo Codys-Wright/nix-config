@@ -15,7 +15,7 @@
       { pkgs, ... }:
       {
         environment.systemPackages = [
-          (pkgs.callPackage ../../../../../packages/mactahoe/kde-theme.nix { })
+          pkgs.mactahoe-kde-theme
           pkgs.kdePackages.qtstyleplugin-kvantum
         ];
       };
@@ -29,7 +29,7 @@
       }:
       {
         home.packages = [
-          (pkgs.callPackage ../../../../../packages/mactahoe/kde-theme.nix { })
+          pkgs.mactahoe-kde-theme
           pkgs.kdePackages.qtstyleplugin-kvantum
         ];
 

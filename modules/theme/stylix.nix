@@ -33,7 +33,7 @@
 
           cursor = {
             name = "MacTahoe-dark-cursors";
-            package = pkgs.callPackage ../../packages/mactahoe/cursor-theme.nix { };
+            package = pkgs.mactahoe-cursor-theme;
             size = 24;
           };
 
@@ -44,7 +44,7 @@
             # placeholders in GTK apps.
             dark = "MacTahoe-blue";
             light = "MacTahoe-blue";
-            package = pkgs.callPackage ../../packages/mactahoe/icon-theme.nix { };
+            package = pkgs.mactahoe-icon-theme;
           };
 
           fonts = {

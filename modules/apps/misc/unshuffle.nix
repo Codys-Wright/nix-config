@@ -6,7 +6,7 @@
       { pkgs, lib, ... }:
       {
         home.packages = lib.optionals pkgs.stdenv.isLinux [
-          (pkgs.callPackage ../../../packages/unshuffle/unshuffle.nix { })
+          pkgs.unshuffle
         ];
       };
   };

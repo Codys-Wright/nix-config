@@ -45,8 +45,8 @@
               nixos =
                 { pkgs, lib, ... }:
                 let
-                  statimePkg = pkgs.callPackage ../../../packages/statime/statime.nix { };
-                  netaudioPkg = pkgs.callPackage ../../../packages/netaudio/netaudio.nix { };
+                  statimePkg = pkgs.statime;
+                  netaudioPkg = pkgs.netaudio;
                   configPath = "/etc/inferno/statime-ptpv1.toml";
                   # The watchdog's lock signal ("Measurement:") is only logged
                   # at info/debug/trace, so disable it on quieter loglevels.

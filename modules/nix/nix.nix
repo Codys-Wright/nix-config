@@ -10,6 +10,7 @@
 
     includes = [
       fleet.nix._.nixpkgs
+      fleet.nix._.fleet-packages
       fleet.nix._.unfree-default
       fleet.nix._.nix-index
       fleet.nix._.nix-registry
