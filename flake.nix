@@ -45,6 +45,10 @@
     };
     fts-reaper-flake.url = "github:FastTrackStudios/fts-reaper-flake";
     ghidra-cli.url = "github:Codys-Wright/ghidra-cli/fix/ghidra-12-compat";
+    herdr = {
+      url = "github:ogulcancelik/herdr/v0.7.4";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     hermes-agent = {
       url = "github:Codys-Wright/hermes-agent/starcommand-nextcloud-v2026.5.7";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -53,9 +57,13 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    hunk = {
+      url = "github:modem-dev/hunk/v0.17.1";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     import-tree.url = "github:vic/import-tree";
     inferno-control = {
-      url = "github:FastTrackStudios/inferno-control";
+      url = "git+https://codeberg.org/FastTrackStudios/inferno-control";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     lanzaboote = {

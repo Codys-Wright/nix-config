@@ -10,7 +10,7 @@
   flake-file.inputs.hermes-agent.inputs.nixpkgs.follows = "nixpkgs";
 
   fleet.coding._.cli = {
-    description = "All CLI development tools - atuin, btop, direnv, eza, fzf, just, pi-coding-agent, sesh, yazi, zoxide";
+    description = "All CLI development tools - atuin, btop, direnv, eza, fzf, herdr, hunk, just, pi-coding-agent, sesh, yazi, zoxide";
 
     includes = [
       fleet.coding._.cli._.atuin
@@ -18,6 +18,8 @@
       fleet.coding._.cli._.direnv
       fleet.coding._.cli._.eza
       fleet.coding._.cli._.fzf
+      fleet.coding._.cli._.herdr
+      fleet.coding._.cli._.hunk
       fleet.coding._.cli._.just
       fleet.coding._.cli._.pi-coding-agent
       fleet.coding._.cli._.sesh
