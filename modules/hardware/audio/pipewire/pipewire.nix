@@ -17,8 +17,22 @@
 # When called with no args (the default via the audio facet), you get a plain
 # low-latency PipeWire setup. Hosts that need studio routing should configure
 # them in their own aspect on top of this.
-{ den, ... }:
 {
+  den,
+  inputs,
+  lib,
+  ...
+}:
+{
+  # PipeWire tracks current nixos-unstable via a dedicated input instead of
+  # riding the (older) main nixpkgs pin: the 2026-07 nixpkgs update regressed
+  # PipeWire 1.6.5 → 1.6.3, whose ALSA-plugin handling breaks Inferno's Dante
+  # bridge (plugin probes then closes; DeviceServer never comes up). Only the
+  # daemon-side stack (pipewire + wireplumber) comes from this input — client
+  # libs elsewhere keep the main pin (native protocol is stable across 1.x).
+  # `just update` bumps this to the latest cached unstable PipeWire.
+  flake-file.inputs.nixpkgs-pipewire.url = lib.mkDefault "github:nixos/nixpkgs/nixos-unstable";
+
   fleet.hardware._.audio._.pipewire = {
     description = "PipeWire audio system (system-wide, low-latency)";
 
@@ -97,6 +111,12 @@
 
         nixos =
           { pkgs, lib, ... }:
+          let
+            pkgsPipewire = import inputs.nixpkgs-pipewire {
+              system = pkgs.stdenv.hostPlatform.system;
+              config.allowUnfree = true;
+            };
+          in
           {
             security.rtkit.enable = true;
 
@@ -119,6 +139,11 @@
 
             services.pipewire = {
               enable = true;
+              # Daemon + session manager from the dedicated nixpkgs-pipewire
+              # input (see header) — keeps PipeWire at current upstream while
+              # the rest of the system stays on the main nixpkgs pin.
+              package = lib.mkDefault pkgsPipewire.pipewire;
+              wireplumber.package = lib.mkDefault pkgsPipewire.wireplumber;
               inherit systemWide;
               # Eager start when system-wide (no session to socket-activate
               # against); socket-activate in the normal per-user case.
