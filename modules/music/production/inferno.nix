@@ -52,7 +52,12 @@
             { host, ... }:
             {
               nixos =
-                { pkgs, lib, ... }:
+                {
+                  pkgs,
+                  lib,
+                  config,
+                  ...
+                }:
                 let
                   infernoPkg = pkgs.fleet-inferno;
                   pcmSink = "inferno_sink";
@@ -306,7 +311,13 @@
                       };
                       serviceConfig = {
                         Type = "simple";
-                        ExecStart = "${pkgs.pipewire}/bin/pipewire -c ${infernoNodesConf}";
+                        # MUST follow the daemon's package (services.pipewire.package,
+                        # currently the nixpkgs-pipewire input) — this client instance
+                        # is what loads the Inferno ALSA plugin, and plugin handling in
+                        # pipewire 1.6.3 breaks it (probe → immediate close, Dante
+                        # DeviceServer never starts). pkgs.pipewire is the older main
+                        # nixpkgs pin, so it must not be used here.
+                        ExecStart = "${config.services.pipewire.package}/bin/pipewire -c ${infernoNodesConf}";
                         Restart = "on-failure";
                         RestartSec = "3s";
                       };
