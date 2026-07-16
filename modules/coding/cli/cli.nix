@@ -10,6 +10,7 @@
     includes = [
       fleet.coding._.cli._.atuin
       fleet.coding._.cli._.btop
+      fleet.coding._.cli._.den-fleet-skill
       fleet.coding._.cli._.direnv
       fleet.coding._.cli._.eza
       fleet.coding._.cli._.fzf
