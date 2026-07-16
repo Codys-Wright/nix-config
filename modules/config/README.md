@@ -123,3 +123,13 @@ Configuration aspects define the abstract interface, while desktop environment m
 - `desktop/environments/gnome/keybinds.nix` - Implements those keybinds for GNOME (future)
 
 This separation allows you to switch desktop environments while keeping your familiar keybinds and applications.
+## Scope: config/ vs aspects/
+
+- `modules/aspects/` holds **den plumbing only**: the global `den.default`
+  includes (defaults.nix), base-host/base-home, and group wiring. Nothing
+  app- or service-shaped lives there.
+- `modules/config/` holds **cross-cutting configuration aspects** that many
+  hosts/homes include but that aren't tied to one category: state-version,
+  dots, hm-backup, nix-settings, ssh-keys, user-secrets, keybinds.
+- Category-specific behavior always belongs in its category directory
+  (`modules/coding/`, `modules/apps/`, …), not here.
