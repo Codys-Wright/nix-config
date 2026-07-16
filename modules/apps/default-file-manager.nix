@@ -12,9 +12,9 @@ let
   validOptions = lib.concatStringsSep ", " (builtins.attrNames desktopFiles);
 in
 {
+  fleet.apps._.default-file-manager.description = "Sets the default file manager via xdg.mimeApps";
   fleet.apps._.default-file-manager.__functor =
     _self: fileManager:
-    { class, aspect-chain }:
     let
       desktop =
         desktopFiles.${fileManager}

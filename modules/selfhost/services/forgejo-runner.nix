@@ -60,7 +60,6 @@
       ioWeight ? 50,
       ...
     }:
-    { class, aspect-chain, ... }:
     {
       description = ''
         Forgejo Actions runner pointed at ${url}.

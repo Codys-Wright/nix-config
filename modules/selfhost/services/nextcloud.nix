@@ -27,10 +27,6 @@
       ...
     }@args:
     {
-      class,
-      aspect-chain,
-    }:
-    {
       description = ''
         Nextcloud - Self-hosted file sync and collaboration platform.
 

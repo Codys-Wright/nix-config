@@ -21,10 +21,6 @@
       ...
     }@args:
     {
-      class,
-      aspect-chain,
-    }:
-    {
       description = ''
         Grocy - Grocery and household management.
 

@@ -41,10 +41,6 @@
       ...
     }@args:
     {
-      class,
-      aspect-chain,
-    }:
-    {
       description = ''
         Deluge - BitTorrent client with web UI.
 

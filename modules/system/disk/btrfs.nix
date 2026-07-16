@@ -10,14 +10,16 @@
   # Function that produces a btrfs-impermanence disk configuration aspect
   # Takes named parameters: { device, swapSize, withSwap, persistFolder, ... }
   # Usage: (<fleet/system/disk/btrfs> { device = "/dev/sda"; })
-  fleet.system._.disk._.btrfs =
+  fleet.system._.disk._.btrfs.description =
+    "Whole-disk btrfs layout with impermanence via disko (DESTROYS existing GPT)";
+  fleet.system._.disk._.btrfs.__functor =
+    _self:
     {
       device,
       swapSize ? "8",
       withSwap ? false,
       persistFolder ? "/persist",
     }:
-    { class, aspect-chain }:
     {
       nixos =
         { pkgs, lib, ... }:

@@ -24,10 +24,6 @@
       ...
     }@args:
     {
-      class,
-      aspect-chain,
-    }:
-    {
       description = ''
         Monitoring - Observability stack with Grafana, Prometheus, and Loki.
 

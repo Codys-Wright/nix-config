@@ -32,10 +32,6 @@
       ...
     }@args:
     {
-      class,
-      aspect-chain,
-    }:
-    {
       description = ''
         Forgejo - Self-hosted Git service.
 

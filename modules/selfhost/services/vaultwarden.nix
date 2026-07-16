@@ -21,10 +21,6 @@
       ...
     }@args:
     {
-      class,
-      aspect-chain,
-    }:
-    {
       description = ''
         Vaultwarden - Bitwarden-compatible password manager.
 

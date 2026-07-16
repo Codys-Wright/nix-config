@@ -24,10 +24,6 @@
       ...
     }@args:
     {
-      class,
-      aspect-chain,
-    }:
-    {
       description = ''
         Hledger - Plain-text accounting.
 

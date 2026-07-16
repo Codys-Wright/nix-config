@@ -33,10 +33,6 @@
       ...
     }@args:
     {
-      class,
-      aspect-chain,
-    }:
-    {
       description = ''
         ProtonVPN - VPN service using ProtonVPN with OpenVPN.
 

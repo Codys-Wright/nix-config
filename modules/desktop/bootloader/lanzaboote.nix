@@ -25,7 +25,6 @@
         configurationLimit ? 15,
         pkiBundle ? "/var/lib/sbctl",
       }:
-      { class, aspect-chain }:
       {
         nixos =
           { lib, pkgs, ... }:

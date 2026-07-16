@@ -21,7 +21,6 @@
       theme ? null,
       ...
     }@args:
-    { class, aspect-chain }:
     let
       inherit (lib) mkIf mkMerge optionals;
       # Normalize devices to a list (accept string or list)

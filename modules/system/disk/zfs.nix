@@ -16,7 +16,6 @@
       dataPool ? null,
       initialBackupDataset ? true,
     }:
-    { class, aspect-chain }:
     let
       inherit (lib)
         mkIf

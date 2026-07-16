@@ -35,7 +35,6 @@
       username ? "admin",
       ...
     }@args:
-    { class, aspect-chain }:
     {
       nixos =
         {

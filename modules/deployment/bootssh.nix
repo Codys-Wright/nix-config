@@ -32,7 +32,6 @@
         staticNetwork ? null, # null = use deployment.staticNetwork
         ...
       }@args:
-      { class, aspect-chain }:
       {
         nixos =
           {

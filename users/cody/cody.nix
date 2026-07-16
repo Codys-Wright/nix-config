@@ -197,8 +197,8 @@
         <fleet.music/production/environment>
 
         <fleet/apps>
-        fleet.apps._.misc._.cuteatum
-        fleet.apps._.misc._.unshuffle
+        <fleet.apps._.misc/cuteatum>
+        <fleet.apps._.misc/unshuffle>
         <fleet.apps._.misc/opendeck>
         <fleet.apps/browsers/firefox_webapps>
         (<fleet.apps/default-file-manager> "nautilus")

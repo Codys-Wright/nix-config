@@ -27,10 +27,6 @@
       ...
     }@args:
     {
-      class,
-      aspect-chain,
-    }:
-    {
       description = ''
         Authelia - SSO and OIDC authentication provider.
 

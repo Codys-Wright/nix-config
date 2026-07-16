@@ -16,7 +16,6 @@
       {
         configurationLimit ? 15,
       }:
-      { class, aspect-chain }:
       {
         nixos =
           { lib, ... }:
