@@ -7,7 +7,7 @@
     nixos =
       { pkgs, ... }:
       let
-        mactahoeKde = pkgs.callPackage ../../../packages/mactahoe/kde-theme.nix { };
+        mactahoeKde = pkgs.mactahoe-kde-theme;
       in
       {
         services.displayManager.sddm = {

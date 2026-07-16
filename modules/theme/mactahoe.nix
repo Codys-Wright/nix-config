@@ -9,15 +9,15 @@
     homeManager =
       { pkgs, ... }:
       let
-        gtkTheme = pkgs.callPackage ../../packages/mactahoe/gtk-theme.nix {
+        gtkTheme = pkgs.mactahoe-gtk-theme.override {
           withBlur = true;
           colorVariants = [ "dark" ];
           themeVariants = [ "blue" ];
         };
-        iconTheme = pkgs.callPackage ../../packages/mactahoe/icon-theme.nix {
+        iconTheme = pkgs.mactahoe-icon-theme.override {
           themeVariants = [ "blue" ];
         };
-        cursorTheme = pkgs.callPackage ../../packages/mactahoe/cursor-theme.nix { };
+        cursorTheme = pkgs.mactahoe-cursor-theme;
       in
       {
         home.packages = [
@@ -47,15 +47,15 @@
     nixos =
       { pkgs, ... }:
       let
-        gtkTheme = pkgs.callPackage ../../packages/mactahoe/gtk-theme.nix {
+        gtkTheme = pkgs.mactahoe-gtk-theme.override {
           withBlur = true;
           colorVariants = [ "dark" ];
           themeVariants = [ "blue" ];
         };
-        iconTheme = pkgs.callPackage ../../packages/mactahoe/icon-theme.nix {
+        iconTheme = pkgs.mactahoe-icon-theme.override {
           themeVariants = [ "blue" ];
         };
-        cursorTheme = pkgs.callPackage ../../packages/mactahoe/cursor-theme.nix { };
+        cursorTheme = pkgs.mactahoe-cursor-theme;
       in
       {
         environment.systemPackages = [

@@ -26,7 +26,7 @@
         { pkgs, ... }:
         {
           environment.systemPackages = [
-            (pkgs.callPackage ../../../packages/davinci-resolve/package.nix {
+            (pkgs.fleet-davinci-resolve.override {
               studioVariant = studio;
             })
           ];

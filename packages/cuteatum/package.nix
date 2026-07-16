@@ -6,7 +6,7 @@
   ninja,
   qt6,
   callPackage,
-  libqatemcontrol ? callPackage ../libqatemcontrol/libqatemcontrol.nix { },
+  libqatemcontrol ? callPackage ../libqatemcontrol/package.nix { },
 }:
 
 stdenv.mkDerivation rec {

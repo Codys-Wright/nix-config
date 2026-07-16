@@ -5,7 +5,7 @@
     nixos =
       { pkgs, ... }:
       let
-        opendeck = pkgs.callPackage ../../../packages/opendeck/opendeck.nix { };
+        opendeck = pkgs.opendeck;
       in
       {
         environment.systemPackages = [ opendeck ];
@@ -16,7 +16,7 @@
       { pkgs, lib, ... }:
       {
         home.packages = lib.optionals pkgs.stdenv.isLinux [
-          (pkgs.callPackage ../../../packages/opendeck/opendeck.nix { })
+          pkgs.opendeck
         ];
       };
   };

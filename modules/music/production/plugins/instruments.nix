@@ -17,12 +17,10 @@
             cardinal
           ])
           ++ [
-            (pkgs.callPackage ../../../../packages/vcv-rack/vcv-rack.nix { })
-            (pkgs.callPackage ../../../../packages/floe/floe.nix {
-              zig_0_14 = inputs.zig-overlay.packages.${pkgs.system}."0.14.0";
-            })
-            (pkgs.callPackage ../../../../packages/tiagolr/ripplerx.nix { })
-            (pkgs.callPackage ../../../../packages/dumumub-0000006/dumumub-0000006.nix { })
+            pkgs.fleet-vcv-rack
+            pkgs.floe
+            pkgs.tiagolr-ripplerx
+            pkgs.dumumub-0000006
           ]
         );
       };
