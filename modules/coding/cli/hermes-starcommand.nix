@@ -1,4 +1,4 @@
-# CLI tools facet - All command-line tools
+# Hermes Starcommand - hermes-agent package + SSH-tunneled remote Hermes CLI
 {
   fleet,
   inputs,
@@ -9,23 +9,8 @@
   flake-file.inputs.hermes-agent.url = lib.mkDefault "github:Codys-Wright/hermes-agent/starcommand-nextcloud-v2026.5.7";
   flake-file.inputs.hermes-agent.inputs.nixpkgs.follows = "nixpkgs";
 
-  fleet.coding._.cli = {
-    description = "All CLI development tools - atuin, btop, direnv, eza, fzf, herdr, hunk, just, pi-coding-agent, sesh, yazi, zoxide";
-
-    includes = [
-      fleet.coding._.cli._.atuin
-      fleet.coding._.cli._.btop
-      fleet.coding._.cli._.direnv
-      fleet.coding._.cli._.eza
-      fleet.coding._.cli._.fzf
-      fleet.coding._.cli._.herdr
-      fleet.coding._.cli._.hunk
-      fleet.coding._.cli._.just
-      fleet.coding._.cli._.pi-coding-agent
-      fleet.coding._.cli._.sesh
-      fleet.coding._.cli._.yazi
-      fleet.coding._.cli._.zoxide
-    ];
+  fleet.coding._.cli._.hermes-starcommand = {
+    description = "Hermes agent package and hermes-starcommand CLI (SSH tunnel to Starcommand Hermes sessions)";
 
     # NixOS system packages
     nixos =
@@ -200,15 +185,7 @@
         };
       in
       {
-        environment.systemPackages = with pkgs; [
-          gcc
-          ripgrep
-          just
-          openssl
-          openssl.dev
-          openssl_3
-          dioxus-cli
-          bat
+        environment.systemPackages = [
           inputs.hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.default
           hermesStarcommand
         ];
@@ -218,14 +195,8 @@
     darwin =
       { pkgs, ... }:
       {
-        environment.systemPackages = with pkgs; [
-          ripgrep
-          bat
-          openssl
-          openssl.dev
-          dioxus-cli
+        environment.systemPackages = [
           inputs.hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.default
-          # gcc is available via Xcode Command Line Tools on macOS
         ];
       };
   };
