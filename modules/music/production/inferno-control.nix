@@ -7,7 +7,8 @@
 { fleet, inputs, ... }:
 {
   flake-file.inputs.inferno-control = {
-    url = "github:FastTrackStudios/inferno-control";
+    # Canonical home is Codeberg (github copy is a leftover mirror).
+    url = "git+https://codeberg.org/FastTrackStudios/inferno-control";
     inputs.nixpkgs.follows = "nixpkgs";
   };
 
