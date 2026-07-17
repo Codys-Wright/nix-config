@@ -210,8 +210,13 @@
                   # up or down without touching the core audio graph.
                   systemd.user.targets.dante = {
                     description = "Dante/Inferno AoIP stack (PTP clock, virtual soundcard, routing)";
-                    # Intentionally not wantedBy default.target: bring it up
-                    # explicitly with `dante on` when the network is live.
+                    # Autostart the AoIP stack at login (2026-06-26): this is a
+                    # dedicated studio box and the Dante network is always live,
+                    # so bring up statime + the clock-ready re-init automatically.
+                    # `dante off` still works to tear it down. (studio-clock-ready
+                    # waits for PTP lock then restarts wireplumber so the Inferno
+                    # nodes re-open against a valid clock.)
+                    wantedBy = [ "default.target" ];
                   };
 
                   systemd.user.services.inferno-nodes =
@@ -302,21 +307,28 @@
                       # no system network-online (Dante IP is up long before
                       # `dante on`). Runs as the logged-in user against the
                       # per-user $XDG_RUNTIME_DIR socket.
+                      #
+                      # DEDUP 2026-06-26: NOT wantedBy dante.target anymore. This
+                      # standalone `pipewire -c` client and cody's home
+                      # 91-inferno-nodes.conf (in the MAIN per-user pipewire) BOTH
+                      # open the same Inferno ALSA device (card 999). Running both
+                      # made the DeviceServer register 0 TX/RX channels (THEBATTLESHIP
+                      # showed up in Dante Controller with no capabilities). The
+                      # MAIN pipewire is the real device owner (it holds the Dante
+                      # conmon/ARC sockets 8700/8800), and its nodes are the ones
+                      # apps/REAPER reach — so this isolated client is redundant.
+                      # Kept defined (start manually for debugging) but no longer
+                      # auto-started. partOf stays so `dante off` still stops it.
                       after = [ "pipewire.service" ];
                       wants = [ "pipewire.service" ];
                       partOf = [ "dante.target" ];
-                      wantedBy = [ "dante.target" ];
                       environment = {
                         ALSA_PLUGIN_DIR = "/run/current-system/sw/lib/alsa-lib";
                       };
                       serviceConfig = {
                         Type = "simple";
-                        # MUST follow the daemon's package (services.pipewire.package,
-                        # currently the nixpkgs-pipewire input) — this client instance
-                        # is what loads the Inferno ALSA plugin, and plugin handling in
-                        # pipewire 1.6.3 breaks it (probe → immediate close, Dante
-                        # DeviceServer never starts). pkgs.pipewire is the older main
-                        # nixpkgs pin, so it must not be used here.
+                        # Follow the daemon's pipewire (services.pipewire.package) so this
+                        # debug client always matches the running daemon version.
                         ExecStart = "${config.services.pipewire.package}/bin/pipewire -c ${infernoNodesConf}";
                         Restart = "on-failure";
                         RestartSec = "3s";

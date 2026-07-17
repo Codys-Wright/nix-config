@@ -27,6 +27,25 @@
         domain ? 0,
         priority1 ? 251,
         protocolVersion ? "PTPv1",
+        # Announce-receipt-timeout: how many announce intervals statime waits
+        # without hearing the grandmaster before it declares the master lost and
+        # self-promotes to its (unimplemented, broken) PTPv1 master stub. The
+        # default (~3) is twitchy; crank it high as a backstop against the
+        # documented startup-race heisenbug (at loglevel=warn statime could hit the
+        # timeout and self-promote before processing the leader's first Sync).
+        # statime has no real clock and must never be master. NB: in steady state
+        # it stays a clean follower regardless — the frequent
+        # "got DelayReq, master operation not implemented" warnings are BENIGN
+        # multicast noise (Dante PTPv1 multicasts DelayReqs), not self-promotion.
+        # null = fork default.
+        announceReceiptTimeout ? null,
+        # NOTE on RT-core pinning: do NOT add a systemd `CPUAffinity=` directive to
+        # this unit. Combined with `CPUSchedulingPolicy=fifo` it fails at boot
+        # ("Failed to set up CPU scheduling: Operation not permitted" — e.g. when
+        # the targeted cores are still isolcpus-reserved in the running kernel),
+        # which crash-loops statime and spams the console so boot looks hung. FIFO
+        # 82 unpinned already gives a tight (~100 ns) lock here; if pinning is ever
+        # needed, do it best-effort at RUNTIME (chrt/taskset with `|| true`).
         # Self-heal: restart statime whenever it loses PTP lock. Requires a
         # loglevel that emits "Measurement:" lines (debug/info/trace) — the
         # signal the watchdog uses to tell "locked follower" from "stuck master".
@@ -77,7 +96,11 @@
                     interface = "${interface}"
                     network-mode = "ipv4"
                     hardware-clock = "none"
-                    protocol-version = "${protocolVersion}"
+                    protocol-version = "${protocolVersion}"${
+                      lib.optionalString (
+                        announceReceiptTimeout != null
+                      ) "\nannounce-receipt-timeout = ${toString announceReceiptTimeout}"
+                    }
                   '';
 
                   # statime binds the PTP UDP ports (319/320), which are
@@ -118,6 +141,23 @@
                         ExecStart = "/run/wrappers/bin/statime --config ${configPath}";
                         Restart = "always";
                         RestartSec = "3s";
+                        # statime uses SOFTWARE timestamping (hardware-clock =
+                        # "none"), so its virtual-clock servo can only build a
+                        # stable frequency estimate if its sync/delay timestamp
+                        # captures aren't preempted. Under SCHED_OTHER the PTPv1
+                        # offset free-runs at the raw-monotonic drift (~12 ppm)
+                        # in a 1 ms sawtooth and never frequency-locks; the
+                        # Kalman filter perpetually rejects the jittered
+                        # measurements. Run it SCHED_FIFO just ABOVE the Inferno
+                        # flow threads (TX 81 / RX 80) so those can't preempt a
+                        # capture, but BELOW the hard-RT PipeWire data-loop (88)
+                        # so audio is never starved. statime's duty cycle is
+                        # tiny (a few µs every ~250 ms), so it doesn't disturb
+                        # the flows. cody's RTPRIO rlimit is 95, so the user
+                        # manager can grant this. Set in the unit (not via
+                        # runtime chrt) so it survives watchdog restarts.
+                        CPUSchedulingPolicy = "fifo";
+                        CPUSchedulingPriority = 82;
                       };
                     };
                   }

@@ -50,10 +50,9 @@
         # before any user logs in (and accept the broken camera portal).
         systemWide ? false,
         clockRate ? 48000,
-        # 1024 is the safe default — high idle latency keeps Inferno/Dante TX
-        # timing stable on THEBATTLESHIP. Apps that need low latency (REAPER,
-        # OBS) pull it down via force-quantum; `pw-buffer 128` works live too.
-        clockQuantum ? 1024,
+        # 128 matches the TF's ALSA period-size so graph and hardware run at
+        # the same block size. Hosts with Dante/Inferno override this per-host.
+        clockQuantum ? 128,
         clockMinQuantum ? 32,
         clockMaxQuantum ? 1024,
         pulseMinReq ? "32/48000",
@@ -212,6 +211,25 @@
             # "connecting to sound server", and volume keys do nothing. Socket
             # activation is enough; the service starts on first connect.
             systemd.sockets.pipewire-pulse.wantedBy = lib.mkIf systemWide [ "sockets.target" ];
+
+            # Per-user PipeWire runs the Inferno ALSA plugin INSIDE the daemon
+            # (nodes are created in the main graph via pw-cli create-node —
+            # see modules/music/production/inferno.nix). The plugin's tokio
+            # runtime uses clock syscalls that upstream's unit hardening
+            # (SystemCallFilter=@system-service) kills with SIGSYS, crashing
+            # the whole daemon the moment an Inferno node is created. Extend
+            # the filter (multiple allow-list assignments union) and provide
+            # the plugin dir + FD headroom for the 128-channel graph. This is
+            # the durable version of the fixes that previously lived only in
+            # runtime drop-ins and died on reboot.
+            systemd.user.services.pipewire.serviceConfig = lib.mkIf (!systemWide) {
+              Environment = [ "ALSA_PLUGIN_DIR=/run/current-system/sw/lib/alsa-lib" ];
+              SystemCallFilter = [
+                "@clock"
+                "@resources"
+              ];
+              LimitNOFILE = 524288;
+            };
 
             # Per-user PipeWire's upstream systemd.user.services.pipewire unit
             # already carries the RT rlimits / NOFILE, and rtkit + PAM grant

@@ -44,6 +44,12 @@
         # home.packages/home.file, so both must be included here.
         <fleet.music/production/plugins>
         <fleet.music/production/environment>
+        # Guitar tooling (NAM model dirs etc.) — homeManager side.
+        <fleet.music._.production._.guitar>
+        # Plain `reaper` (+ SWS/ReaPack) in cody's home. The aspect's
+        # homeManager only routes when included in the HOME pipeline — host
+        # inclusion (via <fleet.music/production>) contributes nixos only.
+        <fleet.music._.production._.reaper>
 
         <fleet/apps>
         <fleet.apps._.misc/cuteatum>
@@ -98,7 +104,6 @@
         <fleet.coding/ghidra>
         <fleet.coding._.tools/game-dev>
         <fleet.hardware._.networking/tailscale>
-        <fleet.gaming/proton>
       ];
     };
   };

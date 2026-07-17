@@ -45,16 +45,9 @@
           };
 
           settings = {
-            # Capture the AOC on HDMI-A-1 so a stream uses that dedicated
-            # display instead of the main 3 monitors. The matching niri
-            # window-rule (rules.kdl) lands Steam Big Picture on the same
-            # output, so streaming never disturbs the main workspaces.
-            #
-            # NOTE: confirm this name against the output list Sunshine logs at
-            # startup (and shows in the web UI) — the wlroots/KMS capture names
-            # the output by its connector, which is "HDMI-A-1" here. If capture
-            # comes up black or on the wrong screen, this is the value to fix.
-            output_name = "HDMI-A-1";
+            # Capture from DP-3 (right monitor, now landscape 16:9).
+            # Streaming happens via virtual gamescope sessions (see apps below).
+            output_name = "DP-3";
 
             # 2026 added CSRF protection: the web UI rejects any origin other
             # than localhost unless whitelisted here (comma-separated full
@@ -72,51 +65,32 @@
 
           # Declaring applications here makes the app list fully declarative —
           # the web UI can no longer add/edit apps (settings still editable).
-          # So we must re-declare Sunshine's built-in defaults (Desktop, Low Res
-          # Desktop) alongside our customized Steam Big Picture, or they vanish.
           applications = {
             env.PATH = "/run/current-system/sw/bin";
             apps = [
               {
-                # Streams whatever is on the captured output (HDMI-A-1).
+                # Stream the main desktop as-is.
                 name = "Desktop";
                 image-path = "desktop.png";
               }
               {
-                # Stock Sunshine uses `xrandr` here, which is X11-only and does
-                # nothing on niri/Wayland. Drop the AOC to 1080p for the stream
-                # and restore its native mode afterwards via niri.
-                name = "Low Res Desktop";
-                image-path = "desktop.png";
-                prep-cmd = [
-                  {
-                    do = "${lib.getExe pkgs.niri} msg output HDMI-A-1 mode 1920x1080@60.000";
-                    undo = "${lib.getExe pkgs.niri} msg output HDMI-A-1 mode 2560x1440@143.912";
-                  }
+                # Virtual 1440p gamescope session — independent of physical
+                # displays. Launches gamescope in 2560x1440 16:9 resolution
+                # ready for any application.
+                name = "Gamescope 1440p";
+                image-path = "steam.png";
+                detached = [
+                  "/run/current-system/sw/bin/gamescope -W 2560 -H 1440 -f -- bash"
                 ];
+                auto-detach = "true";
               }
               {
-                name = "Steam Big Picture";
-                # Make sure the streaming display is awake before launch.
-                prep-cmd = [
-                  {
-                    do = "${lib.getExe pkgs.niri} msg output HDMI-A-1 on";
-                    undo = "";
-                  }
-                ];
-                # Launch Big Picture INSIDE gamescope so Big Picture *and every
-                # game launched from it* live in one nested surface (app-id
-                # "gamescope"). The niri window-rule pins that single surface to
-                # the HDMI "stream" workspace, fullscreen — so games launched
-                # from Big Picture stay on the AOC instead of escaping to the
-                # main "gaming" workspace. Desk gaming via the normal Steam
-                # client is unaffected. -W/-H match the AOC; tune flags if
-                # gamepad UI / input misbehaves.
+                # Stream Steam Big Picture in a virtual 1440p gamescope.
+                name = "Steam Big Picture 1440p";
+                image-path = "steam.png";
                 detached = [
                   "/run/current-system/sw/bin/gamescope -W 2560 -H 1440 -f --steam -- steam -gamepadui"
                 ];
-                image-path = "steam.png";
-                # Tear it down when the stream ends.
                 auto-detach = "true";
               }
             ];

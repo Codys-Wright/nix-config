@@ -34,10 +34,12 @@
                   {
                     method = "manual";
                     addresses = staticIp;
+                    never-default = true;
                   }
                 else
                   {
                     method = "auto";
+                    never-default = true;
                   };
               ipv6.method = "auto";
             };
@@ -52,6 +54,13 @@
               "net.ipv4.tcp_wmem" = "4096 1048576 16777216";
               "net.core.netdev_max_backlog" = 5000;
             };
+
+            # NetworkManager owns this interface (static IP + never-default).
+            # Stop the standalone dhcpcd from double-managing it — otherwise
+            # dhcpcd DHCPs enp12s0 and re-installs `default via 10.10.10.1`
+            # (metric 1003) on every renew, hijacking internet/GitHub traffic
+            # onto the cluster link despite NM's never-default.
+            networking.dhcpcd.denyInterfaces = [ interface ];
 
             # Multicast route for Dante audio network
             networking.interfaces."${interface}".ipv4.routes = [
