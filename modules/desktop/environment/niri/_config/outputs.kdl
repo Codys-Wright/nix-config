@@ -1,3 +1,11 @@
+// Outputs are keyed by monitor make/model/serial — NOT connector (DP-x) —
+// because the connector numbers renumber across reboots/replugs and silently
+// break every per-output + per-workspace assignment. Identity is stable.
+//
+//   "Acer Technologies XV271U M3 1321033793LAJ" = left portrait Acer
+//   "Acer Technologies XV271U M3 13210337C3LAJ" = right landscape Acer
+//   "Microstep MPG491CX OLED Unknown"           = center OLED ultrawide
+
 output "HDMI-A-2" {
     // AOC Q32G1WG4 32" 1440p - far left of everything
     mode "2560x1440@143.912"
@@ -8,7 +16,7 @@ output "HDMI-A-2" {
     }
 }
 
-output "DP-5" {
+output "Acer Technologies XV271U M3 1321033793LAJ" {
     // Acer XV271U M3 - left portrait
     mode "2560x1440@179.999"
     transform "90"
@@ -19,7 +27,7 @@ output "DP-5" {
     }
 }
 
-output "DP-4" {
+output "Microstep MPG491CX OLED Unknown" {
     // MSI MPG491CX OLED ultrawide - center
     // VRR disabled: causes flickering on this panel.
     mode "5120x1440@240.000"
@@ -42,10 +50,9 @@ output "DP-4" {
     }
 }
 
-output "DP-3" {
-    // Acer XV271U M3 - right portrait
+output "Acer Technologies XV271U M3 13210337C3LAJ" {
+    // Acer XV271U M3 - right landscape
     mode "2560x1440@179.999"
-    transform "270"
     position x=6560 y=0
 
     layout {

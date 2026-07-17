@@ -13,9 +13,10 @@
 
     includes = [
       fleet.music._.production._.axeEdit
+      fleet.music._.production._.easyeffects
       fleet.music._.production._.environment
+      fleet.music._.production._.guitar
       fleet.music._.production._.millisecond
-      fleet.music._.production._.mioctl
       fleet.music._.production._.netaudio
       fleet.music._.production._.reaper
       fleet.music._.production._.plugins

@@ -2,6 +2,9 @@
 { fleet, inputs, ... }:
 {
   flake-file.inputs.fts-reaper-flake.url = "github:FastTrackStudios/fts-reaper-flake";
+  # Use our updated reaper-flake (REAPER 7.75) for the launched fts-reaper,
+  # instead of the older reaper pinned inside fts-reaper-flake.
+  flake-file.inputs.fts-reaper-flake.inputs.reaper-flake.follows = "reaper-flake";
 
   fleet.music._.production._.ftsRigs = {
     description = "FTS REAPER production environment";

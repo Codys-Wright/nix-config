@@ -1,5 +1,5 @@
 # Reaper DAW with extensions
-# Uses reaper-flake's custom reaper derivation (v7.66) instead of nixpkgs
+# Uses reaper-flake's custom reaper derivation (v7.75) instead of nixpkgs
 {
   fleet,
   inputs,
@@ -10,7 +10,7 @@
   flake-file.inputs.reaper-flake.inputs.nixpkgs.follows = "nixpkgs";
 
   fleet.music._.production._.reaper = {
-    description = "Reaper digital audio workstation with SWS and ReaPack extensions (v7.66 via reaper-flake)";
+    description = "Reaper digital audio workstation with SWS and ReaPack extensions (v7.75 via reaper-flake)";
 
     homeManager =
       { pkgs, ... }:
@@ -29,11 +29,18 @@
           pkgs.reaper-reapack-extension
         ];
 
-        # Symlink REAPER extensions to UserPlugins directory
-        home.file.".config/REAPER/UserPlugins/reaper_sws-x86_64.so".source =
-          "${pkgs.reaper-sws-extension}/UserPlugins/reaper_sws-x86_64.so";
-        home.file.".config/REAPER/UserPlugins/reaper_reapack-x86_64.so".source =
-          "${pkgs.reaper-reapack-extension}/UserPlugins/reaper_reapack-x86_64.so";
+        # Symlink REAPER extensions to UserPlugins directory.
+        # force = true: cody already has real ReaPack-installed .so files here
+        # (from before this aspect routed to the home); let home-manager own
+        # them with the nix-pinned builds instead of erroring on the clobber.
+        home.file.".config/REAPER/UserPlugins/reaper_sws-x86_64.so" = {
+          source = "${pkgs.reaper-sws-extension}/UserPlugins/reaper_sws-x86_64.so";
+          force = true;
+        };
+        home.file.".config/REAPER/UserPlugins/reaper_reapack-x86_64.so" = {
+          source = "${pkgs.reaper-reapack-extension}/UserPlugins/reaper_reapack-x86_64.so";
+          force = true;
+        };
 
         # Symlink SWS Python scripts
         home.file.".config/REAPER/Scripts/sws_python.py".source =

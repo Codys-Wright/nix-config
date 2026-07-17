@@ -1,17 +1,17 @@
 workspace "main" {
-    open-on-output "DP-4"
+    open-on-output "Microstep MPG491CX OLED Unknown"
 }
 
 workspace "code" {
-    open-on-output "DP-4"
+    open-on-output "Microstep MPG491CX OLED Unknown"
 }
 
 workspace "music" {
-    open-on-output "DP-4"
+    open-on-output "Microstep MPG491CX OLED Unknown"
 }
 
 workspace "gaming" {
-    open-on-output "DP-4"
+    open-on-output "Microstep MPG491CX OLED Unknown"
 
     // No focus ring / border / top strut on this workspace so the game fills
     // the screen cleanly (the top bar is already hidden here by the
@@ -30,32 +30,32 @@ workspace "gaming" {
     }
 }
 
-// Dedicated Sunshine game-streaming workspace on the AOC (HDMI-A-1), so a
-// stream runs on its own display without touching the main monitors.
+// Dedicated Moonlight/Sunshine game-streaming workspace on the right landscape monitor,
+// so a stream runs on its own display without touching the main monitors.
 workspace "stream" {
-    open-on-output "HDMI-A-2"
+    open-on-output "Acer Technologies XV271U M3 13210337C3LAJ"
 }
 
 workspace "recording" {
-    open-on-output "DP-3"
+    open-on-output "Acer Technologies XV271U M3 13210337C3LAJ"
 }
 
 workspace "setup" {
-    open-on-output "DP-3"
+    open-on-output "Acer Technologies XV271U M3 13210337C3LAJ"
 }
 
 workspace "comms" {
-    open-on-output "DP-5"
+    open-on-output "Acer Technologies XV271U M3 1321033793LAJ"
 }
 
 workspace "media" {
-    open-on-output "DP-5"
+    open-on-output "Acer Technologies XV271U M3 1321033793LAJ"
 }
 
 workspace "notes" {
-    open-on-output "DP-5"
+    open-on-output "Acer Technologies XV271U M3 1321033793LAJ"
 }
 
 workspace "research" {
-    open-on-output "DP-3"
+    open-on-output "Acer Technologies XV271U M3 13210337C3LAJ"
 }

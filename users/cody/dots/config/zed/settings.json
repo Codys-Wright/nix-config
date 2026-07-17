@@ -7,7 +7,9 @@
 // custom settings, run `zed: open default settings` from the
 // command palette
 {
+  "cli_default_open_behavior": "existing_window",
   "edit_predictions": {
+    "provider": "zed",
     "disabled_globs": [
       "**/.git",
       "**/.svn",
@@ -35,20 +37,19 @@
       "proxy": null,
       "proxy_no_verify": null
     },
-    "enabled_in_assistant": false
+    "enabled_in_text_threads": false
   },
   "icon_theme": "Catppuccin Mocha",
   "notification_panel": {
     "enabled": false,
     "button": false
   },
-  "assistant": {
+  "agent": {
     "default_profile": "ask",
     "default_model": {
       "provider": "zed.dev",
       "model": "claude-3-7-sonnet-latest"
     },
-    "version": "2"
   },
   "show_edit_predictions": true,
   "languages": {
@@ -56,10 +57,10 @@
       "language_servers": ["ruff", "basedpyright", "!pyright"],
       "formatter": [
         {
-          "code_actions": {
-            "source.organizeImports.ruff": true,
-            "source.fixAll.ruff": true
-          }
+          "code_action": "source.organizeImports.ruff"
+        },
+        {
+          "code_action": "source.fixAll.ruff"
         },
         {
           "language_server": {
@@ -168,7 +169,7 @@
     "metrics": false
   },
   "vim_mode": true,
-  "relative_line_numbers": true,
+  "relative_line_numbers": "enabled",
   "scrollbar": {
     "show": "never"
   },
@@ -273,9 +274,6 @@
   },
   "projects_online_by_default": false,
   "preferred_line_length": 120,
-  "features": {
-    "edit_prediction_provider": "zed"
-  },
   "formatter": {
     "language_server": {
       "name": "biome"

@@ -51,6 +51,15 @@
 
         <fleet/gaming>
         <fleet/apps>
+        <fleet.apps/flatpaks> # Flatpak + Flathub (path to Flatpak bottles)
+        <fleet.system/printing> # CUPS + mDNS network printer discovery
+        <fleet.hardware/cuda> # CUDA toolkit (RTX present; nvidia already on)
+        <fleet/raysession> # RaySession audio session manager
+        # RT core isolation for the audio path — currently DISABLED (see
+        # modules/hardware/audio/rt-isolation.nix): pinning pipewire to a
+        # core before isolcpus is active starves it into a watchdog loop.
+        # Re-enable deliberately, with a reboot, when chasing sub-1ms TX.
+        # (fleet.hardware._.audio._.rt-isolation { })
         (fleet.apps._.davinci-resolve { studio = true; })
         # controller-split bundles polkit + sudoers + InputPlumber config +
         # the launch-as / steam-as equivalents. Replaces the three modules
@@ -75,13 +84,25 @@
         # Inferno exposes a 128-channel virtual Dante soundcard.
         (fleet.music._.production._.statime {
           interface = "enp12s0";
-          preferredLeader = "AA-4202524000109";
+          # The Galaxy32's current Dante name (was the bare serial
+          # "AA-4202524000109"; renamed to "Galaxy32"). The re-assert oneshot
+          # looks the device up by this name, so it must match what the device
+          # advertises or it fails silently. The preferred-leader flag is also
+          # set directly on the device (persists in its NVRAM).
+          preferredLeader = "Galaxy32";
           # MUST stay "debug" (or "trace"): at "warn" this statime fork loses a
           # startup race — it hits the announce-receipt timeout and self-promotes
           # to a PTPv1 master (unimplemented stub) before processing the leader's
           # first Sync, so the clock never locks and no Dante audio flows. The
           # extra per-packet logging delay lets the Sync win the race. Heisenbug.
           loglevel = "debug";
+          # Belt-and-suspenders against the documented startup-race heisenbug
+          # (see loglevel note above): ride through ~60 announce intervals before
+          # ever declaring the master lost and self-promoting to the broken PTPv1
+          # master stub. statime has no real clock and must NEVER be a grandmaster.
+          # In normal operation it stays a clean follower anyway (BMCA only ever
+          # recommends slave state) — this just removes the timeout edge case.
+          announceReceiptTimeout = 60;
           # When the watchdog recovers a lost PTP lock, re-open the Inferno
           # PipeWire node against the now-valid clock (otherwise it stays frozen
           # in "init"). studio-routing-links is partOf wireplumber and re-wires.
@@ -91,6 +112,21 @@
           bindIp = "10.10.10.10";
           deviceId = "00000A0A0A0A0001";
           channels = 128;
+          # Dante TX+RX buffer for our inferno_aoip device. This value is ALSO
+          # inferno's `max_lag_samples` (flows_tx.rs: "we set max_lag_samples to
+          # tx latency because it doesn't make sense to send samples older than
+          # that"): if the transmit thread is scheduled more than this late, the
+          # flow is declared lagged and reset, producing continuous dropouts.
+          # 0.5 ms (=24 samples @48k) was too tight — with RT isolation OFF and
+          # the box under game/browser load, real scheduling jitter measured
+          # ~29 samples (0.6 ms), so it tripped "tx lag of 29 samples" ~500x/30s
+          # and NO audio transmitted. 2 ms (=96 samples) leaves comfortable
+          # margin. Drop back toward 1 ms only after re-enabling RT core
+          # isolation (see rt-isolation aspect) and confirming clean dante-soak.
+          # The per-hop HARDWARE device RX latency (Galaxy32/TF/x16D, also 1 ms)
+          # is set in Dante Controller — inferno-control can't change third-party
+          # devices over ARC.
+          latencyNs = 2000000;
           # RX channel names ≡ THEBATTLESHIP's "inputs" — these are
           # what Reaper records from. Sourced from the Reaper chanmap
           # at ~/.fasttrackstudio/Reaper/ChanMaps/THEBATTLESHIP.ReaperChanMap;

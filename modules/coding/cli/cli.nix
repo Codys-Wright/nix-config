@@ -29,6 +29,7 @@
       { pkgs, ... }:
       {
         environment.systemPackages = with pkgs; [
+          bc
           gcc
           ripgrep
           just
@@ -45,6 +46,7 @@
       { pkgs, ... }:
       {
         environment.systemPackages = with pkgs; [
+          bc
           ripgrep
           bat
           openssl
