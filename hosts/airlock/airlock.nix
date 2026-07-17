@@ -1,6 +1,7 @@
 {
   inputs,
   fleet,
+  ssh-keys,
   lib,
   __findFile,
   ...
@@ -26,6 +27,12 @@
       {
         nix.enable = lib.mkForce false;
         nix.optimise.automatic = lib.mkForce false;
+
+        # Authorize cody's key on the build user so remote iOS builds
+        # (dx / xcodebuild driven over SSH) can reach airlock.
+        users.users.rat.openssh.authorizedKeys.keys = [
+          ssh-keys.personal.cody
+        ];
       };
   };
 
