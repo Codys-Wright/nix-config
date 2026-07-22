@@ -24,7 +24,11 @@
         # nodes simply fail to open and stay suspended — harmless.
         infernoChannels = 64;
         infernoCard = 999;
-        infernoHeadroom = 0;
+        # 128 (not 0/32): the extra ALSA buffer absorbs scheduling jitter
+        # that otherwise clicks — until kernel core isolation lands, this
+        # is the stable value. (Tested 0→clamped-32 on 2026-07-21: lower
+        # latency but occasional clicks under desktop load.)
+        infernoHeadroom = 128;
         positions = lib.replicate infernoChannels "UNK";
         mkInfernoNode =
           {
