@@ -34,6 +34,7 @@
             mediaClass,
             alsaPath,
             prio,
+            prioDriver,
           }:
           {
             factory = "adapter";
@@ -45,9 +46,26 @@
               "api.alsa.path" = alsaPath;
               "api.alsa.pcm.card" = toString infernoCard;
               "api.alsa.headroom" = toString infernoHeadroom;
+              # Match the graph quantum (256). Without this the adapter
+              # defaults to period 1024 (~21 ms) — the single biggest
+              # latency chunk on the Dante path, and it chunks REAPER's
+              # 256-frame cycles into bursty 1024 exchanges.
+              "api.alsa.period-size" = 256;
               "audio.channels" = infernoChannels;
               "audio.position" = positions;
               "priority.session" = prio;
+              # CLOCK LEADER: the Inferno's pacing IS Dante PTP (statime
+              # disciplines the ring buffer), so it must WIN the driver
+              # election — above the Yamaha TF's 10000 — or the graph
+              # runs on the TF's USB crystal and the Inferno path slowly
+              # drifts (rising pitch, then stutter: two free-running 48k
+              # clocks with no rate-matching between driver domains).
+              # With Inferno driving, TF/REAPER become followers and
+              # PipeWire rate-matches them to the Dante clock.
+              # CAVEAT: with dante.target OFF this clock is invalid —
+              # stop/suspend the Inferno nodes (or `dante off`) and the
+              # TF (10000) takes the election back as fallback.
+              "priority.driver" = prioDriver;
               "session.suspend-timeout-seconds" = 0;
               "node.pause-on-idle" = false;
               "node.suspend-on-idle" = false;
@@ -383,6 +401,8 @@
               mediaClass = "Audio/Sink";
               alsaPath = "inferno_sink";
               prio = 2000;
+              # Above TF playback (10000): the sink drives the graph.
+              prioDriver = 20000;
             })
             (mkInfernoNode {
               factoryName = "api.alsa.pcm.source";
@@ -391,6 +411,9 @@
               mediaClass = "Audio/Source";
               alsaPath = "inferno_source";
               prio = 1900;
+              # Same Dante clock; just below the sink so exactly one of
+              # the pair wins (source drives only if the sink is gone).
+              prioDriver = 19000;
             })
           ];
         };
