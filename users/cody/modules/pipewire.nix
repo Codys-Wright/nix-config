@@ -19,10 +19,10 @@
         # per-user PipeWire pieces Inferno needs live here, in cody's home.
         #
         # channels/card/headroom mirror the inferno aspect call in
-        # hosts/THEBATTLESHIP/THEBATTLESHIP.nix (channels = 128, card = 999,
+        # hosts/THEBATTLESHIP/THEBATTLESHIP.nix (channels = 64, card = 999,
         # headroom = 128). On hosts without the Inferno ALSA PCM these adapter
         # nodes simply fail to open and stay suspended — harmless.
-        infernoChannels = 128;
+        infernoChannels = 64;
         infernoCard = 999;
         infernoHeadroom = 128;
         positions = lib.replicate infernoChannels "UNK";
@@ -55,7 +55,7 @@
               "object.linger" = true;
               # Visible to JACK so Reaper (and qpwgraph etc.) can see and route
               # the Dante TX/RX ports directly. The `daw-link` helper +
-              # dante-daw-autolink service snap Reaper to a clean 128x128
+              # dante-daw-autolink service snap Reaper to a clean 64x64
               # mapping; manual rewiring stays possible for the "connect
               # whatever" case.
               "jack.show" = true;
@@ -163,14 +163,14 @@
           {
             name = "system_audio";
             desc = "System Audio";
-            txL = 97;
-            txR = 98;
+            txL = 57;
+            txR = 58;
           }
           {
             name = "voice_chat";
             desc = "Voice Chat";
-            txL = 101;
-            txR = 102;
+            txL = 59;
+            txR = 60;
           }
         ];
         # App-facing sinks that feed ANOTHER app sink instead of a Dante TX pair.
@@ -355,7 +355,7 @@
         # min-quantum 32 still permits apps like guitarix to request lower latency.
         home.file.".config/pipewire/pipewire.conf.d/50-quantum.conf".text = ''
           context.properties = {
-              # 256 @ 48k = 5.3ms. Raised from 128 (2.67ms) 2026-06-26: 128x128
+              # 256 @ 48k = 5.3ms. Raised from 128 (2.67ms) 2026-06-26: 64x64
               # Dante on a single isolated physical core at q128 was too tight —
               # load spikes caused buffer underruns that desynced REAPER's ALSA
               # resampler → clicks/looping. min=256 forces the graph to stay at
@@ -395,7 +395,7 @@
           ];
         };
 
-        # Routed loopback sinks (System Audio → Inferno TX 97/98, etc). The
+        # Routed loopback sinks (System Audio → Inferno TX 57/58, etc). The
         # loopback nodes register here; studio-routing-links.service pins their
         # output ports to the Inferno TX channels once the graph is up.
         home.file.".config/pipewire/pipewire.conf.d/93-studio-routing.conf".text = builtins.toJSON {
@@ -438,7 +438,7 @@
         # RT thread placement (revised twice, 2026-06-26):
         #  1. The old CPUAffinity=15 drop-in pinned the WHOLE pipewire process to
         #     one core — its SCHED_OTHER control thread got starved under the
-        #     128x128 Dante load → GUI stutters.
+        #     64x64 Dante load → GUI stutters.
         #  2. Pinning ALL SCHED_FIFO threads (data-loop + the inferno `flows TX`/
         #     `flows RX`) onto the isolated SMT pair 15,31 then caused graph xruns
         #     (popping/looping on Inferno RX): the heavy flow threads contend with
@@ -503,7 +503,7 @@
           };
         };
 
-        # ── REAPER 128x128 ↔ Dante via ALSA (the working path) ──────────────
+        # ── REAPER 64x64 ↔ Dante via ALSA (the working path) ──────────────
         # REAPER's ALSA backend pointed at the DUPLEX `inferno` device (one
         # device for BOTH in+out) opens a full 128 output + 128 input. A single
         # duplex device forces both directions to the same channel count; with
@@ -512,32 +512,32 @@
         # re-asserts its whole connection state on every graph change). In
         # ~/.fts-dev/reaper.ini: linux_audio_mode=1, alsa_indev=inferno,
         # alsa_outdev=inferno, nch_in=nch_out=128. (See the
-        # project-reaper-dante-128x128 memory for the full saga.)
+        # project-reaper-dante-64x64 memory for the full saga.)
         home.file.".asoundrc".text = ''
-          # Inferno Dante 128ch via PipeWire, for REAPER's ALSA backend.
+          # Inferno Dante 64ch via PipeWire, for REAPER's ALSA backend.
           # Use the duplex `inferno` for BOTH REAPER input and output devices.
 
           # Output only: REAPER 128 outs -> Inferno sink -> Dante TX
           pcm.inferno_out {
               type pipewire
               playback_node "Inferno sink"
-              channels 128
-              hint { show on description "Inferno Dante 128ch OUT (PipeWire)" }
+              channels 64
+              hint { show on description "Inferno Dante 64ch OUT (PipeWire)" }
           }
           # Input only: Dante RX -> Inferno source -> REAPER 128 ins
           pcm.inferno_in {
               type pipewire
               capture_node "Inferno source"
-              channels 128
-              hint { show on description "Inferno Dante 128ch IN (PipeWire)" }
+              channels 64
+              hint { show on description "Inferno Dante 64ch IN (PipeWire)" }
           }
-          # Duplex: one device, both directions — USE THIS in REAPER for 128x128.
+          # Duplex: one device, both directions — USE THIS in REAPER for 64x64.
           pcm.inferno {
               type pipewire
               playback_node "Inferno sink"
               capture_node "Inferno source"
-              channels 128
-              hint { show on description "Inferno Dante 128ch (PipeWire)" }
+              channels 64
+              hint { show on description "Inferno Dante 64ch (PipeWire)" }
           }
           ctl.inferno { type pipewire }
         '';
@@ -579,7 +579,7 @@
           ];
         };
 
-        # Auto-link Reaper to the 128x128 Inferno mapping whenever it launches.
+        # Auto-link Reaper to the 64x64 Inferno mapping whenever it launches.
         # DISABLED (no Install.WantedBy): obsolete now that REAPER uses the ALSA
         # `inferno` device (it auto-routes to Inferno sink/source directly, no
         # patchbay). This JACK-era helper also had a bug — the inline script
@@ -589,7 +589,7 @@
         # only if you return REAPER to the JACK backend.
         systemd.user.services.dante-daw-autolink = {
           Unit = {
-            Description = "Auto-link Reaper to the Inferno Dante soundcard (128x128)";
+            Description = "Auto-link Reaper to the Inferno Dante soundcard (64x64)";
             After = [ "pipewire.service" ];
             Wants = [ "pipewire.service" ];
           };
