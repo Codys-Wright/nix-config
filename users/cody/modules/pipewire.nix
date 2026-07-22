@@ -50,11 +50,12 @@
               "api.alsa.path" = alsaPath;
               "api.alsa.pcm.card" = toString infernoCard;
               "api.alsa.headroom" = toString infernoHeadroom;
-              # Match the graph quantum (256). Without this the adapter
-              # defaults to period 1024 (~21 ms) — the single biggest
-              # latency chunk on the Dante path, and it chunks REAPER's
-              # 256-frame cycles into bursty 1024 exchanges.
-              "api.alsa.period-size" = 256;
+              # Small period = fine-grained pacing. The inferno PCM is a
+              # virtual plugin over the PTP ring — no hardware IRQ cost —
+              # so 32 keeps device-side buffering minimal while the graph
+              # cycles at its own quantum (128). (Default was 1024 ≈21ms,
+              # the single biggest latency chunk on the Dante path.)
+              "api.alsa.period-size" = 32;
               "audio.channels" = infernoChannels;
               "audio.position" = positions;
               "priority.session" = prio;
@@ -377,13 +378,14 @@
         # min-quantum 32 still permits apps like guitarix to request lower latency.
         home.file.".config/pipewire/pipewire.conf.d/50-quantum.conf".text = ''
           context.properties = {
-              # 256 @ 48k = 5.3ms. Raised from 128 (2.67ms) 2026-06-26: 64x64
-              # Dante on a single isolated physical core at q128 was too tight —
-              # load spikes caused buffer underruns that desynced REAPER's ALSA
-              # resampler → clicks/looping. min=256 forces the graph to stay at
-              # 256+ so REAPER can't pull it back down to a fragile low quantum.
-              default.clock.quantum     = 256
-              default.clock.min-quantum = 256
+              # 128 @ 48k = 2.67ms per graph crossing. 2026-07-21: back down
+              # from 256 — the old q128 failure was under the single-isolated-
+              # core setup + REAPER-on-ALSA-resampler; now REAPER is a native
+              # JACK follower of the Dante-clocked graph (no resampler on the
+              # path) and rt-pin spreads data-loop/flows across two physical
+              # cores. If load-spike clicks return, first suspect is q128.
+              default.clock.quantum     = 128
+              default.clock.min-quantum = 128
               default.clock.max-quantum = 1024
               # log.level 3 = info+debug; shows spa.alsa resync, xrun, pointer
               # drift events. Raise to 4 for trace-level scheduling noise.
