@@ -126,13 +126,16 @@
           # The per-hop HARDWARE device RX latency (Galaxy32/TF/x16D, also 1 ms)
           # is set in Dante Controller — inferno-control can't change third-party
           # devices over ARC.
-          # 2026-07-21: settled at 2 ms after testing. 0.5 ms and 1 ms both
-          # produced tx-lag flow resets ("weird pops") with RT core isolation
-          # off; 2 ms is the stable floor here and only ~1.5 ms more per hop.
-          # The latency win came instead from headroom 128→0 in pipewire.nix
-          # (PipeWire clamps to 32), letting PipeWire manage the ALSA buffer.
-          # Revisit sub-2 ms only after re-enabling RT core isolation.
-          latencyNs = 2000000;
+          # 2026-07-21: 0.5/0.5 ms — the rest of the Dante fleet runs
+          # comfortably at 0.5 ms, and the fork (7a809db) split the
+          # semantics: txLatencyNs = TX max_lag + ADVERTISED latency
+          # (what receivers buffer for our flows); rxLatencyNs = playout
+          # floor for incoming flows (network jitter only; clamped up by
+          # the sender's advertised min). The old 0.5 ms pops predate
+          # rt-pin + the source-led clock. Revert toward 2 ms if tx-lag
+          # flow resets return.
+          txLatencyNs = 500000;
+          rxLatencyNs = 500000;
           # RX channel names ≡ THEBATTLESHIP's "inputs" — these are
           # what Reaper records from. Sourced from the Reaper chanmap
           # at ~/.fasttrackstudio/Reaper/ChanMaps/THEBATTLESHIP.ReaperChanMap;

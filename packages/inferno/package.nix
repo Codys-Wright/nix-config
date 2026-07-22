@@ -13,8 +13,8 @@ rustPlatform.buildRustPackage {
   src = fetchFromGitHub {
     owner = "FastTrackStudios";
     repo = "inferno";
-    rev = "31a89dd5e9cdf3946d46b88680c4679cfa602723";
-    hash = "sha256-jb6oBX6I5nyzX8q5GX3gZDIwyZ1Rg7x2xka9U2ll9Ps=";
+    rev = "7a809db9497cbb4b9e2ff7f4d347c7d9f02f9d9a";
+    hash = "sha256-ZXbBUOAzIL6/+WRYWMmp24TvWs+xvh21MHp+au60HEg=";
     fetchSubmodules = true;
   };
 
