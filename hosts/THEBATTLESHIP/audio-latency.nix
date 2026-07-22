@@ -40,6 +40,15 @@
           )
         );
 
+        # Keep all cores at max clock. The kernel default `powersave` governor
+        # lets cores drop into low P-states, adding DVFS ramp-up latency and
+        # frequency jitter to the audio path. musnix doesn't set a governor and
+        # the rt-isolation aspect that used to pin `performance` is currently
+        # disabled on this host, so pin it here. This is the governor Millisecond
+        # flags as the main remaining low-latency bottleneck. Applies on activate
+        # (no reboot); a plugged-in studio box has no reason to downclock.
+        powerManagement.cpuFreqGovernor = "performance";
+
         # Hold CPU PM-QoS DMA latency at 0 — disables the deep C-states that add
         # CPU wakeup jitter (AMD's are aggressive). The wakeup-latency half of
         # the jitter floor; the RT kernel is the other half.
