@@ -401,8 +401,10 @@
               mediaClass = "Audio/Sink";
               alsaPath = "inferno_sink";
               prio = 2000;
-              # Above TF playback (10000): the sink drives the graph.
-              prioDriver = 20000;
+              # Below the source: the RX ring's PTP-paced arrivals make a
+              # steadier driver than the TX side (sink-led graphs showed
+              # 300-600us wakeup jitter; source-led ran clean).
+              prioDriver = 19000;
             })
             (mkInfernoNode {
               factoryName = "api.alsa.pcm.source";
@@ -411,9 +413,9 @@
               mediaClass = "Audio/Source";
               alsaPath = "inferno_source";
               prio = 1900;
-              # Same Dante clock; just below the sink so exactly one of
-              # the pair wins (source drives only if the sink is gone).
-              prioDriver = 19000;
+              # CLOCK LEADER (above TF's 10000 and the sink's 19000): the
+              # source's RX ring is paced by steady PTP arrivals.
+              prioDriver = 20000;
             })
           ];
         };
@@ -482,11 +484,12 @@
             After = [ "pipewire.service" ];
             Wants = [ "pipewire.service" ];
           };
-          # DISABLED 2026-06-27 (no Install.WantedBy): RT core isolation is off —
-          # pipewire runs on the full CPU, unpinned, like everything else. The
-          # service + the placement logic below are kept for when/if we revisit
-          # the two-isolated-cores approach; flip Install.WantedBy back on then.
-          # Install.WantedBy = [ "default.target" ];
+          # RE-ENABLED 2026-07-21: sink-led Dante graphs showed 300-600us
+          # driver wakeup jitter (clicks/stutters). Kernel core isolation is
+          # still off, so cores 14/15 aren't exclusive — but pinning the
+          # data-loop and inferno flow threads still stops cross-CPU
+          # migration jitter. Full determinism = rt-isolation aspect (reboot).
+          Install.WantedBy = [ "default.target" ];
           Service = {
             Type = "simple";
             ExecStart = pkgs.writeShellScript "pipewire-rt-pin" ''
