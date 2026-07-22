@@ -34,6 +34,14 @@
         channels ? 128,
         sampleRate ? 48000,
         latencyNs ? 1000000,
+        # Independent per-direction knobs (default = latencyNs).
+        # txLatencyNs: TX max_lag tolerance AND the latency we ADVERTISE
+        # (what receivers buffer for our flows). rxLatencyNs: playout
+        # floor for incoming flows — network-jitter absorption only, so
+        # it can run well below the TX tolerance on a quiet LAN.
+        # (Semantics fixed in the fork @ 7a809db.)
+        txLatencyNs ? latencyNs,
+        rxLatencyNs ? latencyNs,
         headroom ? 128,
         card ? 999,
         # Declarative channel-name defaults. Either an attrset
@@ -163,8 +171,8 @@
                       SAMPLE_RATE "${toString sampleRate}"
                       RX_CHANNELS "${toString channels}"
                       TX_CHANNELS "${toString channels}"
-                      TX_LATENCY_NS "${toString latencyNs}"
-                      RX_LATENCY_NS "${toString latencyNs}"
+                      TX_LATENCY_NS "${toString txLatencyNs}"
+                      RX_LATENCY_NS "${toString rxLatencyNs}"
                       ${txNamesLine}
                       ${rxNamesLine}
 
@@ -185,8 +193,8 @@
                       SAMPLE_RATE "${toString sampleRate}"
                       RX_CHANNELS "${toString channels}"
                       TX_CHANNELS "${toString channels}"
-                      TX_LATENCY_NS "${toString latencyNs}"
-                      RX_LATENCY_NS "${toString latencyNs}"
+                      TX_LATENCY_NS "${toString txLatencyNs}"
+                      RX_LATENCY_NS "${toString rxLatencyNs}"
                       ${txNamesLine}
                       ${rxNamesLine}
 
