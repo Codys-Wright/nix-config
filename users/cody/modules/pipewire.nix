@@ -24,7 +24,7 @@
         # nodes simply fail to open and stay suspended — harmless.
         infernoChannels = 64;
         infernoCard = 999;
-        infernoHeadroom = 128;
+        infernoHeadroom = 0;
         positions = lib.replicate infernoChannels "UNK";
         mkInfernoNode =
           {
