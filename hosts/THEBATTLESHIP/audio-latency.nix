@@ -100,6 +100,43 @@
           };
         };
 
+        # Auto-recover from I226-V PCIe link-loss without a reboot. When the
+        # errata fires, the igc driver hits a fatal register read and the
+        # kernel logs "PCIe link lost, device now detached" — at that point
+        # driver-level recovery (rmmod/insmod, unbind/bind, even an FLR via
+        # the `reset` sysfs node) is a no-op because the *PCI core* still
+        # holds the old, wedged device object. The only recovery that works
+        # is tearing the PCI device out of the bus entirely (`remove`) and
+        # letting a `rescan` re-enumerate it as a fresh device — verified by
+        # hand on 2026-07-23. The udev EEE=off rule below already re-fires on
+        # the resulting "add" event, so no extra step is needed there.
+        systemd.services."igc-pcie-recover" = {
+          description = "Recover Intel I226-V (enp11s0) after a PCIe link-loss event";
+          serviceConfig.Type = "oneshot";
+          script = ''
+            echo 1 > /sys/bus/pci/devices/0000:0b:00.0/remove
+            sleep 2
+            echo 1 > /sys/bus/pci/rescan
+          '';
+        };
+
+        systemd.services."igc-pcie-watchdog" = {
+          description = "Watch kernel log for I226-V PCIe link-loss and auto-recover";
+          after = [ "systemd-journald.service" ];
+          wantedBy = [ "multi-user.target" ];
+          serviceConfig = {
+            Type = "simple";
+            Restart = "always";
+            RestartSec = 5;
+            ExecStart = pkgs.writeShellScript "igc-pcie-watchdog" ''
+              ${pkgs.systemd}/bin/journalctl -k -f -n0 | ${pkgs.gnugrep}/bin/grep --line-buffered "PCIe link lost" | while read -r _; do
+                ${pkgs.systemd}/bin/systemctl start igc-pcie-recover.service
+                sleep 30
+              done
+            '';
+          };
+        };
+
         services.udev.extraRules = ''
           # Re-disable EEE every time the igc driver binds an I226-V (vendor
           # 8086, device 125c). Matches on add+change so it fires after PCIe
