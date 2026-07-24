@@ -27,6 +27,9 @@
         { ... }:
         {
           systemd.user.startServices = "suggest";
+          # Cody's own Vaultwarden identity (the fleet default is the
+          # hermes agent account).
+          programs.rbw.settings.email = "acodywright@gmail.com";
         };
 
       includes = [
