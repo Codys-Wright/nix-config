@@ -53,7 +53,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     hermes-agent = {
-      url = "github:Codys-Wright/hermes-agent/starcommand-nextcloud-v2026.7.20";
+      url = "github:NousResearch/hermes-agent/v2026.7.20";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     home-manager = {
