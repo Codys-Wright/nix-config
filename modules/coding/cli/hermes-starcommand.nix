@@ -6,7 +6,7 @@
   ...
 }:
 {
-  flake-file.inputs.hermes-agent.url = lib.mkDefault "github:Codys-Wright/hermes-agent/starcommand-nextcloud-v2026.5.7";
+  flake-file.inputs.hermes-agent.url = lib.mkDefault "github:Codys-Wright/hermes-agent/starcommand-nextcloud-v2026.7.20";
   flake-file.inputs.hermes-agent.inputs.nixpkgs.follows = "nixpkgs";
 
   fleet.coding._.cli._.hermes-starcommand = {
