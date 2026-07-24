@@ -43,14 +43,17 @@
       url = "github:hercules-ci/flake-parts";
       inputs.nixpkgs-lib.follows = "nixpkgs";
     };
-    fts-reaper-flake.url = "github:FastTrackStudios/fts-reaper-flake";
+    fts-reaper-flake = {
+      url = "github:FastTrackStudios/fts-reaper-flake";
+      inputs.reaper-flake.follows = "reaper-flake";
+    };
     ghidra-cli.url = "github:Codys-Wright/ghidra-cli/fix/ghidra-12-compat";
     herdr = {
       url = "github:ogulcancelik/herdr/v0.7.4";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     hermes-agent = {
-      url = "github:Codys-Wright/hermes-agent/starcommand-nextcloud-v2026.5.7";
+      url = "github:Codys-Wright/hermes-agent/starcommand-nextcloud-v2026.7.20";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     home-manager = {
