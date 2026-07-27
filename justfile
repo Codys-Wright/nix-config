@@ -450,7 +450,7 @@ edit-secrets name *args:
     DIR="${NIX_SECRETS_DIR:-$HOME/nix-secrets}"
     if [ ! -d "$DIR" ]; then
         echo "nix-secrets checkout not found at $DIR" >&2
-        echo "git clone git@codeberg.org:codywright/nix-secrets.git $DIR" >&2
+        echo "git clone git@github.com:Codys-Wright/nix-secrets.git $DIR" >&2
         exit 1
     fi
     HOST_FILE="$DIR/sops/hosts/{{name}}.yaml"
@@ -472,9 +472,26 @@ rekey-secrets:
     cd "${NIX_SECRETS_DIR:-$HOME/nix-secrets}" && just rekey
     nix flake update nix-secrets
 
-# Repin the nix-secrets input after editing secrets
+# Repin the nix-secrets input after editing secrets.
+# Hosts fetch nix-secrets from GitHub (origin), so a local-only commit would be
+# invisible to them and the repin would silently pick up the previous rev —
+# refuse to repin against unpushed work rather than hand out a stale pin.
 update-secrets:
-    cd "${NIX_SECRETS_DIR:-$HOME/nix-secrets}" && git pull --rebase --autostash || true
+    #!/usr/bin/env bash
+    set -euo pipefail
+    DIR="${NIX_SECRETS_DIR:-$HOME/nix-secrets}"
+    cd "$DIR"
+    git pull --rebase --autostash || true
+    unpushed="$(git log --oneline @{upstream}..HEAD 2>/dev/null || true)"
+    if [ -n "$unpushed" ]; then
+        echo "nix-secrets has commits not pushed to origin (GitHub):" >&2
+        echo "$unpushed" >&2
+        echo "" >&2
+        echo "Hosts evaluate the pushed rev, so repinning now would pin the OLD secrets." >&2
+        echo "Run: git -C \"$DIR\" push" >&2
+        exit 1
+    fi
+    cd - >/dev/null
     nix flake update nix-secrets
 
 # Generate sops-encrypted cluster Secret manifests (k8s/secrets/*.enc.yaml) from
