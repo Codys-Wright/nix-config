@@ -655,17 +655,19 @@ Batteries are den's built-in cross-cutting providers. Access them via `<den/name
 
 ## Secrets Management (SOPS + central nix-secrets repo)
 
-All secrets live in the **private** repo `codeberg.org/codywright/nix-secrets`
-(local checkout: `~/nix-secrets`, override with `$NIX_SECRETS_DIR`), mirrored to
-the **private** GitHub repo `github.com/Codys-Wright/nix-secrets`, which is what
-the `nix-secrets` flake input evaluates against
+All secrets live in the **private** repo `github.com/Codys-Wright/nix-secrets`
+(local checkout: `~/nix-secrets`, override with `$NIX_SECRETS_DIR`), consumed as
+the `nix-secrets` flake input
 (`git+ssh://git@github.com/Codys-Wright/nix-secrets.git?ref=main&shallow=1`).
 
-Codeberg stays canonical for writes; GitHub is the read mirror every host pulls
-from. After committing in `~/nix-secrets`, push **both** remotes
-(`git push origin main && git push github main`) before `just update-secrets`,
-or hosts repin to a stale rev. Any machine running `nix` needs a
-GitHub-authorized SSH key.
+**GitHub is the source of truth** for both this repo and `nix-secrets` — in each
+checkout `origin` is the GitHub remote, so a plain `git push` is correct. The old
+Codeberg remotes survive, demoted, as `codeberg`; they are not kept in sync and
+must not be treated as authoritative. Any machine running `nix` needs a
+GitHub-authorized SSH key, since the input is fetched over SSH at eval time.
+
+After committing in `~/nix-secrets`, `git push` **before** `just update-secrets`,
+or hosts repin to a stale rev.
 
 This `nix-fleet` repo is PUBLIC. **Never add PLAINTEXT secret material here.**
 One deliberate exception: **sops-ENCRYPTED** k8s Secrets in `gitops/prod` (the

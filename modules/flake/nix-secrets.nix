@@ -6,11 +6,10 @@
 # rekey commits and we only ever need the latest rev. Fetching happens over
 # SSH at evaluation time, so whoever runs nix needs a GitHub-authorized key.
 #
-# Codeberg (git@codeberg.org:codywright/nix-secrets.git) remains the canonical
-# write target — `just edit-secrets` still edits the local ~/nix-secrets
-# checkout. GitHub is the read mirror every host evaluates against, so after
-# pushing to codeberg also `git push github main` from ~/nix-secrets before
-# running `just update-secrets`, or hosts will repin to a stale rev.
+# GitHub is the source of truth: `origin` in the ~/nix-secrets checkout points
+# at github.com/Codys-Wright/nix-secrets (private), which is the same URL hosts
+# evaluate against. Push before `just update-secrets` or hosts repin to a stale
+# rev. `codeberg` survives only as a demoted secondary remote.
 { ... }:
 {
   flake-file.inputs.nix-secrets.url = "git+ssh://git@github.com/Codys-Wright/nix-secrets.git?ref=main&shallow=1";
