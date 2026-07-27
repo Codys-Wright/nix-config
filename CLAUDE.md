@@ -656,8 +656,16 @@ Batteries are den's built-in cross-cutting providers. Access them via `<den/name
 ## Secrets Management (SOPS + central nix-secrets repo)
 
 All secrets live in the **private** repo `codeberg.org/codywright/nix-secrets`
-(local checkout: `~/nix-secrets`, override with `$NIX_SECRETS_DIR`), consumed
-as the `nix-secrets` flake input (`git+ssh://…?ref=main&shallow=1`).
+(local checkout: `~/nix-secrets`, override with `$NIX_SECRETS_DIR`), mirrored to
+the **private** GitHub repo `github.com/Codys-Wright/nix-secrets`, which is what
+the `nix-secrets` flake input evaluates against
+(`git+ssh://git@github.com/Codys-Wright/nix-secrets.git?ref=main&shallow=1`).
+
+Codeberg stays canonical for writes; GitHub is the read mirror every host pulls
+from. After committing in `~/nix-secrets`, push **both** remotes
+(`git push origin main && git push github main`) before `just update-secrets`,
+or hosts repin to a stale rev. Any machine running `nix` needs a
+GitHub-authorized SSH key.
 
 This `nix-fleet` repo is PUBLIC. **Never add PLAINTEXT secret material here.**
 One deliberate exception: **sops-ENCRYPTED** k8s Secrets in `gitops/prod` (the

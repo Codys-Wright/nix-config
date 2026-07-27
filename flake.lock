@@ -1467,19 +1467,19 @@
     },
     "nix-secrets": {
       "locked": {
-        "lastModified": 1784249207,
-        "narHash": "sha256-JOYHAbbzc6S4Gc187BdFO1UwTjuFgM5QP6rndN9bttQ=",
+        "lastModified": 1784929784,
+        "narHash": "sha256-7ZcrBGQH9+4lY7X2fdAjuG2PtBkTRzQ/gWeosPcBYm0=",
         "ref": "main",
-        "rev": "7c9ee9d909a91770bc31ff7ef6820d14375ba4dd",
+        "rev": "c62cd9e15d715236cb707e76ac83c351608a824c",
         "shallow": true,
         "type": "git",
-        "url": "ssh://git@codeberg.org/codywright/nix-secrets.git"
+        "url": "ssh://git@github.com/Codys-Wright/nix-secrets.git"
       },
       "original": {
         "ref": "main",
         "shallow": true,
         "type": "git",
-        "url": "ssh://git@codeberg.org/codywright/nix-secrets.git"
+        "url": "ssh://git@github.com/Codys-Wright/nix-secrets.git"
       }
     },
     "nixhelm": {
