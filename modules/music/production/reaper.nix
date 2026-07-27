@@ -12,8 +12,14 @@
   fleet.music._.production._.reaper = {
     description = "Reaper digital audio workstation with SWS and ReaPack extensions (v7.75 via reaper-flake)";
 
+    # reaper-flake's reaper (and the SWS/ReaPack extensions, which ship
+    # x86_64-linux .so files) declare linux-only meta.platforms, so the whole
+    # aspect is omitted on darwin — otherwise the shared cody home aspect fails
+    # to evaluate on aarch64-darwin (voyager). mkIf, not lib.optionalAttrs:
+    # optionalAttrs forces the config<-args<-config cycle into infinite
+    # recursion, same reason the other linux-only guards use mkIf.
     homeManager =
-      { pkgs, ... }:
+      { pkgs, lib, ... }:
       let
         reaperPkgs = inputs.reaper-flake.lib.mkReaperPackages {
           inherit pkgs;
@@ -22,7 +28,7 @@
           };
         };
       in
-      {
+      lib.mkIf pkgs.stdenv.isLinux {
         home.packages = [
           reaperPkgs.reaper
           pkgs.reaper-sws-extension
