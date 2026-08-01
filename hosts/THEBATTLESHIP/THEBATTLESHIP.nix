@@ -30,6 +30,7 @@
       includes = [
         # Opportunistic k3s agent: join with cluster-on, leave with cluster-off.
         (<fleet.cluster/k3s-agent> {
+          dedicatedTo = [ "minecraft" ];
           nodeLabels = [ "fleet.fts/gpu=nvidia" ];
         })
 
@@ -369,6 +370,9 @@
           time.timeZone = "America/Los_Angeles";
           boot.loader.grub.configurationLimit = 3;
           services.dbus.implementation = "dbus";
+
+          # Minecraft runs as a k3s hostPort workload on this node.
+          networking.firewall.allowedTCPPorts = [ 25565 ];
 
           nix.gc = {
             automatic = true;
