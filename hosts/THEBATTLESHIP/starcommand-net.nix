@@ -21,6 +21,14 @@
         nextcloudWebdavUrl = "https://${nextcloudWebdavHost}/remote.php/dav/files/${nextcloudWebdavUser}/";
       in
       {
+        # TEMPORARY: testing the new cluster Pi-hole (2 replicas behind a
+        # MetalLB floating IP, see ~/.starcommand modules/services/pihole)
+        # before pointing the whole network's DHCP DNS at it. Revert this
+        # (or just delete the line) once satisfied — the router's DHCP DNS
+        # server settings are the real switch-over; this only affects
+        # THEBATTLESHIP itself.
+        networking.nameservers = [ "192.168.1.254" ];
+
         environment.variables = {
           TASK_VAULT = "${nextcloudWebdavMediaMount}/Projects";
           TASK_SERVER = "http://10.10.10.1:3456";
