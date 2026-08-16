@@ -1,10 +1,21 @@
 # Task app environments (gitops): two Argo CD Applications watching the Task
-# repo's OWN Helm chart (deploy/chart/task — ships in-repo so Task stays easily
-# self-hostable), plus argocd-image-updater to roll the mutable dev/latest tags
-# by digest.
+# repo's OWN Helm chart (apps/deploy/chart/task — ships in-repo so Task stays
+# easily self-hostable), plus argocd-image-updater to roll the mutable
+# dev/latest tags by digest.
 #
-#   task-dev  follows `dev`  (trunk)      -> tasks-dev.starcommand.live (+ ui-lab)
-#   task      follows `main` (production) -> task.starcommand.live
+#   task-dev  -> tasks-dev.starcommand.live (+ ui-lab)
+#   task      -> task.starcommand.live (production)
+#
+# BOTH follow `main` on github.com/FastTrackStudios/task. They pointed at
+# codeberg.org/FastTrackStudios/Task.git (path deploy/chart/task) until the
+# August 2026 repo split. That Codeberg repo predates the monorepo era, so
+# after the split it was a THIRD source of truth: images were built from the
+# new GitHub repo while Argo kept syncing manifests from the old one, and
+# production sat frozen on the last pre-split image.
+#
+# The dev/prod split is by IMAGE CHANNEL TAG (:dev vs :latest), not by branch —
+# the new repo has only `main`, and the deploy workflow pushes both channels
+# from it. Point task-dev back at a `dev` branch if one is ever created.
 #
 # No secrets ride along — the repo and images are public. Moved off the host
 # k3s-manifests bridge into nixidy; Argo now manages these Applications.
@@ -51,9 +62,9 @@ in
         spec:
           project: default
           source:
-            repoURL: https://codeberg.org/FastTrackStudios/Task.git
-            targetRevision: dev
-            path: deploy/chart/task
+            repoURL: https://github.com/FastTrackStudios/task
+            targetRevision: main
+            path: apps/deploy/chart/task
             helm:
               values: |
                 image:
@@ -107,9 +118,9 @@ in
         spec:
           project: default
           source:
-            repoURL: https://codeberg.org/FastTrackStudios/Task.git
+            repoURL: https://github.com/FastTrackStudios/task
             targetRevision: main
-            path: deploy/chart/task
+            path: apps/deploy/chart/task
             helm:
               values: |
                 image:
