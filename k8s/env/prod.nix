@@ -30,8 +30,15 @@
     ../apps/whoami.nix
   ];
 
+  # Where Argo READS the rendered manifests from. Every generated
+  # Application's repoURL is stamped from this, so it must match what the
+  # app-of-apps actually watches -- Codys-Wright/starcommand. It still said
+  # codeberg.org/codywright/nix-fleet, which predates the move to GitHub:
+  # the live cluster had been hand-updated to starcommand, so the first
+  # honest `gitops-push` would have repointed EVERY Application at a repo
+  # Argo cannot read, taking the whole cluster with it.
   nixidy.target = {
-    repository = "https://codeberg.org/codywright/nix-fleet.git";
+    repository = "git@github.com:Codys-Wright/starcommand.git";
     branch = "gitops/prod";
     rootPath = "./";
   };
