@@ -3,6 +3,23 @@
 # self-hostable), plus argocd-image-updater to roll the mutable dev/latest tags
 # by digest.
 #
+# SOURCE OF TRUTH IS GITHUB. It pointed at codeberg.org/FastTrackStudios/Task
+# — which predates the August 2026 split and became a THIRD source of truth:
+# the deploy workflow pushed images from the GitHub repo while Argo synced
+# manifests from Codeberg, so production froze on the last pre-split image and
+# every "Verify live" step timed out. That was fixed once (5ba58126) and then
+# lost to a blanket revert (2f2fa71e) that was really aimed at unrelated
+# changes in the same commit. Restored here.
+#
+# The path is `deploy/chart/task`, NOT `apps/deploy/chart/task`: the Task repo
+# refactored to one workspace at the root and moved apps/deploy -> deploy. The
+# live cluster was left pointing at the old path, which no longer exists, so
+# Argo kept serving a pre-refactor chart revision — which is why /otlp and
+# /media were missing from the ingress even though the chart declares them.
+#
+# task-dev follows `main` too: the new repo has only main, and the dev/prod
+# split is by image channel tag (:dev vs :latest), not by branch.
+#
 #   task-dev  follows `dev`  (trunk)      -> tasks-dev.starcommand.live (+ ui-lab)
 #   task      follows `main` (production) -> task.starcommand.live
 #
@@ -51,8 +68,8 @@ in
         spec:
           project: default
           source:
-            repoURL: https://codeberg.org/FastTrackStudios/Task.git
-            targetRevision: dev
+            repoURL: https://github.com/FastTrackStudios/task.git
+            targetRevision: main
             path: deploy/chart/task
             helm:
               values: |
@@ -107,7 +124,7 @@ in
         spec:
           project: default
           source:
-            repoURL: https://codeberg.org/FastTrackStudios/Task.git
+            repoURL: https://github.com/FastTrackStudios/task.git
             targetRevision: main
             path: deploy/chart/task
             helm:
