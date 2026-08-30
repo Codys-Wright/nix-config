@@ -657,6 +657,15 @@ generate-hardware hostname:
     fi
 
 # ── GitOps (nixidy → Argo CD) ────────────────────────────────────────────
+# The rendered manifests live on the `gitops/prod` branch of the GITOPS_REMOTE
+# repo, which is what Argo's app-of-apps actually watches. That is
+# Codys-Wright/starcommand -- NOT `origin` (Codys-Wright/nix-config), which
+# holds this source but has no gitops/prod branch. Pushing to origin renders
+# into a void: Argo never sees it and the cluster silently keeps serving the
+# last thing that did land (which is how task sat on a pre-refactor chart
+# revision for weeks).
+GITOPS_REMOTE := "git@github.com:Codys-Wright/starcommand.git"
+
 # Render cluster manifests to ./result for inspection
 gitops-render:
     nix run .#nixidy -- build .#prod
@@ -668,9 +677,9 @@ gitops-push:
     cd "{{justfile_directory()}}"
     nix run .#nixidy -- build .#prod
     WT=$(mktemp -d /tmp/gitops-prod.XXXX)
-    if git ls-remote --exit-code origin refs/heads/gitops/prod >/dev/null 2>&1; then
-        git fetch -q origin gitops/prod
-        git worktree add -q -B gitops/prod "$WT" origin/gitops/prod
+    if git ls-remote --exit-code {{GITOPS_REMOTE}} refs/heads/gitops/prod >/dev/null 2>&1; then
+        git fetch -q {{GITOPS_REMOTE}} gitops/prod
+        git worktree add -q -B gitops/prod "$WT" FETCH_HEAD
     else
         git worktree add -q --detach "$WT"
         git -C "$WT" checkout -q --orphan gitops/prod
@@ -679,7 +688,7 @@ gitops-push:
     rsync -aL --delete --exclude .git --chmod=Du+rwx,Fu+rw result/ "$WT"/
     git -C "$WT" add -A
     git -C "$WT" commit -q -m "render from $(git rev-parse --short HEAD)" || echo "manifests unchanged"
-    git -C "$WT" push -q origin HEAD:gitops/prod
+    git -C "$WT" push -q {{GITOPS_REMOTE}} HEAD:gitops/prod
     git worktree remove --force "$WT"
     echo "gitops/prod updated"
 
