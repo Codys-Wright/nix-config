@@ -135,8 +135,74 @@ in
                   image:
                     tag: latest
                   publicUrl: https://task.starcommand.live
+                  env:
+                    # Permission enforcement (FastTrackStudio issue #109).
+                    # Until this was set the gate evaluated every RPC,
+                    # recorded the answer, and dispatched anyway — which is
+                    # how this server served every org's data to anonymous
+                    # visitors while the audit log said would_deny ~1000
+                    # times an hour. Verified per-org in Tempo before
+                    # flipping: a signed-in session resolves on its home org
+                    # and the cross-org fan-out is gone. DO NOT UNSET.
+                    TASK_ENFORCE_PERMISSIONS: "1"
+                    # Signed-URL enforcement for the colocated media route.
+                    # TASK_ENFORCE_PERMISSIONS does NOT reach it —
+                    # /org/{slug}/media/{path} is plain HTTP, not vox — so
+                    # until this was set it served the org's entire
+                    # resources/ tree, files and listings, to anyone
+                    # (confirmed open on prod with a bare curl 2026-08-07).
+                    # Clients mint a short-lived grant over vox and append
+                    # ?token=. Fails SOFT, so the failure mode is songs
+                    # 401ing, not the app breaking. DO NOT UNSET.
+                    TASK_ENFORCE_MEDIA_TOKEN: "1"
+                    # Hermes agent gateway — the default chat backend for
+                    # /agents. Its bearer key rides the task-env Secret.
+                    TASK_HERMES_URL: http://hermes-gateway.hermes.svc:8642/v1
+                    # OpenTelemetry. architect-telemetry's OTLP pipelines are
+                    # inert unless this is set, so this is what actually turns
+                    # tracing on. The collector fans traces/logs/metrics out
+                    # to Tempo/Loki/Prometheus — the app never names a
+                    # backend.
+                    #
+                    # NOTE: the chart's values-prod.yaml is an EXAMPLE for
+                    # self-hosters. These inline values are what this cluster
+                    # actually runs, so prod env belongs HERE, not there.
+                    OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector.observability.svc:4318
+                    OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+                    OTEL_RESOURCE_ATTRIBUTES: deployment.environment=prod,service.namespace=task
+                    # Authenticated OTLP ingest for out-of-cluster CLIENTS
+                    # (desktop, iOS): mounts /otlp/v1/* on the server,
+                    # forwarding here. The collector stays a ClusterIP —
+                    # clients reuse the server's auth and TLS rather than a
+                    # public write endpoint. This is what the five iOS apps
+                    # bake TASK_OTLP_ENDPOINT against.
+                    TASK_OTLP_UPSTREAM: http://otel-collector.observability.svc:4318
+                    # Announce the NAS mount as a Storage Location volume.
+                    # Mounting it (mediaMounts) only makes the bytes
+                    # reachable; a File Root can only be granted on a volume
+                    # an AGENT ANNOUNCED, and the in-server agent announces
+                    # just its own PVC. Without this the whole media tree is
+                    # invisible to the placement registry. Must match a
+                    # mediaMounts mountPath — a root stores the path it was
+                    # created at.
+                    TASK_STORAGE_VOLUMES: media=/mnt/storage/Task
+                    TASK_STORAGE_GRANTS: >-
+                      cbu@media:Projects/cbu,
+                      codywright@media:Projects/codywright,
+                      days-to-praise@media:Projects/days-to-praise,
+                      fasttrackaudio@media:Projects/fasttrackaudio,
+                      fasttrackstudios@media:Projects/fasttrackstudios,
+                      tombrooksmusic@media:Projects/tombrooksmusic
+                  # Carries TASK_HERMES_API_KEY, TASK_MCP_TOKEN and
+                  # TASK_OTLP_TOKEN (the static ingest bearer the iOS/desktop
+                  # clients present on /otlp). Managed by cluster-secrets.
+                  existingSecret: task-env
                   persistence:
                     size: 50Gi
+                  mediaMounts:
+                    - name: task-media
+                      mountPath: /mnt/storage/Task
+                      hostPath: /mnt/storage/Task
                   resources:
                     requests:
                       cpu: 250m
