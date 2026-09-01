@@ -4,6 +4,7 @@
 {
   inputs,
   lib,
+  config,
   ...
 }:
 let
@@ -195,9 +196,17 @@ in
         }
       ) deploymentHosts;
 
-      # Deploy checks
-      checks = builtins.mapAttrs (
-        system: deployLib: deployLib.deployChecks inputs.self.deploy
-      ) inputs.deploy-rs.lib;
+      # Deploy checks.
+      #
+      # Restricted to the systems this flake actually targets (`config.systems`,
+      # which den derives from den.hosts/den.homes). `inputs.deploy-rs.lib` is
+      # keyed by every flake-exposed system, and a `flake.checks.<sys>` entry is
+      # transposed back by flake-parts into a full `perSystem.<sys>` — which
+      # instantiates nixpkgs for it. Since nixpkgs 26.11 dropped x86_64-darwin,
+      # that instantiation is a hard eval error, and it broke every build in the
+      # repo (including nixosConfigurations).
+      checks = builtins.mapAttrs (system: deployLib: deployLib.deployChecks inputs.self.deploy) (
+        lib.filterAttrs (system: _: builtins.elem system config.systems) inputs.deploy-rs.lib
+      );
     };
 }

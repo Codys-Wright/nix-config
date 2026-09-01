@@ -7,7 +7,13 @@
 }:
 {
   flake-file.inputs.hunk.url = lib.mkDefault "github:modem-dev/hunk/v0.17.1";
-  flake-file.inputs.hunk.inputs.nixpkgs.follows = "nixpkgs";
+  # Follows nixpkgs-stable (25.11), NOT nixpkgs (26.11), deliberately.
+  # hunk's own flake is flake-parts-based and exposes `formatter` over
+  # `lib.systems.flakeExposed`. Building hunkdiff forces its `self'` module
+  # argument, which forces that whole per-system attrset — including
+  # x86_64-darwin, which nixpkgs 26.11 dropped with a hard `throw`. Following
+  # unstable therefore breaks every host build in this repo, not just darwin.
+  flake-file.inputs.hunk.inputs.nixpkgs.follows = "nixpkgs-stable";
 
   fleet.coding._.cli._.hunk = {
     description = "hunk — review-first terminal diff viewer for agentic coders";

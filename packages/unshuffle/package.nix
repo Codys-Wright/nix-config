@@ -67,7 +67,11 @@ python.pkgs.buildPythonApplication rec {
     hnswlib
   ];
 
-  pythonRelaxDeps = [ "hnswlib" ];
+  pythonRelaxDeps = [
+    "hnswlib"
+    # upstream pins mutagen <1.48; nixpkgs 26.11 ships 1.48.1
+    "mutagen"
+  ];
 
   pythonImportsCheck = [ "unshuffle" ];
 

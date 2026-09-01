@@ -17,7 +17,10 @@
         androidEnv = pkgs.androidenv.override { licenseAccepted = true; };
         androidSdk = androidEnv.composeAndroidPackages {
           cmdLineToolsVersion = "13.0";
-          platformToolsVersion = "35.0.2";
+          # nixpkgs 26.11 trimmed androidenv's platform-tools list down to a
+          # single version; 35.0.2 no longer exists. Check
+          # pkgs/development/mobile/androidenv/repo.json before re-pinning.
+          platformToolsVersion = "37.0.1";
           buildToolsVersions = [
             "35.0.0"
             "34.0.0"

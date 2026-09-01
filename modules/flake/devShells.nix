@@ -40,12 +40,12 @@
           just
           nh
           sshpass
-          (terraform.withPlugins (
-            p: with p; [
-              p.null
-              p.external
-            ]
-          ))
+          # nixpkgs 26.11 renamed terraform-providers to namespaced attrs
+          # (`null` → `hashicorp_null`, `external` → `hashicorp_external`).
+          (terraform.withPlugins (p: [
+            p.hashicorp_null
+            p.hashicorp_external
+          ]))
           jq
           yq-go # Go version of yq (mikefarah/yq) for YAML editing with anchor support
           # SOPS tools for secrets management
