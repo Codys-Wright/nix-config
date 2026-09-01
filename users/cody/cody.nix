@@ -62,6 +62,7 @@
         (<fleet.apps/default-file-manager> "nautilus")
         (<fleet.apps/default-browser> "brave")
         cody.opendeck
+        <fleet.gaming/minecraft>
 
         (fleet.coding {
           editor = {
