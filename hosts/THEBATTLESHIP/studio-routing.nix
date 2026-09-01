@@ -184,6 +184,11 @@
         # jack do_sync (the dead socket errors their call out).
         systemd.user.services.pipewire-watchdog = {
           description = "Restart PipeWire if its core stops answering";
+          # NixOS `systemd.user.*` units instantiate in EVERY user manager,
+          # including SDDM's own `sddm` session and the co-op/guest accounts.
+          # The studio stack belongs to cody alone.
+          # See docs/sddm-no-greeter-incident.md.
+          unitConfig.ConditionUser = "cody";
           serviceConfig = {
             Type = "oneshot";
             ExecStart = pkgs.writeShellScript "pipewire-watchdog" ''
@@ -221,6 +226,8 @@
 
         systemd.user.services.studio-clock-ready = {
           description = "Re-init the audio session once the Dante PTP clock is locked";
+          # Studio-user only — see pipewire-watchdog above.
+          unitConfig.ConditionUser = "cody";
           after = [
             "statime-inferno.service"
             "pipewire.service"

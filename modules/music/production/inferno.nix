@@ -52,6 +52,15 @@
         # `RX_CHANNEL_NAMES` config keys (see fts/main).
         txChannelNames ? { },
         rxChannelNames ? { },
+        # The user whose systemd --user manager runs the Dante stack.
+        # `systemd.user.*` from a NixOS module is instantiated in EVERY user
+        # manager on the box — SDDM's own `sddm` user and every guest/co-op
+        # account included. `dante.target` is `wantedBy = default.target`, so
+        # without gating the whole AoIP stack (and its RT-scheduled statime)
+        # spins up in sessions that have neither the Dante hardware nor the
+        # RTPRIO rlimit to run it. See docs/sddm-no-greeter-incident.md.
+        # null = no gating (every user manager runs it — legacy behaviour).
+        user ? null,
         ...
       }:
       {
@@ -218,6 +227,7 @@
                   # up or down without touching the core audio graph.
                   systemd.user.targets.dante = {
                     description = "Dante/Inferno AoIP stack (PTP clock, virtual soundcard, routing)";
+                    unitConfig = lib.optionalAttrs (user != null) { ConditionUser = user; };
                     # Autostart the AoIP stack at login (2026-06-26): this is a
                     # dedicated studio box and the Dante network is always live,
                     # so bring up statime + the clock-ready re-init automatically.
@@ -341,6 +351,7 @@
                         Restart = "on-failure";
                         RestartSec = "3s";
                       };
+                      unitConfig = lib.optionalAttrs (user != null) { ConditionUser = user; };
                     };
                 };
             }

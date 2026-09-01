@@ -49,6 +49,19 @@
         # Self-heal: restart statime whenever it loses PTP lock. Requires a
         # loglevel that emits "Measurement:" lines (debug/info/trace) — the
         # signal the watchdog uses to tell "locked follower" from "stuck master".
+        # The user whose systemd --user manager may run this stack.
+        # `systemd.user.*` units defined in a NixOS module are instantiated in
+        # EVERY user manager on the box — including the one SDDM runs for its
+        # own `sddm` user, and every co-op/guest account. Only the studio user
+        # is in @audio/@pipewire, so only that user gets an RLIMIT_RTPRIO from
+        # pam_limits; everywhere else `CPUSchedulingPolicy=fifo` fails with
+        # EPERM (`214/SETSCHEDULER`) and `Restart=always` turns it into a
+        # 3-second restart loop that burns a core forever (it was the bulk of a
+        # load average of ~13 on an idle box — see
+        # docs/sddm-no-greeter-incident.md). `ConditionUser=` keeps the unit
+        # from ever instantiating outside this user's manager.
+        # null = no gating (every user manager runs it — legacy behaviour).
+        user ? null,
         watchdog ? true,
         # Services to restart after the watchdog recovers a lost lock. The
         # Inferno PipeWire node must be re-opened against a valid clock, so the
@@ -67,6 +80,16 @@
                   statimePkg = pkgs.statime;
                   netaudioPkg = pkgs.netaudio;
                   configPath = "/etc/inferno/statime-ptpv1.toml";
+                  # `systemd.user.*` in a NixOS module lands in EVERY user
+                  # manager on the box. `gate` stamps ConditionUser on each unit
+                  # so the Dante stack only ever instantiates in the studio
+                  # user's manager. See the `user` parameter above.
+                  gate =
+                    _name: unit:
+                    unit
+                    // {
+                      unitConfig = (unit.unitConfig or { }) // lib.optionalAttrs (user != null) { ConditionUser = user; };
+                    };
                   # The watchdog's lock signal ("Measurement:") is only logged
                   # at info/debug/trace, so disable it on quieter loglevels.
                   watchdogEnabled =
@@ -117,130 +140,140 @@
                     group = "root";
                   };
 
-                  systemd.user.services = {
-                    statime-inferno = {
-                      description = "Statime PTP daemon for ${host.name} Dante network";
-                      # No network-online ordering: this is a user unit started
-                      # via `dante on` well after login, by which time the Dante
-                      # static IP has long been up (boot-time assignment).
-                      # Gated behind the user dante.target (`dante on|off`):
-                      # with the Dante network absent the whole AoIP stack stays
-                      # down so a clockless Inferno can't wedge PipeWire.
-                      partOf = [ "dante.target" ];
-                      wantedBy = [ "dante.target" ];
-                      serviceConfig = {
-                        Type = "simple";
-                        # A crashed statime leaves its usrvclock server socket
-                        # behind (/tmp/ptp-usrvclock); the next bind then fails
-                        # with EADDRINUSE and the service restart-loops. Remove
-                        # it before (re)binding. The `-` ignores failure — e.g. a
-                        # stale *root*-owned socket from a prior system-wide run
-                        # (cody can't rm that, but /tmp is tmpfs so a reboot
-                        # clears it anyway).
-                        ExecStartPre = "-${pkgs.coreutils}/bin/rm -f /tmp/ptp-usrvclock";
-                        ExecStart = "/run/wrappers/bin/statime --config ${configPath}";
-                        Restart = "always";
-                        RestartSec = "3s";
-                        # statime uses SOFTWARE timestamping (hardware-clock =
-                        # "none"), so its virtual-clock servo can only build a
-                        # stable frequency estimate if its sync/delay timestamp
-                        # captures aren't preempted. Under SCHED_OTHER the PTPv1
-                        # offset free-runs at the raw-monotonic drift (~12 ppm)
-                        # in a 1 ms sawtooth and never frequency-locks; the
-                        # Kalman filter perpetually rejects the jittered
-                        # measurements. Run it SCHED_FIFO just ABOVE the Inferno
-                        # flow threads (TX 81 / RX 80) so those can't preempt a
-                        # capture, but BELOW the hard-RT PipeWire data-loop (88)
-                        # so audio is never starved. statime's duty cycle is
-                        # tiny (a few µs every ~250 ms), so it doesn't disturb
-                        # the flows. cody's RTPRIO rlimit is 95, so the user
-                        # manager can grant this. Set in the unit (not via
-                        # runtime chrt) so it survives watchdog restarts.
-                        CPUSchedulingPolicy = "fifo";
-                        CPUSchedulingPriority = 82;
+                  systemd.user.services = lib.mapAttrs gate (
+                    {
+                      statime-inferno = {
+                        description = "Statime PTP daemon for ${host.name} Dante network";
+                        # No network-online ordering: this is a user unit started
+                        # via `dante on` well after login, by which time the Dante
+                        # static IP has long been up (boot-time assignment).
+                        # Gated behind the user dante.target (`dante on|off`):
+                        # with the Dante network absent the whole AoIP stack stays
+                        # down so a clockless Inferno can't wedge PipeWire.
+                        partOf = [ "dante.target" ];
+                        wantedBy = [ "dante.target" ];
+                        serviceConfig = {
+                          Type = "simple";
+                          # A crashed statime leaves its usrvclock server socket
+                          # behind (/tmp/ptp-usrvclock); the next bind then fails
+                          # with EADDRINUSE and the service restart-loops. Remove
+                          # it before (re)binding. The `-` ignores failure — e.g. a
+                          # stale *root*-owned socket from a prior system-wide run
+                          # (cody can't rm that, but /tmp is tmpfs so a reboot
+                          # clears it anyway).
+                          ExecStartPre = "-${pkgs.coreutils}/bin/rm -f /tmp/ptp-usrvclock";
+                          ExecStart = "/run/wrappers/bin/statime --config ${configPath}";
+                          Restart = "always";
+                          RestartSec = "3s";
+                          # statime uses SOFTWARE timestamping (hardware-clock =
+                          # "none"), so its virtual-clock servo can only build a
+                          # stable frequency estimate if its sync/delay timestamp
+                          # captures aren't preempted. Under SCHED_OTHER the PTPv1
+                          # offset free-runs at the raw-monotonic drift (~12 ppm)
+                          # in a 1 ms sawtooth and never frequency-locks; the
+                          # Kalman filter perpetually rejects the jittered
+                          # measurements. Run it SCHED_FIFO just ABOVE the Inferno
+                          # flow threads (TX 81 / RX 80) so those can't preempt a
+                          # capture, but BELOW the hard-RT PipeWire data-loop (88)
+                          # so audio is never starved. statime's duty cycle is
+                          # tiny (a few µs every ~250 ms), so it doesn't disturb
+                          # the flows. cody's RTPRIO rlimit is 95, so the user
+                          # manager can grant this. Set in the unit (not via
+                          # runtime chrt) so it survives watchdog restarts.
+                          CPUSchedulingPolicy = "fifo";
+                          CPUSchedulingPriority = 82;
+                        };
+                        unitConfig = {
+                          # Backstop: convert an unexpected crash/EPERM into a
+                          # bounded give-up rather than an infinite 3s restart
+                          # loop that burns a core until the session ends.
+                          StartLimitIntervalSec = "60s";
+                          StartLimitBurst = 5;
+                        }
+                        // lib.optionalAttrs (user != null) { ConditionUser = user; };
                       };
-                    };
-                  }
-                  // lib.optionalAttrs (preferredLeader != null) {
-                    dante-preferred-leader = {
-                      description = "Lock ${preferredLeader} as Dante PTP preferred leader";
-                      after = [ "statime-inferno.service" ];
-                      wants = [ "statime-inferno.service" ];
-                      partOf = [ "dante.target" ];
-                      wantedBy = [ "dante.target" ];
-                      serviceConfig = {
-                        # simple, NOT oneshot: the retry loop below can run for
-                        # 3 minutes, and a oneshot start job blocks
-                        # multi-user.target — which wedges every
-                        # nixos-rebuild switch until the loop finishes (and
-                        # marks the unit failed if interrupted).
-                        Type = "simple";
-                        ExecStart = pkgs.writeShellScript "dante-preferred-leader" ''
-                          # Retry until the leader device answers. A Dante device
-                          # absent at boot would otherwise never get locked (the
-                          # old one-shot skipped silently). The timer re-asserts
-                          # periodically so the lock survives the leader rebooting.
-                          for i in $(seq 1 18); do
-                            if ${netaudioPkg}/bin/netaudio --name ${preferredLeader} device config preferred-leader on; then
-                              echo "Locked ${preferredLeader} as Dante PTP preferred leader."
+                    }
+                    // lib.optionalAttrs (preferredLeader != null) {
+                      dante-preferred-leader = {
+                        description = "Lock ${preferredLeader} as Dante PTP preferred leader";
+                        after = [ "statime-inferno.service" ];
+                        wants = [ "statime-inferno.service" ];
+                        partOf = [ "dante.target" ];
+                        wantedBy = [ "dante.target" ];
+                        serviceConfig = {
+                          # simple, NOT oneshot: the retry loop below can run for
+                          # 3 minutes, and a oneshot start job blocks
+                          # multi-user.target — which wedges every
+                          # nixos-rebuild switch until the loop finishes (and
+                          # marks the unit failed if interrupted).
+                          Type = "simple";
+                          ExecStart = pkgs.writeShellScript "dante-preferred-leader" ''
+                            # Retry until the leader device answers. A Dante device
+                            # absent at boot would otherwise never get locked (the
+                            # old one-shot skipped silently). The timer re-asserts
+                            # periodically so the lock survives the leader rebooting.
+                            for i in $(seq 1 18); do
+                              if ${netaudioPkg}/bin/netaudio --name ${preferredLeader} device config preferred-leader on; then
+                                echo "Locked ${preferredLeader} as Dante PTP preferred leader."
+                                exit 0
+                              fi
+                              echo "Dante leader ${preferredLeader} not reachable (attempt $i); retrying in 10s..."
+                              sleep 10
+                            done
+                            echo "Dante leader ${preferredLeader} still unavailable; timer will retry later."
+                          '';
+                        };
+                      };
+                    }
+                    // lib.optionalAttrs watchdogEnabled {
+                      statime-watchdog = {
+                        description = "Restart Statime if it loses PTP lock (self-promotes to broken PTPv1 master)";
+                        after = [ "statime-inferno.service" ];
+                        partOf = [ "dante.target" ];
+                        serviceConfig = {
+                          # simple so the up-to-75s recovery loop never holds a
+                          # start job open (oneshot start jobs block switches
+                          # and go "failed" when interrupted).
+                          Type = "simple";
+                          ExecStart = pkgs.writeShellScript "statime-watchdog" ''
+                            jctl=${pkgs.systemd}/bin/journalctl
+                            sctl=${pkgs.systemd}/bin/systemctl
+                            # Statime emits "Measurement:" (~4/sec) only while
+                            # locked as a PTP follower. Zero in the last 35s means
+                            # it self-promoted to its unimplemented PTPv1 master
+                            # stub (the heisenbug, or a lost grandmaster).
+                            if [ "$("$jctl" --user -u statime-inferno.service --since '35 seconds ago' -o cat | grep -c 'Measurement:')" -gt 0 ]; then
                               exit 0
                             fi
-                            echo "Dante leader ${preferredLeader} not reachable (attempt $i); retrying in 10s..."
-                            sleep 10
-                          done
-                          echo "Dante leader ${preferredLeader} still unavailable; timer will retry later."
-                        '';
-                      };
-                    };
-                  }
-                  // lib.optionalAttrs watchdogEnabled {
-                    statime-watchdog = {
-                      description = "Restart Statime if it loses PTP lock (self-promotes to broken PTPv1 master)";
-                      after = [ "statime-inferno.service" ];
-                      partOf = [ "dante.target" ];
-                      serviceConfig = {
-                        # simple so the up-to-75s recovery loop never holds a
-                        # start job open (oneshot start jobs block switches
-                        # and go "failed" when interrupted).
-                        Type = "simple";
-                        ExecStart = pkgs.writeShellScript "statime-watchdog" ''
-                          jctl=${pkgs.systemd}/bin/journalctl
-                          sctl=${pkgs.systemd}/bin/systemctl
-                          # Statime emits "Measurement:" (~4/sec) only while
-                          # locked as a PTP follower. Zero in the last 35s means
-                          # it self-promoted to its unimplemented PTPv1 master
-                          # stub (the heisenbug, or a lost grandmaster).
-                          if [ "$("$jctl" --user -u statime-inferno.service --since '35 seconds ago' -o cat | grep -c 'Measurement:')" -gt 0 ]; then
-                            exit 0
-                          fi
-                          echo "Statime not locked; restarting statime-inferno."
-                          "$sctl" --user restart statime-inferno.service || true
-                          relocked=0
-                          for i in $(seq 1 20); do
-                            sleep 2
-                            if [ "$("$jctl" --user -u statime-inferno.service --since '5 seconds ago' -o cat | grep -c 'Measurement:')" -gt 0 ]; then
-                              relocked=1
-                              break
+                            echo "Statime not locked; restarting statime-inferno."
+                            "$sctl" --user restart statime-inferno.service || true
+                            relocked=0
+                            for i in $(seq 1 20); do
+                              sleep 2
+                              if [ "$("$jctl" --user -u statime-inferno.service --since '5 seconds ago' -o cat | grep -c 'Measurement:')" -gt 0 ]; then
+                                relocked=1
+                                break
+                              fi
+                            done
+                            # Only re-init dependents if the clock actually came
+                            # back — otherwise (grandmaster truly gone) we'd churn
+                            # the audio session every cycle for nothing.
+                            if [ "$relocked" = 1 ]; then
+                              echo "Statime re-locked; re-initialising audio session."
+                              ${lib.concatMapStringsSep "\n                            " (
+                                svc: ''"$sctl" --user restart ${svc} || true''
+                              ) reinitOnRecovery}
                             fi
-                          done
-                          # Only re-init dependents if the clock actually came
-                          # back — otherwise (grandmaster truly gone) we'd churn
-                          # the audio session every cycle for nothing.
-                          if [ "$relocked" = 1 ]; then
-                            echo "Statime re-locked; re-initialising audio session."
-                            ${lib.concatMapStringsSep "\n                            " (
-                              svc: ''"$sctl" --user restart ${svc} || true''
-                            ) reinitOnRecovery}
-                          fi
-                        '';
+                          '';
+                        };
                       };
-                    };
-                  };
+                    }
+                  );
 
                   # Timers ride dante.target too — with the stack off they
                   # must not fire (the watchdog would endlessly restart
                   # statime, the leader lock would spam an absent device).
-                  systemd.user.timers =
+                  systemd.user.timers = lib.mapAttrs gate (
                     lib.optionalAttrs (preferredLeader != null) {
                       dante-preferred-leader = {
                         partOf = [ "dante.target" ];
@@ -260,7 +293,8 @@
                           OnUnitActiveSec = "30s";
                         };
                       };
-                    };
+                    }
+                  );
                 };
             }
           )
