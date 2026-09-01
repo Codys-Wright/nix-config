@@ -51,17 +51,6 @@
           '';
         };
 
-        home.file.".local/bin/codex" = {
-          executable = true;
-          text = ''
-            #!/usr/bin/env bash
-            if [[ -x "$HOME/.local/bin/forgejo-env" ]]; then
-              exec "$HOME/.local/bin/forgejo-env" ${pkgs.codex}/bin/codex "$@"
-            fi
-            exec ${pkgs.codex}/bin/codex "$@"
-          '';
-        };
-
         # Fleet/agent claude: nix-pinned claude-code wrapped with forgejo-env,
         # installed under a distinct name and config dir so it never collides
         # with the user's native auto-updating `claude` (~/.local/bin/claude,
@@ -86,7 +75,9 @@
 
           # amazon-q-cli
           # aider-chat
-          codex
+          # codex intentionally stays out of Nix/Home Manager: use the native
+          # npm global install so the CLI can track upstream releases and
+          # remote features without waiting on nixpkgs.
           # copilot-cli
           # crush
           # cursor-cli
