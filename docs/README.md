@@ -37,3 +37,4 @@
 ## Troubleshooting
 
 - [audio-system-issues.md](audio-system-issues.md) — resolved Inferno/Dante issues on THEBATTLESHIP (kept as reference).
+- [sddm-no-greeter-incident.md](sddm-no-greeter-incident.md) — SDDM wedges when its last DRM output vanishes; plus the statime-inferno SETSCHEDULER loop in SDDM sessions.
