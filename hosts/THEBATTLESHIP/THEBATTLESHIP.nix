@@ -62,6 +62,7 @@
         # Re-enable deliberately, with a reboot, when chasing sub-1ms TX.
         # (fleet.hardware._.audio._.rt-isolation { })
         (fleet.apps._.davinci-resolve { studio = true; })
+        (fleet.apps._.davinci-resolve-mcp { studio = true; })
         # controller-split bundles polkit + sudoers + InputPlumber config +
         # the launch-as / steam-as equivalents. Replaces the three modules
         # that used to live here (launch-as, inputplumber, coop-launcher).
@@ -85,6 +86,12 @@
         # Inferno exposes a 128-channel virtual Dante soundcard.
         (fleet.music._.production._.statime {
           interface = "enp12s0";
+          # Only cody's user manager runs the Dante stack. Without this the
+          # RT-scheduled statime unit is instantiated in every user manager on
+          # the box (sddm, joshua, guest, bri, carter) — none of which have an
+          # RTPRIO rlimit, so it fails 214/SETSCHEDULER and restart-loops every
+          # 3s forever. See docs/sddm-no-greeter-incident.md.
+          user = "cody";
           # The Galaxy32's current Dante name (was the bare serial
           # "AA-4202524000109"; renamed to "Galaxy32"). The re-assert oneshot
           # looks the device up by this name, so it must match what the device
@@ -111,6 +118,9 @@
         })
         (fleet.music._.production._.inferno {
           bindIp = "10.10.10.10";
+          # Gate dante.target (and the whole AoIP stack it pulls) to cody's
+          # user manager — see the statime `user` note above.
+          user = "cody";
           deviceId = "00000A0A0A0A0001";
           channels = 64;
           # Dante TX+RX buffer for our inferno_aoip device. This value is ALSO
