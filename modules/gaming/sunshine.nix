@@ -37,9 +37,10 @@
 
           # NVENC hardware encode on the RTX card. cudaSupport compiles
           # sunshine from source against cudatoolkit — the first build is long.
-          # Vendored 2026.516.143833 (security fix) until nixpkgs catches up —
-          # see ../../packages/sunshine/package.nix and nixpkgs issue #524668.
-          package = pkgs.fleet-sunshine.override {
+          # Was `pkgs.fleet-sunshine` (packages/sunshine, a vendored 2026.516.143833
+          # for security fix GHSA-ph75-mgxh-mv57); nixpkgs now ships exactly that
+          # version, so the vendored copy is gone and this is stock nixpkgs again.
+          package = pkgs.sunshine.override {
             cudaSupport = true;
             cudaPackages = pkgs.cudaPackages;
           };

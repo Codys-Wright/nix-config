@@ -30,8 +30,6 @@ let
     "davinci-resolve"
     "inferno"
     "melonloader-installer"
-    "sunshine"
-    "vcv-rack"
   ];
   attrName = n: if builtins.elem n collides then "fleet-${n}" else n;
 

@@ -17,7 +17,11 @@
             cardinal
           ])
           ++ [
-            pkgs.fleet-vcv-rack
+            # Was packages/vcv-rack (an overrideAttrs vendoring a segfault patch
+            # nixpkgs used to fetch from a since-deleted PR). nixpkgs 26.11 ships
+            # the fix itself, and re-applying the vendored patch on top now
+            # breaks the libRack.so link — so this is stock nixpkgs again.
+            pkgs.vcv-rack
             pkgs.floe
             pkgs.tiagolr-ripplerx
             pkgs.dumumub-0000006
