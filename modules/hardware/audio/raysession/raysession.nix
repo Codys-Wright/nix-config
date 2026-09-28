@@ -5,7 +5,7 @@
   ...
 }:
 let
-  raysessionHelpers = import ../../../../lib/audio/raysession/common.nix { inherit lib; };
+  raysessionHelpers = import ./_lib.nix { inherit lib; };
 in
 {
   fleet.raysession = {

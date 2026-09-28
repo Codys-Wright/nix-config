@@ -1,27 +1,20 @@
-let
-  my.nix._.npins = {
-    os = npins-system;
+# npins — pin management for sources outside the flake inputs.
+# Pins live in npins/sources.json (currently only nvzone-floaterm, read by
+# modules/coding/editor/nvf.nix via `import ../../../npins/default.nix`).
+{
+  fleet.nix._.npins = {
+    description = "npins - Pin management tool for Nix flakes";
+
+    os =
+      { pkgs, ... }:
+      {
+        environment.systemPackages = [ pkgs.npins ];
+      };
+
     homeManager =
       { pkgs, ... }:
       {
         home.packages = [ pkgs.npins ];
       };
   };
-
-  npins-system =
-    { pkgs, ... }:
-    {
-      environment.systemPackages = [ pkgs.npins ];
-    };
-in
-{
-  # npins aspect - Pin management tool for Nix flakes
-  fleet.nix._.npins = {
-    description = "npins - Pin management tool for Nix flakes";
-  }
-  // my.nix._.npins;
-
-  # Note: To use npins sources in other modules (e.g., nvf.nix),
-  # import them directly: `import ../../npins/default.nix`
-  # This returns a set of all pinned sources that can be used to build plugins.
 }

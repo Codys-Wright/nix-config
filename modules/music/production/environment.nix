@@ -7,7 +7,7 @@
   ...
 }:
 let
-  audioProduction = import ../../../lib/audio/production/common.nix { inherit lib; };
+  audioProduction = import ./_lib.nix { inherit lib; };
 in
 {
   flake-file.inputs.musnix.url = "github:musnix/musnix";

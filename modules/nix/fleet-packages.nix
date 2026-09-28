@@ -62,12 +62,23 @@ let
       };
     };
 
+  # A nixpkgs attr appearing under an unprefixed local name would be
+  # silently replaced by the overlay; fail loudly instead (on use).
+  guardCollision =
+    prev: n: value:
+    if !(builtins.elem n collides) && prev ? ${n} then
+      throw "packages/${n}: nixpkgs now provides pkgs.${n}; add \"${n}\" to `collides` in modules/nix/fleet-packages.nix (exposes it as pkgs.fleet-${n})"
+    else
+      value;
+
   overlay =
-    final: _prev:
+    final: prev:
     lib.listToAttrs (
       map (n: {
         name = attrName n;
-        value = final.callPackage (packagesDir + "/${n}/package.nix") ((extraArgs final).${n} or { });
+        value = guardCollision prev n (
+          final.callPackage (packagesDir + "/${n}/package.nix") ((extraArgs final).${n} or { })
+        );
       }) autoNames
     )
     // {
