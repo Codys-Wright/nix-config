@@ -20,7 +20,7 @@
       ...
     }@aspectArgs:
     {
-      includes = [ (den.lib.groups [ "media" ]) ];
+      includes = [ (fleet.user._.groups [ "media" ]) ];
 
       nixos =
         {

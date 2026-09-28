@@ -12,9 +12,6 @@
     description = "Joshua user — browser-only child account";
 
     includes = [
-      den.aspects.hm-backup
-      <den/primary-user>
-
       # Browser only
       <fleet.apps/browsers/brave>
       (<fleet.apps/default-browser> "brave")

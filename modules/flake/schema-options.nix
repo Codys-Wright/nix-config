@@ -44,10 +44,20 @@
     description = "Extra/override includes attached directly to the host entry";
   };
 
-  # hosts/<name>.users.<user>.extraGroups — forwarded to users.users.<name>.
+  # hosts/<name>.users.<user>.extraGroups — per-host groups for one user,
+  # forwarded to users.users.<name> through the `user` class below.
   den.schema.user.options.extraGroups = lib.mkOption {
     type = lib.types.listOf lib.types.str;
     default = [ ];
     description = "Additional Unix groups for the user on this host";
   };
+  den.schema.user.includes = [
+    (
+      { user, ... }:
+      {
+        name = "entity-extra-groups/${user.userName}";
+        user.extraGroups = user.extraGroups;
+      }
+    )
+  ];
 }

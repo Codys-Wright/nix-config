@@ -4,7 +4,8 @@
   den.aspects.joshua-curfew = {
     description = "Joshua's login curfew — pam_time 08:00-22:00 window plus a timer that terminates out-of-hours sessions";
 
-    nixos =
+    # Every host Joshua lives on (explicit edge; see den #694).
+    provides.to-hosts.nixos =
       { pkgs, ... }:
       {
         # Allow Joshua to log in only between 08:00 and 22:00.

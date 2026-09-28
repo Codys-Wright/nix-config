@@ -23,7 +23,7 @@
 
     includes = [
       fleet.desktop._.environment._.niri._.xremap
-      (den.lib.groups [ "input" ])
+      (fleet.user._.groups [ "input" ])
     ];
 
     nixos =

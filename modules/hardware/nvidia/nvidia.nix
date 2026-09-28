@@ -8,7 +8,7 @@
   fleet.hardware._.nvidia = {
     description = "NVIDIA graphics hardware support";
 
-    includes = [ (den.lib.groups [ "video" ]) ];
+    includes = [ (fleet.user._.groups [ "video" ]) ];
 
     nixos =
       {

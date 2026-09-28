@@ -15,7 +15,7 @@
 
     # Virtual mouse/keyboard/gamepad injection goes through /dev/uinput.
     # Grant every host user access so any of them can stream input.
-    includes = [ (den.lib.groups [ "uinput" ]) ];
+    includes = [ (fleet.user._.groups [ "uinput" ]) ];
 
     nixos =
       { pkgs, lib, ... }:

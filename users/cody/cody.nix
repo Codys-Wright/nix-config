@@ -23,6 +23,8 @@
     aspects.cody = {
       description = "Cody user configuration";
 
+      user.description = "cody";
+
       homeManager =
         { ... }:
         {
@@ -33,8 +35,6 @@
         };
 
       includes = [
-        den.aspects.hm-backup
-
         # SSH host aliases + peer-reachability tiers (users/cody/modules/ssh.nix)
         cody.ssh
         # Firefox WebApps definitions (users/cody/modules/webapps.nix)

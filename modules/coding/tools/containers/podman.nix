@@ -4,7 +4,7 @@
   fleet.coding._.tools._.containers._.podman = {
     description = "Podman container tools with Docker compatibility";
 
-    includes = [ (den.lib.groups [ "podman" ]) ];
+    includes = [ (fleet.user._.admin-groups [ "podman" ]) ];
 
     nixos =
       { pkgs, ... }:

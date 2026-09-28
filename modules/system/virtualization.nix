@@ -9,9 +9,9 @@
     description = "KVM/QEMU virtualization with virt-manager for running Windows VMs";
 
     includes = [
-      (den.lib.groups [
+      (fleet.user._.groups [ "kvm" ])
+      (fleet.user._.admin-groups [
         "libvirtd"
-        "kvm"
         "docker"
       ])
     ];

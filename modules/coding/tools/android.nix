@@ -5,7 +5,7 @@
     description = "Android SDK with build tools, platform tools, emulator, and system images";
 
     includes = [
-      (den.lib.groups [
+      (fleet.user._.groups [
         "adbusers"
         "kvm"
       ])

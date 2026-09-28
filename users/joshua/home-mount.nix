@@ -4,7 +4,9 @@
   den.aspects.joshua-home-mount = {
     description = "Joshua's /home bind mount from /persist with noexec/nodev/nosuid hardening";
 
-    nixos =
+    # THEBATTLESHIP only: the bind source lives on its /persist
+    # (impermanence), which no other host has.
+    provides.THEBATTLESHIP.nixos =
       { ... }:
       {
         # Keep Joshua's writable home on a separate bind mount with noexec/nodev/nosuid
