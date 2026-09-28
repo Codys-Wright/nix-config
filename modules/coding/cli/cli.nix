@@ -33,11 +33,9 @@
           bc
           gcc
           ripgrep
-          just
           openssl
           openssl.dev
           openssl_3
-          dioxus-cli
           bat
         ];
       };
@@ -52,7 +50,6 @@
           bat
           openssl
           openssl.dev
-          dioxus-cli
           # gcc is available via Xcode Command Line Tools on macOS
         ];
       };

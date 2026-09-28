@@ -25,7 +25,7 @@ let
   buildWrappedNeovim =
     { pkgs }:
     let
-      neovim = den.lib.nvf.package pkgs den.aspects.nvf-config { };
+      neovim = den.lib.nvf.package pkgs fleet.coding._.editors._.nvf._.vim { };
     in
     inputs.wrappers.lib.wrapPackage {
       inherit pkgs;
@@ -54,8 +54,10 @@ in
 
   # ── NVF vim configuration aspect ──────────────────────────────────────
   # All vim.* settings composed from sub-aspects via provides.*
-  den.aspects.nvf-config = {
-    includes = with den.aspects.nvf-config.provides; [
+  # Lives under its editor, not in den.aspects (that namespace is for
+  # hosts and users). Resolved only through den.lib.nvf, never included.
+  fleet.coding._.editors._.nvf._.vim = {
+    includes = with fleet.coding._.editors._.nvf._.vim.provides; [
       ai
       coding
       debug

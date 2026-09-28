@@ -1,8 +1,6 @@
 {
   inputs,
   lib,
-  den,
-  __findFile,
   ...
 }:
 {
@@ -11,7 +9,7 @@
     inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  den.aspects.hm = {
+  fleet.hm-cli = {
     description = "Adds the home-manager CLI to user home packages.";
 
     homeManager =
@@ -30,7 +28,4 @@
           lib.optional (hmPackages ? ${system}) hmPackages.${system}.default;
       };
   };
-
-  # Note: host→user homeManager forwarding is handled by den._.mutual-provider
-  # (configured in defaults.nix via den.ctx.user.includes)
 }

@@ -55,7 +55,6 @@ in
         <fleet.apps/flatpaks> # Flatpak + Flathub (path to Flatpak bottles)
         <fleet.system/printing> # CUPS + mDNS network printer discovery
         <fleet.hardware/cuda> # CUDA toolkit (RTX present; nvidia already on)
-        <fleet/raysession> # RaySession audio session manager
         # RT core isolation for the audio path — currently DISABLED (see
         # modules/hardware/audio/rt-isolation.nix): pinning pipewire to a
         # core before isolcpus is active starves it into a watchdog loop.
@@ -67,8 +66,7 @@ in
         # that used to live here (launch-as, inputplumber, coop-launcher).
         <fleet.gaming/controller-split>
 
-        (<fleet.system/disk> {
-          type = "btrfs-impermanence";
+        (<fleet.disk/btrfs> {
           device = "/dev/nvme2n1";
           withSwap = true;
           swapSize = "205";
