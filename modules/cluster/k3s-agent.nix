@@ -20,6 +20,8 @@
   ...
 }:
 let
+  # Soft vars from the private nix-secrets flake (networking topology).
+  starcommandIp = inputs.nix-secrets.networking.hosts.starcommand.vpnIp;
   # The aspect body, applied to the host's settings (see `settings` below).
   k3sAgentFor =
     {
@@ -134,7 +136,7 @@ in
     settings = {
       serverAddr = lib.mkOption {
         type = lib.types.str;
-        default = "https://10.10.10.1:6443";
+        default = "https://${starcommandIp}:6443";
         description = "k3s API endpoint (default: starcommand over the fleet VPN); drain/uncordon SSH to its host";
       };
       extraTaints = lib.mkOption {

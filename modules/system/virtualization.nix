@@ -2,8 +2,14 @@
 {
   fleet,
   den,
+  inputs,
   ...
 }:
+let
+  # Soft vars from the private nix-secrets flake (networking topology).
+  domain = inputs.nix-secrets.networking.domains.selfhost;
+  starcommandIp = inputs.nix-secrets.networking.hosts.starcommand.vpnIp;
+in
 {
   fleet.system._.virtualization = {
     description = "KVM/QEMU virtualization with virt-manager for running Windows VMs";
@@ -40,10 +46,10 @@
         # refuses HTTP registries unless they're declared insecure.
         virtualisation.docker.enable = true;
         virtualisation.docker.daemon.settings.insecure-registries = [
-          "registry.starcommand.live:30050"
+          "registry.${domain}:30050"
         ];
         # Resolve the registry hostname to starcommand on the 10G LAN.
-        networking.extraHosts = "10.10.10.1 registry.starcommand.live";
+        networking.extraHosts = "${starcommandIp} registry.${domain}";
 
         # Enable spice USB redirection for passthrough
         virtualisation.spiceUSBRedirection.enable = true;

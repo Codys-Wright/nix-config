@@ -1,5 +1,9 @@
 # OpenCode AI terminal assistant aspect
-{ fleet, ... }:
+{ fleet, inputs, ... }:
+let
+  # Soft vars from the private nix-secrets flake (networking topology).
+  domain = inputs.nix-secrets.networking.domains.selfhost;
+in
 {
   fleet.coding._.tools._.opencode = {
     description = "OpenCode AI terminal assistant";
@@ -42,7 +46,7 @@
             #!/usr/bin/env bash
             set -euo pipefail
             token="$($HOME/.local/bin/forgejo-token)"
-            export FORGEJO_URL="https://git.starcommand.live"
+            export FORGEJO_URL="https://git.${domain}"
             export GITEA_SERVER_URL="$FORGEJO_URL"
             export FORGEJO_TOKEN="$token"
             export GITEA_TOKEN="$token"

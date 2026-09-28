@@ -1,5 +1,10 @@
 # SSH client configuration - host aliases and peer-reachability tiers
-{ ... }:
+{ inputs, ... }:
+let
+  # Soft vars from the private nix-secrets flake (networking topology).
+  domain = inputs.nix-secrets.networking.domains.selfhost;
+  starcommandIp = inputs.nix-secrets.networking.hosts.starcommand.vpnIp;
+in
 {
   cody.ssh.homeManager =
     { ... }:
@@ -22,13 +27,13 @@
             controlPersist = "no";
           };
           "starcommand" = {
-            hostname = "10.10.10.1";
+            hostname = "${starcommandIp}";
             user = "starcommand";
             identityFile = "~/.ssh/id_ed25519";
           };
           "starcommand-root" = {
             host = "starcommand-root";
-            hostname = "10.10.10.1";
+            hostname = "${starcommandIp}";
             user = "root";
             identityFile = "~/.ssh/id_ed25519";
           };
@@ -40,7 +45,7 @@
           # Service ClusterIPs — stable until the Service is recreated
           # (refresh: kubectl get svc task-server -n task).
           "task-prod-tunnel" = {
-            hostname = "10.10.10.1";
+            hostname = "${starcommandIp}";
             user = "root";
             identityFile = "~/.ssh/id_ed25519";
             localForwards = [
@@ -56,7 +61,7 @@
             };
           };
           "task-dev-tunnel" = {
-            hostname = "10.10.10.1";
+            hostname = "${starcommandIp}";
             user = "root";
             identityFile = "~/.ssh/id_ed25519";
             localForwards = [
@@ -83,8 +88,8 @@
           # (host :22 stays the admin sshd; a socat forward bridges :2222 ->
           # the forgejo SSH NodePort). Forgejo maps the key to the account,
           # so cody's key authenticates as codywright.
-          "git.starcommand.live" = {
-            hostname = "git.starcommand.live";
+          "git.${domain}" = {
+            hostname = "git.${domain}";
             user = "git";
             port = 2222;
             identityFile = "~/.ssh/id_ed25519";

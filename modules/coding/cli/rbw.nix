@@ -5,10 +5,14 @@
 # per user (email prompted; agents use hermes@starcommand.live),
 # `rbw get <item>` after — scripts and agent helpers read secrets
 # without plaintext .env files.
-{ fleet, ... }:
+{ fleet, inputs, ... }:
+let
+  # Soft vars from the private nix-secrets flake (networking topology).
+  domain = inputs.nix-secrets.networking.domains.selfhost;
+in
 {
   fleet.coding._.cli._.rbw = {
-    description = "rbw Bitwarden CLI configured for the self-hosted Vaultwarden (vault.starcommand.live)";
+    description = "rbw Bitwarden CLI configured for the self-hosted Vaultwarden (vault.${domain})";
 
     homeManager =
       { pkgs, lib, ... }:
@@ -16,10 +20,10 @@
         programs.rbw = {
           enable = true;
           settings = {
-            base_url = lib.mkDefault "https://vault.starcommand.live";
+            base_url = lib.mkDefault "https://vault.${domain}";
             # Interactive users override with their own email via a
             # user aspect; the agent identity is the fleet default.
-            email = lib.mkDefault "hermes@starcommand.live";
+            email = lib.mkDefault "hermes@${domain}";
             lock_timeout = lib.mkDefault 3600;
             pinentry = lib.mkDefault pkgs.pinentry-curses;
           };

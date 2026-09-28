@@ -1,4 +1,9 @@
-{ den, ... }:
+{ den, inputs, ... }:
+let
+  # Soft vars from the private nix-secrets flake (networking topology).
+  domain = inputs.nix-secrets.networking.domains.selfhost;
+  starcommandIp = inputs.nix-secrets.networking.hosts.starcommand.vpnIp;
+in
 {
   den.aspects.THEBATTLESHIP-starcommand-net = {
     description = "Starcommand 10G pinning: hosts entries, WebDAV/NFS mounts, agent workspace, task env";
@@ -13,7 +18,7 @@
         # Starcommand hosts Nextcloud. Keep the WebDAV URL on the canonical
         # TLS hostname, but resolve it to Starcommand's 10G/Dante address on
         # THEBATTLESHIP so traffic stays on the direct 10.10 link.
-        nextcloudWebdavHost = "cloud.starcommand.live";
+        nextcloudWebdavHost = "cloud.${domain}";
         nextcloudWebdavUser = "codywright";
         nextcloudWebdavMount = "/mnt/nextcloud/codywright";
         nextcloudNfsFilesMount = "/mnt/starcommand/Operations/nextcloud-data/data/${nextcloudWebdavUser}/files";
@@ -31,8 +36,8 @@
 
         environment.variables = {
           TASK_VAULT = "${nextcloudWebdavMediaMount}/Projects";
-          TASK_SERVER = "http://10.10.10.1:3456";
-          NEXTCLOUD_URL = "https://cloud.starcommand.live";
+          TASK_SERVER = "http://${starcommandIp}:3456";
+          NEXTCLOUD_URL = "https://cloud.${domain}";
           NEXTCLOUD_USER = "codywright";
           NEXTCLOUD_PASSWORD_FILE = config.sops.secrets."cody/task/nextcloud-password".path;
         };
@@ -47,39 +52,39 @@
         # hostnames in URLs, but pin them to Starcommand's 10.10.10.1 address
         # locally so THEBATTLESHIP talks directly to nginx instead of hairpinning
         # through Cloudflare Tunnel.
-        networking.hosts."10.10.10.1" = [
-          "starcommand.live"
-          "agent.starcommand.live"
-          "audiobooks.starcommand.live"
-          "auth.starcommand.live"
-          "bazarr.starcommand.live"
-          "bookmarks.starcommand.live"
-          "chat.starcommand.live"
-          "cloud.starcommand.live"
-          "finance.starcommand.live"
-          "git.starcommand.live"
-          "grafana.starcommand.live"
-          "grocy.starcommand.live"
-          "hermes.starcommand.live"
-          "home.starcommand.live"
-          "invoice.starcommand.live"
-          "jackett.starcommand.live"
-          "jdownloader.starcommand.live"
-          "ldap.starcommand.live"
-          "lidarr.starcommand.live"
-          "media.starcommand.live"
-          "office.starcommand.live"
-          "photos.starcommand.live"
-          "radarr.starcommand.live"
-          "readarr.starcommand.live"
-          "signaling.starcommand.live"
-          "sonarr.starcommand.live"
-          "task-preview.starcommand.live"
-          "task.starcommand.live"
-          "torrents.starcommand.live"
-          "vault.starcommand.live"
-          "workspace.starcommand.live"
-          "youtube.starcommand.live"
+        networking.hosts."${starcommandIp}" = [
+          "${domain}"
+          "agent.${domain}"
+          "audiobooks.${domain}"
+          "auth.${domain}"
+          "bazarr.${domain}"
+          "bookmarks.${domain}"
+          "chat.${domain}"
+          "cloud.${domain}"
+          "finance.${domain}"
+          "git.${domain}"
+          "grafana.${domain}"
+          "grocy.${domain}"
+          "hermes.${domain}"
+          "home.${domain}"
+          "invoice.${domain}"
+          "jackett.${domain}"
+          "jdownloader.${domain}"
+          "ldap.${domain}"
+          "lidarr.${domain}"
+          "media.${domain}"
+          "office.${domain}"
+          "photos.${domain}"
+          "radarr.${domain}"
+          "readarr.${domain}"
+          "signaling.${domain}"
+          "sonarr.${domain}"
+          "task-preview.${domain}"
+          "task.${domain}"
+          "torrents.${domain}"
+          "vault.${domain}"
+          "workspace.${domain}"
+          "youtube.${domain}"
           "invoice.fasttrackaudio.com"
         ];
         services.davfs2 = {
@@ -143,7 +148,7 @@
 
         # Mount starcommand storage over 10G NFS
         fileSystems."/mnt/starcommand" = {
-          device = "10.10.10.1:/";
+          device = "${starcommandIp}:/";
           fsType = "nfs";
           options = [
             "nfsvers=4.2"
@@ -161,7 +166,7 @@
           ];
         };
 
-        programs.ssh.knownHosts."10.10.10.1" = {
+        programs.ssh.knownHosts."${starcommandIp}" = {
           publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIENFHgs8JqCE4/dO58AN8W4M2SRgetgar94m2ntI9xb8";
         };
 

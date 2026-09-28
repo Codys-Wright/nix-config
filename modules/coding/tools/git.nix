@@ -2,8 +2,13 @@
 {
   fleet,
   lib,
+  inputs,
   ...
 }:
+let
+  # Soft vars from the private nix-secrets flake (networking topology).
+  domain = inputs.nix-secrets.networking.domains.selfhost;
+in
 {
   fleet.coding._.tools._.git = {
     description = "Git version control with delta and LFS support";
@@ -25,13 +30,13 @@
           settings = {
             credential = {
               helper = lib.mkForce "store --file ~/.git-credentials";
-              "https://git.starcommand.live" = {
+              "https://git.${domain}" = {
                 username = "codywright";
                 useHttpPath = false;
               };
             };
             url = {
-              "https://git.starcommand.live/".insteadOf = [
+              "https://git.${domain}/".insteadOf = [
                 "forgejo:"
                 "starcommand:"
               ];
