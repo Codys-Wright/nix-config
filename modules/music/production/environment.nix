@@ -34,6 +34,11 @@ in
         environment.pathsToLink = map (dir: "/lib/${dir}") audioProduction.defaultPluginDirs;
       };
 
+  };
+
+  # ~/.vst3/nixos, ~/.clap/nixos, ~/.lv2/nixos … symlinks DAWs scan.
+  fleet.music._.production._.plugin-links = {
+    description = "Per-user plugin-dir symlinks (~/.vst3/nixos, ~/.clap/nixos, …) for DAW scanning";
     homeManager =
       { config, ... }:
       {

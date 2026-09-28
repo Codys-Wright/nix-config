@@ -25,8 +25,6 @@
 
   den.aspects = {
     THEBATTLESHIP = {
-      provides.to-users.includes = [ <fleet.desktop/home> ];
-
       includes = [
         # Opportunistic k3s agent: join with cluster-on, leave with cluster-off.
         (<fleet.cluster/k3s-agent> {

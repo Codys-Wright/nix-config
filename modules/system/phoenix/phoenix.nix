@@ -10,21 +10,15 @@ in
     description = "Phoenix system management tool for cross-platform Nix configurations";
 
     nixos =
-      {
-        config,
-        pkgs,
-        lib,
-        ...
-      }:
+      { pkgs, ... }:
       let
-        inherit (lib)
-          mkIf
-          mkEnableOption
-          mkOption
-          types
-          optionalString
-          ;
-        cfg = config.fleet.phoenix;
+        # Fixed settings (the old per-host options were never set).
+        cfg = {
+          dotfilesDir = "$HOME/.flake";
+          defaultGcAge = "30d";
+          postHookScript = defaultPostHookScript;
+          extraRuntimeInputs = [ ];
+        };
 
         scripts = mkScripts {
           inherit pkgs cfg;
@@ -43,93 +37,25 @@ in
           platformName = "NixOS";
         };
 
-        # Default post-hook scripts for NixOS
-        defaultPostHookScript = ''
-          # Hyprland-specific reloads
-          if pgrep Hyprland &> /dev/null; then
-            echo "🔄 Reloading Hyprland..."
-            hyprctl reload &> /dev/null || true
-          fi
-
-          # Restart waybar if running
-          if pgrep .waybar-wrapped &> /dev/null; then
-            echo "📊 Restarting waybar..."
-            killall .waybar-wrapped &> /dev/null || true
-            waybar &> /dev/null & disown
-          fi
-
-          # Restart fnott if running
-          if pgrep fnott &> /dev/null; then
-            echo "🔔 Restarting fnott..."
-            killall fnott &> /dev/null || true
-            fnott &> /dev/null & disown
-          fi
-
-          # Stop hyprpaper if running (we use mpvpaper instead)
-          if pgrep hyprpaper &> /dev/null; then
-            echo "🖼️ Stopping hyprpaper (using mpvpaper instead)..."
-            killall hyprpaper &> /dev/null || true
-          fi
-
-          # Restart dunst if running (for notifications)
-          if pgrep .dunst-wrapped &> /dev/null; then
-            echo "📢 Restarting dunst..."
-            killall .dunst-wrapped &> /dev/null || true
-            dunst &> /dev/null & disown
-          fi
-        '';
+        # niri and noctalia reload their own config; nothing to poke.
+        defaultPostHookScript = "";
       in
       {
-        options.fleet.phoenix = {
-          enable = mkEnableOption "Phoenix system management tool";
-
-          dotfilesDir = mkOption {
-            type = types.str;
-            default = "/home/$(whoami)/nix-config";
-            description = "Path to the dotfiles directory";
-          };
-
-          defaultGcAge = mkOption {
-            type = types.str;
-            default = "30d";
-            description = "Default age for garbage collection";
-          };
-
-          postHookScript = mkOption {
-            type = types.str;
-            default = defaultPostHookScript;
-            description = "Custom script to run during post-hooks";
-          };
-
-          extraRuntimeInputs = mkOption {
-            type = types.listOf types.package;
-            default = [ ];
-            description = "Additional packages to include in phoenix script runtime";
-          };
-        };
-
-        config = mkIf cfg.enable {
-          environment.systemPackages = [
-            scripts.phoenixScript
-          ];
-        };
+        environment.systemPackages = [
+          scripts.phoenixScript
+        ];
       };
 
     darwin =
-      {
-        config,
-        pkgs,
-        lib,
-        ...
-      }:
+      { pkgs, ... }:
       let
-        inherit (lib)
-          mkIf
-          mkEnableOption
-          mkOption
-          types
-          ;
-        cfg = config.fleet.phoenix;
+        # Fixed settings (the old per-host options were never set).
+        cfg = {
+          dotfilesDir = "$HOME/.flake";
+          defaultGcAge = "30d";
+          postHookScript = defaultPostHookScript;
+          extraRuntimeInputs = [ ];
+        };
 
         scripts = mkScripts {
           inherit pkgs cfg;
@@ -180,39 +106,9 @@ in
         '';
       in
       {
-        options.fleet.phoenix = {
-          enable = mkEnableOption "Phoenix system management tool";
-
-          dotfilesDir = mkOption {
-            type = types.str;
-            default = "/Users/$(whoami)/nix-config";
-            description = "Path to the dotfiles directory";
-          };
-
-          defaultGcAge = mkOption {
-            type = types.str;
-            default = "30d";
-            description = "Default age for garbage collection";
-          };
-
-          postHookScript = mkOption {
-            type = types.str;
-            default = defaultPostHookScript;
-            description = "Custom script to run during post-hooks";
-          };
-
-          extraRuntimeInputs = mkOption {
-            type = types.listOf types.package;
-            default = [ ];
-            description = "Additional packages to include in phoenix script runtime";
-          };
-        };
-
-        config = mkIf cfg.enable {
-          environment.systemPackages = [
-            scripts.phoenixScript
-          ];
-        };
+        environment.systemPackages = [
+          scripts.phoenixScript
+        ];
       };
   };
 }

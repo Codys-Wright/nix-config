@@ -153,7 +153,9 @@ in
       Caps Lock (hold) = Mod5 (niri Mod), Physical Super = Cmd (F20 virtual modifier).
     '';
 
-    homeManager =
+    # Per-user half. Host scope never delivers homeManager, so this rides
+    # the explicit host→users edge to every user on hosts that include it.
+    provides.to-users.homeManager =
       { pkgs, ... }:
       let
         # Find the niri socket at runtime and inject it into the systemd user env.

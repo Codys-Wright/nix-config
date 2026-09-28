@@ -12,6 +12,10 @@
     description = "Joshua user — browser-only child account";
 
     includes = [
+      # Browser-only child account: skip the per-user halves that
+      # host-included features hand to every user.
+      <fleet.user/restricted>
+
       # Browser only
       <fleet.apps/browsers/brave>
       (<fleet.apps/default-browser> "brave")

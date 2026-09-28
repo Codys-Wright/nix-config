@@ -6,7 +6,9 @@
   fleet.mactahoe = {
     description = "MacTahoe theme packages - macOS Tahoe-inspired theming for GTK/niri";
 
-    homeManager =
+    # Per-user half. Host scope never delivers homeManager, so this rides
+    # the explicit host→users edge to every user on hosts that include it.
+    provides.to-users.homeManager =
       { pkgs, ... }:
       let
         gtkTheme = pkgs.mactahoe-gtk-theme.override {

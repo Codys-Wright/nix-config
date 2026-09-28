@@ -22,10 +22,5 @@
         networking.firewall.allowedUDPPorts = [ config.services.tailscale.port ];
       };
 
-    homeManager =
-      { pkgs, ... }:
-      {
-        home.packages = [ pkgs.tailscale ];
-      };
   };
 }

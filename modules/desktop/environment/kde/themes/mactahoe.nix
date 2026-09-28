@@ -20,7 +20,9 @@
         ];
       };
 
-    homeManager =
+    # Per-user half. Host scope never delivers homeManager, so this rides
+    # the explicit host→users edge to every user on hosts that include it.
+    provides.to-users.homeManager =
       {
         pkgs,
         lib,
@@ -130,9 +132,4 @@
       };
   };
 
-  # HM-only aspect for host→user forwarding via provides.to-users.
-  fleet.desktop._.environment._.kde._.themes._.mactahoe._.home = {
-    description = "MacTahoe KDE home-manager configuration (apply script, activation, kdedefaults)";
-    homeManager = fleet.desktop._.environment._.kde._.themes._.mactahoe.homeManager;
-  };
 }

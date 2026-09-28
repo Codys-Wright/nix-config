@@ -40,19 +40,10 @@
         # Firefox WebApps definitions (users/cody/modules/webapps.nix)
         cody.webapps
 
-        # Music production plugins (VST3/CLAP) and the ~/.vst3/nixos,
-        # ~/.clap/nixos, ~/.lv2/nixos plugin-dir symlinks DAWs scan —
-        # homeManager-only aspects; host-level includes of
-        # <fleet.music/production> only reach nixos config, not per-user
-        # home.packages/home.file, so both must be included here.
-        <fleet.music/production/plugins>
-        <fleet.music/production/environment>
-        # Guitar tooling (NAM model dirs etc.) — homeManager side.
-        <fleet.music._.production._.guitar>
-        # Plain `reaper` (+ SWS/ReaPack) in cody's home. The aspect's
-        # homeManager only routes when included in the HOME pipeline — host
-        # inclusion (via <fleet.music/production>) contributes nixos only.
-        <fleet.music._.production._.reaper>
+        # Per-user music production half (REAPER, plugins, plugin-dir
+        # links, guitar, Axe-Edit, Spicetify). Hosts include the system half
+        # (<fleet.music/production>) separately.
+        <fleet.music._.production/producer>
 
         <fleet/apps>
         <fleet.apps._.misc/cuteatum>
@@ -106,7 +97,6 @@
         <fleet/apple-fonts>
         <fleet.coding/ghidra>
         <fleet.coding._.tools/game-dev>
-        <fleet.hardware._.networking/tailscale>
       ];
     };
   };

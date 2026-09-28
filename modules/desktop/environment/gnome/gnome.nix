@@ -24,7 +24,9 @@
         # Theme packages are installed by the mactahoe aspect — don't duplicate here.
       };
 
-    homeManager =
+    # Per-user half. Host scope never delivers homeManager, so this rides
+    # the explicit host→users edge to every user on hosts that include it.
+    provides.to-users.homeManager =
       { pkgs, lib, ... }:
       {
         # Theme packages are installed by the mactahoe aspect — don't duplicate here.
@@ -53,9 +55,4 @@
       };
   };
 
-  # HM-only aspect for host→user forwarding via provides.to-users.
-  fleet.desktop._.environment._.gnome._.home = {
-    description = "GNOME home-manager configuration (GTK theming, dconf)";
-    homeManager = fleet.desktop._.environment._.gnome.homeManager;
-  };
 }

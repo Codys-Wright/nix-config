@@ -12,9 +12,10 @@
   fleet.music._.production._.axeEdit = {
     description = "Fractal Audio Axe-Edit III editor/librarian via Wine";
 
+    # Wine app — Linux only. mkIf, not optionalAttrs (the latter recurses).
     homeManager =
-      { pkgs, ... }:
-      {
+      { lib, pkgs, ... }:
+      lib.mkIf pkgs.stdenv.isLinux {
         home.packages = [
           # Built by the fleet-packages overlay (wine + erosanix args live there)
           pkgs.axe-edit-iii

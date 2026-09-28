@@ -53,7 +53,9 @@
         '';
       };
 
-    homeManager =
+    # Per-user half. Host scope never delivers homeManager, so this rides
+    # the explicit host→users edge to every user on hosts that include it.
+    provides.to-users.homeManager =
       { lib, ... }:
       {
         # Remap app launcher to Super+Space (macOS Spotlight style)
@@ -67,9 +69,4 @@
       };
   };
 
-  # HM-only aspect for host→user forwarding via provides.to-users.
-  fleet.desktop._.environment._.kde._.home = {
-    description = "KDE home-manager configuration (shortcuts, theme defaults)";
-    homeManager = fleet.desktop._.environment._.kde.homeManager;
-  };
 }
