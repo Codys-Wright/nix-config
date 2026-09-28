@@ -1,17 +1,11 @@
-{ inputs, ... }:
+{ ... }:
 {
   flake-file.inputs.nixos-wsl = {
     url = "github:nix-community/nixos-wsl";
-    inputs.nixpkgs.follows = "nixpkgs-stable";
+    # Fleet aspects target the main (unstable) nixpkgs; NixOS-WSL follows it.
+    inputs.nixpkgs.follows = "nixpkgs";
     inputs.flake-compat.follows = "";
   };
 
-  den.aspects = {
-    # aspect for outrider host using github:nix-community/NixOS-WSL
-    wsl.nixos = {
-      imports = [ inputs.nixos-wsl.nixosModules.default ];
-      wsl.enable = true;
-    };
-  };
-
+  # Consumed by den's wsl battery (den.hosts.<sys>.<host>.wsl.enable).
 }

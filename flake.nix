@@ -104,7 +104,7 @@
       url = "github:nix-community/nixos-wsl";
       inputs = {
         flake-compat.follows = "";
-        nixpkgs.follows = "nixpkgs-stable";
+        nixpkgs.follows = "nixpkgs";
       };
     };
     nixpkgs.url = "https://channels.nixos.org/nixpkgs-unstable/nixexprs.tar.xz";

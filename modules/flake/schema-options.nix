@@ -56,14 +56,6 @@
     )
   ];
 
-  # hosts/<name>.includes — per-host default-aspect override list (beacon sets
-  # `includes = []` to skip the home-manager defaults on the ISO).
-  den.schema.host.options.includes = lib.mkOption {
-    type = lib.types.listOf lib.types.anything;
-    default = [ ];
-    description = "Extra/override includes attached directly to the host entry";
-  };
-
   # hosts/<name>.users.<user>.extraGroups — per-host groups for one user,
   # forwarded to users.users.<name> through the `user` class below.
   den.schema.user.options.extraGroups = lib.mkOption {
