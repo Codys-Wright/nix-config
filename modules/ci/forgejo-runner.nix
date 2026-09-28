@@ -10,10 +10,11 @@
   ...
 }:
 {
-  fleet.selfhost._.forgejo-runner =
+  fleet.ci._.forgejo-runner.__functor =
+    _self:
     {
       # URL of the Forgejo instance to register against
-      url ? "https://git.starcommand.live",
+      url ? "https://git.${inputs.nix-secrets.networking.domains.selfhost}",
       # Human-readable name for this runner instance in the Forgejo admin UI
       name ? "battleship",
       # SOPS-encrypted key holding the runner registration token. The token
@@ -61,6 +62,8 @@
       ...
     }:
     {
+      # One aspect per runner instance (a host may run several).
+      name = "forgejo-runner(${name})";
       description = ''
         Forgejo Actions runner pointed at ${url}.
 

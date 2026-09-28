@@ -34,7 +34,7 @@
       <fleet/desktop>
 
       <fleet.music/production>
-      (fleet.selfhost._.samba-client { })
+      <fleet.system/samba-client>
 
       (
         { host, ... }:

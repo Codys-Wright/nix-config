@@ -11,7 +11,8 @@
   ...
 }:
 {
-  fleet.selfhost._.github-runner =
+  fleet.ci._.github-runner.__functor =
+    _self:
     {
       # Org (or repo) URL to register against. Org-level: use the org root,
       # NOT a single repo, or the registration API returns 404.
@@ -39,6 +40,8 @@
       ...
     }:
     {
+      # One aspect per runner instance (a host may run several).
+      name = "github-runner(${name})";
       description = ''
         GitHub Actions self-hosted runner registered against ${url}.
 

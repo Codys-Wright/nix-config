@@ -149,14 +149,14 @@ in
         # leaving the host.
         <fleet.music/production/inferno-control>
 
-        (fleet.selfhost._.samba-client { })
+        <fleet.system/samba-client>
 
         # Codeberg Actions runner. Pre-created in the Codeberg UI (runner
         # "THEBATTLESHIP" on the codywright account) — UUID + secret live in
         # hosts/THEBATTLESHIP/secrets.yaml. Docker-only labels on purpose:
         # no `:host` label, so Codeberg CI never executes directly on the
         # workstation the way the trusted starcommand runner above does.
-        (fleet.selfhost._.forgejo-runner {
+        (fleet.ci._.forgejo-runner {
           url = "https://codeberg.org/";
           name = "codeberg";
           uuidKey = "codeberg-runner-uuid";
@@ -177,7 +177,7 @@ in
         # effectively the sole committer, so the trust level matches the
         # starcommand runner. The codywright-account runner above keeps
         # the docker-only sandbox.
-        (fleet.selfhost._.forgejo-runner {
+        (fleet.ci._.forgejo-runner {
           url = "https://codeberg.org/";
           name = "codeberg-org";
           uuidKey = "codeberg-org-runner-uuid";
@@ -194,7 +194,7 @@ in
         # Replaces the Codeberg-mirror trigger now that GitHub is canonical:
         # lets .github/workflows/deploy.yml build + push images on the LAN.
         # Defaults cover url/name/labels/tokenKey; only the sops file differs.
-        (fleet.selfhost._.github-runner {
+        (fleet.ci._.github-runner {
           tokenSopsFile = "${inputs.nix-secrets}/sops/hosts/THEBATTLESHIP.yaml";
         })
 
