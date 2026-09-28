@@ -1,26 +1,20 @@
 # GRUB boot loader configuration aspect
-# Takes named parameters for boot configuration
 {
   lib,
   fleet,
   ...
 }:
-{
-  fleet.grub.description = "GRUB boot loader configuration for NixOS";
-
-  # Function that produces a GRUB boot loader configuration aspect
-  # Takes named parameters: { devices, uefi, useOSProber, mirroredBoots, theme, ... }
-  # Usage: (fleet.grub { uefi = true; theme = "minegrub"; })
-  fleet.grub.__functor =
-    _self:
+let
+  # The aspect body, applied to the host's settings (see `settings` below).
+  grubFor =
     {
-      devices ? [ ],
-      uefi ? true,
-      useOSProber ? false,
-      mirroredBoots ? [ ],
-      theme ? null,
+      devices,
+      uefi,
+      useOSProber,
+      mirroredBoots,
+      theme,
       ...
-    }@args:
+    }:
     let
       inherit (lib) mkIf mkMerge optionals;
       # Normalize devices to a list (accept string or list)
@@ -42,20 +36,6 @@
           false;
       hasMirroredBoots = mirroredBoots != [ ];
       grubDevices = devicesList;
-
-      # Available themes
-      availableThemes = [
-        "minegrub"
-        "minegrub-world-sel"
-        "minegrub-double-menu"
-      ];
-
-      # Validate theme
-      _ =
-        if theme != null && !(builtins.elem theme availableThemes) then
-          throw "grub: unknown theme '${theme}'. Available: ${builtins.concatStringsSep ", " availableThemes}"
-        else
-          null;
 
       # Theme includes
       themeIncludes =
@@ -103,4 +83,46 @@
           );
         };
     };
+in
+{
+  # Per-host knobs: den.hosts.<sys>.<host>.settings.grub.* (modules/den/settings.nix)
+  fleet.grub = {
+    description = "GRUB boot loader configuration for NixOS";
+
+    settings = {
+      devices = lib.mkOption {
+        type = lib.types.either lib.types.str (lib.types.listOf lib.types.str);
+        default = [ ];
+        description = "BIOS install devices (ignored for UEFI)";
+      };
+      uefi = lib.mkOption {
+        type = lib.types.nullOr lib.types.bool;
+        default = true;
+        description = "UEFI boot (null = infer from devices)";
+      };
+      useOSProber = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Probe for other operating systems";
+      };
+      mirroredBoots = lib.mkOption {
+        type = lib.types.listOf lib.types.attrs;
+        default = [ ];
+        description = "boot.loader.grub.mirroredBoots entries (e.g. mirrored ZFS roots)";
+      };
+      theme = lib.mkOption {
+        type = lib.types.nullOr (
+          lib.types.enum [
+            "minegrub"
+            "minegrub-world-sel"
+            "minegrub-double-menu"
+          ]
+        );
+        default = null;
+        description = "GRUB theme";
+      };
+    };
+
+    includes = [ ({ host, ... }: grubFor host.settings.grub) ];
+  };
 }

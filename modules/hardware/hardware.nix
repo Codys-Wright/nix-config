@@ -1,41 +1,26 @@
-# Hardware parametric aspect
-# Common hardware (audio, bluetooth, networking, facter) always included.
-# Opt in to machine-specific components: nvidia, tailscale, cuda, zsa.
-#
-# Usage: (fleet.hardware { nvidia = true; tailscale = true; })
+# Hardware facet: what every physical machine needs. Machine-specific parts
+# are included by the host next to it:
+#   <fleet.hardware/nvidia>  <fleet.hardware/cuda>  <fleet.hardware/zsa>
+#   <fleet.hardware._.networking/tailscale>
 {
   lib,
-  den,
   fleet,
   __findFile,
   ...
 }:
 {
-  fleet.hardware.description = "Hardware support configuration";
+  fleet.hardware = {
+    description = "Hardware support configuration";
 
-  fleet.hardware.__functor =
-    _self:
-    {
-      nvidia ? false,
-      tailscale ? false,
-      cuda ? false,
-      zsa ? false,
-      ...
-    }:
-    {
-      # Redistributable firmware (AMD GPU, WiFi, etc.) — needed by most hardware
-      nixos.hardware.enableRedistributableFirmware = lib.mkDefault true;
+    # Redistributable firmware (AMD GPU, WiFi, etc.) — needed by most hardware
+    nixos.hardware.enableRedistributableFirmware = lib.mkDefault true;
 
-      includes = [
-        <fleet.hardware/facter>
-        <fleet.hardware/audio>
-        <fleet.hardware/bluetooth>
-        <fleet.hardware/networking>
-        <fleet.hardware/disk-utils>
-      ]
-      ++ lib.optional tailscale <fleet.hardware._.networking/tailscale>
-      ++ lib.optional nvidia <fleet.hardware/nvidia>
-      ++ lib.optional cuda <fleet.hardware/cuda>
-      ++ lib.optional zsa <fleet.hardware/zsa>;
-    };
+    includes = [
+      <fleet.hardware/facter>
+      <fleet.hardware/audio>
+      <fleet.hardware/bluetooth>
+      <fleet.hardware/networking>
+      <fleet.hardware/disk-utils>
+    ];
+  };
 }

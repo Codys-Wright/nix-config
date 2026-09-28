@@ -41,14 +41,13 @@
         <fleet/stylix>
         <fleet.system/agent-user>
 
-        (fleet.desktop { default = "niri"; })
-        (fleet.grub { uefi = true; })
+        <fleet/desktop>
+        <fleet/grub>
 
-        (fleet.hardware {
-          nvidia = true;
-          tailscale = true;
-          zsa = true;
-        })
+        <fleet/hardware>
+        <fleet.hardware/nvidia>
+        <fleet.hardware._.networking/tailscale>
+        <fleet.hardware/zsa>
 
         <fleet/gaming>
         <fleet.apps/flatpaks> # Flatpak + Flathub (path to Flatpak bottles)

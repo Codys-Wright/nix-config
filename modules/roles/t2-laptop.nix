@@ -29,10 +29,9 @@
 
       <fleet.hardware/apple-t2>
       <fleet.hardware._.apple-t2/steam-cef-fix>
-      (fleet.hardware {
-        tailscale = true;
-      })
-      (fleet.desktop { default = "niri"; })
+      <fleet/hardware>
+      <fleet.hardware._.networking/tailscale>
+      <fleet/desktop>
 
       <fleet.music/production>
       (fleet.selfhost._.samba-client { })

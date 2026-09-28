@@ -26,7 +26,7 @@
         # Complete desktop setup with GNOME
 
         <fleet.kernel>
-        (fleet.hardware { })
+        <fleet/hardware>
       ];
 
       # Manually set fileSystems and bootloader for now
