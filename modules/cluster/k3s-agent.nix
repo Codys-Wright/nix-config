@@ -19,27 +19,16 @@
   lib,
   ...
 }:
-{
-  fleet.cluster._.k3s-agent.description =
-    "Opt-in k3s agent joining the starcommand cluster (cluster-on/off toggles)";
-  fleet.cluster._.k3s-agent.__functor =
-    _self:
+let
+  # The aspect body, applied to the host's settings (see `settings` below).
+  k3sAgentFor =
     {
-      # k3s API endpoint; default = starcommand over the fleet VPN
-      serverAddr ? "https://10.10.10.1:6443",
-      # extra node taints; opportunistic taint is always applied
-      extraTaints ? [ ],
-      # extra node labels, e.g. [ "fleet.fts/gpu=nvidia" ]
-      nodeLabels ? [ ],
-      # Dedicate this node to one or more services. Instead of the opportunistic
-      # taint, apply `fleet.fts/dedicated=<svc>:NoSchedule` + label
-      # `fleet.fts/svc.<svc>=true` per service, and JOIN AT BOOT — a dedicated
-      # node is a permanent home for its service, not an on-demand burst node.
-      # Matches a service's `placement.node`. E.g. a pihole Raspberry Pi:
-      #   (<fleet.cluster/k3s-agent> { dedicatedTo = [ "pihole" ]; })
-      dedicatedTo ? [ ],
-      # future: VPS/offsite agents join over tailscale
-      viaTailscale ? false,
+      serverAddr,
+      extraTaints,
+      nodeLabels,
+      dedicatedTo,
+      viaTailscale,
+      k3sPackage,
       ...
     }:
     {
@@ -60,7 +49,8 @@
           # v1: drain/uncordon run on the server over SSH (root@server has
           # cluster-admin kubectl). Phase 3 replaces this with a local
           # drain-scoped ServiceAccount kubeconfig from nix-secrets.
-          serverSsh = "ssh -o ConnectTimeout=10 -o BatchMode=yes root@10.10.10.1";
+          serverHost = lib.head (lib.splitString ":" (lib.removePrefix "https://" serverAddr));
+          serverSsh = "ssh -o ConnectTimeout=10 -o BatchMode=yes root@${serverHost}";
 
           cluster-on = pkgs.writeShellApplication {
             name = "cluster-on";
@@ -99,7 +89,7 @@
             # Pin to the server minor: kubelet must never be NEWER than the
             # API server (version-skew policy). starcommand (nixpkgs 25.11)
             # runs k3s 1.33; fleet hosts on newer nixpkgs would drift ahead.
-            package = pkgs.k3s_1_33;
+            package = pkgs.${k3sPackage};
             role = "agent";
             inherit serverAddr;
             tokenFile = config.sops.secrets."k3s/token".path;
@@ -134,4 +124,53 @@
           ];
         };
     };
+in
+{
+  # Cluster membership is host data:
+  #   den.hosts.<sys>.<host>.settings.cluster.k3s-agent = { dedicatedTo = [ "pihole" ]; };
+  fleet.cluster._.k3s-agent = {
+    description = "Opt-in k3s agent joining the starcommand cluster (cluster-on/off toggles)";
+
+    settings = {
+      serverAddr = lib.mkOption {
+        type = lib.types.str;
+        default = "https://10.10.10.1:6443";
+        description = "k3s API endpoint (default: starcommand over the fleet VPN); drain/uncordon SSH to its host";
+      };
+      extraTaints = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        default = [ ];
+        description = "Extra node taints (the opportunistic/dedicated taint is always applied)";
+      };
+      nodeLabels = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        default = [ ];
+        example = [ "fleet.fts/gpu=nvidia" ];
+        description = "Extra node labels";
+      };
+      # Instead of the opportunistic taint, apply fleet.fts/dedicated=<svc>
+      # + label fleet.fts/svc.<svc>=true per service and JOIN AT BOOT — a
+      # dedicated node is a permanent home for its service. Matches a
+      # service's `placement.node`.
+      dedicatedTo = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        default = [ ];
+        description = "Services this node is dedicated to";
+      };
+      viaTailscale = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Join over tailscale (VPS/offsite agents; future)";
+      };
+      # Pin to the server minor: kubelet must never be NEWER than the API
+      # server (version-skew policy). starcommand runs k3s 1.33.
+      k3sPackage = lib.mkOption {
+        type = lib.types.str;
+        default = "k3s_1_33";
+        description = "nixpkgs attribute of the k3s package (match the server minor)";
+      };
+    };
+
+    includes = [ ({ host, ... }: k3sAgentFor host.settings.cluster.k3s-agent) ];
+  };
 }

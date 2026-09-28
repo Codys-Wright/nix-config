@@ -2,7 +2,7 @@
 # Usage: import from other modules as `ssh-keys` via _module.args
 { lib, ... }:
 {
-  _module.args.ssh-keys = {
+  _module.args.ssh-keys = rec {
     # Personal SSH public keys
     personal = {
       cody = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO8y8AMfYQnvu3BvjJ54/qYJcedNkMHmnjexine1ypda cody";
@@ -17,13 +17,7 @@
       starcommandAgent = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFrMb6rGjMO0EzWfkG71kYnkbtxW5+oIUCyaum3uHViW agent@starcommand";
     };
 
-    # All keys as a flat list
-    all = [
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO8y8AMfYQnvu3BvjJ54/qYJcedNkMHmnjexine1ypda cody"
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEExJ9+wtbBN4v9uWZwZKK+K83/ZscpIyuVMCQkuMY2c cody@voyager"
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICGTCYWYifaiPcQVQnebV/cFVnvGULPJ2+jVEkPIEgXg THEBATTLESHIP-deploy"
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK2Q/nkryxc2ZL5xTsYApQxFXK5HgxPTjIcl+OGAsKy8 starcommand-deploy"
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFrMb6rGjMO0EzWfkG71kYnkbtxW5+oIUCyaum3uHViW agent@starcommand"
-    ];
+    # All keys as a flat list (personal, then fleet; each by name)
+    all = lib.attrValues personal ++ lib.attrValues fleet;
   };
 }

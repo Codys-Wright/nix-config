@@ -13,6 +13,10 @@ in
     THEBATTLESHIP = {
       description = "The Main System, ready for everyday battle (all users)";
       timeZone = "America/Los_Angeles";
+      settings.cluster.k3s-agent = {
+        dedicatedTo = [ "minecraft" ];
+        nodeLabels = [ "fleet.fts/gpu=nvidia" ];
+      };
       deployment.ip = "100.68.255.30";
       users.cody = {
         extraGroups = [
@@ -31,11 +35,9 @@ in
   den.aspects = {
     THEBATTLESHIP = {
       includes = [
-        # Opportunistic k3s agent: join with cluster-on, leave with cluster-off.
-        (<fleet.cluster/k3s-agent> {
-          dedicatedTo = [ "minecraft" ];
-          nodeLabels = [ "fleet.fts/gpu=nvidia" ];
-        })
+        # k3s agent; membership (dedicated to minecraft, GPU label) is in
+        # settings.cluster.k3s-agent on the host entry above.
+        <fleet.cluster/k3s-agent>
 
         <fleet/fonts>
         <fleet/phoenix>
