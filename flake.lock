@@ -133,13 +133,13 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1779400172,
-        "narHash": "sha256-YxxKIT1hDL6KubLPQB4S98mCQeo4x5+Ry6CBUoRwQgI=",
-        "path": "/home/cody/Development/Tools/controller-split",
+        "lastModified": 1789754742,
+        "narHash": "sha256-sYRtcUl0RxoKmAYxArKyK4D/jesz2kiXVEBagx99Zbc=",
+        "path": "/run/media/Development/Tools/controller-split",
         "type": "path"
       },
       "original": {
-        "path": "/home/cody/Development/Tools/controller-split",
+        "path": "/run/media/Development/Tools/controller-split",
         "type": "path"
       }
     },
@@ -271,11 +271,11 @@
     "daw": {
       "flake": false,
       "locked": {
-        "lastModified": 1775699069,
-        "narHash": "sha256-2PW10q4hIsvAjWUy4R3L6NVOrC8rmg777ugmd90OBMc=",
+        "lastModified": 1790443338,
+        "narHash": "sha256-BRe3dOsRHTjQ4mmTiXn8X85n511ceTOBpj9wzYNv9Mk=",
         "owner": "FastTrackStudios",
         "repo": "daw",
-        "rev": "95417c043eb9394e503eb5180293e2019601ef42",
+        "rev": "bb66d3480623403aacdf2f9344e627e401a4b8f3",
         "type": "github"
       },
       "original": {

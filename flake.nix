@@ -19,7 +19,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     controller-split = {
-      url = "path:/home/cody/Development/Tools/controller-split";
+      url = "path:/run/media/Development/Tools/controller-split";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     darwin = {
