@@ -11,7 +11,7 @@
     description = "Zellij terminal multiplexer with custom configuration";
 
     # Darwin-specific configuration
-    darwin =
+    provides.to-hosts.darwin =
       {
         config,
         pkgs,
@@ -28,7 +28,7 @@
       };
 
     # NixOS-specific configuration
-    nixos =
+    provides.to-hosts.nixos =
       {
         config,
         pkgs,

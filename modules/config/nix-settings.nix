@@ -41,26 +41,6 @@ let
           options = "--delete-older-than 7d";
         };
       };
-
-      # crates.io answers 403 to any User-Agent shaped like
-      # `curl/<version>`, and nixpkgs' fetchurl introduces itself as
-      # "curl/8.18.0 Nixpkgs/26.11". Every crate tarball not already in
-      # the store therefore fails to download:
-      #
-      #   trying https://crates.io/api/v1/crates/toml_edit/0.25.3+.../download
-      #   curl: (22) The requested URL returned error: 403
-      #   error: cannot download crate-toml_edit-... from any mirror
-      #
-      # It hits anything vendoring crates through nix — importCargoLock,
-      # crane, fetchCrate — and it reads like a dependency problem in
-      # whatever happened to be building. It is what actually stopped
-      # THEBATTLESHIP rebuilding (via fts-rigs → reaper-launcher).
-      #
-      # Dropping the version is enough; bare "Nixpkgs" is accepted.
-      # fetchurl declares NIX_CURL_FLAGS impure precisely so a host can
-      # do this. Remove once nixpkgs stops sending a `curl/` UA.
-      systemd.services.nix-daemon.environment.NIX_CURL_FLAGS =
-        lib.mkIf config.nix.enable "--user-agent Nixpkgs";
     };
 in
 {
@@ -70,5 +50,30 @@ in
       <fleet/nix>
     ];
     os = nixSettings;
+
+    # NixOS-only (darwin has no systemd).
+    nixos =
+      { config, lib, ... }:
+      {
+        # crates.io answers 403 to any User-Agent shaped like
+        # `curl/<version>`, and nixpkgs' fetchurl introduces itself as
+        # "curl/8.18.0 Nixpkgs/26.11". Every crate tarball not already in
+        # the store therefore fails to download:
+        #
+        #   trying https://crates.io/api/v1/crates/toml_edit/0.25.3+.../download
+        #   curl: (22) The requested URL returned error: 403
+        #   error: cannot download crate-toml_edit-... from any mirror
+        #
+        # It hits anything vendoring crates through nix — importCargoLock,
+        # crane, fetchCrate — and it reads like a dependency problem in
+        # whatever happened to be building. It is what actually stopped
+        # THEBATTLESHIP rebuilding (via fts-rigs → reaper-launcher).
+        #
+        # Dropping the version is enough; bare "Nixpkgs" is accepted.
+        # fetchurl declares NIX_CURL_FLAGS impure precisely so a host can
+        # do this. Remove once nixpkgs stops sending a `curl/` UA.
+        systemd.services.nix-daemon.environment.NIX_CURL_FLAGS =
+          lib.mkIf config.nix.enable "--user-agent Nixpkgs";
+      };
   };
 }

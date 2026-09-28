@@ -53,9 +53,12 @@
   };
   den.schema.user.includes = [
     (
-      { user, ... }:
+      { host, user, ... }:
       {
         name = "entity-extra-groups/${user.userName}";
+      }
+      # NixOS only — nix-darwin's users.users has no extraGroups.
+      // lib.optionalAttrs ((host.class or null) == "nixos") {
         user.extraGroups = user.extraGroups;
       }
     )

@@ -54,30 +54,9 @@
         (<fleet.apps/default-browser> "brave")
         cody.opendeck
 
-        (fleet.coding {
-          editor = {
-            default = "nvf";
-          };
-          terminal = {
-            default = "ghostty";
-          };
-          shell = {
-            default = "nushell";
-          };
-          languages = [
-            "rust"
-            "typescript"
-            "python"
-          ];
-          tools = [
-            "android"
-            "dioxus"
-            "flyctl"
-            "reverse-engineering"
-            "opencode"
-            "podman"
-          ];
-        })
+        <fleet/coding>
+        (<fleet.user/shell> "nushell")
+        (<fleet.coding/user-terminal> "ghostty")
         (fleet.git-identity {
           name = "Cody Wright";
           email = "acodywright@gmail.com";

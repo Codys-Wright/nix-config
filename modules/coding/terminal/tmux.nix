@@ -8,7 +8,7 @@
     description = "Tmux terminal multiplexer with custom configuration and plugins";
 
     # Darwin-specific configuration
-    darwin =
+    provides.to-hosts.darwin =
       {
         config,
         pkgs,
@@ -25,7 +25,7 @@
       };
 
     # NixOS-specific configuration
-    nixos =
+    provides.to-hosts.nixos =
       {
         config,
         pkgs,

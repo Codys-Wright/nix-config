@@ -2,7 +2,7 @@
 {
   fleet.coding._.tools._.reverse-engineering = {
     description = "Reverse engineering and binary analysis tools";
-    nixos =
+    provides.to-hosts.nixos =
       { pkgs, ... }:
       {
         environment.systemPackages = with pkgs; [

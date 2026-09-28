@@ -7,7 +7,7 @@
   fleet.coding._.terminals._.ghostty = {
     description = "Ghostty terminal emulator (Linux only)";
 
-    nixos =
+    provides.to-hosts.nixos =
       { pkgs, ... }:
       {
         environment.systemPackages = [

@@ -20,7 +20,7 @@
         '';
       };
 
-    nixos =
+    provides.to-hosts.nixos =
       { pkgs, ... }:
       let
         obsidian = pkgs.obsidian.overrideAttrs (prev: {

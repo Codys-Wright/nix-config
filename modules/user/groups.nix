@@ -11,9 +11,16 @@
 #
 # Root-equivalent groups (docker, libvirtd, the podman socket) go through
 # admin-groups so co-op / guest / child accounts never get them.
+#
+# NixOS only: nix-darwin's users.users has no extraGroups, and the `user`
+# class routes into whatever the host's class is. `host.class` is static
+# entity data, so branching on it at the aspect level is safe.
 { fleet, lib, ... }:
 let
   label = kind: groups: "${kind}(${lib.concatStringsSep "," groups})";
+
+  onNixos =
+    host: userModule: lib.optionalAttrs ((host.class or null) == "nixos") { user = userModule; };
 
   # Class-module body, so hasAspect reads the frozen tree (cycle-safe).
   adminOnly =
@@ -22,19 +29,25 @@ let
     {
       extraGroups = lib.mkIf (user.hasAspect fleet.user._.admin) groups;
     };
+
+  mkGroups = kind: userModuleFor: groups: {
+    name = label kind groups;
+    includes = [ ({ host, user, ... }: onNixos host (userModuleFor groups user)) ];
+    provides.to-users = { host, user, ... }: onNixos host (userModuleFor groups user);
+  };
 in
 {
-  fleet.user._.groups.__functor = _self: groups: {
-    name = label "groups" groups;
-    description = "Adds the users it reaches to: ${lib.concatStringsSep ", " groups}";
-    user.extraGroups = groups;
-    provides.to-users.user.extraGroups = groups;
-  };
+  fleet.user._.groups.__functor =
+    _self: groups:
+    mkGroups "groups" (groups: _user: { extraGroups = groups; }) groups
+    // {
+      description = "Adds the users it reaches to: ${lib.concatStringsSep ", " groups}";
+    };
 
-  fleet.user._.admin-groups.__functor = _self: groups: {
-    name = label "admin-groups" groups;
-    description = "Adds admin users (those with <fleet.user/admin>) to: ${lib.concatStringsSep ", " groups}";
-    includes = [ ({ user, ... }: { user = adminOnly groups user; }) ];
-    provides.to-users = { user, ... }: { user = adminOnly groups user; };
-  };
+  fleet.user._.admin-groups.__functor =
+    _self: groups:
+    mkGroups "admin-groups" adminOnly groups
+    // {
+      description = "Adds admin users (those with <fleet.user/admin>) to: ${lib.concatStringsSep ", " groups}";
+    };
 }

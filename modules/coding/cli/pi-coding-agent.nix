@@ -3,7 +3,7 @@
   fleet.coding._.cli._.pi-coding-agent = {
     description = "pi-coding-agent — coding agent CLI";
 
-    os =
+    provides.to-hosts.os =
       { pkgs, ... }:
       {
         environment.systemPackages = with pkgs; [

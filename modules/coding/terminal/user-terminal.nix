@@ -1,47 +1,16 @@
+# A user's preferred terminal ($TERMINAL).
+#
+#   den.aspects.vic.includes = [ (<fleet.coding/user-terminal> "kitty") ];
+{ lib, ... }:
 {
-  lib,
-  den,
-  fleet,
-  __findFile,
-  ...
-}:
-let
+  fleet.coding._.user-terminal.__functor = _self: terminal: {
+    name = "user-terminal(${terminal})";
+    description = "Sets $TERMINAL to ${terminal} for the user and on the hosts they live on";
 
-  description = ''
-    Sets a user's preferred terminal and TERM environment variable.
+    homeManager.home.sessionVariables.TERMINAL = lib.mkForce terminal;
 
-    Usage:
-
-      den.aspects.vic.includes = [
-        (fleet.coding._.user-terminal "kitty")
-      ];
-  '';
-
-  userTerminal =
-    terminal: from:
-    let
-      os =
-        { lib, ... }:
-        {
-          environment.variables.TERMINAL = lib.mkForce terminal;
-        };
-      homeManager =
-        { lib, ... }:
-        {
-          home.sessionVariables.TERMINAL = lib.mkForce terminal;
-        };
-    in
-    {
-      inherit os homeManager;
-    };
-
-in
-{
-  fleet.coding._.user-terminal = terminal: {
-    inherit description;
-    includes = [
-      ({ user, ... }: userTerminal terminal user)
-      ({ home, ... }: userTerminal terminal home)
-    ];
+    # System-wide too, so compositor-spawned processes (outside a login
+    # shell) see it. One value per host — only the admin sets a terminal.
+    provides.to-hosts.os.environment.variables.TERMINAL = lib.mkForce terminal;
   };
 }

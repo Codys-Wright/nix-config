@@ -49,7 +49,6 @@
         })
 
         <fleet/gaming>
-        <fleet/apps>
         <fleet.apps/flatpaks> # Flatpak + Flathub (path to Flatpak bottles)
         <fleet.system/printing> # CUPS + mDNS network printer discovery
         <fleet.hardware/cuda> # CUDA toolkit (RTX present; nvidia already on)

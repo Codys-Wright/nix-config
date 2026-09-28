@@ -11,16 +11,15 @@
       # Proton tooling (protonup-rs, protontricks, dotnet 6) in the user's
       # home. System-wide GE-Proton comes from <fleet.gaming/steam> at the host.
       <fleet.gaming/proton>
-    ];
-
-    user.extraGroups = [
-      "networkmanager"
-      "audio"
-      "video"
-      "render"
-      "input"
-      "gamemode"
-      "pipewire"
+      (<fleet.user/groups> [
+        "networkmanager"
+        "audio"
+        "video"
+        "render"
+        "input"
+        "gamemode"
+        "pipewire"
+      ])
     ];
 
     homeManager =

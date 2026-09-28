@@ -20,7 +20,7 @@
         ];
       };
 
-    nixos =
+    provides.to-hosts.nixos =
       { pkgs, ... }:
       {
         fonts.packages = with inputs.apple-fonts.packages.${pkgs.stdenv.hostPlatform.system}; [

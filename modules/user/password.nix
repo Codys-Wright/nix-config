@@ -41,18 +41,20 @@
     in
     {
       inherit description;
+      name = "password(${method})";
+      # `user` class → users.users.<this user> on every NixOS host they live
+      # on (nix-darwin has no password options; macOS owns account auth).
       includes = [
         (
-          { user, ... }:
-          {
-            nixos.users.users.${user.userName} = lib.mkMerge (
-              lib.lists.optional (method == "initial") { initialPassword = value; }
-              ++ lib.lists.optional (method == "hashed") { hashedPassword = value; }
-              ++ lib.lists.optional (method == "none") {
+          { host, ... }:
+          lib.optionalAttrs ((host.class or null) == "nixos") {
+            user =
+              lib.optionalAttrs (method == "initial") { initialPassword = value; }
+              // lib.optionalAttrs (method == "hashed") { hashedPassword = value; }
+              // lib.optionalAttrs (method == "none") {
                 password = "!";
                 hashedPassword = null;
-              }
-            );
+              };
           }
         )
       ];

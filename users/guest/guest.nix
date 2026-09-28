@@ -9,11 +9,11 @@
 
     includes = [
       (<den/user-shell> "bash")
+      (<fleet.user/groups> [ "networkmanager" ])
     ];
 
     user = {
       description = "Guest";
-      extraGroups = [ "networkmanager" ];
       password = ""; # passwordless login
     };
 

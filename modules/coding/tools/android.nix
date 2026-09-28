@@ -11,7 +11,7 @@
       ])
     ];
 
-    nixos =
+    provides.to-hosts.nixos =
       { pkgs, ... }:
       let
         androidEnv = pkgs.androidenv.override { licenseAccepted = true; };

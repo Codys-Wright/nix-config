@@ -34,7 +34,7 @@
         };
       };
 
-    nixos =
+    provides.to-hosts.nixos =
       { pkgs, ... }:
       {
         environment.systemPackages = with pkgs; [

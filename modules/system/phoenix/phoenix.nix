@@ -62,7 +62,7 @@ in
           baseRuntimeInputs = with pkgs; [
             git
             nix
-            darwin-rebuild
+            # darwin-rebuild: nix-darwin puts it on PATH (not a nixpkgs attr).
           ];
           hostnameCmd = "hostname -s";
           systemRebuildCmd = "darwin-rebuild switch --flake";

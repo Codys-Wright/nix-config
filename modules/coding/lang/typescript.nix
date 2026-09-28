@@ -5,7 +5,7 @@
     description = "TypeScript and Node.js development environment";
 
     # Enable nix-ld for running dynamically linked binaries (bun global installs, etc.)
-    nixos =
+    provides.to-hosts.nixos =
       { pkgs, lib, ... }:
       {
         programs.nix-ld = {

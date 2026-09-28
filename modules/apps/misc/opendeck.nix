@@ -2,7 +2,7 @@
   fleet.apps._.misc._.opendeck = {
     description = "OpenDeck - Stream Deck controller software";
 
-    nixos =
+    provides.to-hosts.nixos =
       { pkgs, ... }:
       let
         opendeck = pkgs.opendeck;

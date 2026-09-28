@@ -6,7 +6,7 @@
 {
   fleet.coding._.shells._.oh-my-posh = {
     description = "Oh My Posh prompt theme with custom configuration";
-    os =
+    provides.to-hosts.os =
       { pkgs, ... }:
       {
         environment.systemPackages = [ pkgs.oh-my-posh ];

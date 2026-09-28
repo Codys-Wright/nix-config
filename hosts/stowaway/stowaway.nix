@@ -46,7 +46,6 @@
         <fleet/mactahoe>
         <fleet/stylix>
         <fleet/kernel>
-        <fleet/apps>
         <fleet/gaming>
 
         <fleet.system/ssh>

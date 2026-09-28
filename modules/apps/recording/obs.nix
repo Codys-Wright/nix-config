@@ -7,7 +7,7 @@
   fleet.apps._.recording._.obs = {
     description = "OBS Studio with Wayland capture, pipewire audio, and NVIDIA encoding";
 
-    nixos =
+    provides.to-hosts.nixos =
       { pkgs, ... }:
       {
         programs.obs-studio = {

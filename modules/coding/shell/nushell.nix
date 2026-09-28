@@ -7,7 +7,7 @@
   fleet.coding._.shells._.nushell = {
     description = "Nushell structured data shell with sensible defaults";
 
-    os =
+    provides.to-hosts.os =
       { pkgs, ... }:
       {
         environment.systemPackages = [ pkgs.nushell ];

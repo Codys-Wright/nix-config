@@ -10,7 +10,7 @@
       ];
     };
 
-    nixos =
+    provides.to-hosts.nixos =
       { pkgs, ... }:
       {
         # Install appimage-run system-wide

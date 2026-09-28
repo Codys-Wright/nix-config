@@ -17,7 +17,7 @@
         '';
       };
 
-    nixos =
+    provides.to-hosts.nixos =
       { pkgs, ... }:
       {
         # grim/slurp are Wayland screenshot dependencies needed system-wide

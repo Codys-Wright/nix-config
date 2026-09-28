@@ -13,7 +13,7 @@
     description = "Hermes agent package and hermes-starcommand CLI (SSH tunnel to Starcommand Hermes sessions)";
 
     # NixOS system packages
-    nixos =
+    provides.to-hosts.nixos =
       { pkgs, ... }:
       let
         hermesStarcommand = pkgs.writeShellApplication {
@@ -192,7 +192,7 @@
       };
 
     # Darwin system packages
-    darwin =
+    provides.to-hosts.darwin =
       { pkgs, ... }:
       {
         environment.systemPackages = [

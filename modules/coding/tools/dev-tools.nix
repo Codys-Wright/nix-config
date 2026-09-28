@@ -5,7 +5,7 @@
     description = "General development tools and utilities";
 
     # NixOS-specific tools (Linux-only)
-    nixos =
+    provides.to-hosts.nixos =
       { pkgs, ... }:
       {
         environment.systemPackages = with pkgs; [
@@ -17,7 +17,7 @@
       };
 
     # Darwin-specific tools (macOS-only)
-    darwin =
+    provides.to-hosts.darwin =
       { pkgs, ... }:
       {
         # Add Darwin-specific tools here if needed

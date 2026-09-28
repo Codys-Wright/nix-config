@@ -6,7 +6,7 @@
 
     includes = [ (fleet.user._.admin-groups [ "podman" ]) ];
 
-    nixos =
+    provides.to-hosts.nixos =
       { pkgs, ... }:
       {
         # Enable containers
