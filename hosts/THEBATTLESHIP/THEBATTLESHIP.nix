@@ -9,6 +9,8 @@
   den.hosts.x86_64-linux = {
     THEBATTLESHIP = {
       description = "The Main System, ready for everyday battle (all users)";
+      timeZone = "America/Los_Angeles";
+      deployment.ip = "100.68.255.30";
       users.cody = {
         extraGroups = [
           "audio"
@@ -336,7 +338,6 @@
 
         <fleet.system/avahi>
         <fleet.system/virtualization>
-        (fleet.deploy { ip = "100.68.255.30"; })
 
         # 10G network tuning for starcommand link
         # Static 10.10.10.10/24 — outside starcommand dnsmasq DHCP range (.100-.200),
@@ -364,7 +365,6 @@
           ...
         }:
         {
-          time.timeZone = "America/Los_Angeles";
           boot.loader.grub.configurationLimit = 3;
           services.dbus.implementation = "dbus";
 

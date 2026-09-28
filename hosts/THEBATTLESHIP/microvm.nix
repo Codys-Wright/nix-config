@@ -11,6 +11,7 @@
   den.hosts.x86_64-linux.THEBATTLESHIP-vm = {
     description = "THEBATTLESHIP MicroVM — graphical niri desktop for local testing";
     users.cody = { };
+    timeZone = "America/Los_Angeles";
   };
 
   den.aspects.THEBATTLESHIP-vm = {
@@ -19,11 +20,5 @@
       <fleet.desktop/environment/niri>
       # Dev tooling comes from cody's own aspect (<fleet/coding>).
     ];
-
-    nixos =
-      { ... }:
-      {
-        time.timeZone = "America/Los_Angeles";
-      };
   };
 }

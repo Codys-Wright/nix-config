@@ -1,37 +1,12 @@
 # deploy-rs integration
-# Reads deployment config from host configurations and sets up deploy-rs
+# deploy.nodes come from den.hosts.*.*.deployment (modules/flake/deploy-targets.nix).
 # SSH keys are stored in SOPS and decrypted on-demand
 {
   inputs,
   lib,
+  deployTargets,
   ...
 }:
-let
-  # Helper to read deployment config from nixosConfigurations
-  # SSH keys are now stored in SOPS, not as files
-  getDeploymentConfig =
-    hostName: hostConfig:
-    let
-      # Safely try to get deployment config, returning null on any error
-      tryGetCfg = builtins.tryEval (hostConfig.config.deployment or { });
-      cfg = if tryGetCfg.success then tryGetCfg.value else { };
-      # Check if deployment is enabled AND ip is set (non-empty string)
-      isDeployable = (cfg.enable or false) && (cfg.ip or "") != "";
-    in
-    if isDeployable then
-      {
-        inherit hostName;
-        ip = cfg.ip;
-        sshPort = cfg.sshPort or 22;
-        sshUser = cfg.sshUser or "admin";
-        # SSH key is in SOPS, will be decrypted on-demand
-        # Public keys and known_hosts are still files
-        hostKeyPub = "./hosts/${hostName}/host_key.pub";
-        knownHostsPath = "./hosts/${hostName}/known_hosts";
-      }
-    else
-      null;
-in
 {
   # Add deploy-rs to flake inputs
   flake-file.inputs.deploy-rs.url = "github:serokell/deploy-rs";
@@ -147,11 +122,16 @@ in
   # Define deploy-rs flake outputs
   flake =
     let
-      # Get nixosConfigurations from the flake
       nixosConfigs = inputs.self.nixosConfigurations or { };
 
-      # Collect all hosts with deployment enabled
-      deploymentHosts = lib.filterAttrs (_: v: v != null) (lib.mapAttrs getDeploymentConfig nixosConfigs);
+      # deploy-rs activates NixOS profiles; darwin targets use `just deploy-darwin`.
+      deploymentHosts = lib.mapAttrs (
+        hostName: target:
+        target
+        // {
+          knownHostsPath = "./hosts/${hostName}/known_hosts";
+        }
+      ) (lib.filterAttrs (_: target: target.class == "nixos") deployTargets);
     in
     {
       # Define deploy-rs nodes from host configurations

@@ -4,37 +4,57 @@
 # never to delete the data that set it.
 { lib, ... }:
 {
-  # hosts/<name>.deployment — deploy-rs wiring consumed by
-  # modules/deployment/deploy.nix (ip/sshUser/sshPort per host).
+  # hosts/<name>.deployment — where a host is reached for deployment.
+  # Read from den.hosts by modules/flake/deploy-targets.nix.
   den.schema.host.options.deployment = lib.mkOption {
-    type = lib.types.submodule {
-      freeformType = lib.types.attrsOf lib.types.anything;
-      options = {
-        enable = lib.mkOption {
-          type = lib.types.bool;
-          default = false;
-          description = "Deploy this host via deploy-rs";
+    type = lib.types.submodule (
+      { config, ... }:
+      {
+        options = {
+          enable = lib.mkOption {
+            type = lib.types.bool;
+            default = config.ip != null;
+            defaultText = "ip != null";
+            description = "Deploy this host (deploy-rs / just deploy); on whenever ip is set";
+          };
+          ip = lib.mkOption {
+            type = lib.types.nullOr lib.types.str;
+            default = null;
+            description = "Target address for deploy-rs";
+          };
+          sshUser = lib.mkOption {
+            type = lib.types.str;
+            default = "root";
+            description = "SSH user deploy-rs connects as";
+          };
+          sshPort = lib.mkOption {
+            type = lib.types.port;
+            default = 22;
+            description = "SSH port deploy-rs connects to";
+          };
         };
-        ip = lib.mkOption {
-          type = lib.types.nullOr lib.types.str;
-          default = null;
-          description = "Target address for deploy-rs";
-        };
-        sshUser = lib.mkOption {
-          type = lib.types.str;
-          default = "root";
-          description = "SSH user deploy-rs connects as";
-        };
-        sshPort = lib.mkOption {
-          type = lib.types.port;
-          default = 22;
-          description = "SSH port deploy-rs connects to";
-        };
-      };
-    };
+      }
+    );
     default = { };
     description = "deploy-rs deployment settings for this host";
   };
+
+  # hosts/<name>.timeZone — the host's IANA timezone (NixOS; null = UTC).
+  den.schema.host.options.timeZone = lib.mkOption {
+    type = lib.types.nullOr lib.types.str;
+    default = null;
+    example = "America/Los_Angeles";
+    description = "IANA timezone for the host (sets time.timeZone on NixOS)";
+  };
+  den.schema.host.includes = [
+    (
+      { host, ... }:
+      {
+        name = "entity-timezone/${host.name}";
+        nixos = lib.mkIf (host.timeZone != null) { time.timeZone = host.timeZone; };
+      }
+    )
+  ];
 
   # hosts/<name>.includes — per-host default-aspect override list (beacon sets
   # `includes = []` to skip the home-manager defaults on the ISO).

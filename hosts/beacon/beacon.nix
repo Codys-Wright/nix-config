@@ -7,6 +7,10 @@
 {
   den.hosts.x86_64-linux.beacon = {
     description = "Universal installation beacon ISO";
+    deployment = {
+      ip = "192.168.0.100";
+      sshUser = "installer";
+    };
     aspect = den.aspects.beacon-aspect;
     includes = [ ]; # skip home-manager defaults for ISO
   };
@@ -16,10 +20,6 @@
       <fleet/fonts>
       <fleet/phoenix>
       <fleet/beacon>
-      (fleet.deploy {
-        ip = "192.168.0.100";
-        sshUser = "installer";
-      })
     ];
   };
 }

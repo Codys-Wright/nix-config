@@ -4,6 +4,7 @@
 {
   inputs,
   lib,
+  deployTargets,
   ...
 }:
 {
@@ -22,10 +23,9 @@
       mkHostPackages =
         hostname: hostConfig:
         let
-          # Check if host has deployment config
-          tryGetCfg = builtins.tryEval (hostConfig.config.deployment or { });
-          deploymentCfg = if tryGetCfg.success then tryGetCfg.value else { };
-          hasDeployment = (deploymentCfg.enable or false) && (deploymentCfg.ip or "") != "";
+          # den.hosts.*.*.deployment, via modules/flake/deploy-targets.nix
+          deploymentCfg = deployTargets.${hostname} or { };
+          hasDeployment = deployTargets ? ${hostname};
 
           # Get beacon ISO if available
           hasISO = hostConfig.config.system.build ? isoImage;

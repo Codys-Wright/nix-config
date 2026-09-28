@@ -38,4 +38,23 @@
         ];
       };
   };
+
+  # Steam's CEF UI segfaults on the T2's half-initialized iGPU; run only the
+  # client UI in software (games still render on the GPU). Per-user file, so
+  # it rides provides.to-users to everyone on the host.
+  fleet.hardware._.apple-t2._.steam-cef-fix = {
+    description = "Steam desktop entry override — -cef-disable-gpu to avoid CEF SIGSEGV on T2 half-initialized iGPU";
+    provides.to-users.homeManager.home.file.".local/share/applications/steam.desktop".text = ''
+      [Desktop Entry]
+      Name=Steam
+      Comment=Application for managing and playing games on Steam
+      Exec=steam -cef-disable-gpu %U
+      Icon=steam
+      Terminal=false
+      Type=Application
+      Categories=Network;FileTransfer;Game;
+      MimeType=x-scheme-handler/steam;x-scheme-handler/steamlink;
+      PrefersNonDefaultGPU=true
+    '';
+  };
 }

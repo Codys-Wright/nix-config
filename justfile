@@ -312,7 +312,7 @@ deploy-darwin host:
     PASS="    "
 
     # Get deployment config from flake
-    DEPLOY_CFG=$(nix eval --json ".#darwinConfigurations.{{host}}.config.deployment" 2>/dev/null || echo "{}")
+    DEPLOY_CFG=$(nix eval --json ".#deployTargets.{{host}}" 2>/dev/null || echo "{}")
     IP=$(echo "$DEPLOY_CFG" | jq -r '.ip // "192.168.0.65"')
     PORT=$(echo "$DEPLOY_CFG" | jq -r '.sshPort // 22')
     USER=$(echo "$DEPLOY_CFG" | jq -r '.sshUser // "rat"')
