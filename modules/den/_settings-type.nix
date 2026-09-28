@@ -1,7 +1,7 @@
 # Aspect settings generator (den guides/aspect-settings), adapted to this
 # fleet: it walks the `fleet` namespace and descends through `provides`/`_`,
-# which is where fleet sub-aspects live (fleet.hardware._.audio._.pipewire).
-# Paths drop the `_`: host.settings.hardware.audio.pipewire.clockQuantum.
+# which is where fleet sub-aspects live (fleet.audio._.pipewire).
+# Paths drop the `_`: host.settings.audio.pipewire.clockQuantum.
 #
 # Plain function file — the leading underscore keeps import-tree away.
 { den, lib }:

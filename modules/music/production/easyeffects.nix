@@ -4,7 +4,7 @@
 #
 # RT placement: EasyEffects processes through PipeWire filter nodes, so its DSP
 # runs on the graph data-loop — which is pinned to the isolated RT core (15) by
-# <fleet.hardware._.audio/rt-isolation>. No extra pinning needed for the audio
+# <fleet.audio/rt-isolation>. No extra pinning needed for the audio
 # thread; only the EasyEffects GUI/control process lives on the main cores.
 #
 # Talkback routing (wire when ready): a Dante RX channel (the talkback mic,

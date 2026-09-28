@@ -8,7 +8,7 @@ let
   raysessionHelpers = import ./_lib.nix { inherit lib; };
 in
 {
-  fleet.raysession = {
+  fleet.audio._.raysession = {
     description = "RaySession audio session manager";
 
     nixos =

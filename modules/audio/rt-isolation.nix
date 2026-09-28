@@ -8,7 +8,7 @@
 # pollutes the core), the total CPU count, the Dante NIC, and which
 # housekeeping CPUs should service its IRQs:
 #
-#   (fleet.hardware._.audio._.rt-isolation {
+#   (fleet.audio._.rt-isolation {
 #     cores      = [ 13 14 15 29 30 31 ];  # CCD1 cores 13-15 + SMT siblings
 #     totalCpus  = 32;
 #     nic        = "enp12s0";
@@ -33,10 +33,10 @@
 # only. The two must agree on the core list.
 { fleet, lib, ... }:
 {
-  fleet.hardware._.audio._.rt-isolation.description =
+  fleet.audio._.rt-isolation.description =
     "Dedicated RT CPU cores for deterministic Dante/audio (isolcpus + IRQ steering + C-state cap)";
 
-  fleet.hardware._.audio._.rt-isolation.__functor =
+  fleet.audio._.rt-isolation.__functor =
     _self:
     {
       cores,

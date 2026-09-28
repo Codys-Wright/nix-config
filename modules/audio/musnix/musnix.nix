@@ -1,5 +1,5 @@
 # Musnix real-time audio sub-aspect.
-# Per-host knobs: den.hosts.<sys>.<host>.settings.hardware.audio.musnix.*
+# Per-host knobs: den.hosts.<sys>.<host>.settings.audio.musnix.*
 {
   fleet,
   lib,
@@ -9,7 +9,7 @@
 {
   flake-file.inputs.musnix.url = "github:musnix/musnix";
 
-  fleet.hardware._.audio._.musnix = {
+  fleet.audio._.musnix = {
     description = "musnix real-time audio tuning (RT kernel options, limits, IRQ threading)";
 
     settings = {
@@ -39,7 +39,7 @@
     nixos =
       { host, lib, ... }:
       let
-        cfg = host.settings.hardware.audio.musnix;
+        cfg = host.settings.audio.musnix;
       in
       {
         imports = [ inputs.musnix.nixosModules.musnix ];

@@ -17,7 +17,7 @@
 
     includes = [
       <fleet.hardware/facter>
-      <fleet.hardware/audio>
+      <fleet/audio>
       <fleet.hardware/bluetooth>
       <fleet.hardware/networking>
       <fleet.hardware/disk-utils>

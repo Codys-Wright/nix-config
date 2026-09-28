@@ -58,10 +58,10 @@ in
         <fleet.system/printing> # CUPS + mDNS network printer discovery
         <fleet.hardware/cuda> # CUDA toolkit (RTX present; nvidia already on)
         # RT core isolation for the audio path — currently DISABLED (see
-        # modules/hardware/audio/rt-isolation.nix): pinning pipewire to a
+        # modules/audio/rt-isolation.nix): pinning pipewire to a
         # core before isolcpus is active starves it into a watchdog loop.
         # Re-enable deliberately, with a reboot, when chasing sub-1ms TX.
-        # (fleet.hardware._.audio._.rt-isolation { })
+        # (fleet.audio._.rt-isolation { })
         (fleet.apps._.davinci-resolve { studio = true; })
         # controller-split bundles polkit + sudoers + InputPlumber config +
         # the launch-as / steam-as equivalents. Replaces the three modules
@@ -77,13 +77,18 @@ in
 
         <fleet/kernel>
 
-        # Music production base (Reaper, plugins, netaudio, environment).
+        # Music production host half (musnix plugin paths, millisecond,
+        # easyeffects, fts-rigs); cody's per-user half is
+        # <fleet.music._.production/producer> in his own aspect.
         <fleet.music/production>
+        <fleet.audio/studio> # musnix RT tuning + RaySession
+        <fleet.music._.production/mioctl> # iConnectivity mioXM MIDI router CLI
 
-        # Dante / Inferno: this host is "THEBATTLESHIP" on the 10G Dante
+        # Dante: netaudio + inferno-control, plus this host's device/clock
+        # below. Dante / Inferno: this host is "THEBATTLESHIP" on the 10G Dante
         # network, bound to the enp12s0 NIC. Statime does PTP clock sync,
         # Inferno exposes a 128-channel virtual Dante soundcard.
-        (fleet.music._.production._.statime {
+        (fleet.audio._.dante._.statime {
           interface = "enp12s0";
           # The Galaxy32's current Dante name (was the bare serial
           # "AA-4202524000109"; renamed to "Galaxy32"). The re-assert oneshot
@@ -109,7 +114,7 @@ in
           # in "init"). studio-routing-links is partOf wireplumber and re-wires.
           reinitOnRecovery = [ "wireplumber.service" ];
         })
-        (fleet.music._.production._.inferno {
+        (fleet.audio._.dante._.inferno {
           bindIp = "10.10.10.10";
           deviceId = "00000A0A0A0A0001";
           channels = 64;
@@ -143,11 +148,7 @@ in
           txChannelNames = danteChannels.tx;
         })
 
-        # System-wide inferno-control CLI — Rust port of
-        # network-audio-controller. Pairs with the inferno_aoip
-        # soundcard above for ad-hoc Dante inspection / control without
-        # leaving the host.
-        <fleet.music/production/inferno-control>
+        <fleet/audio/dante>
 
         <fleet.system/samba-client>
 

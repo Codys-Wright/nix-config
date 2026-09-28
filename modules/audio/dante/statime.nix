@@ -3,7 +3,7 @@
 # Parametric — each host supplies its Dante NIC and (optionally) the Dante
 # device it wants locked as preferred PTP leader.
 #
-#   (fleet.music._.production._.statime {
+#   (fleet.audio._.dante._.statime {
 #     interface  = "enp12s0";
 #     # Optional: lock a specific device as Dante PTP leader
 #     preferredLeader = "AA-4202524000109";
@@ -14,7 +14,7 @@
 # descriptions so multiple hosts in a fleet can be told apart in journalctl.
 { fleet, lib, ... }:
 {
-  fleet.music._.production._.statime = {
+  fleet.audio._.dante._.statime = {
     description = "Statime PTP daemon (Inferno fork) for Dante clock sync";
 
     __functor =

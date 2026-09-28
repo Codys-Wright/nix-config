@@ -6,7 +6,7 @@
 #
 # Per-host knobs are aspect settings (modules/den/settings.nix), e.g.:
 #
-#   den.hosts.x86_64-linux.<host>.settings.hardware.audio.pipewire = {
+#   den.hosts.x86_64-linux.<host>.settings.audio.pipewire = {
 #     defaultSink = "system_audio";
 #     defaultSource = "talkback_mic";
 #     stickyNodes = [ "alsa_output.pci-0000_01_00.1.hdmi-stereo-extra1" ];
@@ -336,10 +336,10 @@ in
   # `just update` bumps this to the latest cached unstable PipeWire.
   flake-file.inputs.nixpkgs-pipewire.url = lib.mkDefault "github:nixos/nixpkgs/nixos-unstable";
 
-  fleet.hardware._.audio._.pipewire = {
+  fleet.audio._.pipewire = {
     description = "PipeWire audio system (system-wide, low-latency)";
 
-    # Per-host knobs: den.hosts.<sys>.<host>.settings.hardware.audio.pipewire.*
+    # Per-host knobs: den.hosts.<sys>.<host>.settings.audio.pipewire.*
     settings = {
       defaultSink = lib.mkOption {
         type = lib.types.nullOr lib.types.str;
@@ -415,7 +415,7 @@ in
     };
 
     includes = [
-      ({ host, ... }: pipewireFor host.settings.hardware.audio.pipewire)
+      ({ host, ... }: pipewireFor host.settings.audio.pipewire)
     ];
   };
 }

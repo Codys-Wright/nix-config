@@ -12,7 +12,7 @@
     inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  fleet.music._.production._.inferno-control = {
+  fleet.audio._.dante._.control = {
     description = "inferno-control — Rust CLI for Dante / Inferno-AoIP control";
 
     nixos =

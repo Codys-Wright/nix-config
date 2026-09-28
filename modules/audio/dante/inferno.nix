@@ -4,7 +4,7 @@
 # parameters. The host's name is used as the Dante device name, so each host
 # shows up in Dante Controller with its own identity.
 #
-#   (fleet.music._.production._.inferno {
+#   (fleet.audio._.dante._.inferno {
 #     bindIp   = "10.10.10.10";
 #     deviceId = "00000A0A0A0A0001";
 #     channels = 128;
@@ -20,10 +20,10 @@
 # initialised correctly regardless of open order. PROCESS_ID and ALT_PORT
 # distinguish the two streams within the shared DeviceServer.
 #
-# Requires system-wide PipeWire (see fleet.hardware._.audio._.pipewire).
+# Requires system-wide PipeWire (see fleet.audio._.pipewire).
 { fleet, lib, ... }:
 {
-  fleet.music._.production._.inferno = {
+  fleet.audio._.dante._.inferno = {
     description = "Inferno Dante virtual soundcard (ALSA + PipeWire)";
 
     __functor =

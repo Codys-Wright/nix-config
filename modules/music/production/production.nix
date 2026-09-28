@@ -4,19 +4,18 @@
 # so they are NOT included by default here. Hosts that want Dante support
 # should include them explicitly, e.g.:
 #
-#   (fleet.music._.production._.inferno { bindIp = "..."; deviceId = "..."; })
-#   (fleet.music._.production._.statime { interface = "enp12s0"; })
+#   (fleet.audio._.dante._.inferno { bindIp = "..."; deviceId = "..."; })
+#   (fleet.audio._.dante._.statime { interface = "enp12s0"; })
 { fleet, ... }:
 {
   # Host half: the system side of a production machine. Included by hosts.
   fleet.music._.production = {
-    description = "Music production host — musnix + plugin paths, netaudio, millisecond, easyeffects, fts-rigs";
+    description = "Music production host — musnix + plugin paths, millisecond, easyeffects, fts-rigs";
 
     includes = [
       fleet.music._.production._.environment
       fleet.music._.production._.easyeffects
       fleet.music._.production._.millisecond
-      fleet.music._.production._.netaudio
       fleet.music._.production._.ftsRigs
     ];
   };
