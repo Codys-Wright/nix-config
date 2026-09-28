@@ -30,7 +30,7 @@
       <fleet.hardware/apple-t2>
       <fleet.hardware._.apple-t2/steam-cef-fix>
       <fleet/hardware>
-      <fleet.hardware._.networking/tailscale>
+      <fleet.networking/tailscale>
       <fleet/desktop>
 
       <fleet.music/production>

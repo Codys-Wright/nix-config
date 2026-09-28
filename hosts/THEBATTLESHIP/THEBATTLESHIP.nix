@@ -50,7 +50,7 @@ in
 
         <fleet/hardware>
         <fleet.hardware/nvidia>
-        <fleet.hardware._.networking/tailscale>
+        <fleet.networking/tailscale>
         <fleet.hardware/zsa>
 
         <fleet/gaming>
@@ -205,7 +205,7 @@ in
         # 10G network tuning for starcommand link
         # Static 10.10.10.10/24 — outside starcommand dnsmasq DHCP range (.100-.200),
         # gives Hermes/agent a stable address to SSH to from starcommand.
-        (fleet.system._.network-10g {
+        (fleet.networking._.network-10g {
           interface = "enp12s0";
           staticIp = "10.10.10.10/24";
         })

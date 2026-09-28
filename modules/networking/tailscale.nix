@@ -4,7 +4,7 @@
   ...
 }:
 {
-  fleet.hardware._.networking._.tailscale = {
+  fleet.networking._.tailscale = {
     description = "Tailscale VPN service";
 
     nixos =

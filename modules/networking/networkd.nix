@@ -4,7 +4,7 @@
   ...
 }:
 {
-  fleet.system._.networking = {
+  fleet.networking._.networkd = {
     description = "Basic networking with systemd-networkd (DHCP by default)";
 
     nixos =
@@ -24,9 +24,6 @@
             linkConfig.RequiredForOnline = true;
           };
         };
-
-        # Enable resolved for DNS
-        services.resolved.enable = lib.mkDefault true;
       };
   };
 }

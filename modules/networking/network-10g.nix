@@ -5,7 +5,7 @@
   ...
 }:
 {
-  fleet.system._.network-10g = {
+  fleet.networking._.network-10g = {
     description = "10G network tuning: jumbo frames, TCP buffers, NFS client, Dante multicast";
 
     __functor =
