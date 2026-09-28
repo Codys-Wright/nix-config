@@ -46,7 +46,7 @@ Pass = every diff is exactly the registry.json cascade above.
 Darwin skips the registry (the pin is `lib.mkIf pkgs.stdenv.isLinux`), so
 darwin drvPaths must be **byte-identical** across a pure refactor — with one
 known exception: `HOME_MANAGER_BACKUP_EXT=bak-<self.lastModified>` from
-`modules/config/hm-backup.nix` shifts at each commit. If that variable is
+`modules/den/hm-backup.nix` shifts at each commit. If that variable is
 the only diff, the refactor is pure. Compare uncommitted working-tree state
 against the old rev to sidestep it entirely.
 

@@ -7,7 +7,7 @@
 # surface. So we apply the strict freeform only to the entity kinds where an
 # undeclared key is almost certainly a typo: host, user, home, and flake
 # entries. Every legitimate custom key must be declared in
-# modules/flake/schema-options.nix — declare the option, never delete data.
+# modules/den/schema.nix — declare the option, never delete data.
 { den, ... }:
 {
   den.schema.host = den.lib.strict;

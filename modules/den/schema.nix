@@ -1,5 +1,5 @@
 # Explicit den.schema option declarations required by strict mode
-# (modules/flake/strict.nix). Strict throws on any key set on a den entity
+# (modules/den/strict.nix). Strict throws on any key set on a den entity
 # without a declaration — the fix is always to declare the option here,
 # never to delete the data that set it.
 { lib, ... }:
