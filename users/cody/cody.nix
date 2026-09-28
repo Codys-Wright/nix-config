@@ -72,7 +72,6 @@
         cody.dots
         cody.fish
         cody.secrets
-        cody.pipewire
         <fleet/apple-fonts>
         <fleet.coding/ghidra>
         <fleet.coding._.tools/game-dev>

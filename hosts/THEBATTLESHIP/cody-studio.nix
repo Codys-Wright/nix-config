@@ -1,27 +1,31 @@
-# Per-user PipeWire config.
+# cody's studio PipeWire on THEBATTLESHIP — den host-qualified user aspect.
 #
-# The per-user PipeWire daemon does NOT read the system /etc/pipewire drop-ins
-# (those only apply to a system-wide instance), so any user-facing quantum /
-# latency config must live in ~/.config/pipewire to actually take effect. This
-# is the declarative home-manager home for that — the user-pipewire equivalent
-# of the host's /etc 92-low-latency.
+# `den.aspects."cody@THEBATTLESHIP"` applies to cody on THEBATTLESHIP only,
+# in addition to den.aspects.cody. Everything here is this machine's studio:
+# the per-user PipeWire quantum (matched to the TF's ALSA period and the
+# Dante-clocked graph), the Inferno Dante adapter nodes (pairs with the
+# host's <fleet.music/production/inferno> call), routed loopback sinks,
+# studio-routing-links, the @clock drop-in, the rt-pin daemon (cores
+# 14/15/30/31 = this host's isolated CCD1 cores), REAPER's duplex `inferno`
+# .asoundrc and the talkback/DAW-link helpers. It used to be in cody's
+# general aspect, so every other host got a Dante .asoundrc and core pins.
+#
+# The per-user PipeWire daemon does NOT read the system /etc/pipewire
+# drop-ins (those only apply to a system-wide instance), so user-facing
+# quantum / latency config must live in ~/.config/pipewire.
 { ... }:
 {
-  cody.pipewire.description = "Cody's per-user PipeWire quantum / latency config";
-  cody.pipewire.homeManager =
+  den.aspects."cody@THEBATTLESHIP".description =
+    "cody's THEBATTLESHIP studio PipeWire: quantum, Inferno Dante nodes, routed sinks, RT pinning";
+  den.aspects."cody@THEBATTLESHIP".homeManager =
     { pkgs, lib, ... }:
     lib.mkIf pkgs.stdenv.hostPlatform.isLinux (
       let
         # ── Inferno Dante soundcard nodes (pairs with the host's
         # <fleet.music/production/inferno> aspect on THEBATTLESHIP) ────────────
-        # The host aspect's homeManager block does NOT propagate to the home
-        # under den (a host-included aspect contributes nixos only), so the
-        # per-user PipeWire pieces Inferno needs live here, in cody's home.
-        #
         # channels/card/headroom mirror the inferno aspect call in
         # hosts/THEBATTLESHIP/THEBATTLESHIP.nix (channels = 64, card = 999,
-        # headroom = 128). On hosts without the Inferno ALSA PCM these adapter
-        # nodes simply fail to open and stay suspended — harmless.
+        # headroom = 128).
         infernoChannels = 64;
         infernoCard = 999;
         # 128 (not 0/32): the extra ALSA buffer absorbs scheduling jitter
