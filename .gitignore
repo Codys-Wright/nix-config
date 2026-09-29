@@ -56,3 +56,8 @@ scripts/__pycache__/
 # initrd SSH host private keys (bootssh) — never commit; public halves are fine
 initrd_ssh_host_key
 generated-secrets.txt
+
+# Local credential for the beads tracker — never commit (rotate if it was).
+.beads/.beads-credential-key
+# Python bytecode from scripts/
+__pycache__/
