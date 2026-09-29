@@ -51,22 +51,23 @@ Minimal host file — the agent is a single include. Example
 {
   den.hosts.x86_64-linux.<NAME> = {
     users.cody = { };
-    aspect = "<NAME>";
   };
 
   den.aspects.<NAME> = {
     includes = [
       # ── the cluster node, opt-in ──
-      (<fleet.cluster/k3s-agent> {
-        # nodeLabels = [ "fleet.fts/gpu=nvidia" ]; # optional, e.g. for ML pods
-        # extraTaints = [ ];                       # optional
-      })
+      # Membership knobs are host settings on the den.hosts entry:
+      #   settings.cluster.k3s-agent = {
+      #     nodeLabels = [ "fleet.fts/gpu=nvidia" ];  # optional, e.g. ML pods
+      #     dedicatedTo = [ "pihole" ];               # dedicated node, joins at boot
+      #   };
+      <fleet.cluster/k3s-agent>
       <fleet.system/agent-user>   # the unprivileged ops user the agent uses
 
       # ── the usual host plumbing (real machine) ──
-      (fleet.grub { uefi = true; })
-      (<fleet.system/disk> { type = "..."; device = "/dev/..."; })
-      # + facter.json from `nixos-facter`, timezone, etc.
+      <fleet/grub>
+      (<fleet.disk/btrfs> { device = "/dev/..."; })
+      # + facter.json from `nixos-facter`; timeZone on the den.hosts entry
     ];
   };
 }

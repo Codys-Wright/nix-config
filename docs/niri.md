@@ -9,7 +9,7 @@ a `config.kdl` in the nix store. **Do not edit config.kdl directly.**
 | File | Purpose |
 |------|---------|
 | `modules/desktop/environment/niri/_niri-settings.nix` | All niri settings (keybinds, outputs, workspaces, window rules) |
-| `modules/desktop/environment/niri/niri.nix` | FTS aspect: nixos/homeManager integration, system packages |
+| `modules/desktop/environment/niri/niri.nix` | fleet aspect: nixos/homeManager integration, system packages |
 | `modules/desktop/environment/niri/niri-wrapper.nix` | Exposes wrapper-module for `nix run .#niri` |
 | `modules/desktop/environment/niri/inputs.nix` | Flake input for niri-flake |
 

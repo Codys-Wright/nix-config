@@ -62,8 +62,7 @@ This runs `nixos-anywhere` which:
 
 **Note:** The host needs a disk config in its includes:
 ```nix
-(<fleet.system/disk> {
-  type = "btrfs-impermanence";
+(<fleet.disk/btrfs> {
   device = "/dev/vda";  # virtio disk in QEMU
 })
 ```
@@ -127,15 +126,16 @@ After a host is installed and running, push config changes with deploy-rs.
 
 ### Prerequisites
 
-The host needs `fleet.deploy` in its includes with a reachable IP:
+The host's `den.hosts` entry needs a reachable address (read by
+`modules/flake/deploy-targets.nix`; check with `nix eval --json .#deployTargets`):
 
 ```nix
-(fleet.deploy { ip = "100.74.250.99"; })  # tailscale IP
+den.hosts.x86_64-linux.<hostname>.deployment.ip = "100.74.250.99";  # tailscale IP
 ```
 
-And an SSH private key stored in SOPS at:
+And an SSH private key stored in SOPS in the private nix-secrets repo at:
 ```
-hosts/<hostname>/secrets.yaml → ['<hostname>']['system']['sshPrivateKey']
+~/nix-secrets/sops/hosts/<hostname>.yaml → ['<hostname>']['system']['sshPrivateKey']
 ```
 
 ### Deploy
@@ -173,44 +173,27 @@ hosts/<hostname>/<hostname>.nix
 ```
 
 ```nix
-{ fleet, __findFile, ... }:
+{ __findFile, ... }:
 {
   den.hosts.x86_64-linux.<hostname> = {
-    users.cody = {};
-    aspect = "<hostname>";
+    users.cody = { };
+    timeZone = "America/Los_Angeles";
+    deployment.ip = "100.74.250.99";          # deploy target
+    # settings.desktop.session = "niri";      # aspect settings, if not default
   };
 
-  den.aspects.<hostname> = {
-    includes = [
-      # Desktop
-      (fleet.desktop { default = "niri"; })
-      (fleet.grub { uefi = true; })
-      (fleet.hardware {})
-
-      # Disk — update device to match target hardware
-      (<fleet.system/disk> {
-        type = "btrfs-impermanence";
-        device = "/dev/nvme0n1";
-      })
-
-      # Deploy target
-      (fleet.deploy { ip = "100.74.250.99"; })
-
-      # Apps & coding
-      <fleet/apps>
-      (fleet.coding {
-        editor = { default = "nvf"; };
-        terminal = { default = "ghostty"; };
-        shell = { default = "nushell"; };
-      })
-    ];
-
-    nixos = { ... }: {
-      time.timeZone = "America/Los_Angeles";
-    };
-  };
+  den.aspects.<hostname>.includes = [
+    <fleet/desktop>
+    <fleet/grub>
+    <fleet/hardware>
+    # Disk — update device to match target hardware
+    (<fleet.disk/btrfs> { device = "/dev/nvme0n1"; })
+  ];
 }
 ```
+
+Apps, coding tools and the login shell come from the user's own aspect
+(`users/cody/cody.nix`), not the host.
 
 ### 2. Git add the file
 
@@ -244,19 +227,13 @@ For quick local testing without the full beacon workflow:
 { fleet, __findFile, ... }:
 {
   den.hosts.x86_64-linux.<hostname>-vm = {
-    users.cody = {};
-    aspect = "<hostname>-vm";
+    users.cody = { };   # cody's aspect brings coding tools + shell
   };
 
   den.aspects.<hostname>-vm = {
     includes = [
       (fleet.system._.microvm { graphics = true; })
       <fleet.desktop/environment/niri>
-      (fleet.coding {
-        editor = { default = "nvf"; };
-        terminal = { default = "ghostty"; };
-        shell = { default = "fish"; };
-      })
     ];
   };
 }

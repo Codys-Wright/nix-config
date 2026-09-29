@@ -44,30 +44,51 @@ One aspect per file: `modules/<category>/<name>.nix`
 {
   fleet.<category>._.<name> = {
     description = "One factual line — REQUIRED";
-    nixos = { pkgs, ... }: { ... };        # or homeManager / darwin / os
+    nixos = { pkgs, ... }: { ... };        # or homeManager / darwin / os / user
   };
 }
 ```
 
-- `os` = nixos+darwin shorthand; `user` = users.users.<name> shorthand.
-- `lib.mkDefault` on values hosts may override; `lib.mkForce` only for invariants.
-- Parametric aspect (caller args): `fleet.x._.y.__functor = _self: { args... }: { ... };`
-  with a sibling `.description`. Do NOT add a `{ class, aspect-chain }:` layer
-  unless the body actually uses those args.
-- Context aspect: a bare function `{ host, ... }: { ... }` or
-  `{ description; includes = [ ({ user, ... }: ...) ]; }`. Never den.lib.parametric
-  (deprecated upstream).
+## Which class key? (host scope DROPS homeManager and user)
+
+- **Host picks it** (service, hardware, desktop, gaming) → `nixos`/`os` for the
+  system half; per-user half in `provides.to-users.homeManager` (or
+  `provides.to-users.includes = [ (<fleet.user/unless-restricted> <…/user-half>) ]`
+  so restricted accounts skip it).
+- **User picks it** (app, CLI, editor) → `homeManager`; any OS bits in
+  `provides.to-hosts.nixos` / `.os`. Never an untargeted `nixos` block on a
+  user-included aspect (den bug #694).
+- **Account field** (shell, password, description) → `user` class. NixOS-only
+  fields (`extraGroups`, `hashedPassword`) must be gated on
+  `host.class == "nixos"` — the user class also routes into nix-darwin.
+- **Groups** → `(<fleet.user/groups> [ … ])`; root-equivalent ones (docker,
+  libvirtd, podman) → `(<fleet.user/admin-groups> [ … ])`.
+- **One user on one host** → `den.aspects."cody@THEBATTLESHIP".homeManager`.
+- **Linux-only package in a home** → `homeManager = { lib, pkgs, ... }: lib.mkIf pkgs.stdenv.isLinux { … }`
+  (mkIf, never optionalAttrs).
+
+## Per-host values
+
+- **Varies per host?** → aspect `settings` (modules/den/settings.nix):
+  `settings.foo = lib.mkOption { … }` on the static aspect, read
+  `host.settings.<path without _>.foo` in `nixos = { host, ... }: …`, set
+  `den.hosts.<sys>.<host>.settings.<path>.foo = …`.
+- **Fact about the host** (deploy IP, timezone) → den.hosts entry
+  (`deployment.ip`, `timeZone`); new keys are declared in modules/den/schema.nix.
+- **Domain / LAN IP** → `inputs.nix-secrets.networking.*`, never a literal.
+- **Include X only if the host has/lacks Y** → `den.lib.policy.when ({ host ? null, ... }: host != null && host.hasAspect …) { includes = [ X ]; }`.
+- Callable aspects (`__functor = _self: args: { name = "x(${…})"; … }`) only
+  for real multi-instance args (e.g. CI runners); never den.lib.parametric.
 
 ## Wire it in
 
 1. Add the aspect to its category facet's `includes` (e.g. modules/coding/cli/cli.nix).
-   The facet is what hosts/users include; leaves referenced directly are a smell.
-2. Host-specific config goes in `hosts/<host>/<concern>.nix` as
-   `den.aspects.<HOST>-<concern>` added to the host's includes — never grow the
-   host file's inline nixos block.
+   The facet is what hosts/users include.
+2. Machines of one kind share a role (`modules/roles/`, e.g. `<fleet.roles/t2-laptop>`).
+   Host-specific config goes in `hosts/<host>/<concern>.nix` as
+   `den.aspects.<HOST>-<concern>`; plain data in `hosts/<host>/_data/`.
 3. Angle brackets for references: `<fleet.coding/cli>`; dotted `den.aspects.*` for
-   named aspects. Underscore-prefixed files/dirs (`_data/`, `_lib/`) are invisible
-   to import-tree — use them for plain-Nix data and helpers.
+   hosts/users. `_`-prefixed files/dirs are invisible to import-tree.
 
 ## The non-negotiable loop
 
@@ -91,5 +112,6 @@ nix eval --raw .#nixosConfigurations.<h>.config.system.build.toplevel.drvPath  #
 nix run nixpkgs#nix-diff -- <old.drv> <new.drv>   # only registry.json may differ
 ```
 
-Darwin configs skip the registry and must stay byte-identical.
+Darwin configs skip the registry and must stay byte-identical (modulo
+HOME_MANAGER_BACKUP_EXT); check standalone homeConfigurations too.
 See docs/refactor-verification.md for the full workflow and script.

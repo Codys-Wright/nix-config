@@ -238,12 +238,12 @@ Pick one stable address:
 - DHCP reservation address, if your LAN gives it a fixed lease
 - static address, if you configure one explicitly
 
-## 9. Update `fleet.deploy` in the Host Config
+## 9. Update the Deploy Target in the Host Config
 
-Set the actual deploy target in the host file:
+Set the actual deploy target on the host's `den.hosts` entry:
 
 ```nix
-(fleet.deploy { ip = "100.64.12.34"; })
+den.hosts.x86_64-linux.stowaway.deployment.ip = "100.64.12.34";
 ```
 
 For `stowaway`, that means editing:
