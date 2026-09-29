@@ -76,10 +76,6 @@
       url = "git+https://codeberg.org/FastTrackStudios/inferno-control";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    lanzaboote = {
-      url = "github:nix-community/lanzaboote/v1.0.0";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     microvm = {
       url = "github:microvm-nix/microvm.nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -96,11 +92,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-secrets.url = "git+ssh://git@github.com/Codys-Wright/nix-secrets.git?ref=main&shallow=1";
-    nixhelm = {
-      url = "github:farcaller/nixhelm";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    nixidy.url = "github:arnarg/nixidy/latest";
     nixos-facter-modules.url = "github:numtide/nixos-facter-modules";
     nixos-generators = {
       url = "github:nix-community/nixos-generators";
@@ -129,7 +120,6 @@
       url = "github:oxalica/rust-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    selfhostblocks.url = "github:Codys-Wright/selfhostblocks";
     sops-nix.url = "github:Mic92/sops-nix";
     spicetify-nix = {
       url = "github:Gerg-L/spicetify-nix";
