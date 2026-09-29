@@ -40,12 +40,10 @@
           just
           nh
           sshpass
-          (terraform.withPlugins (
-            p: with p; [
-              p.null
-              p.external
-            ]
-          ))
+          (terraform.withPlugins (p: [
+            p.hashicorp_null
+            p.hashicorp_external
+          ]))
           jq
           yq-go # Go version of yq (mikefarah/yq) for YAML editing with anchor support
           # SOPS tools for secrets management

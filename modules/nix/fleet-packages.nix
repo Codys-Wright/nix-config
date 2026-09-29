@@ -30,6 +30,7 @@ let
     "davinci-resolve"
     "inferno"
     "melonloader-installer"
+    "statime"
     "sunshine"
     "vcv-rack"
   ];

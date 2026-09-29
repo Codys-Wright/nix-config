@@ -64,7 +64,8 @@
               nixos =
                 { pkgs, lib, ... }:
                 let
-                  statimePkg = pkgs.statime;
+                  # The Dante-patched fork from packages/statime (nixpkgs has its own).
+                  statimePkg = pkgs.fleet-statime;
                   netaudioPkg = pkgs.netaudio;
                   configPath = "/etc/inferno/statime-ptpv1.toml";
                   # The watchdog's lock signal ("Measurement:") is only logged

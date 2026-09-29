@@ -91,7 +91,9 @@ let
             # Pin to the server minor: kubelet must never be NEWER than the
             # API server (version-skew policy). starcommand (nixpkgs 25.11)
             # runs k3s 1.33; fleet hosts on newer nixpkgs would drift ahead.
-            package = pkgs.${k3sPackage};
+            # From nixpkgs-stable (pkgs.stable), which matches starcommand's nixpkgs:
+            # unstable drops k3s minors at EOL while the server still runs them.
+            package = pkgs.stable.${k3sPackage};
             role = "agent";
             inherit serverAddr;
             tokenFile = config.sops.secrets."k3s/token".path;
@@ -169,7 +171,7 @@ in
       k3sPackage = lib.mkOption {
         type = lib.types.str;
         default = "k3s_1_33";
-        description = "nixpkgs attribute of the k3s package (match the server minor)";
+        description = "k3s attribute in nixpkgs-stable (pkgs.stable), matching the server minor";
       };
     };
 

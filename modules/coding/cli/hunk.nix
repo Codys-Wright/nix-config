@@ -6,7 +6,7 @@
   ...
 }:
 {
-  flake-file.inputs.hunk.url = lib.mkDefault "github:modem-dev/hunk/v0.17.1";
+  flake-file.inputs.hunk.url = lib.mkDefault "github:modem-dev/hunk/v0.22.0";
   flake-file.inputs.hunk.inputs.nixpkgs.follows = "nixpkgs";
 
   fleet.coding._.cli._.hunk = {

@@ -1,4 +1,4 @@
-# DO-NOT-EDIT. This file was auto-generated using github:vic/flake-file.
+# DO-NOT-EDIT. This file was auto-generated using github:denful/flake-file.
 # Use `nix run .#write-flake` to regenerate it.
 {
   description = "A flake for Cody's Entire Computing World";
@@ -26,6 +26,10 @@
       url = "github:nix-darwin/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    daw = {
+      url = "github:FastTrackStudios/daw";
+      flake = false;
+    };
     den.url = "github:denful/den";
     deploy-rs.url = "github:serokell/deploy-rs";
     dioxus-flake = {
@@ -38,14 +42,17 @@
     };
     erosanix.url = "github:emmanuelrosa/erosanix";
     flake-aspects.url = "github:vic/flake-aspects";
-    flake-file.url = "github:vic/flake-file";
+    flake-file.url = "github:denful/flake-file";
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
       inputs.nixpkgs-lib.follows = "nixpkgs";
     };
     fts-reaper-flake = {
       url = "github:FastTrackStudios/fts-reaper-flake";
-      inputs.reaper-flake.follows = "reaper-flake";
+      inputs = {
+        daw.follows = "daw";
+        reaper-flake.follows = "reaper-flake";
+      };
     };
     ghidra-cli.url = "github:Codys-Wright/ghidra-cli/fix/ghidra-12-compat";
     herdr = {
@@ -61,10 +68,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     hunk = {
-      url = "github:modem-dev/hunk/v0.17.1";
+      url = "github:modem-dev/hunk/v0.22.0";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    import-tree.url = "github:vic/import-tree";
+    import-tree.url = "github:denful/import-tree";
     inferno-control = {
       url = "git+https://codeberg.org/FastTrackStudios/inferno-control";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -107,7 +114,7 @@
         nixpkgs.follows = "nixpkgs";
       };
     };
-    nixpkgs.url = "https://channels.nixos.org/nixpkgs-unstable/nixexprs.tar.xz";
+    nixpkgs.url = "https://channels.nixos.org/nixpkgs-unstable/nixexprs.tar.zst";
     nixpkgs-pipewire.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.11";
     nvf = {

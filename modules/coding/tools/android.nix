@@ -17,7 +17,7 @@
         androidEnv = pkgs.androidenv.override { licenseAccepted = true; };
         androidSdk = androidEnv.composeAndroidPackages {
           cmdLineToolsVersion = "13.0";
-          platformToolsVersion = "35.0.2";
+          platformToolsVersion = "37.0.1";
           buildToolsVersions = [
             "35.0.0"
             "34.0.0"
