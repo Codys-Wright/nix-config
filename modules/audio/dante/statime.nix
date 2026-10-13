@@ -54,6 +54,15 @@
         # Inferno PipeWire node must be re-opened against a valid clock, so the
         # host passes its session manager here (e.g. [ "wireplumber.service" ]).
         reinitOnRecovery ? [ ],
+        # Shell commands the watchdog runs when the clock is lost and does not
+        # come back (the Dante gear is off): the host takes its clock-led nodes
+        # out of the graph so the rest of the audio keeps running.
+        onLockLost ? [ ],
+        # Shell commands run on every watchdog check that finds the clock
+        # locked (so they must be idempotent), before any reinitOnRecovery
+        # restarts: the host puts those nodes back once a clock turns up —
+        # whether statime had to be restarted for it or not.
+        onLocked ? [ ],
         ...
       }:
       {
@@ -212,6 +221,7 @@
                           # it self-promoted to its unimplemented PTPv1 master
                           # stub (the heisenbug, or a lost grandmaster).
                           if [ "$("$jctl" --user -u statime-inferno.service --since '35 seconds ago' -o cat | grep -c 'Measurement:')" -gt 0 ]; then
+                            ${lib.concatStringsSep "\n                            " onLocked}
                             exit 0
                           fi
                           echo "Statime not locked; restarting statime-inferno."
@@ -227,8 +237,13 @@
                           # Only re-init dependents if the clock actually came
                           # back — otherwise (grandmaster truly gone) we'd churn
                           # the audio session every cycle for nothing.
+                          if [ "$relocked" != 1 ]; then
+                            echo "Statime did not re-lock; no Dante clock."
+                            ${lib.concatStringsSep "\n                            " onLockLost}
+                          fi
                           if [ "$relocked" = 1 ]; then
                             echo "Statime re-locked; re-initialising audio session."
+                            ${lib.concatStringsSep "\n                            " onLocked}
                             ${lib.concatMapStringsSep "\n                            " (
                               svc: ''"$sctl" --user restart ${svc} || true''
                             ) reinitOnRecovery}

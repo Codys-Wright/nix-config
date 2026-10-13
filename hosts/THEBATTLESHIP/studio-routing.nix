@@ -9,7 +9,68 @@
         pkgs,
         ...
       }:
+      let
+        # The Inferno (Dante) nodes in or out of the main PipeWire. They lead
+        # the graph clock, and a PipeWire start with the Dante gear off opened
+        # their clockless PCM, blocking the main loop 5s per open in a retry
+        # loop: the whole graph (the TF too) went silent and PipeWire stopped
+        # answering clients. So their config is staged outside conf.d
+        # (cody-studio.nix) and linked in only while the PTP clock is locked.
+        #   on     link it and restart PipeWire (the nodes open); a no-op
+        #          when already linked, so a watchdog can call it every check
+        #   link   link it only (the caller restarts PipeWire)
+        #   off    unlink it and restart the audio stack (TF drives)
+        #   reset  unlink it, nothing else (before PipeWire starts at login)
+        infernoGate = pkgs.writeShellScriptBin "inferno-gate" ''
+          set -u
+          conf="$HOME/.config/pipewire/pipewire.conf.d/91-inferno-nodes.conf"
+          staged="$HOME/.config/pipewire/inferno/91-inferno-nodes.conf"
+          sctl=${pkgs.systemd}/bin/systemctl
+          linked() { [ -L "$conf" ] || [ -e "$conf" ]; }
+          case "''${1:-status}" in
+            on)
+              if ! linked; then
+                ln -sfn "$staged" "$conf"
+                "$sctl" --user restart pipewire.service
+              fi
+              echo "inferno-gate: on" ;;
+            link)
+              ln -sfn "$staged" "$conf"
+              echo "inferno-gate: linked" ;;
+            off)
+              if linked; then
+                rm -f "$conf"
+                "$sctl" --user restart pipewire.service wireplumber.service pipewire-pulse.service
+              fi
+              echo "inferno-gate: off" ;;
+            reset)
+              rm -f "$conf"
+              echo "inferno-gate: reset" ;;
+            status)
+              if linked; then echo on; else echo off; fi ;;
+            *)
+              echo "usage: inferno-gate on|link|off|reset|status" >&2
+              exit 2 ;;
+          esac
+        '';
+      in
       {
+        environment.systemPackages = [ infernoGate ];
+
+        # At login the Inferno nodes start OUT of the graph, whatever the
+        # last session left: the clock-ready service links them once the
+        # Dante clock locks. Left linked from a session with the gear on, a
+        # boot with it off wedged PipeWire for the two minutes the wait took.
+        systemd.user.services.inferno-gate-reset = {
+          description = "Start PipeWire without the Inferno nodes until the Dante clock locks";
+          before = [ "pipewire.service" ];
+          wantedBy = [ "default.target" ];
+          serviceConfig = {
+            Type = "oneshot";
+            ExecStart = "${infernoGate}/bin/inferno-gate reset";
+          };
+        };
+
         services.pipewire = {
           wireplumber.extraConfig."80-pro-audio-usb"."monitor.alsa.rules" = [
             {
@@ -234,22 +295,36 @@
           serviceConfig = {
             Type = "oneshot";
             RemainAfterExit = true;
+            # `dante off` (dante.target stopping): the nodes out, the TF driving.
+            ExecStop = "${infernoGate}/bin/inferno-gate off";
             ExecStart = pkgs.writeShellScript "studio-clock-ready" ''
               jctl=${pkgs.systemd}/bin/journalctl
               sctl=${pkgs.systemd}/bin/systemctl
               # Wait (up to ~2min) until statime is emitting Measurement
               # lines, i.e. locked as a PTP follower.
+              locked=0
               for i in $(seq 1 60); do
                 if [ "$("$jctl" --user -u statime-inferno.service --since '8 seconds ago' -o cat | grep -c 'Measurement:')" -gt 0 ]; then
+                  locked=1
                   break
                 fi
                 sleep 2
               done
+              # No clock (the Dante gear is off): leave the Inferno nodes out
+              # of the graph and the TF driving. The statime watchdog links
+              # them when a clock turns up.
+              if [ "$locked" != 1 ]; then
+                echo "No Dante PTP lock; Inferno nodes stay out of the graph."
+                ${infernoGate}/bin/inferno-gate off
+                exit 0
+              fi
+              ${infernoGate}/bin/inferno-gate link
               # Re-open the Inferno device against the now-valid clock AND
               # self-heal the device-server startup wedge.
               #
               # The Inferno adapter nodes live in pipewire's OWN config
-              # (~/.config/pipewire/pipewire.conf.d/91-inferno-nodes.conf), so
+              # (~/.config/pipewire/pipewire.conf.d/91-inferno-nodes.conf,
+              # linked in just above by inferno-gate), so
               # they re-open only when PIPEWIRE restarts — NOT wireplumber
               # (the long-standing bug here: bouncing wireplumber never
               # re-opened Inferno). On a fraction of starts the inferno_aoip

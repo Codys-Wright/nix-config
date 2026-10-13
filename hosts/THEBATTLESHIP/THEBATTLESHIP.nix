@@ -113,6 +113,11 @@ in
           # PipeWire node against the now-valid clock (otherwise it stays frozen
           # in "init"). studio-routing-links is partOf wireplumber and re-wires.
           reinitOnRecovery = [ "wireplumber.service" ];
+          # Without a clock the Inferno nodes wedge PipeWire's main loop and
+          # stall the whole graph (TF included): gate them out when the clock
+          # is lost for good, back in when it returns (studio-routing.nix).
+          onLockLost = [ "/run/current-system/sw/bin/inferno-gate off || true" ];
+          onLocked = [ "/run/current-system/sw/bin/inferno-gate on || true" ];
         })
         (fleet.audio._.dante._.inferno {
           bindIp = "10.10.10.10";

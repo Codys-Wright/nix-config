@@ -402,7 +402,14 @@
         # in an isolated context and never exports its nodes to this graph, so we
         # declare them here where apps/pw-link can actually reach them. They show
         # up as `Inferno sink` / `Inferno source` with 128 TX/RX ports.
-        home.file.".config/pipewire/pipewire.conf.d/91-inferno-nodes.conf".text = builtins.toJSON {
+        #
+        # STAGED, not loaded: the file lives outside pipewire.conf.d and
+        # `inferno-gate` (studio-routing.nix) links it in only once the Dante
+        # PTP clock is locked. Loaded unconditionally, a PipeWire start with
+        # the Dante gear off opened the clockless PCM, which blocks the main
+        # loop 5s per open in a retry loop — every app (the TF included) went
+        # silent and PipeWire stopped answering clients.
+        home.file.".config/pipewire/inferno/91-inferno-nodes.conf".text = builtins.toJSON {
           "context.objects" = [
             (mkInfernoNode {
               factoryName = "api.alsa.pcm.sink";
