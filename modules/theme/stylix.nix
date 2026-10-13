@@ -75,27 +75,24 @@
         fonts.packages = [
           pkgs.nerd-fonts.jetbrains-mono
         ];
-
-        # Stylix HM target config — placed in sharedModules because den's
-        # mutual-provider doesn't propagate the homeManager block reliably
-        # when autoEnable=false is propagated via Stylix's NixOS-to-HM integration.
-        home-manager.sharedModules = [
-          {
-            # Terminal theming via Stylix (colors + JetBrains Mono font)
-            stylix.targets.kitty.enable = true;
-            stylix.targets.kitty.fonts.enable = true;
-            stylix.targets.ghostty.enable = true;
-            stylix.targets.ghostty.fonts.enable = true;
-
-            # KDE theming is handled by the MacTahoe KDE theme aspect (mactahoe.nix)
-            # Stylix KDE target is disabled because it creates its own look-and-feel
-            # that conflicts with the MacTahoe look-and-feel package
-            stylix.targets.kde.enable = false;
-
-            # Qt theming disabled — same kvantum/plasmashell issue as NixOS level
-            stylix.targets.qt.enable = false;
-          }
-        ];
       };
+
+    # Per-user Stylix targets. The stylix HM module itself arrives through
+    # Stylix's NixOS→HM integration (home-manager.sharedModules).
+    provides.to-users.homeManager = {
+      # Terminal theming via Stylix (colors + JetBrains Mono font)
+      stylix.targets.kitty.enable = true;
+      stylix.targets.kitty.fonts.enable = true;
+      stylix.targets.ghostty.enable = true;
+      stylix.targets.ghostty.fonts.enable = true;
+
+      # KDE theming is handled by the MacTahoe KDE theme aspect (mactahoe.nix)
+      # Stylix KDE target is disabled because it creates its own look-and-feel
+      # that conflicts with the MacTahoe look-and-feel package
+      stylix.targets.kde.enable = false;
+
+      # Qt theming disabled — same kvantum/plasmashell issue as NixOS level
+      stylix.targets.qt.enable = false;
+    };
   };
 }
