@@ -46,6 +46,20 @@ let
     # Symbols layer: hold Right Super + key → symbol
     # Ported from kanata symbols layer (rmet hold)
     extraKeymap = [
+      # macOS screenshots: ⌘⇧3 screen, ⌘⇧4 area (the Keychron K2 HE's
+      # screenshot key sends exactly this), ⌘⇧5 capture toolbar. XKB
+      # lv3:lwin_switch turns Left Super into niri's Mod, so as-is these hit
+      # Mod+Shift+3–5 (move window to a workspace). Re-sent on Right Super,
+      # which stays plain Super → studio-linux's Super+Shift+3/4/5 binds.
+      # The other Mod keys (Esc/Right Ctrl/Right Alt) still move windows.
+      {
+        name = "macOS screenshot shortcuts → studio-linux capture";
+        remap = {
+          "Super_L-Shift-3" = "Super_R-Shift-3";
+          "Super_L-Shift-4" = "Super_R-Shift-4";
+          "Super_L-Shift-5" = "Super_R-Shift-5";
+        };
+      }
 
       {
         name = "Symbols layer (Right Super held)";
