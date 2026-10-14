@@ -59,3 +59,9 @@ workspace "notes" {
 workspace "research" {
     open-on-output "Acer Technologies XV271U M3 13210337C3LAJ"
 }
+
+// Test sessions (nested niri windows from studio-linux dev / agents) land here,
+// on the left portrait monitor, unfocused — never on the working workspaces.
+workspace "lab" {
+    open-on-output "Acer Technologies XV271U M3 1321033793LAJ"
+}

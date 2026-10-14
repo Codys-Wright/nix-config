@@ -171,3 +171,11 @@ window-rule {
     open-focused true
     open-maximized true
 }
+
+// Nested niri sessions (studio-linux test windows) → the "lab" workspace,
+// without stealing focus.
+window-rule {
+    match app-id="^niri$"
+    open-on-workspace "lab"
+    open-focused false
+}
