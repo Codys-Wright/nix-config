@@ -37,7 +37,6 @@ binds {
     Mod+Ctrl+WheelScrollUp { focus-workspace-up; }
     Mod+Ctrl+WheelScrollDown { focus-workspace-down; }
 
-    Mod+Tab { focus-window-previous; }
     Mod+C { center-column; }
     Mod+Ctrl+C { center-visible-columns; }
     Mod+F { maximize-column; }
