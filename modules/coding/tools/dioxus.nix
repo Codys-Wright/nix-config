@@ -16,7 +16,21 @@
       { pkgs, ... }:
       {
         home.packages = with pkgs; [
-          dioxus-cli
+          # dx with the WebKitGTK workarounds for the desktop apps it runs —
+          # scoped to dx, not the whole session (a session-wide GDK_BACKEND=x11
+          # pushes every GTK app, the launcher included, onto XWayland).
+          (symlinkJoin {
+            name = "dioxus-cli-webkit-env";
+            paths = [ dioxus-cli ];
+            nativeBuildInputs = [ makeWrapper ];
+            postBuild = ''
+              wrapProgram $out/bin/dx \
+                --set-default GDK_BACKEND x11 \
+                --set-default WEBKIT_DISABLE_COMPOSITING_MODE 1 \
+                --set-default WEBKIT_ENABLE_WEBGPU 0 \
+                --set-default GTK_USE_PORTAL 0
+            '';
+          })
           wasm-bindgen-cli
           binaryen
           tailwindcss_4
@@ -25,13 +39,6 @@
           nodejs_22
           flyctl
         ];
-
-        home.sessionVariables = {
-          GDK_BACKEND = "x11";
-          WEBKIT_DISABLE_COMPOSITING_MODE = "1";
-          WEBKIT_ENABLE_WEBGPU = "0";
-          GTK_USE_PORTAL = "0";
-        };
       };
 
     provides.to-hosts.nixos =

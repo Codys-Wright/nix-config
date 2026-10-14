@@ -116,6 +116,8 @@
                 else
                   ''
                     spawn-at-startup "noctalia-shell"
+                    // Noctalia's per-workspace wallpaper (studio-linux has its own).
+                    spawn-at-startup "bash" "-lc" "pgrep -u \"$USER\" -f \"[n]iri-workspace-wallpaper\" >/dev/null || exec \"$HOME/.config/niri/bin/niri-workspace-wallpaper\""
                   '';
 
               # Override niri-flake's homeModules.config which sets enable = (finalConfig != null).
