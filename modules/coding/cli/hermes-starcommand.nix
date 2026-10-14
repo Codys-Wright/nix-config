@@ -6,7 +6,7 @@
   ...
 }:
 {
-  flake-file.inputs.hermes-agent.url = lib.mkDefault "github:NousResearch/hermes-agent/v2026.7.20";
+  flake-file.inputs.hermes-agent.url = lib.mkDefault "github:NousResearch/hermes-agent/v0.22.0";
   flake-file.inputs.hermes-agent.inputs.nixpkgs.follows = "nixpkgs";
 
   fleet.coding._.cli._.hermes-starcommand = {
@@ -187,6 +187,9 @@
       {
         environment.systemPackages = [
           inputs.hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.default
+          # Hermes Desktop (v0.22+): the desktop app; points at a local Hermes or
+          # a remote gateway (Starcommand).
+          inputs.hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.desktop
           hermesStarcommand
         ];
       };
