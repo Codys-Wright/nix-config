@@ -9,6 +9,10 @@
         pkgs,
         ...
       }:
+      let
+        # PREEMPT_RT kernel (compiled locally) vs the cached stock kernel.
+        realtime = false;
+      in
       {
         # Prevent Intel I226-V (igc/enp11s0) PCIe link loss after extended uptime.
         # The I226-V has a hardware errata where the NIC self-initiates PCIe L1
@@ -21,23 +25,30 @@
           # Never auto-suspend USB — the TF audio interface must not be
           # power-managed mid-session.
           "usbcore.autosuspend=-1"
-        ];
+        ]
+        # Without PREEMPT_RT: full preemption on the stock kernel (musnix
+        # already adds threadirqs).
+        ++ lib.optional (!realtime) "preempt=full";
 
         # ── Low-latency audio (user-level PipeWire) ──────────────────────────
-        # PREEMPT_RT real-time kernel on mainline 6.18 (CONFIG_PREEMPT_RT).
-        # Cuts worst-case scheduling jitter (~500 µs generic → <100 µs RT) — the
-        # real limiter on minimum audio buffer size. Build-tested: Nvidia 595.x
-        # compiles against it. PREEMPT_DYNAMIC off (mutually exclusive with RT).
+        # Kernel: the stock (cache.nixos.org) 6.18 with full preemption and
+        # threaded IRQs at boot. PREEMPT_RT is built from source on every kernel
+        # bump (no public RT cache), and Dante moves to a dedicated box, so it's
+        # off; flip `realtime` back on for hard RT (worst-case jitter ~500 µs
+        # generic → <100 µs RT, the limiter on the smallest Dante buffers).
         boot.kernelPackages = lib.mkForce (
-          pkgs.linuxPackagesFor (
-            pkgs.linux_6_18.override {
-              structuredExtraConfig = with lib.kernel; {
-                PREEMPT_RT = yes;
-                PREEMPT_DYNAMIC = lib.mkForce no;
-              };
-              ignoreConfigErrors = true;
-            }
-          )
+          if realtime then
+            pkgs.linuxPackagesFor (
+              pkgs.linux_6_18.override {
+                structuredExtraConfig = with lib.kernel; {
+                  PREEMPT_RT = yes;
+                  PREEMPT_DYNAMIC = lib.mkForce no;
+                };
+                ignoreConfigErrors = true;
+              }
+            )
+          else
+            pkgs.linuxPackages_6_18
         );
 
         # Keep all cores at max clock. The kernel default `powersave` governor
