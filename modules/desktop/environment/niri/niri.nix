@@ -96,27 +96,27 @@
             let
               configRoot = "${config.home.homeDirectory}/.flake/modules/desktop/environment/niri/_config";
               mutableNoctaliaColors = "${configRoot}/noctalia/colors.json";
-              # Per user: studio-linux when it's enabled for this user (e.g. one
+              # Per user: Loft when it's enabled for this user (e.g. one
               # user on one host), otherwise the host's settings.desktop.shell.
               shell =
-                if (config.programs ? studio-linux) && config.programs.studio-linux.enable then
-                  "studio"
+                if (config.programs ? loft) && config.programs.loft.enable then
+                  "loft"
                 else
                   host.settings.desktop.shell;
             in
             {
               # The desktop shell niri starts (see `shell` above), included
-              # last by _config/config.kdl. studio-linux brings its own services and
-              # a fragment with its keybinds + active theme (fleet.desktop._.studio).
+              # last by _config/config.kdl. Loft brings its own services and
+              # a fragment with its keybinds + active theme (fleet.desktop._.loft).
               xdg.configFile."fleet-niri/shell.kdl".text =
-                if shell == "studio" then
+                if shell == "loft" then
                   ''
-                    include optional=true "${config.xdg.configHome}/studio-linux/niri.kdl"
+                    include optional=true "${config.xdg.configHome}/loft/niri.kdl"
                   ''
                 else
                   ''
                     spawn-at-startup "noctalia-shell"
-                    // Noctalia's per-workspace wallpaper (studio-linux has its own).
+                    // Noctalia's per-workspace wallpaper (Loft has its own).
                     spawn-at-startup "bash" "-lc" "pgrep -u \"$USER\" -f \"[n]iri-workspace-wallpaper\" >/dev/null || exec \"$HOME/.config/niri/bin/niri-workspace-wallpaper\""
                   '';
 
@@ -170,7 +170,7 @@
                 };
               };
 
-              # Drives Noctalia's wallpaper; studio-linux has its own.
+              # Drives Noctalia's wallpaper; Loft has its own.
               systemd.user.services.niri-workspace-wallpaper =
                 lib.mkIf (config.home.username == "cody" && shell == "noctalia")
                   {

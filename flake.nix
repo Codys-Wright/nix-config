@@ -76,6 +76,10 @@
       url = "git+https://codeberg.org/FastTrackStudios/inferno-control";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    loft = {
+      url = "github:Codys-Wright/loft";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     microvm = {
       url = "github:microvm-nix/microvm.nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -123,10 +127,6 @@
     sops-nix.url = "github:Mic92/sops-nix";
     spicetify-nix = {
       url = "github:Gerg-L/spicetify-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    studio-linux = {
-      url = "github:Codys-Wright/studio-linux";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     stylix = {

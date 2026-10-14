@@ -14,7 +14,7 @@
           enable = true;
           wayland.enable = true;
           autoNumlock = true;
-          # Overridable: hosts on the studio shell use studio's login screen.
+          # Overridable: hosts on the Loft shell use Loft's login screen.
           # Above mkDefault, which Plasma 6 uses for "breeze".
           theme = lib.mkOverride 900 "MacTahoe-Dark";
         };

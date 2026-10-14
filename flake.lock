@@ -712,7 +712,7 @@
     "flake-parts_7": {
       "inputs": {
         "nixpkgs-lib": [
-          "studio-linux",
+          "loft",
           "nixpkgs"
         ]
       },
@@ -1117,6 +1117,27 @@
       "original": {
         "type": "git",
         "url": "https://codeberg.org/FastTrackStudios/inferno-control"
+      }
+    },
+    "loft": {
+      "inputs": {
+        "flake-parts": "flake-parts_7",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1791963910,
+        "narHash": "sha256-COm6Wt6YlRInIDjGcv0eWW4ucVTktTjEXQ6Rvn0LVuQ=",
+        "owner": "Codys-Wright",
+        "repo": "loft",
+        "rev": "1eafe621ee092571ccfdf652eafac5be29bad119",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Codys-Wright",
+        "repo": "loft",
+        "type": "github"
       }
     },
     "microvm": {
@@ -1995,6 +2016,7 @@
         "hunk": "hunk",
         "import-tree": "import-tree_2",
         "inferno-control": "inferno-control",
+        "loft": "loft",
         "microvm": "microvm",
         "minegrub-theme": "minegrub-theme",
         "minegrub-world-sel-theme": "minegrub-world-sel-theme",
@@ -2014,7 +2036,6 @@
         "rust-overlay": "rust-overlay_7",
         "sops-nix": "sops-nix",
         "spicetify-nix": "spicetify-nix",
-        "studio-linux": "studio-linux",
         "stylix": "stylix",
         "wrapper-modules": "wrapper-modules",
         "wrappers": "wrappers",
@@ -2328,27 +2349,6 @@
       "original": {
         "owner": "Gerg-L",
         "repo": "spicetify-nix",
-        "type": "github"
-      }
-    },
-    "studio-linux": {
-      "inputs": {
-        "flake-parts": "flake-parts_7",
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1791962632,
-        "narHash": "sha256-QqRkVGThfFxGLppoo5WRA0PxRDfZABQmr++SJnslwnM=",
-        "owner": "Codys-Wright",
-        "repo": "studio-linux",
-        "rev": "bcc512522db6dbd7ef8d2fe1b0819e9b6168df14",
-        "type": "github"
-      },
-      "original": {
-        "owner": "Codys-Wright",
-        "repo": "studio-linux",
         "type": "github"
       }
     },
