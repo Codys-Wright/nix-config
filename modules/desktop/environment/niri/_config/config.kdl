@@ -1,3 +1,6 @@
+// studio-linux's early fragment (display overrides from its Settings app);
+// first, so this config's own outputs/input win where both set something.
+include optional=true "~/.config/studio-linux/niri-early.kdl"
 include "outputs.kdl"
 include "workspaces.kdl"
 include "rules.kdl"

@@ -3,6 +3,8 @@
 #
 # Opt-in per host; Noctalia stays the default:
 #   den.hosts.x86_64-linux.<host>.settings.desktop.shell = "studio";
+# or per user on one host (login screen unchanged):
+#   den.aspects."<user>@<host>".homeManager.programs.studio-linux.enable = true;
 #
 # Users then get studio's home-manager module (shell + launcher services,
 # idle locking, the `studio` CLI). The niri aspect switches the shell it
@@ -41,9 +43,10 @@
       (
         { host, ... }:
         {
-          homeManager = {
+          homeManager = { lib, ... }: {
             imports = [ inputs.studio-linux.homeManagerModules.default ];
-            programs.studio-linux.enable = host.settings.desktop.shell == "studio";
+            # A user can opt in on their own (den.aspects."<user>@<host>").
+            programs.studio-linux.enable = lib.mkDefault (host.settings.desktop.shell == "studio");
           };
         }
       )

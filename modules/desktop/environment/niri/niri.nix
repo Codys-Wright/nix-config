@@ -96,10 +96,16 @@
             let
               configRoot = "${config.home.homeDirectory}/.flake/modules/desktop/environment/niri/_config";
               mutableNoctaliaColors = "${configRoot}/noctalia/colors.json";
-              shell = host.settings.desktop.shell;
+              # Per user: studio-linux when it's enabled for this user (e.g. one
+              # user on one host), otherwise the host's settings.desktop.shell.
+              shell =
+                if (config.programs ? studio-linux) && config.programs.studio-linux.enable then
+                  "studio"
+                else
+                  host.settings.desktop.shell;
             in
             {
-              # The desktop shell niri starts (settings.desktop.shell), included
+              # The desktop shell niri starts (see `shell` above), included
               # last by _config/config.kdl. studio-linux brings its own services and
               # a fragment with its keybinds + active theme (fleet.desktop._.studio).
               xdg.configFile."fleet-niri/shell.kdl".text =
