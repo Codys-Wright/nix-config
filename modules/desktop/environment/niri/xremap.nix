@@ -170,8 +170,26 @@ in
     # Per-user half. Host scope never delivers homeManager, so this rides
     # the explicit host→users edge to every user on hosts that include it.
     provides.to-users.homeManager =
-      { pkgs, ... }:
+      {
+        config,
+        lib,
+        pkgs,
+        ...
+      }:
       let
+        # Loft's "Apps to leave alone" (Settings → Keyboard Shortcuts): with Loft
+        # on, xremap reads `loft keys xremap`'s copy of this config, which turns
+        # every remap off in those apps, and reloads it when the list changes.
+        loftOn = (config.programs ? loft) && config.programs.loft.enable;
+        xremapBase = pkgs.writeText "xremap-base.json" (builtins.toJSON xremapConfig);
+        loftXremapConfig = "${config.xdg.stateHome}/loft/xremap/config.json";
+        # Falls back to the plain config so a Loft failure never costs the remaps.
+        loftXremap = pkgs.writeShellScript "xremap-loft-config" ''
+          ${config.home.profileDirectory}/bin/loft keys xremap --base ${xremapBase} && exit 0
+          mkdir -p "$(dirname ${loftXremapConfig})"
+          cp ${xremapBase} ${loftXremapConfig}
+        '';
+
         # Find the niri socket at runtime and inject it into the systemd user env.
         # niri does not call import-environment, so PassEnvironment gets nothing.
         # Uses only shell builtins + systemctl (always in PATH via /run/current-system/sw).
@@ -197,7 +215,13 @@ in
         # xremap needs NIRI_SOCKET for app-specific remaps (terminal vs non-terminal).
         systemd.user.services.xremap.Unit.After = [ "niri.service" ];
         systemd.user.services.xremap.Service.RestartSec = "2";
-        systemd.user.services.xremap.Service.ExecStartPre = [ "${findNiriSocket}" ];
+        systemd.user.services.xremap.Service.ExecStartPre = [
+          "${findNiriSocket}"
+        ]
+        ++ lib.optional loftOn "${loftXremap}";
+        systemd.user.services.xremap.Service.ExecStart = lib.mkIf loftOn (
+          lib.mkForce "${lib.getExe config.services.xremap.package} --mouse --watch=config ${loftXremapConfig}"
+        );
       };
   };
 }
