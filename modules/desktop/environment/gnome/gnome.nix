@@ -32,8 +32,8 @@
         # Theme packages are installed by the mactahoe aspect — don't duplicate here.
         gtk = {
           enable = true;
-          theme.name = lib.mkForce "MacTahoe-Dark-Blue";
-          gtk4.theme.name = lib.mkForce "MacTahoe-Dark-Blue";
+          theme.name = lib.mkForce "MacTahoe-Dark-blue";
+          gtk4.theme.name = lib.mkForce "MacTahoe-Dark-blue";
           iconTheme.name = lib.mkForce "MacTahoe-blue";
           cursorTheme = {
             name = lib.mkForce "MacTahoe-dark-cursors";
@@ -46,7 +46,7 @@
         dconf.settings = {
           "org/gnome/desktop/interface" = {
             color-scheme = "prefer-dark";
-            gtk-theme = "MacTahoe-Dark-Blue";
+            gtk-theme = "MacTahoe-Dark-blue";
             icon-theme = "MacTahoe-blue";
             cursor-theme = "MacTahoe-dark-cursors";
             cursor-size = 24;

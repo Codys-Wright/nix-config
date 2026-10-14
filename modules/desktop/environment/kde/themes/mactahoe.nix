@@ -37,8 +37,8 @@
 
         gtk = {
           enable = true;
-          theme.name = lib.mkForce "MacTahoe-Dark-Blue";
-          gtk4.theme.name = lib.mkForce "MacTahoe-Dark-Blue";
+          theme.name = lib.mkForce "MacTahoe-Dark-blue";
+          gtk4.theme.name = lib.mkForce "MacTahoe-Dark-blue";
           iconTheme.name = lib.mkForce "MacTahoe-blue";
           cursorTheme = {
             name = lib.mkForce "MacTahoe-dark-cursors";
