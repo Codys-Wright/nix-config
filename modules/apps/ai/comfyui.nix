@@ -19,11 +19,15 @@
         cudaWheels = pkgs.extend (
           final: prev: {
             pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
-              (_: pp: {
-                torch = pp.torch-bin;
-                torchvision = pp.torchvision-bin;
-                torchaudio = pp.torchaudio-bin;
-                triton = pp.triton-bin;
+              (py: pp: {
+                # The cu130 wheel must be told to use CUDA 13 (nixpkgs refuses it
+                # with the default 12.x cudaPackages); torchvision-bin etc. take
+                # torch-bin directly, so pin it at the source.
+                torch-bin = pp.torch-bin.override { cudaPackages = final.cudaPackages_13; };
+                torch = py.torch-bin;
+                torchvision = py.torchvision-bin;
+                torchaudio = py.torchaudio-bin;
+                triton = py.triton-bin;
                 # The cu130 wheels need cuda-bindings >= 13 (default set is 12.x).
                 cuda-bindings = pp.cuda-bindings.override { cudaPackages = final.cudaPackages_13; };
               })

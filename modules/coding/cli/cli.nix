@@ -35,7 +35,7 @@
           ripgrep
           openssl
           openssl.dev
-          openssl_3
+          openssl
           bat
         ];
       };
