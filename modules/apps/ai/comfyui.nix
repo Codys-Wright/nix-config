@@ -13,22 +13,28 @@
     nixos =
       { pkgs, ... }:
       let
-        python = pkgs.python3.override {
-          packageOverrides = _final: prev: {
-            torch = prev.torch-bin;
-            torchvision = prev.torchvision-bin;
-            torchaudio = prev.torchaudio-bin;
-            triton = prev.triton-bin;
-          };
-        };
+        # A nixpkgs scoped to ComfyUI whose Python sets use the CUDA 13 wheels
+        # (*-bin): comfyui re-overrides python3 internally, so a plain
+        # `python3 = …` override is dropped.
+        cudaWheels = pkgs.extend (
+          final: prev: {
+            pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
+              (_: pp: {
+                torch = pp.torch-bin;
+                torchvision = pp.torchvision-bin;
+                torchaudio = pp.torchaudio-bin;
+                triton = pp.triton-bin;
+                # The cu130 wheels need cuda-bindings >= 13 (default set is 12.x).
+                cuda-bindings = pp.cuda-bindings.override { cudaPackages = final.cudaPackages_13; };
+              })
+            ];
+          }
+        );
       in
       {
         services.comfyui = {
           enable = true;
-          package = pkgs.comfyui.override {
-            python3 = python;
-            withManager = true;
-          };
+          package = cudaWheels.comfyui.override { withManager = true; };
           listen = [ "127.0.0.1" ];
           # Models are large: the Development drive.
           dataDir = lib.mkDefault "/run/media/Development/ComfyUI";
