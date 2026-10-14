@@ -35,8 +35,11 @@
           ripgrep
           openssl
           openssl.dev
-          openssl
           bat
+          # Secrets (nix-secrets, starcommand cluster-secrets): edit / encrypt.
+          sops
+          age
+          ssh-to-age
         ];
       };
 
