@@ -2,7 +2,9 @@
 #
 # Pulls t2linux-patched kernel + drivers from nixos-hardware's apple-t2 module
 # (keyboard, trackpad, touchbar, audio, Wi-Fi/BT, thermals) and wires up the
-# t2linux cachix so you are not compiling a custom kernel locally.
+# t2linux cachix so you are not compiling a custom kernel locally. (While the
+# kernel-patch workaround below is active the kernel is a local derivation,
+# so it is compiled locally.)
 #
 # Post-install firmware step: Wi-Fi and Bluetooth need blobs extracted from a
 # macOS recovery image. See https://wiki.t2linux.org — once blobs are installed,
@@ -21,9 +23,33 @@
     description = "Apple T2 Mac kernel + drivers (2018-2020 Intel Macs)";
 
     nixos =
-      { lib, ... }:
+      {
+        config,
+        lib,
+        pkgs,
+        ...
+      }:
+      let
+        # WORKAROUND (2026-10): nixos-hardware's stable t2linux patches no
+        # longer apply to nixpkgs' 6.18.x; see ./_apple-t2-kernel-fix.nix.
+        # Remove this, the two definitions below and that file once the
+        # warning fires (nixos-hardware has bumped its patch set).
+        t2KernelFix = import ./_apple-t2-kernel-fix.nix {
+          inherit lib pkgs;
+          inherit (inputs) nixos-hardware;
+        };
+      in
       {
         imports = [ inputs.nixos-hardware.nixosModules.apple-t2 ];
+
+        boot.kernelPackages = lib.mkIf (
+          config.hardware.apple-t2.kernelChannel == "stable" && t2KernelFix.needed
+        ) (lib.mkForce (pkgs.linuxPackagesFor t2KernelFix.kernel));
+        warnings = lib.optional (!t2KernelFix.needed) ''
+          fleet.hardware.apple-t2: nixos-hardware has moved its T2 patch set
+          off t2linux facf1c7 — drop the kernel workaround
+          (modules/hardware/_apple-t2-kernel-fix.nix + its wiring in apple-t2.nix).
+        '';
 
         hardware.apple-t2.kernelChannel = lib.mkDefault "stable";
 
