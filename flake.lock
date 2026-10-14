@@ -1127,11 +1127,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1791963910,
-        "narHash": "sha256-COm6Wt6YlRInIDjGcv0eWW4ucVTktTjEXQ6Rvn0LVuQ=",
+        "lastModified": 1791964777,
+        "narHash": "sha256-lZj3BsR7Cbs0Gzyys8htHd83uIC+a6HI++B+LrJzueI=",
         "owner": "Codys-Wright",
         "repo": "loft",
-        "rev": "1eafe621ee092571ccfdf652eafac5be29bad119",
+        "rev": "6f6698ba92c2a375fc037b8162d39f8b013551ea",
         "type": "github"
       },
       "original": {
