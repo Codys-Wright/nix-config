@@ -1,7 +1,8 @@
 # Desktop facet: niri, GNOME and KDE environments behind SDDM.
 #
-# The default session is a per-host setting:
+# The default session and, under niri, the desktop shell are per-host settings:
 #   den.hosts.x86_64-linux.<host>.settings.desktop.session = "gnome";
+#   den.hosts.x86_64-linux.<host>.settings.desktop.shell = "studio";
 {
   lib,
   fleet,
@@ -25,11 +26,21 @@ in
       description = "Default display-manager session";
     };
 
+    settings.shell = lib.mkOption {
+      type = lib.types.enum [
+        "noctalia"
+        "studio"
+      ];
+      default = "noctalia";
+      description = "Desktop shell under niri: Noctalia, or studio-linux (github:Codys-Wright/studio-linux)";
+    };
+
     includes = [
       <fleet.desktop._.environment/niri>
       <fleet.desktop._.environment/gnome>
       <fleet.desktop._.environment/kde>
       <fleet.desktop._.display-manager/sddm>
+      <fleet.desktop/studio>
     ];
 
     nixos =
