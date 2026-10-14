@@ -202,7 +202,7 @@ in
             // make-app-profiles config.programs.firefox.webapps;
           };
 
-          xdg.desktopEntries = lib.mkIf pkgs.stdenv.isLinux (
+          xdg.desktopEntries = lib.mkIf pkgs.stdenv.hostPlatform.isLinux (
             mapAttrs (name: cfg: {
               inherit (cfg)
                 genericName

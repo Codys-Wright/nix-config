@@ -25,7 +25,7 @@ in
       # darwin (e.g. voyager) so the shared cody aspect still evaluates there.
       homeManager =
         { pkgs, ... }:
-        lib.mkIf pkgs.stdenv.isLinux {
+        lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
           xdg.mimeApps = {
             enable = true;
             defaultApplications = {

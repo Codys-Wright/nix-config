@@ -17,7 +17,7 @@
             "dotnet-runtime-6.0.36"
           ];
         }
-        (lib.mkIf (!pkgs.stdenv.isDarwin) {
+        (lib.mkIf (!pkgs.stdenv.hostPlatform.isDarwin) {
           home.packages = [
             pkgs.protonup-ng
             pkgs.protonup-rs # Install/update GE-Proton and Wine-GE

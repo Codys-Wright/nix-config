@@ -14,7 +14,7 @@
         ...
       }:
       {
-        home.packages = lib.mkIf (!pkgs.stdenv.isDarwin) [ pkgs.telegram-desktop ];
+        home.packages = lib.mkIf (!pkgs.stdenv.hostPlatform.isDarwin) [ pkgs.telegram-desktop ];
       };
   };
 }

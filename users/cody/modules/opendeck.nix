@@ -92,7 +92,7 @@
           source = config.lib.file.mkOutOfStoreSymlink "${configRoot}/images";
         };
 
-        systemd.user.services.opendeck-config-sync = lib.mkIf pkgs.stdenv.isLinux {
+        systemd.user.services.opendeck-config-sync = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
           Unit.Description = "Sync OpenDeck JSON config back to the flake repo";
 
           Service = {
@@ -101,7 +101,7 @@
           };
         };
 
-        systemd.user.paths.opendeck-config-sync = lib.mkIf pkgs.stdenv.isLinux {
+        systemd.user.paths.opendeck-config-sync = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
           Unit.Description = "Watch OpenDeck JSON config for repo sync";
 
           Path = {
@@ -116,7 +116,7 @@
           Install.WantedBy = [ "default.target" ];
         };
 
-        systemd.user.services.opendeck = lib.mkIf pkgs.stdenv.isLinux {
+        systemd.user.services.opendeck = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
           Unit = {
             Description = "OpenDeck Stream Deck controller";
             After = [ "graphical-session.target" ];
@@ -135,7 +135,7 @@
           Install.WantedBy = [ "graphical-session.target" ];
         };
 
-        systemd.user.services.opendeck-niri-profile-switcher = lib.mkIf pkgs.stdenv.isLinux {
+        systemd.user.services.opendeck-niri-profile-switcher = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
           Unit = {
             Description = "Switch OpenDeck profiles from Niri focus changes";
             After = [

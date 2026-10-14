@@ -14,7 +14,7 @@
         lib,
         ...
       }:
-      lib.mkIf (!pkgs.stdenv.isDarwin) {
+      lib.mkIf (!pkgs.stdenv.hostPlatform.isDarwin) {
         programs.zed-editor = {
           enable = true;
         };

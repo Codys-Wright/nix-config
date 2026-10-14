@@ -11,7 +11,7 @@
     homeManager =
       { pkgs, ... }:
       {
-        nix.registry = lib.mkIf pkgs.stdenv.isLinux (
+        nix.registry = lib.mkIf pkgs.stdenv.hostPlatform.isLinux (
           lib.mapAttrs (_name: v: { flake = v; }) (lib.filterAttrs (_name: value: value ? outputs) inputs)
         );
       };

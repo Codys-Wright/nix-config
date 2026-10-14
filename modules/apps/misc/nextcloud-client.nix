@@ -7,7 +7,7 @@
     # via nixpkgs; skip it there (macOS uses the official .app instead).
     homeManager =
       { pkgs, lib, ... }:
-      lib.mkIf pkgs.stdenv.isLinux {
+      lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
         home.packages = [ pkgs.nextcloud-client ];
       };
   };

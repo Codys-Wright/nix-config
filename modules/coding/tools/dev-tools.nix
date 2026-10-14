@@ -44,7 +44,7 @@
             # Debugging tools
             lldb
           ]
-          ++ lib.optionals pkgs.stdenv.isLinux [
+          ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
             gdb
 
             # Performance tools

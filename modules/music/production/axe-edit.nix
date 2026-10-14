@@ -15,7 +15,7 @@
     # Wine app — Linux only. mkIf, not optionalAttrs (the latter recurses).
     homeManager =
       { lib, pkgs, ... }:
-      lib.mkIf pkgs.stdenv.isLinux {
+      lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
         home.packages = [
           # Built by the fleet-packages overlay (wine + erosanix args live there)
           pkgs.axe-edit-iii

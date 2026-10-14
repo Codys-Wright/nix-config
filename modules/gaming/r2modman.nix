@@ -10,7 +10,7 @@
         lib,
         ...
       }:
-      lib.mkIf (!pkgs.stdenv.isDarwin) {
+      lib.mkIf (!pkgs.stdenv.hostPlatform.isDarwin) {
         home.packages = [
           pkgs.r2modman
           pkgs.gale

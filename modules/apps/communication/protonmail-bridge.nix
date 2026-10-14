@@ -35,7 +35,7 @@
         pkgs,
         ...
       }:
-      lib.mkIf pkgs.stdenv.isLinux {
+      lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
         # Also expose pass + gnupg in the interactive shell PATH so
         # `protonmail-bridge --cli` (run by the user for login) can find
         # the keychain helper. The systemd service gets them via

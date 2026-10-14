@@ -28,7 +28,7 @@
           };
         };
       in
-      lib.mkIf pkgs.stdenv.isLinux {
+      lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
         home.packages = [
           reaperPkgs.reaper
           pkgs.reaper-sws-extension

@@ -15,7 +15,7 @@
         ...
       }:
       {
-        home.packages = lib.mkIf pkgs.stdenv.isLinux (
+        home.packages = lib.mkIf pkgs.stdenv.hostPlatform.isLinux (
           with pkgs;
           [
             code-cursor
@@ -23,7 +23,7 @@
         );
 
         # Set up desktop entry and file associations
-        xdg.desktopEntries = lib.mkIf pkgs.stdenv.isLinux {
+        xdg.desktopEntries = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
           code-cursor = {
             name = "Code Cursor";
             comment = "AI-powered code editor";
