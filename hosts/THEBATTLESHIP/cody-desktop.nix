@@ -30,6 +30,9 @@
         # desktop never woke up. Re-enable once that's solved.
         idle.lockAfter = null;
         idle.screenOffAfter = null;
+        # iPhone via tether (tetherd user unit; Loft's Messages / notifications /
+        # calls). The Loft feature stays off until paired (Settings → Features).
+        phone.enable = true;
         # Spotify patched by Spicetify at runtime, so its colors follow the
         # Loft theme live (Cozytile's "text" theme + schemes, Marketplace).
         spotify = {
