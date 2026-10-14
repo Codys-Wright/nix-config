@@ -1,4 +1,7 @@
 // The shell is started from ~/.config/fleet-niri/shell.kdl (see config.kdl).
+// Until home-manager has generated that file (first switch after this
+// change), keep starting Noctalia so a niri login always has a shell.
+spawn-sh-at-startup "[ -e \"$HOME/.config/fleet-niri/shell.kdl\" ] || exec noctalia-shell"
 spawn-at-startup "bash" "-lc" "pgrep -u \"$USER\" -f \"[n]iri-workspace-wallpaper\" >/dev/null || exec \"$HOME/.config/niri/bin/niri-workspace-wallpaper\""
 spawn-at-startup "bash" "-lc" "pgrep -u \"$USER\" -f \"[r]eaper-console-pin\" >/dev/null || exec \"$HOME/.config/niri/bin/reaper-console-pin\""
 

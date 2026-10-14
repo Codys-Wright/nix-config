@@ -2339,11 +2339,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1791945293,
-        "narHash": "sha256-nFr9OriFEw1FjKxoNRtwA+Vu3pjmc1zWyYWFaVnH0hE=",
+        "lastModified": 1791945590,
+        "narHash": "sha256-f5H6wMCxuQjbT3gSdyGm9QfvefBhyNnszIRqTS7zy28=",
         "owner": "Codys-Wright",
         "repo": "studio-linux",
-        "rev": "0ccc9a7652984bc57fd863ffd73e3b62c07a651b",
+        "rev": "65ad78021021b7c5c24f7abe8c117c46beb76d14",
         "type": "github"
       },
       "original": {
