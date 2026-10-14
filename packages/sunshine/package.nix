@@ -232,6 +232,10 @@ stdenv'.mkDerivation (finalAttrs: {
 
   cmakeFlags = [
     "-Wno-dev"
+    # glad probes `import pkg_resources`, which setuptools >= 81 removed, then
+    # tries to pip-install it. Its generator uses importlib.metadata first, so
+    # the jinja2 + setuptools Python above is all it needs.
+    (lib.cmakeBool "GLAD_SKIP_PIP_INSTALL" true)
     (lib.cmakeBool "BOOST_USE_STATIC" false)
     (lib.cmakeBool "BUILD_DOCS" false)
     (lib.cmakeFeature "SUNSHINE_PUBLISHER_NAME" "nixpkgs")

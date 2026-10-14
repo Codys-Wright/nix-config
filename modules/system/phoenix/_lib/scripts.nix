@@ -36,11 +36,11 @@ let
 
     # Sync system
     echo "📦 Updating system configuration..."
-    ${systemRebuildCmd} ${cfg.dotfilesDir}#${systemConfigAttr}."$HOSTNAME"
+    ${systemRebuildCmd} "${cfg.dotfilesDir}#${systemConfigAttr}.$HOSTNAME"
 
     # Sync user
     echo "🏠 Updating user configuration..."
-    ${homeRebuildCmd} ${cfg.dotfilesDir}#homeConfigurations."$USERNAME@$HOSTNAME"${homeSwitchSuffix}
+    ${homeRebuildCmd} "${cfg.dotfilesDir}#homeConfigurations.$USERNAME@$HOSTNAME"${homeSwitchSuffix}
 
     # Run post-sync hooks
     phoenix posthook
@@ -53,7 +53,7 @@ let
     # Get current hostname
     HOSTNAME=$(${hostnameCmd})
 
-    ${systemRebuildCmd} ${cfg.dotfilesDir}#${systemConfigAttr}."$HOSTNAME"
+    ${systemRebuildCmd} "${cfg.dotfilesDir}#${systemConfigAttr}.$HOSTNAME"
     echo "✅ System sync complete!"
   '';
 
@@ -65,14 +65,14 @@ let
     HOSTNAME=$(${hostnameCmd})
     USERNAME=$(whoami)
 
-    ${homeRebuildCmd} ${cfg.dotfilesDir}#homeConfigurations."$USERNAME@$HOSTNAME"${homeSwitchSuffix}
+    ${homeRebuildCmd} "${cfg.dotfilesDir}#homeConfigurations.$USERNAME@$HOSTNAME"${homeSwitchSuffix}
     echo "✅ User sync complete!"
   '';
 
   updateScript = createScript "phoenix-update" ''
     #!/bin/bash
     echo "🔄 Updating flake inputs..."
-    cd ${cfg.dotfilesDir}
+    cd "${cfg.dotfilesDir}"
     nix flake update
     echo "✅ Flake inputs updated!"
   '';
@@ -80,15 +80,15 @@ let
   upgradeScript = createScript "phoenix-upgrade" ''
     #!/bin/bash
     echo "⬆️ Upgrading system..."
-    cd ${cfg.dotfilesDir}
+    cd "${cfg.dotfilesDir}"
     nix flake update
 
     # Get current hostname and username
     HOSTNAME=$(${hostnameCmd})
     USERNAME=$(whoami)
 
-    ${systemRebuildCmd} ${cfg.dotfilesDir}#${systemConfigAttr}."$HOSTNAME"
-    ${homeRebuildCmd} ${cfg.dotfilesDir}#homeConfigurations."$USERNAME@$HOSTNAME"${homeSwitchSuffix}
+    ${systemRebuildCmd} "${cfg.dotfilesDir}#${systemConfigAttr}.$HOSTNAME"
+    ${homeRebuildCmd} "${cfg.dotfilesDir}#homeConfigurations.$USERNAME@$HOSTNAME"${homeSwitchSuffix}
     echo "✅ System upgraded!"
   '';
 
