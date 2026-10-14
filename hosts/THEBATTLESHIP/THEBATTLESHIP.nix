@@ -219,6 +219,7 @@ in
         # Host-local aspects split out of the former inline nixos block —
         # one file per concern in this directory.
         den.aspects.THEBATTLESHIP-audio-latency
+        den.aspects.THEBATTLESHIP-niri-loft
         den.aspects.THEBATTLESHIP-storage
         den.aspects.THEBATTLESHIP-starcommand-net
         den.aspects.THEBATTLESHIP-sops

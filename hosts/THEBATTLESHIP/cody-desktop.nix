@@ -23,6 +23,9 @@
     {
       programs.loft = {
         enable = true;
+        # Must match the compositor (hosts/THEBATTLESHIP/niri-loft.nix): turns
+        # on per-workspace wallpapers (the layer rule + the shell's surfaces).
+        niriPackage = inputs.loft.packages.${pkgs.stdenv.hostPlatform.system}.niri-loft;
         gtkBase.dark = gtk4 "Dark";
         gtkBase.light = gtk4 "Light";
         # No auto-lock and no monitor power-off for now: turning the monitors off
