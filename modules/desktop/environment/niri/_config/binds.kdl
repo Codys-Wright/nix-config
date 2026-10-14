@@ -85,7 +85,6 @@ binds {
     Mod+Shift+0 { move-column-to-workspace "setup"; }
 
     Print { screenshot; }
-    Mod+Ctrl+S { spawn-sh "flameshot gui --raw | wl-copy"; }
     Mod+Shift+S { spawn-sh "grim -g \"$(slurp -w 0)\" - | wl-copy"; }
     Mod+Shift+E { spawn-sh "wl-paste | swappy -f -"; }
 
