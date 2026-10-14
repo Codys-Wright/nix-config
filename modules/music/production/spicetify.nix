@@ -12,7 +12,7 @@
     description = "Spotify client with Catppuccin theme, adblock, and extensions via spicetify-nix";
 
     homeManager =
-      { pkgs, ... }:
+      { pkgs, lib, ... }:
       let
         spicePkgs = inputs.spicetify-nix.legacyPackages.${pkgs.stdenv.hostPlatform.system};
       in
@@ -20,7 +20,8 @@
         imports = [ inputs.spicetify-nix.homeManagerModules.spicetify ];
 
         programs.spicetify = {
-          enable = true;
+          # Off where Loft themes Spotify at runtime (programs.loft.spotify).
+          enable = lib.mkDefault true;
           theme = spicePkgs.themes.catppuccin;
           colorScheme = "mocha";
 
