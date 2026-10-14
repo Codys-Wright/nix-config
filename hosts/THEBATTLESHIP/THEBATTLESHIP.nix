@@ -57,6 +57,7 @@ in
         <fleet.apps/flatpaks> # Flatpak + Flathub (path to Flatpak bottles)
         <fleet.system/printing> # CUPS + mDNS network printer discovery
         <fleet.hardware/cuda> # CUDA toolkit (RTX present; nvidia already on)
+        <fleet.apps/comfyui> # ComfyUI (CUDA) on :8188, models on the Development drive
         # RT core isolation for the audio path — currently DISABLED (see
         # modules/audio/rt-isolation.nix): pinning pipewire to a
         # core before isolcpus is active starves it into a watchdog loop.

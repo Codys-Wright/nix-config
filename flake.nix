@@ -18,6 +18,7 @@
       url = "github:Lyndeno/apple-fonts.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    comfyui-nix.url = "github:utensils/comfyui-nix";
     controller-split = {
       url = "path:/run/media/Development/Tools/controller-split";
       inputs.nixpkgs.follows = "nixpkgs";
