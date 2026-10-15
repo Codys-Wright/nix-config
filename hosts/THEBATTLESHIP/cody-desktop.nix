@@ -21,6 +21,10 @@
       spicePkgs = inputs.spicetify-nix.legacyPackages.${pkgs.stdenv.hostPlatform.system};
     in
     {
+      # Files (Nautilus): sort folders in with files, so "newest first" in
+      # Downloads is one list, not folders then files (GTK 4 file chooser too).
+      dconf.settings."org/gtk/gtk4/settings/file-chooser".sort-directories-first = false;
+
       programs.loft = {
         enable = true;
         # Must match the compositor (hosts/THEBATTLESHIP/niri-loft.nix): turns
