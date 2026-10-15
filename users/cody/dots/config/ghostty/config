@@ -76,3 +76,7 @@ mouse-hide-while-typing = true
 window-padding-x = 5
 window-padding-y = 5
 
+
+# Loft: theme colors + translucent background (blurred by niri). Set
+# "App's own" for Ghostty in Loft → Window Rules so text stays solid.
+config-file = ?~/.local/state/loft/current/ghostty.conf
