@@ -1,3 +1,10 @@
+// Translucent windows (Loft's window glass): by default niri paints the focus
+// ring / border as a solid rectangle *behind* the window, so a see-through
+// focused window showed the ring color instead of the blurred wallpaper.
+window-rule {
+    draw-border-with-background false
+}
+
 window-rule {
     match app-id="^kitty$" is-focused=false
     opacity 0.9
