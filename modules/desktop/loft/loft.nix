@@ -12,19 +12,6 @@
 # The host's login screen becomes Loft's SDDM theme (same design as the
 # lock screen).
 { inputs, lib, ... }:
-let
-  # Loft's login screen (the lock screen's design, in SDDM).
-  greeter = pkgs: {
-    environment.systemPackages = [
-      inputs.loft.packages.${pkgs.stdenv.hostPlatform.system}.loft-sddm-theme
-    ];
-    services.displayManager.sddm = {
-      theme = "loft";
-      # Lets the greeter read /var/lib/loft/greeter/theme.json.
-      settings.General.GreeterEnvironment = "QML_XHR_ALLOW_FILE_READ=1";
-    };
-  };
-in
 {
   flake-file.inputs.loft = {
     url = lib.mkDefault "github:Codys-Wright/loft";
@@ -34,20 +21,20 @@ in
   fleet.desktop._.loft = {
     description = "Loft desktop shell + launcher (when settings.desktop.shell = \"loft\")";
 
+    # Loft's NixOS module: the login screen (SDDM theme `loft`) that follows
+    # each user's lock screen design (`loft greeter sync`).
     nixos =
+      { host, lib, ... }:
       {
-        host,
-        lib,
-        pkgs,
-        ...
-      }:
-      lib.mkIf (host.settings.desktop.shell == "loft") (greeter pkgs);
+        imports = [ inputs.loft.nixosModules.default ];
+        programs.loft.greeter.enable = lib.mkDefault (host.settings.desktop.shell == "loft");
+      };
 
     # Just the login screen, for hosts where only some users run Loft
     # (den.aspects."<user>@<host>"): the others keep their shell.
     provides.greeter = {
       description = "Loft's SDDM login screen (without making Loft the host's shell)";
-      nixos = { pkgs, ... }: greeter pkgs;
+      nixos.programs.loft.greeter.enable = true;
     };
 
     provides.to-users.includes = [
