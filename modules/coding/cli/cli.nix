@@ -5,7 +5,7 @@
 }:
 {
   fleet.coding._.cli = {
-    description = "All CLI development tools - atuin, btop, direnv, eza, fzf, herdr, hunk, just, pi-coding-agent, rbw, sesh, yazi, zoxide";
+    description = "All CLI development tools - atuin, btop, direnv, eza, fzf, herdr, hunk, just, pi-coding-agent, perf/samply, rbw, sesh, yazi, zoxide";
 
     includes = [
       fleet.coding._.cli._.atuin
@@ -19,6 +19,7 @@
       fleet.coding._.cli._.hunk
       fleet.coding._.cli._.just
       fleet.coding._.cli._.pi-coding-agent
+      fleet.coding._.cli._.profiling
       fleet.coding._.cli._.rbw
       fleet.coding._.cli._.sesh
       fleet.coding._.cli._.yazi
