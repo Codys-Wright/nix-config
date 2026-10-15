@@ -1,5 +1,7 @@
+// No DISPLAY here: niri runs xwayland-satellite itself and exports the
+// display it got. Forcing ":0" sent X11 apps (REAPER) to whichever X server
+// owns :0, e.g. a second niri started from a TTY, so their windows never showed.
 environment {
-    DISPLAY ":0"
     NIXOS_OZONE_WL "1"
     MOZ_ENABLE_WAYLAND "1"
     _JAVA_AWT_WM_NONREPARENTING "1"
