@@ -186,3 +186,50 @@ window-rule {
     open-on-workspace "lab"
     open-focused false
 }
+
+// Settings, preferences and dialog-type windows open floating (centered) instead
+// of as a new column that shoves the workspace around. niri already floats
+// dialogs that have a parent; these catch the rest: by title (any app's
+// Preferences / Settings / Properties / About / file pickers / confirmations) and
+// whole utility apps. Per app: Loft → Settings → Window Rules → Open floating.
+window-rule {
+    match title="(?i)^(preferences|settings|properties|about|options|configure)\\b"
+    match title="(?i)\\b(preferences|settings|properties|options)$"
+    match title="(?i)^about "
+    match title="(?i)^(open|save|save as|select|choose|export|import)( (file|files|folder|image|location)s?)?…?$"
+    match title="(?i)^(rename|delete|replace|confirm|authentication required|unlock)\\b"
+    match title="(?i)— (preferences|settings|properties|configure)"
+    match title="(?i)(properties|settings) — "
+    match app-id="^org\\.pulseaudio\\.pavucontrol$"
+    match app-id="^pavucontrol$"
+    match app-id="^com\\.saivert\\.pwvucontrol$"
+    match app-id="^blueman-manager"
+    match app-id="^\\.blueman-manager-wrapped$"
+    match app-id="^nm-connection-editor$"
+    match app-id="^org\\.gnome\\.Settings$"
+    match app-id="^org\\.gnome\\.FileRoller$"
+    match app-id="^xdg-desktop-portal"
+    match app-id="^org\\.freedesktop\\.impl\\.portal"
+    match app-id="^polkit"
+    match app-id="^org\\.kde\\.polkit"
+    match app-id="^org\\.kde\\.kdialog$"
+    match app-id="^zenity$"
+    match app-id="^org\\.gnome\\.Calculator$"
+    match app-id="^qalculate"
+    match app-id="^nwg-look$"
+    match app-id="^qt[56]ct$"
+    match app-id="^kvantummanager$"
+    match app-id="^org\\.kde\\.kcolorchooser$"
+    match app-id="^gcolor3$"
+    match app-id="^com\\.github\\.finefindus\\.eyedropper$"
+    match app-id="^org\\.gnome\\.clocks$"
+    exclude app-id="^brave"
+    exclude app-id="^chromium"
+    exclude app-id="^firefox"
+    exclude app-id="^zen"
+    exclude app-id="^com\\.mitchellh\\.ghostty$"
+    exclude app-id="^kitty$"
+    exclude app-id="^foot"
+    exclude app-id="^REAPER$"
+    open-floating true
+}
