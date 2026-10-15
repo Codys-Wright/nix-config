@@ -27,6 +27,9 @@
 
       programs.loft = {
         enable = true;
+        # Dolphin themed like Files' glass (Kvantum + a KDE colour scheme per
+        # Loft theme, set in dolphinrc only — no global Qt style).
+        qt.enable = true;
         # Must match the compositor (hosts/THEBATTLESHIP/niri-loft.nix): turns
         # on per-workspace wallpapers (the layer rule + the shell's surfaces).
         niriPackage = inputs.loft.packages.${pkgs.stdenv.hostPlatform.system}.niri-loft;
