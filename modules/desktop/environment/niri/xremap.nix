@@ -193,10 +193,28 @@ in
         # Find the niri socket at runtime and inject it into the systemd user env.
         # niri does not call import-environment, so PassEnvironment gets nothing.
         # Uses only shell builtins + systemctl (always in PATH via /run/current-system/sw).
+        # More than one niri can be running (a stray `niri` started from a TTY):
+        # take the one of this session (niri.$WAYLAND_DISPLAY.<pid>.sock) whose
+        # niri is alive, else any live one. Picking a stale or foreign socket
+        # makes per-app remaps see the wrong focused window (Cmd+T in Brave
+        # became the terminal mapping, Ctrl+Shift+T).
         findNiriSocket = pkgs.writeShellScript "xremap-find-niri-socket" ''
-          for sock in /run/user/$UID/niri.*.sock; do
-            [ -S "$sock" ] && exec systemctl --user set-environment NIRI_SOCKET=$sock
-          done
+          live() {
+            local pid=''${1%.sock}; pid=''${pid##*.}
+            [ -S "$1" ] && [ -d "/proc/$pid" ]
+          }
+          pick=""
+          if [ -n "''${WAYLAND_DISPLAY:-}" ]; then
+            for sock in /run/user/$UID/niri."$WAYLAND_DISPLAY".*.sock; do
+              live "$sock" && pick=$sock
+            done
+          fi
+          if [ -z "$pick" ]; then
+            for sock in /run/user/$UID/niri.*.sock; do
+              live "$sock" && pick=$sock
+            done
+          fi
+          [ -n "$pick" ] && exec systemctl --user set-environment NIRI_SOCKET="$pick"
           exit 0
         '';
       in
