@@ -27,6 +27,9 @@
 
       programs.loft = {
         enable = true;
+        # The `loft` (configuring Loft, window rules) and `loft-drive` agent
+        # skills in ~/.claude/skills.
+        agentSkills.enable = true;
         # Dolphin themed like Files' glass (Kvantum + a KDE colour scheme per
         # Loft theme, set in dolphinrc only — no global Qt style).
         qt.enable = true;
