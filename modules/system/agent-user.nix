@@ -25,6 +25,25 @@
             ssh-keys.fleet.starcommand
             ssh-keys.fleet.starcommandAgent
           ];
+          # What Hermes's tools expect on PATH when its terminal backend runs
+          # here over SSH (the same set its own package wraps in, plus the
+          # usual agent CLI kit).
+          packages = with pkgs; [
+            nodejs
+            ffmpeg
+            ripgrep
+            fd
+            git
+            gh
+            jq
+            uv
+            python3
+            curl
+            wget
+            unzip
+            file
+            tree
+          ];
         };
 
         # Passwordless sudo for the agent user
