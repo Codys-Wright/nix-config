@@ -21,6 +21,8 @@
       includes = [
         <fleet/fonts>
         <fleet/phoenix>
+        # starcommand Hermes runs `voyager` profile sessions here over SSH.
+        (<fleet.coding.cli/hermes-node> { user = "CodyWright"; })
       ];
       darwin =
         { pkgs, ... }:

@@ -21,6 +21,8 @@
   };
 
   den.aspects.airlock = {
+    # starcommand Hermes runs `airlock` profile sessions here over SSH.
+    includes = [ (<fleet.coding.cli/hermes-node> { user = "rat"; }) ];
     darwin =
       { pkgs, ... }:
       {
