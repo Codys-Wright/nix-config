@@ -30,6 +30,9 @@
         in
         {
           services.openssh.enable = true;
+          # Every Hermes session to this Mac shares one SSH connection
+          # (ControlMaster); the default MaxSessions 10 caps running commands.
+          services.openssh.extraConfig = "MaxSessions 64";
           users.users.${user}.openssh.authorizedKeys.keys = [ ssh-keys.fleet.starcommandAgent ];
           environment.systemPackages = [
             pkgs.gnutar

@@ -46,6 +46,11 @@
           ];
         };
 
+        # Hermes multiplexes every session to this host over one SSH
+        # connection (ControlMaster); sshd's default MaxSessions 10 would cap
+        # concurrently running commands at ten.
+        services.openssh.settings.MaxSessions = 64;
+
         # Passwordless sudo for the agent user
         security.sudo.extraRules = [
           {
