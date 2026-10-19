@@ -30,6 +30,41 @@
       # Labels exposed to workflows via `runs-on:`. `nix-host` marks this
       # runner as host-mode with nix + the image tooling on PATH.
       labels ? [ "nix-host" ],
+      # How many runner instances to register. One instance executes ONE
+      # job at a time, so a workflow with N parallel jobs serialises on a
+      # single runner. Instances are named `<name>-1 .. <name>-N` and each
+      # gets its own workDir, so their build trees never contend.
+      count ? 1,
+      # Parent of each instance's work directory — where the CHECKOUT
+      # lands. The nixpkgs module defaults `workDir` to null, which puts it
+      # in the unit's RuntimeDirectory (/run/… — tmpfs, charged to RAM).
+      # Real disk instead, so a big checkout is not RAM.
+      #
+      # NOTHING CACHEABLE MAY LIVE HERE. The module's own pre-start hook
+      # ends with `find -H "$WORK_DIRECTORY" -mindepth 1 -delete`, run
+      # unconditionally on EVERY service start — so a build cache under
+      # workDir survives only between jobs of one uninterrupted service
+      # lifetime, and is destroyed by any restart, rebuild or reboot. Put
+      # build caches in cacheRoot below.
+      workRoot ? "/var/lib/github-runner-work",
+      # Parent of each instance's BUILD CACHE (e.g. CARGO_TARGET_DIR), as
+      # `CacheDirectory=` under /var/cache. This is the durable half:
+      # systemd creates it, keeps it across restarts and reboots, and only
+      # `systemctl clean --what=cache` removes it. It also has to be a
+      # systemd-managed directory rather than a plain path, because the
+      # unit runs ProtectSystem=strict — everything outside the state,
+      # runtime and cache dirs is read-only to it.
+      cacheRoot ? "github-runner-cargo",
+      # A big local disk for the DURABLE per-instance build cache, as an
+      # absolute path (e.g. "/run/media/Development"). When set, every
+      # instance gets `<storageRoot>/ci/<instance>` — created by tmpfiles,
+      # writable through ProtectSystem=strict via ReadWritePaths, kept
+      # across restarts and reboots — and the path is handed to every
+      # job as $CI_CACHE_DIR, so a workflow's CARGO_TARGET_DIR lives on
+      # this disk instead of /var/cache. One instance per project is
+      # what makes this pay: its cache only ever holds that project's
+      # artifacts, so it stays warm and never needs clearing.
+      storageRoot ? null,
       # Linux scheduling priority. Higher (less eager) than default so audio
       # / interactive work on this DAW workstation pre-empts the runner.
       nice ? 10,
@@ -40,7 +75,7 @@
       ...
     }:
     {
-      # One aspect per runner instance (a host may run several).
+      # One aspect per runner (a host may run several).
       name = "github-runner(${name})";
       description = ''
         GitHub Actions self-hosted runner registered against ${url}.
@@ -57,6 +92,15 @@
           pkgs,
           ...
         }:
+        let
+          indices = lib.range 1 count;
+          # A single instance keeps the bare name, so an existing
+          # deployment's registration and work tree are not orphaned by
+          # merely gaining this option.
+          instanceName = i: if count == 1 then name else "${name}-${toString i}";
+          ciDir = instance: "${storageRoot}/ci/${instance}";
+          onDisk = storageRoot != null;
+        in
         {
           # Static user so the sops-owned token can be chowned at activation
           # (the module defaults to DynamicUser, which can't own a file
@@ -73,23 +117,56 @@
           # Runner token. SOPS-encrypted, consumed RAW by the module's
           # `tokenFile`. A fine-grained PAT is created into a registration
           # token on each start; a registration token is used directly.
+          # Every instance restarts when the token rotates.
           sops.secrets.${tokenKey} = {
             sopsFile = lib.mkIf (tokenSopsFile != null) tokenSopsFile;
             owner = "github-runner";
             group = "github-runner";
             mode = "0400";
-            restartUnits = [ "github-runner-${name}.service" ];
+            restartUnits = map (i: "github-runner-${instanceName i}.service") indices;
           };
 
-          services.github-runners.${name} = {
+          # Work roots — checkouts only; the module empties these on every
+          # start. `d` (not `D`) so a rebuild does not race a running job.
+          systemd.tmpfiles.rules = lib.optionals (!onDisk) (
+            [ "d ${workRoot} 0700 github-runner github-runner - -" ]
+            ++ map (i: "d ${workRoot}/${instanceName i} 0700 github-runner github-runner - -") indices
+          );
+
+          # On a chosen disk the directories are made at activation, not by
+          # tmpfiles: tmpfiles refuses an "unsafe path transition" — a
+          # parent owned by a person (the mount, owned by cody) with a
+          # child owned by another user — and silently creates nothing
+          # under it. The units then fail at namespace setup, because
+          # ReadWritePaths must exist before ExecStartPre runs. Activation
+          # runs as root, ahead of the units, and has no such policy.
+          system.activationScripts."github-runner-dirs-${name}" = lib.mkIf onDisk (
+            lib.stringAfter [ "users" "groups" ] (
+              lib.concatMapStringsSep "\n" (i: ''
+                install -d -m 0700 -o github-runner -g github-runner \
+                  ${workRoot}/${instanceName i} ${ciDir (instanceName i)}
+              '') indices
+              + ''
+                chown github-runner:github-runner ${workRoot} ${storageRoot}/ci
+                chmod 0755 ${workRoot} ${storageRoot}/ci
+              ''
+            )
+          );
+
+          services.github-runners = lib.genAttrs (map instanceName indices) (instance: {
             enable = true;
-            inherit url name;
+            inherit url;
+            name = instance;
             # Static user/group -> module forces DynamicUser=false.
             user = "github-runner";
             group = "github-runner";
             # Point straight at the sops secret (raw token file).
             tokenFile = config.sops.secrets.${tokenKey}.path;
             extraLabels = labels;
+            # The checkout, on disk rather than in tmpfs. Emptied by the
+            # module on every start — the durable half is CacheDirectory
+            # below, which is where CARGO_TARGET_DIR belongs.
+            workDir = "${workRoot}/${instance}";
             # Re-register when config (url/name/labels/token) changes.
             replace = true;
             # Non-ephemeral: persist the runner across jobs (default).
@@ -107,13 +184,28 @@
               skopeo
             ];
             # Yield to interactive/audio work on this DAW workstation. Same
-            # rationale as the forgejo-runner aspect.
+            # rationale as the forgejo-runner aspect — with several
+            # instances this matters more, not less: the weights are what
+            # keep a full workspace rebuild from being audible.
             serviceOverrides = {
               Nice = nice;
               CPUWeight = cpuWeight;
               IOWeight = ioWeight;
+              # The durable build cache: /var/cache/<cacheRoot>/<instance>,
+              # created and kept by systemd across restarts and reboots, and
+              # writable despite ProtectSystem=strict. Workflows point
+              # CARGO_TARGET_DIR here; nothing else on the unit removes it.
+              CacheDirectory = "${cacheRoot}/${instance}";
+              CacheDirectoryMode = "0700";
+            }
+            // lib.optionalAttrs onDisk {
+              # The same cache on the big disk instead. Jobs read it as
+              # $CI_CACHE_DIR (the runner hands its environment to every
+              # step), so a workflow never has to know the host's layout.
+              ReadWritePaths = [ (ciDir instance) ];
+              Environment = [ "CI_CACHE_DIR=${ciDir instance}" ];
             };
-          };
+          });
         };
     };
 }

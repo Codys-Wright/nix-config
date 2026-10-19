@@ -199,13 +199,9 @@ in
           ];
         })
 
-        # GitHub-native self-hosted runner (org-level, label `nix-host`).
-        # Replaces the Codeberg-mirror trigger now that GitHub is canonical:
-        # lets .github/workflows/deploy.yml build + push images on the LAN.
-        # Defaults cover url/name/labels/tokenKey; only the sops file differs.
-        (fleet.ci._.github-runner {
-          tokenSopsFile = "${inputs.nix-secrets}/sops/hosts/THEBATTLESHIP.yaml";
-        })
+        # GitHub Actions runners: the nix-host pool plus one per project
+        # (github-runners.nix).
+        den.aspects.THEBATTLESHIP-github-runners
 
         <fleet.system/avahi>
         <fleet.system/virtualization>
