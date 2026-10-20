@@ -168,13 +168,13 @@ in
           sopsFile = "${inputs.nix-secrets}/sops/hosts/starcommand.yaml";
         };
 
-      # The App key only mints registration tokens, in the unit's privileged
-      # (`+`) ExecStartPre. Root-only, so no runner job on this host (all
-      # 15 runners' jobs run as non-root users) can read it.
-      sops.secrets.github_app_fts_forge_private_key = {
-        owner = lib.mkForce "root";
-        group = lib.mkForce "root";
-      };
+      # ACCEPTED RISK (Captain, 2026-10-20): github_app_fts_forge_private_key
+      # stays github-runner 0400, so jobs on the 14 FastTrackStudios runners
+      # (user github-runner) can read it and mint fts-forge App tokens. This
+      # runner is unaffected: it runs as starcommand-ci, and only the
+      # privileged (`+`) ExecStartPre reads the key. Suggested fix, not
+      # applied: owner root, mint tokens only in the `+` step. See
+      # starcommand docs/ci-deploy.md.
 
       services.github-runners.github-starcommand = {
         user = lib.mkForce "starcommand-ci";
