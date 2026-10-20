@@ -64,6 +64,21 @@ in
       labels = [ "task" ];
       count = 2;
     })
+    # Codys-Wright/starcommand's own runner: merges to main deploy from here
+    # (deploy.yml, `runs-on: [self-hosted, starcommand]`). Registered through
+    # the FTS - Forge GitHub App (installed on Codys-Wright, all repos), so no
+    # PAT; the key is a THEBATTLESHIP host secret.
+    (runner {
+      name = "github-starcommand";
+      url = "https://github.com/Codys-Wright/starcommand";
+      labels = [ "starcommand" ];
+      githubApp = {
+        id = 5391924;
+        login = "Codys-Wright";
+        keySopsKey = "github_app_fts_forge_private_key";
+        keySopsFile = "${inputs.nix-secrets}/sops/hosts/THEBATTLESHIP.yaml";
+      };
+    })
   ]
   ++ builtins.attrValues (
     builtins.mapAttrs (

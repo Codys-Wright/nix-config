@@ -27,6 +27,12 @@
       tokenKey ? "github-runner-token",
       # Path under hosts/<host>/… to the sops file carrying tokenKey.
       tokenSopsFile ? null,
+      # Authenticate as a GitHub App instead of tokenKey: { id; login;
+      # keySopsKey; keySopsFile ? null; }. The module turns the App's private
+      # key into a fresh registration token on every start — no PAT stored.
+      # The App needs "self-hosted runners" admin on `url` and an installation
+      # on `login`.
+      githubApp ? null,
       # Labels exposed to workflows via `runs-on:`. `nix-host` marks this
       # runner as host-mode with nix + the image tooling on PATH.
       labels ? [ "nix-host" ],
@@ -118,8 +124,12 @@
           # `tokenFile`. A fine-grained PAT is created into a registration
           # token on each start; a registration token is used directly.
           # Every instance restarts when the token rotates.
-          sops.secrets.${tokenKey} = {
-            sopsFile = lib.mkIf (tokenSopsFile != null) tokenSopsFile;
+          sops.secrets.${if githubApp == null then tokenKey else githubApp.keySopsKey} = {
+            sopsFile =
+              let
+                f = if githubApp == null then tokenSopsFile else githubApp.keySopsFile or null;
+              in
+              lib.mkIf (f != null) f;
             owner = "github-runner";
             group = "github-runner";
             mode = "0400";
@@ -161,7 +171,11 @@
             user = "github-runner";
             group = "github-runner";
             # Point straight at the sops secret (raw token file).
-            tokenFile = config.sops.secrets.${tokenKey}.path;
+            tokenFile = lib.mkIf (githubApp == null) config.sops.secrets.${tokenKey}.path;
+            githubApp = lib.mkIf (githubApp != null) {
+              inherit (githubApp) id login;
+              privateKeyFile = config.sops.secrets.${githubApp.keySopsKey}.path;
+            };
             extraLabels = labels;
             # The checkout, on disk rather than in tmpfs. Emptied by the
             # module on every start — the durable half is CacheDirectory
