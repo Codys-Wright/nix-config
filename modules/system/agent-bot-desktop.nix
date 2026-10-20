@@ -42,6 +42,12 @@
           pkgs.xauth
           pkgs.xdpyinfo
           pkgs.xsetroot
+          pkgs.xset
+          pkgs.xprop
+          pkgs.setxkbmap
+          pkgs.xkbcomp
+          pkgs.xkeyboard-config
+          pkgs.xfce4-terminal
           pkgs.agent-browser
           cuaDriver
         ];
