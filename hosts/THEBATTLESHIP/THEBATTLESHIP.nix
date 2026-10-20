@@ -44,6 +44,7 @@ in
         <fleet/mactahoe>
         <fleet/stylix>
         <fleet.system/agent-user>
+        <fleet.system/agent-bot-desktop> # Hermes bot screen for agent sessions over SSH
 
         <fleet/desktop>
         <fleet/grub>

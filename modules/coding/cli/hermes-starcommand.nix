@@ -5,8 +5,15 @@
   lib,
   ...
 }:
+let
+  # The pinned release. The flake's package reports 0.0.0 unless told its
+  # version, and clients that gate on it (Hermex needs >= 0.21.3) refuse it.
+  hermesVersion = "0.22.2";
+  hermesCli =
+    system: inputs.hermes-agent.packages.${system}.default.override { version = hermesVersion; };
+in
 {
-  flake-file.inputs.hermes-agent.url = lib.mkDefault "github:NousResearch/hermes-agent/v0.22.2";
+  flake-file.inputs.hermes-agent.url = lib.mkDefault "github:NousResearch/hermes-agent/v${hermesVersion}";
   flake-file.inputs.hermes-agent.inputs.nixpkgs.follows = "nixpkgs";
 
   fleet.coding._.cli._.hermes-starcommand = {
@@ -186,7 +193,7 @@
       in
       {
         environment.systemPackages = [
-          inputs.hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.default
+          (hermesCli pkgs.stdenv.hostPlatform.system)
           # Hermes Desktop (v0.22+): the desktop app; points at a local Hermes or
           # a remote gateway (Starcommand).
           inputs.hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.desktop
@@ -199,7 +206,7 @@
       { pkgs, ... }:
       {
         environment.systemPackages = [
-          inputs.hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.default
+          (hermesCli pkgs.stdenv.hostPlatform.system)
         ];
       };
   };
