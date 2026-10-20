@@ -78,6 +78,11 @@
       # yields gracefully under contention.
       cpuWeight ? 50,
       ioWeight ? 50,
+      # Daily `cargo sweep --time <days>` over every Cargo target dir in
+      # each instance's build cache, so a long-lived cache drops artifacts
+      # no build has touched in that long instead of growing forever (each
+      # branch, toolchain and feature set adds its own copy). null = off.
+      sweepDays ? 1,
       ...
     }:
     {
@@ -220,6 +225,50 @@
               Environment = [ "CI_CACHE_DIR=${ciDir instance}" ];
             };
           });
+
+          # The cache sweep (sweepDays). cargo-sweep wants a manifest, but a
+          # CI cache is a bare target dir, so it is pointed at each one through
+          # a throwaway package with CARGO_TARGET_DIR set.
+          systemd.services = lib.mkIf (sweepDays != null) (
+            lib.listToAttrs (
+              map (
+                i:
+                let
+                  instance = instanceName i;
+                  cache = if onDisk then ciDir instance else "/var/cache/${cacheRoot}/${instance}";
+                in
+                lib.nameValuePair "github-runner-sweep-${instance}" {
+                  description = "cargo sweep of ${instance}'s build cache";
+                  startAt = "04:30";
+                  path = [
+                    pkgs.cargo
+                    pkgs.cargo-sweep
+                    pkgs.findutils
+                  ];
+                  serviceConfig = {
+                    Type = "oneshot";
+                    User = "github-runner";
+                    Group = "github-runner";
+                    Nice = 19;
+                    IOSchedulingClass = "idle";
+                  };
+                  script = ''
+                    [ -d ${cache} ] || exit 0
+                    pkg=$(mktemp -d)
+                    trap 'rm -rf "$pkg"' EXIT
+                    mkdir "$pkg/src"
+                    printf '[package]\nname = "sweep"\nversion = "0.0.0"\nedition = "2021"\n' > "$pkg/Cargo.toml"
+                    echo 'fn main() {}' > "$pkg/src/main.rs"
+                    # A target dir is wherever cargo left its .rustc_info.json.
+                    find ${cache} -maxdepth 4 -name .rustc_info.json -printf '%h\n' |
+                      while read -r target; do
+                        CARGO_TARGET_DIR="$target" cargo sweep --time ${toString sweepDays} "$pkg" || true
+                      done
+                  '';
+                }
+              ) indices
+            )
+          );
         };
     };
 }
