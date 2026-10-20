@@ -6,7 +6,7 @@
   ...
 }:
 {
-  flake-file.inputs.hermes-agent.url = lib.mkDefault "github:NousResearch/hermes-agent/v0.22.0";
+  flake-file.inputs.hermes-agent.url = lib.mkDefault "github:NousResearch/hermes-agent/v0.22.2";
   flake-file.inputs.hermes-agent.inputs.nixpkgs.follows = "nixpkgs";
 
   fleet.coding._.cli._.hermes-starcommand = {
