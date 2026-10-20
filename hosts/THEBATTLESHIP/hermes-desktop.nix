@@ -32,7 +32,11 @@
             exec ${cuaDriver} mcp --no-overlay
             ;;
           loft-mcp)
-            exec /etc/profiles/per-user/$(id -un)/bin/loft mcp
+            for loft in "$HOME/.nix-profile/bin/loft" "/etc/profiles/per-user/$(id -un)/bin/loft"; do
+              [ -x "$loft" ] && exec "$loft" mcp
+            done
+            echo "loft is not installed for $(id -un)" >&2
+            exit 1
             ;;
           *)
             echo "usage: hermes-desktop-mcp [cuadriver|loft-mcp]" >&2
