@@ -37,7 +37,8 @@
             gh
             jq
             uv
-            python3
+            # Pillow: Hermes grabs bot-screen thumbnails with python3 on the host
+            (python3.withPackages (ps: [ ps.pillow ]))
             curl
             wget
             unzip
