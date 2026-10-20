@@ -45,6 +45,7 @@ in
         <fleet/stylix>
         <fleet.system/agent-user>
         <fleet.system/agent-bot-desktop> # Hermes bot screen for agent sessions over SSH
+        den.aspects.THEBATTLESHIP-hermes-desktop # Hermes can drive cody's real desktop (forced-command key)
 
         <fleet/desktop>
         <fleet/grub>
