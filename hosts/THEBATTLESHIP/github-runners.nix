@@ -159,15 +159,6 @@ in
 
       sops.secrets."starcommand-ci/deploy-ssh-key" = secret "ci_deploy_ssh_key";
       sops.secrets."starcommand-ci/nix-secrets-read-key" = secret "nix_secrets_read_key";
-      # BOOTSTRAP ONLY: the dedicated key above is authorized on starcommand
-      # by the first CI deploy itself, so that one run uses the existing
-      # starcommand deploy key (this host is already a recipient of
-      # starcommand.yaml). Removed as soon as that deploy lands.
-      sops.secrets."starcommand-ci/bootstrap-deploy-ssh-key" =
-        (secret "starcommand/system/sshPrivateKey")
-        // {
-          sopsFile = "${inputs.nix-secrets}/sops/hosts/starcommand.yaml";
-        };
 
       # ACCEPTED RISK (Captain, 2026-10-20): github_app_fts_forge_private_key
       # stays github-runner 0400, so jobs on the 14 FastTrackStudios runners
@@ -184,7 +175,7 @@ in
         # is small, so the unit's own RuntimeDirectory is fine.
         workDir = lib.mkForce null;
         extraEnvironment = {
-          DEPLOY_SSH_KEY_FILE = config.sops.secrets."starcommand-ci/bootstrap-deploy-ssh-key".path;
+          DEPLOY_SSH_KEY_FILE = config.sops.secrets."starcommand-ci/deploy-ssh-key".path;
           GIT_SSH_COMMAND = "ssh -i ${
             config.sops.secrets."starcommand-ci/nix-secrets-read-key".path
           } -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=${githubKnownHosts}";
