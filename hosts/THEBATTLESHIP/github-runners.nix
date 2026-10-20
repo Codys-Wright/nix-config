@@ -131,8 +131,9 @@ in
       githubKnownHosts = pkgs.writeText "github-known-hosts" ''
         github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl
       '';
-      jobGate = pkgs.writeShellScript "starcommand-ci-job-gate" ''
-        # ACTIONS_RUNNER_HOOK_JOB_STARTED: non-zero fails the job before any
+      jobGate = pkgs.writeShellScript "starcommand-ci-job-gate.sh" ''
+        # ACTIONS_RUNNER_HOOK_JOB_STARTED (the runner requires a .sh name):
+        # non-zero fails the job before any
         # of its steps run.
         want="Codys-Wright/starcommand/.github/workflows/deploy.yml@refs/heads/main"
         deny() { echo "starcommand-ci: refusing job ($1)" >&2; exit 1; }
