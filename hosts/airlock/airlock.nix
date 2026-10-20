@@ -13,7 +13,7 @@
     airlock = {
       description = "An Mac Mini that holds all the proprietary garbage that can't run on linux";
       deployment = {
-        ip = "192.168.0.65";
+        ip = "192.168.1.116"; # DHCP — reserve it on the router
         sshPort = 22;
         sshUser = "rat";
       };
