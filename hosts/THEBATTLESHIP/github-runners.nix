@@ -59,10 +59,16 @@ in
     })
     # Two: a deploy takes ~30 min of nix build and must not queue the next
     # PR's checks behind it.
+    #
+    # STA-156: these two moved to toms-mac-pro-vm (starcommand repo,
+    # hosts/toms-mac-pro-vm/github-runners.nix) because CI here froze the
+    # engineers' own work. DISABLED, not deleted: rollback is `enable = true`
+    # below plus a switch (then drop "task" from the VM runners' labels).
     (runner {
       name = "github-fts-task";
       labels = [ "task" ];
       count = 2;
+      enable = false;
     })
     # Codys-Wright/starcommand's own runner: merges to main deploy from here
     # (deploy.yml, `runs-on: [self-hosted, starcommand]`). Registered through
