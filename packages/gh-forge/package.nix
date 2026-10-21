@@ -43,7 +43,9 @@ runCommand "gh-forge"
     cat > $out/bin/github-app-token <<EOF
     #!/bin/sh
     : "\''${GITHUB_APP_ID:=${appId}}"
-    : "\''${GITHUB_APP_KEY_FILE:=${keyFile}}"
+    # Not \''${VAR:=…}: the "}" in "{app}" would end the expansion early
+    # (default became ".../{app"), so the sops key was never found.
+    [ -n "\''${GITHUB_APP_KEY_FILE:-}" ] || GITHUB_APP_KEY_FILE='${keyFile}'
     export GITHUB_APP_ID GITHUB_APP_KEY_FILE
     exec ${githubAppToken}/bin/github-app-token "\$@"
     EOF
