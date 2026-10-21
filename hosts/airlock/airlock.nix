@@ -22,7 +22,15 @@
 
   den.aspects.airlock = {
     # starcommand Hermes runs `airlock` profile sessions here over SSH.
-    includes = [ (<fleet.coding.cli/hermes-node> { user = "rat"; }) ];
+    includes = [
+      (<fleet.coding.cli/hermes-node> { user = "rat"; })
+      # rat's `gh` / git push = fts-forge[bot] (key: sops/hosts/airlock.yaml).
+      (<fleet.coding.cli/gh-forge> {
+        user = "rat";
+        home = "/Users/rat";
+        sopsFile = "${inputs.nix-secrets}/sops/hosts/airlock.yaml";
+      })
+    ];
     darwin =
       { pkgs, ... }:
       {

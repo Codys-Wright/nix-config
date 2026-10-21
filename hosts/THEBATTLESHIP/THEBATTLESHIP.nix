@@ -44,6 +44,12 @@ in
         <fleet/mactahoe>
         <fleet/stylix>
         <fleet.system/agent-user>
+        # agent's `gh` / git push = fts-forge[bot]: workers open their own PRs.
+        (<fleet.coding.cli/gh-forge> {
+          user = "agent";
+          home = "/home/agent";
+          sopsFile = "${inputs.nix-secrets}/sops/hosts/THEBATTLESHIP.yaml";
+        })
         <fleet.system/agent-bot-desktop> # Hermes bot screen for agent sessions over SSH
         den.aspects.THEBATTLESHIP-hermes-desktop # Hermes can drive cody's real desktop (forced-command key)
 
