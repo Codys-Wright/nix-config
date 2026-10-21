@@ -4,9 +4,10 @@
 # as the bot with a short-lived installation token minted per invocation.
 #
 # The installation (owner) is picked from, in order: $GH_FORGE_OWNER,
-# -R/--repo OWNER/REPO, an `api repos/OWNER/...` path, the current repo's
-# github.com remote (origin, else the first). An owner the app isn't
-# installed on falls back to its default installation (FastTrackStudios).
+# -R/--repo OWNER/REPO, a github.com URL argument, an `api repos/OWNER/...`
+# path, $GH_REPO, the current repo's github.com remote (origin, else the
+# first). An owner the app isn't installed on falls back to its default
+# installation (FastTrackStudios).
 #
 #   GH_FORGE=0 gh ...   run plain gh with your own login (no bot token)
 #
@@ -42,6 +43,7 @@ if [ -z "$owner" ]; then
     --repo=*) owner=$(owner_of "${a#--repo=}") ;;
     -R?*) owner=$(owner_of "${a#-R}") ;;
     repos/*/* | /repos/*/*) [ -z "$owner" ] && { a=${a#/}; a=${a#repos/}; owner=${a%%/*}; } ;;
+    https://github.com/*/* | http://github.com/*/*) owner=$(owner_of "$a") ;;
     esac
     [ -n "$owner" ] && break
     prev=$a
