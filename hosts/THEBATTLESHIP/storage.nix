@@ -36,13 +36,21 @@
           ];
         };
 
-        # ext4 dedicated development partition (Samsung 990 EVO Plus 2TB)
+        # btrfs dedicated development partition (Samsung 990 EVO Plus 2TB).
+        # btrfs (was ext4 until 2026-10-20) for reflink copies: `cp --reflink`
+        # gives a new worktree a warm Cargo target dir at no disk cost. zstd:1
+        # because Rust build output compresses well and level 1 costs little
+        # CPU. relatime stays (the default): cargo sweep ages files by atime.
         fileSystems."/run/media/Development" = {
-          device = "/dev/disk/by-uuid/7e6024ba-a396-409f-92ae-27d74359240d";
-          fsType = "ext4";
+          device = "/dev/disk/by-label/development";
+          fsType = "btrfs";
           options = [
             "rw"
             "nofail"
+            "compress=zstd:1"
+            "ssd"
+            "discard=async"
+            "space_cache=v2"
           ];
         };
 
