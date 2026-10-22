@@ -49,27 +49,14 @@ in
     # The bare `nix-host` pool (github-fts-1, -2): the LAN-only deploys
     # (forum, the landing site) and repos not yet on a label of their own.
     (runner { count = 2; })
-    # Task's deploy gets a slot of its own: with checks and deploy sharing
-    # the `task` runners, a deploy sat 45 minutes behind two PRs' test
-    # builds. Its cache holds the release target dir the deploy fast path
-    # builds incrementally.
-    (runner {
-      name = "github-fts-task-deploy";
-      labels = [ "task-deploy" ];
-    })
-    # Two: a deploy takes ~30 min of nix build and must not queue the next
-    # PR's checks behind it.
-    #
-    # STA-156 moved these two to toms-mac-pro-vm; STA-229 (Captain, 2026-10-22:
-    # "Put the CI runners back onto THEBATTLESHIP") moves them back. The VM's
-    # runners keep running until their "task" label is dropped (starcommand repo,
-    # hosts/toms-mac-pro-vm/github-runners.nix); until then a Task job lands on
-    # either pool. Rollback: `enable = false;` here plus a switch.
-    (runner {
-      name = "github-fts-task";
-      labels = [ "task" ];
-      count = 2;
-    })
+    # Task's CI (checks per build kind, plan, desktop-cache and the release
+    # deploy) runs on the Mac Pro VM, not here (Captain, 2026-10-22: free
+    # THEBATTLESHIP for the engineers' work; supersedes STA-229). The runners
+    # live in Codys-Wright/starcommand hosts/toms-mac-pro-vm/github-runners.nix
+    # (macpro-task-1, -tests, -lint, -wasm, -deploy).
+    # Rollback: restore the `github-fts-task`, `github-fts-task-deploy` and
+    # per-kind (`task-tests` x2, `task-lint`, `task-wasm`) runners from git
+    # history and switch.
     # Codys-Wright/starcommand's own runner: merges to main deploy from here
     # (deploy.yml, `runs-on: [self-hosted, starcommand]`). Registered through
     # the FTS - Forge GitHub App (installed on Codys-Wright, all repos), so no
