@@ -1,0 +1,834 @@
+#!/usr/bin/env python3
+"""gate-queue: durable, lease-aware build gates that wake their Paperclip issue (STA-402).
+
+  gate-submit <ISSUE> <repo-tree> <script> [--sha SHA] [--timeout S] [--exclusive] [--no-lease]
+              [--profile P] [--run-id ID] [--on-done todo|in_review]
+  gate-queue daemon                     # run by systemd --user (Linux) / LaunchAgent (macOS)
+  gate-queue status [--unreported] [--json] [JOB]
+  gate-queue cancel <JOB>               # queued: dropped; running: its process is stopped
+  gate-queue retry-report <JOB>         # re-arm the Paperclip report for a done/lost job
+
+Model
+  * One FIFO per repo tree (realpath). Jobs in different trees may run side by side, each holding
+    its own build-lease slot (owner "gate-<ISSUE>-<4 hex>"), renewed while the job runs.
+  * With --sha the daemon checks the tree is clean (tracked files), detaches HEAD at the sha under
+    a flock, runs the script, then restores the previous branch/sha. It never resets or force-checks
+    out: if the restore fails it says so in the report.
+  * The script runs OUTSIDE the daemon (systemd transient unit on Linux, a new session on macOS),
+    with cwd = tree, a log at <log-dir>/gate.log, and the env GATE_ISSUE GATE_JOB GATE_TREE GATE_SHA
+    GATE_LOG_DIR PAPERCLIP_RUN_ID HERMES_PROFILE. If the script writes $GATE_LOG_DIR/summary.md it is
+    used as the report body, else the tail of gate.log.
+  * On finish (green or red) the daemon runs `pc -p <profile> status <ISSUE> todo "<summary>"` with
+    the SUBMITTING run's PAPERCLIP_RUN_ID, so the assignee wakes. If the issue has open blockers
+    (409) it posts a comment instead, leaves the issue blocked and logs it. 403/5xx/network errors
+    are retried with backoff for 24 h; the job stays reported=false and shows in `status --unreported`.
+  * State: <root>/jobs/<id>.json, <root>/logs/<id>/ (gate.log, events.log, rc, pid). The daemon
+    re-adopts running jobs after a restart; a running job whose process vanished becomes `lost` and
+    is reported as such. Nothing is silently dropped.
+
+Root is ~/gate-queue (override: GATE_QUEUE_DIR). Pure stdlib, Python 3.9+.
+"""
+import argparse
+import fcntl
+import json
+import os
+import random
+import re
+import shutil
+import signal
+import socket
+import subprocess
+import sys
+import threading
+import time
+
+HOME = os.path.expanduser("~")
+ROOT = os.environ.get("GATE_QUEUE_DIR", os.path.join(HOME, "gate-queue"))
+JOBS = os.path.join(ROOT, "jobs")
+LOGS = os.path.join(ROOT, "logs")
+HOST = socket.gethostname().split(".")[0]
+IS_LINUX = sys.platform.startswith("linux")
+LEASE_TTL = 1800
+LEASE_RENEW_EVERY = 60
+POLL = 3
+LEASE_POLL = 10
+REPORT_GIVE_UP_S = 24 * 3600
+STOP = threading.Event()
+SAVE_LOCK = threading.Lock()
+ISSUE_RE = re.compile(r"^[A-Za-z][A-Za-z0-9]*-\d+$")
+
+
+# ---------------------------------------------------------------- small helpers
+def now():
+    return time.time()
+
+
+def iso(t=None):
+    return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(t if t is not None else now()))
+
+
+def which(name):
+    for cand in (os.path.join(HOME, ".local", "bin", name),):
+        if os.access(cand, os.X_OK):
+            return cand
+    return shutil.which(name)
+
+
+def log(msg):
+    print("%s gate-queue: %s" % (iso(), msg), flush=True)
+
+
+def job_path(jid):
+    return os.path.join(JOBS, jid + ".json")
+
+
+def log_dir(jid):
+    return os.path.join(LOGS, jid)
+
+
+def load(path):
+    with open(path) as f:
+        return json.load(f)
+
+
+def save(job):
+    with SAVE_LOCK:
+        p = job_path(job["id"])
+        tmp = p + ".tmp.%d" % os.getpid()
+        with open(tmp, "w") as f:
+            json.dump(job, f, indent=1, sort_keys=True)
+        os.replace(tmp, p)
+
+
+def all_jobs():
+    out = []
+    try:
+        names = sorted(os.listdir(JOBS))
+    except FileNotFoundError:
+        return out
+    for n in names:
+        if n.endswith(".json"):
+            try:
+                out.append(load(os.path.join(JOBS, n)))
+            except (OSError, ValueError):
+                pass
+    out.sort(key=lambda j: j.get("submitted_at", 0))
+    return out
+
+
+def event(job, msg):
+    line = "%s %s" % (iso(), msg)
+    log("%s: %s" % (job["id"], msg))
+    try:
+        os.makedirs(log_dir(job["id"]), exist_ok=True)
+        with open(os.path.join(log_dir(job["id"]), "events.log"), "a") as f:
+            f.write(line + "\n")
+    except OSError:
+        pass
+
+
+def run(cmd, env=None, timeout=120, stdin=None):
+    try:
+        r = subprocess.run(cmd, capture_output=True, text=True, env=env, timeout=timeout, input=stdin)
+        return r.returncode, (r.stdout or "") + (r.stderr or "")
+    except subprocess.TimeoutExpired:
+        return 124, "timeout after %ss: %s" % (timeout, cmd[0])
+    except OSError as e:
+        return 127, "cannot run %s: %s" % (cmd[0], e)
+
+
+def git(tree, *args):
+    return run(["git", "-c", "safe.directory=*", "-C", tree] + list(args), timeout=300)
+
+
+def pid_matches(pid, jid):
+    """True if `pid` is alive and its command line mentions the job id (guards against pid reuse)."""
+    if not pid:
+        return False
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        pass
+    rc, out = run(["ps", "-p", str(pid), "-o", "command="], timeout=10)
+    return rc == 0 and jid in out
+
+
+# ---------------------------------------------------------------- build-lease
+def lease_cmd(*args):
+    bl = which("build-lease")
+    if not bl:
+        return 127, "build-lease not found"
+    return run([bl] + list(args), timeout=60)
+
+
+def lease_slots():
+    rc, out = lease_cmd("slots")
+    m = re.search(r"slots=(\d+)", out)
+    return int(m.group(1)) if rc == 0 and m else 1
+
+
+def lease_owners(job):
+    if job.get("no_lease"):
+        return []
+    base = job["lease_owner"]
+    n = lease_slots() if job.get("exclusive") else 1
+    return [base] + ["%s~%d" % (base, i) for i in range(2, n + 1)]
+
+
+def lease_acquire(job):
+    """All-or-nothing acquire. Returns (ok, holder-note)."""
+    got = []
+    for o in lease_owners(job):
+        rc, out = lease_cmd("acquire", o, str(LEASE_TTL))
+        if rc != 0:
+            for g in got:
+                lease_cmd("release", g)
+            held = [l.strip() for l in out.splitlines() if l.startswith("HELD") or l.startswith("owner=")]
+            lines = [l for l in out.splitlines() if l.strip()]
+            return False, "; ".join(held) or (lines[-1].strip() if lines else "busy") + " (build-lease rc=%d, %d output bytes)" % (rc, len(out))
+        got.append(o)
+    return True, ""
+
+
+def lease_renew(job):
+    for o in lease_owners(job):
+        rc, out = lease_cmd("renew", o, str(LEASE_TTL))
+        if rc != 0:  # expired and taken, or never held: try to take it again
+            lease_cmd("acquire", o, str(LEASE_TTL))
+
+
+def lease_release(job):
+    for o in lease_owners(job):
+        lease_cmd("release", o)
+
+
+# ---------------------------------------------------------------- tree swap
+def tree_lock_path(tree):
+    rc, out = git(tree, "rev-parse", "--absolute-git-dir")
+    d = out.strip() if rc == 0 else tree
+    return os.path.join(d, "gate.lock")
+
+
+class TreeLock:
+    """flock around the HEAD swap so no gate can move another's checkout."""
+
+    def __init__(self, tree):
+        self.path = tree_lock_path(tree)
+        self.fd = None
+
+    def __enter__(self):
+        try:
+            self.fd = os.open(self.path, os.O_CREAT | os.O_RDWR, 0o644)
+            fcntl.flock(self.fd, fcntl.LOCK_EX)
+        except OSError:
+            self.fd = None  # read-only git dir: the FIFO still serialises us
+        return self
+
+    def __exit__(self, *a):
+        if self.fd is not None:
+            try:
+                fcntl.flock(self.fd, fcntl.LOCK_UN)
+                os.close(self.fd)
+            except OSError:
+                pass
+
+
+def swap_in(job):
+    """Detach the tree at job['sha']. Returns error string or None. Records job['restore']."""
+    tree, sha = job["tree"], job.get("sha")
+    rc, out = git(tree, "status", "--porcelain", "--untracked-files=no")
+    if rc != 0:
+        return "git status failed: %s" % out.strip()[:300]
+    if out.strip():
+        return "tree has uncommitted tracked changes; refusing to move HEAD:\n" + out.strip()[:600]
+    rc, ref = git(tree, "symbolic-ref", "-q", "HEAD")
+    if rc == 0:
+        job["restore"] = {"kind": "branch", "name": re.sub(r"^refs/heads/", "", ref.strip())}
+    else:
+        rc, head = git(tree, "rev-parse", "HEAD")
+        job["restore"] = {"kind": "detach", "name": head.strip()}
+    save(job)
+    rc, head = git(tree, "rev-parse", "HEAD")
+    if head.strip() == sha:
+        return None
+    rc, out = git(tree, "checkout", "--detach", sha)
+    if rc != 0:
+        job.pop("restore", None)
+        return "git checkout --detach %s failed: %s" % (sha[:12], out.strip()[:400])
+    return None
+
+
+def swap_back(job):
+    """Restore the previous branch/sha. Returns error string or None. Never forces."""
+    r = job.get("restore")
+    if not r:
+        return None
+    tree = job["tree"]
+    rc, head = git(tree, "rev-parse", "HEAD")
+    if r["kind"] == "detach":
+        if head.strip() == r["name"]:
+            return None
+        rc, out = git(tree, "checkout", "--detach", r["name"])
+    else:
+        rc, cur = git(tree, "symbolic-ref", "-q", "--short", "HEAD")
+        if rc == 0 and cur.strip() == r["name"]:
+            return None
+        rc, out = git(tree, "checkout", r["name"])
+    if rc != 0:
+        return "restore of %s %s failed (tree left at %s): %s" % (r["kind"], r["name"][:40], head.strip()[:12], out.strip()[:300])
+    return None
+
+
+# ---------------------------------------------------------------- launching
+ENV_KEEP = ["PATH", "HOME", "USER", "LOGNAME", "LANG", "LC_ALL", "NIX_PATH", "NIX_SSL_CERT_FILE",
+            "SSL_CERT_FILE", "XDG_RUNTIME_DIR", "XDG_CONFIG_HOME", "XDG_CACHE_HOME", "BUILD_LEASE_DIR",
+            "RUSTUP_HOME", "CARGO_HOME", "TMPDIR"]
+
+
+def job_env(job):
+    env = {k: os.environ[k] for k in ENV_KEEP if k in os.environ}
+    env.setdefault("HOME", HOME)
+    env["TERM"] = "dumb"
+    env.update({
+        "GATE_ISSUE": job["issue"], "GATE_JOB": job["id"], "GATE_TREE": job["tree"],
+        "GATE_SHA": job.get("sha") or "", "GATE_LOG_DIR": log_dir(job["id"]),
+        "PAPERCLIP_RUN_ID": job["run_id"], "HERMES_PROFILE": job["profile"],
+    })
+    return env
+
+
+def wrapper_text(job):
+    script = job["script"]
+    runner = script if os.access(script, os.X_OK) else "bash " + shlex_quote(script)
+    # Written to <log-dir>/run.sh and run as `sh run.sh gate-job:<id>`: systemd-run would expand any
+    # `$` on its command line, and $0 carries the job id so pid_matches() can verify the process.
+    # The rc is published atomically.
+    return (
+        '#!/bin/sh\n'
+        'echo $$ > "$D/pid"\n'
+        'cd "$GATE_TREE" || exit 97\n'
+        '%s > "$D/gate.log" 2>&1\n'
+        'rc=$?\n'
+        'echo $rc > "$D/rc.tmp"\n'
+        'mv "$D/rc.tmp" "$D/rc"\n'
+    ) % runner
+
+
+def shlex_quote(s):
+    import shlex
+    return shlex.quote(s)
+
+
+def launch(job):
+    """Start the script detached from the daemon. Returns error string or None."""
+    d = log_dir(job["id"])
+    os.makedirs(d, exist_ok=True)
+    for stale in ("rc", "rc.tmp", "pid"):
+        try:
+            os.unlink(os.path.join(d, stale))
+        except FileNotFoundError:
+            pass
+    env = job_env(job)
+    env["D"] = d
+    wrapper = os.path.join(d, "run.sh")
+    with open(wrapper, "w") as f:
+        f.write(wrapper_text(job))
+    inner = ["sh", wrapper, "gate-job:" + job["id"]]
+    if IS_LINUX and shutil.which("systemd-run"):
+        unit = "gate-" + re.sub(r"[^A-Za-z0-9_.-]", "_", job["id"])
+        cmd = ["systemd-run", "--user", "--collect", "--quiet", "--unit", unit,
+               "--description", "gate %s (%s)" % (job["issue"], job["id"]), "--working-directory", job["tree"]]
+        for k, v in env.items():
+            cmd.append("--setenv=%s=%s" % (k, v))
+        cmd += ["--"] + inner
+        rc, out = run(cmd, timeout=60)
+        if rc != 0:
+            return "systemd-run failed: %s" % out.strip()[:400]
+        job["unit"] = unit
+    else:
+        try:
+            p = subprocess.Popen(inner, cwd=job["tree"], env=env, start_new_session=True,
+                                 stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        except OSError as e:
+            return "spawn failed: %s" % e
+        job["unit"] = None
+        job["pgid"] = p.pid
+        threading.Thread(target=p.wait, daemon=True).start()  # reap while the daemon lives
+    return None
+
+
+def read_pid(job):
+    try:
+        return int(open(os.path.join(log_dir(job["id"]), "pid")).read().strip())
+    except (OSError, ValueError):
+        return 0
+
+
+def read_rc(job):
+    try:
+        return int(open(os.path.join(log_dir(job["id"]), "rc")).read().strip())
+    except (OSError, ValueError):
+        return None
+
+
+def stop_job(job):
+    if job.get("unit"):
+        run(["systemctl", "--user", "stop", job["unit"] + ".service"], timeout=60)
+        return
+    pg = job.get("pgid")
+    if pg:
+        for sig in (signal.SIGTERM, signal.SIGKILL):
+            try:
+                os.killpg(pg, sig)
+            except (ProcessLookupError, PermissionError):
+                return
+            time.sleep(3)
+    else:
+        pid = read_pid(job)
+        if pid:
+            try:
+                os.kill(pid, signal.SIGTERM)
+            except OSError:
+                pass
+
+
+# ---------------------------------------------------------------- worker
+def cancel_marker(job):
+    return os.path.join(JOBS, job["id"] + ".cancel")
+
+
+def finalize(job, state, rc, reason=None):
+    job["state"] = state
+    job["rc"] = rc
+    job["finished_at"] = now()
+    if reason:
+        job["reason"] = reason
+    with TreeLock(job["tree"]):
+        err = swap_back(job)
+    if err:
+        job["restore_error"] = err
+        event(job, "RESTORE FAILED: " + err)
+    elif job.get("restore"):
+        event(job, "tree restored to %s %s" % (job["restore"]["kind"], job["restore"]["name"][:12]))
+    lease_release(job)
+    event(job, "lease released (%s)" % ",".join(lease_owners(job)))
+    job["reported"] = "n/a" if (state == "cancelled" or job.get("no_run_id")) else False
+    job["report_attempts"] = 0
+    job["next_report_at"] = 0
+    save(job)
+    event(job, "finished state=%s rc=%s%s" % (state, rc, " reason=" + reason if reason else ""))
+
+
+def monitor(job):
+    """Watch a launched job until it ends. Returns when finalised or when the daemon is stopping."""
+    last_renew = 0
+    misses = 0
+    while not STOP.is_set():
+        rc = read_rc(job)
+        if rc is not None:
+            return finalize(job, "done", rc)
+        if os.path.exists(cancel_marker(job)):
+            event(job, "cancel requested; stopping the running job")
+            stop_job(job)
+            time.sleep(2)
+            return finalize(job, "cancelled", read_rc(job), "cancelled by operator")
+        pid = read_pid(job)
+        if not pid_matches(pid, job["id"]):
+            misses += 1
+            if misses >= 3:  # three polls with no rc file and no process
+                if read_rc(job) is not None:
+                    continue
+                return finalize(job, "lost", None, "process vanished without writing an rc (killed, reboot or OOM)")
+        else:
+            misses = 0
+        if now() - job["started_at"] > job["timeout"]:
+            event(job, "timeout after %ss; stopping" % job["timeout"])
+            stop_job(job)
+            time.sleep(2)
+            return finalize(job, "done", 124, "timeout after %ss" % job["timeout"])
+        if now() - last_renew > LEASE_RENEW_EVERY:
+            lease_renew(job)
+            last_renew = now()
+        STOP.wait(POLL)
+
+
+def start(job):
+    """Wait for the lease, swap HEAD, launch. Returns False if the job ended (failed to start)."""
+    waited_note = None
+    while not STOP.is_set():
+        if os.path.exists(cancel_marker(job)):
+            event(job, "cancelled while queued")
+            job["state"] = "cancelled"
+            job["finished_at"] = now()
+            job["reported"] = "n/a"
+            save(job)
+            return False
+        ok, holder = lease_acquire(job)
+        if ok:
+            break
+        if holder != waited_note:
+            waited_note = holder
+            job["waiting_for"] = holder[:300]
+            save(job)
+            event(job, "waiting for build-lease: %s" % holder[:300])
+        STOP.wait(LEASE_POLL)
+    else:
+        return False
+    event(job, "lease acquired (%s)" % (",".join(lease_owners(job)) or "none: --no-lease"))
+    job.pop("waiting_for", None)
+    if job.get("sha"):
+        with TreeLock(job["tree"]):
+            err = swap_in(job)
+        if err:
+            event(job, "swap failed: " + err)
+            finalize(job, "done", 98, "could not move the tree to %s: %s" % (job["sha"][:12], err))
+            return False
+        event(job, "tree detached at %s (restore: %s %s)" % (job["sha"][:12], job["restore"]["kind"], job["restore"]["name"][:12]))
+    job["started_at"] = now()
+    err = launch(job)
+    if err:
+        event(job, err)
+        finalize(job, "done", 99, err)
+        return False
+    job["state"] = "running"
+    save(job)
+    event(job, "started script %s (unit=%s)" % (job["script"], job.get("unit")))
+    return True
+
+
+def worker(tree, workers):
+    try:
+        while not STOP.is_set():
+            mine = [j for j in all_jobs() if j.get("tree") == tree and j["state"] in ("queued", "running")]
+            if not mine:
+                return
+            running = [j for j in mine if j["state"] == "running"]
+            if running:
+                job = running[0]
+                if not job.get("started_at"):
+                    job["started_at"] = now()
+                event(job, "adopted running job")
+                lease_renew(job)
+                monitor(job)
+            else:
+                job = mine[0]  # FIFO by submit time
+                if start(job):
+                    monitor(job)
+    except Exception:
+        log("worker %s crashed:\n%s" % (tree, __import__("traceback").format_exc()))
+    finally:
+        workers.pop(tree, None)
+
+
+# ---------------------------------------------------------------- reporting
+ANSI = re.compile(r"\x1b\[[0-9;?]*[A-Za-z]")
+
+
+def tail_lines(path, n=14):
+    try:
+        with open(path, "rb") as f:
+            f.seek(0, 2)
+            size = f.tell()
+            f.seek(max(0, size - 20000))
+            data = f.read().decode("utf-8", "replace")
+    except OSError:
+        return []
+    lines = [ANSI.sub("", l)[:300] for l in data.splitlines() if l.strip()]
+    return lines[-n:]
+
+
+def build_summary(job):
+    d = log_dir(job["id"])
+    rc = job.get("rc")
+    if job["state"] == "lost":
+        verdict = "LOST"
+    elif rc == 0:
+        verdict = "GREEN"
+    else:
+        verdict = "RED"
+    dur = ""
+    if job.get("started_at") and job.get("finished_at"):
+        s = int(job["finished_at"] - job["started_at"])
+        dur = " in %dm%02ds" % (s // 60, s % 60)
+    out = ["Gate %s for %s: rc=%s%s on %s." % (verdict, job["issue"], rc, dur, HOST)]
+    if job.get("reason"):
+        out.append("Reason: " + job["reason"])
+    out.append("tree=%s sha=%s script=%s" % (job["tree"], (job.get("sha") or "(not moved)")[:12], job["script"]))
+    out.append("log: %s:%s/gate.log (events: %s/events.log)" % (HOST, d, d))
+    if job.get("restore_error"):
+        out.append("WARNING: " + job["restore_error"])
+    sm = os.path.join(d, "summary.md")
+    body = None
+    if os.path.isfile(sm):
+        try:
+            body = open(sm, errors="replace").read().strip()[:3000]
+        except OSError:
+            body = None
+    if body:
+        out += ["", body]
+    else:
+        tl = tail_lines(os.path.join(d, "gate.log"))
+        if tl:
+            out += ["", "last lines of gate.log:"] + ["    " + l for l in tl]
+    out += ["", "(gate-queue job %s; submitted by run %s)" % (job["id"], job["run_id"][:8])]
+    return "\n".join(out)
+
+
+def report(job):
+    pc = which("pc")
+    if not pc:
+        job["report_error"] = "pc not found"
+        return False
+    env = dict(os.environ)
+    env["PAPERCLIP_RUN_ID"] = job["run_id"]
+    summary = job.get("summary") or build_summary(job)
+    job["summary"] = summary
+    rc, out = run([pc, "-p", job["profile"], "status", job["issue"], job.get("on_done", "todo"), summary], env=env, timeout=90)
+    if rc == 0:
+        job["reported"] = "status"
+        job["report_error"] = None
+        event(job, "reported: %s set to %s (run %s)" % (job["issue"], job.get("on_done", "todo"), job["run_id"][:8]))
+        return True
+    err = out.strip().replace("\n", " ")[:400]
+    job["report_error"] = err
+    m = re.search(r"HTTP (\d+)", err)
+    code = int(m.group(1)) if m else 0
+    if code in (409, 422):
+        # open blockedBy / run-ownership conflict: the status flip cannot succeed. Comment, leave state alone.
+        note = ("Gate finished but %s could not be moved to %s (%s). Left as is; assignee to pick up from this comment.\n\n"
+                % (job["issue"], job.get("on_done", "todo"), "HTTP %d: %s" % (code, err[-160:]))) + summary
+        rc2, out2 = run([pc, "-p", job["profile"], "comment", job["issue"], "-"], env=env, timeout=90, stdin=note)
+        if rc2 == 0:
+            job["reported"] = "comment-only"
+            event(job, "NOT WOKEN: status todo refused (%s); posted a comment instead and left the issue as is" % err[:200])
+            return True
+        job["report_error"] = (err + " | comment failed: " + out2.strip()[:200])[:600]
+    if code == 404:
+        job["reported"] = "failed"
+        event(job, "report failed permanently: " + err[:300])
+        return True
+    return False
+
+
+def reporter():
+    while not STOP.is_set():
+        try:
+            for j in all_jobs():
+                if j["state"] in ("done", "lost") and j.get("reported") is False and j.get("no_run_id"):
+                    j["reported"] = "n/a"  # collected by hand: there is no run id to report with
+                    save(j)
+                elif j["state"] in ("done", "lost") and j.get("reported") is False and j.get("next_report_at", 0) <= now():
+                    ok = report(j)
+                    if not ok:
+                        j["report_attempts"] = j.get("report_attempts", 0) + 1
+                        delay = min(30 * 2 ** min(j["report_attempts"] - 1, 5), 900)
+                        j["next_report_at"] = now() + delay
+                        if now() - j.get("finished_at", now()) > REPORT_GIVE_UP_S:
+                            j["reported"] = "gave-up"
+                            event(j, "gave up reporting after 24h: " + str(j.get("report_error")))
+                        else:
+                            event(j, "report attempt %d failed (%s); retry in %ds" % (j["report_attempts"], j.get("report_error"), delay))
+                    save(j)
+        except Exception:
+            log("reporter error:\n%s" % __import__("traceback").format_exc())
+        STOP.wait(5)
+
+
+# ---------------------------------------------------------------- daemon
+def cmd_daemon(args):
+    os.makedirs(JOBS, exist_ok=True)
+    os.makedirs(LOGS, exist_ok=True)
+    lockfd = os.open(os.path.join(ROOT, "daemon.lock"), os.O_CREAT | os.O_RDWR, 0o644)
+    try:
+        fcntl.flock(lockfd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError:
+        print("gate-queue daemon already running", file=sys.stderr)
+        return 1
+    signal.signal(signal.SIGTERM, lambda *a: STOP.set())
+    signal.signal(signal.SIGINT, lambda *a: STOP.set())
+    log("daemon up pid=%d host=%s root=%s lease=%s" % (os.getpid(), HOST, ROOT, which("build-lease")))
+    threading.Thread(target=reporter, daemon=True).start()
+    workers = {}
+    hb = os.path.join(ROOT, "heartbeat")
+    ppid0 = os.getppid()
+    while not STOP.is_set():
+        # macOS LaunchAgent runs the daemon under osascript (the TCC "removable volume" grant lives on it);
+        # launchd's stop only signals osascript, so follow it down. Running gates are not affected.
+        if os.environ.get("GATE_QUEUE_EXIT_WITH_PARENT") and os.getppid() != ppid0:
+            log("parent exited; stopping")
+            break
+        try:
+            with open(hb, "w") as f:
+                f.write("%d %s\n" % (os.getpid(), iso()))
+            for j in all_jobs():
+                if j["state"] in ("queued", "running") and j["tree"] not in workers:
+                    t = threading.Thread(target=worker, args=(j["tree"], workers), daemon=True)
+                    workers[j["tree"]] = t
+                    t.start()
+        except Exception:
+            log("supervisor error:\n%s" % __import__("traceback").format_exc())
+        STOP.wait(2)
+    log("daemon stopping; running jobs keep running and are re-adopted on restart")
+    time.sleep(1)
+    return 0
+
+
+# ---------------------------------------------------------------- client commands
+def infer_profile():
+    d = os.path.join(HOME, ".hermes", "profiles")
+    try:
+        names = [n for n in os.listdir(d) if os.path.isdir(os.path.join(d, n))]
+    except OSError:
+        names = []
+    return names[0] if len(names) == 1 else os.environ.get("HERMES_PROFILE", "")
+
+
+def cmd_submit(args):
+    if not ISSUE_RE.match(args.issue):
+        print("gate-submit: ISSUE must look like STA-42", file=sys.stderr)
+        return 2
+    tree = os.path.realpath(os.path.expanduser(args.tree))
+    rc, out = git(tree, "rev-parse", "--show-toplevel")
+    if rc != 0:
+        print("gate-submit: %s is not a git tree: %s" % (tree, out.strip()), file=sys.stderr)
+        return 2
+    script = args.script
+    if "/" not in script:
+        script = shutil.which(script) or script
+    script = os.path.abspath(os.path.expanduser(script))
+    if not os.path.isfile(script):
+        print("gate-submit: script not found: %s" % args.script, file=sys.stderr)
+        return 2
+    sha = None
+    if args.sha:
+        rc, out = git(tree, "rev-parse", "--verify", args.sha + "^{commit}")
+        if rc != 0:
+            print("gate-submit: %s is not a commit in %s" % (args.sha, tree), file=sys.stderr)
+            return 2
+        sha = out.strip()
+    run_id = args.run_id or os.environ.get("PAPERCLIP_RUN_ID", "")
+    if not run_id and not args.no_run_id:
+        print("gate-submit: no run id. Export PAPERCLIP_RUN_ID=<the run id from your wake> (or --run-id).\n"
+              "  Without it the daemon's report is refused with 403 and the issue never wakes.\n"
+              "  Use --no-run-id only to queue a gate you will collect by hand (`gate-queue status`).", file=sys.stderr)
+        return 2
+    profile = args.profile or infer_profile()
+    if not profile:
+        print("gate-submit: cannot infer the Paperclip profile; pass --profile (e.g. battleship, airlock)", file=sys.stderr)
+        return 2
+    os.makedirs(JOBS, exist_ok=True)
+    os.makedirs(LOGS, exist_ok=True)
+    t = now()
+    jid = "%s-%s-%04x" % (time.strftime("%Y%m%dT%H%M%S", time.gmtime(t)), args.issue, random.randrange(65536))
+    job = {
+        "id": jid, "issue": args.issue.upper(), "tree": tree, "script": script, "sha": sha,
+        "profile": profile, "run_id": run_id or "00000000-no-run-id", "no_run_id": bool(args.no_run_id and not run_id),
+        "timeout": args.timeout, "exclusive": args.exclusive, "no_lease": args.no_lease, "on_done": args.on_done,
+        "submitted_at": t, "submitted_by": os.environ.get("USER", ""), "host": HOST, "state": "queued",
+        "lease_owner": "gate-%s-%s" % (args.issue.upper(), jid[-4:]), "reported": False, "report_attempts": 0,
+        "next_report_at": 0,
+    }
+    if job["no_run_id"]:
+        job["reported"] = "n/a"
+    os.makedirs(log_dir(jid), exist_ok=True)
+    save(job)
+    ahead = [j for j in all_jobs() if j["tree"] == tree and j["state"] in ("queued", "running") and j["id"] != jid]
+    print("queued %s (%s) ahead in this tree: %d" % (jid, args.issue.upper(), len(ahead)))
+    print("log: %s/gate.log   status: gate-queue status %s" % (log_dir(jid), jid))
+    try:
+        age = now() - os.path.getmtime(os.path.join(ROOT, "heartbeat"))
+    except OSError:
+        age = 1e9
+    if age > 30:
+        print("WARNING: gate-queue daemon heartbeat is %s old; the job is queued but will not run until the daemon is up "
+              "(systemctl --user status gate-queue / launchctl print gui/$(id -u)/ai.fts.gate-queue)."
+              % ("%ds" % age if age < 1e8 else "missing"), file=sys.stderr)
+    return 0
+
+
+def cmd_status(args):
+    jobs = all_jobs()
+    if args.job:
+        jobs = [j for j in jobs if j["id"] == args.job or j["id"].startswith(args.job) or j["issue"] == args.job]
+    if args.unreported:
+        jobs = [j for j in jobs if j["state"] in ("done", "lost") and j.get("reported") in (False, "comment-only", "gave-up", "failed")]
+    if args.json:
+        print(json.dumps(jobs, indent=1))
+        return 0
+    if not jobs:
+        print("(no jobs)")
+    for j in jobs:
+        extra = ""
+        if j["state"] == "queued" and j.get("waiting_for"):
+            extra = " waiting: " + j["waiting_for"][:80]
+        if j.get("report_error") and j.get("reported") != "status":
+            extra += " report_error: " + str(j["report_error"])[:100]
+        print("%-34s %-8s %-8s rc=%-4s reported=%-12s %s%s" % (
+            j["id"], j["issue"], j["state"], j.get("rc"), j.get("reported"), os.path.basename(j["tree"]), extra))
+    return 0
+
+
+def cmd_cancel(args):
+    for j in all_jobs():
+        if j["id"] == args.job or j["id"].startswith(args.job):
+            open(cancel_marker(j), "w").close()
+            print("cancel requested for %s (state %s); the daemon acts within a few seconds" % (j["id"], j["state"]))
+            return 0
+    print("no such job", file=sys.stderr)
+    return 1
+
+
+def cmd_retry_report(args):
+    for j in all_jobs():
+        if j["id"] == args.job or j["id"].startswith(args.job):
+            if j["state"] not in ("done", "lost"):
+                print("job is %s; nothing to report yet" % j["state"], file=sys.stderr)
+                return 1
+            j["reported"] = False
+            j["next_report_at"] = 0
+            j["finished_at"] = now()
+            save(j)
+            print("report re-armed for %s" % j["id"])
+            return 0
+    print("no such job", file=sys.stderr)
+    return 1
+
+
+def main():
+    prog = os.path.basename(sys.argv[0])
+    argv = sys.argv[1:]
+    if prog == "gate-submit":
+        argv = ["submit"] + argv
+    ap = argparse.ArgumentParser(prog="gate-queue", description=__doc__.split("\n")[0])
+    sub = ap.add_subparsers(dest="cmd", required=True)
+    sub.add_parser("daemon")
+    s = sub.add_parser("submit")
+    s.add_argument("issue")
+    s.add_argument("tree")
+    s.add_argument("script")
+    s.add_argument("--sha")
+    s.add_argument("--timeout", type=int, default=7200)
+    s.add_argument("--exclusive", action="store_true")
+    s.add_argument("--no-lease", action="store_true",
+                   help="do not take a build-lease slot (canaries / non-compiling checks only)")
+    s.add_argument("--profile")
+    s.add_argument("--run-id")
+    s.add_argument("--no-run-id", action="store_true")
+    s.add_argument("--on-done", default="todo", choices=["todo", "in_review"])
+    st = sub.add_parser("status")
+    st.add_argument("job", nargs="?")
+    st.add_argument("--unreported", action="store_true")
+    st.add_argument("--json", action="store_true")
+    c = sub.add_parser("cancel")
+    c.add_argument("job")
+    r = sub.add_parser("retry-report")
+    r.add_argument("job")
+    args = ap.parse_args(argv)
+    return {"daemon": cmd_daemon, "submit": cmd_submit, "status": cmd_status,
+            "cancel": cmd_cancel, "retry-report": cmd_retry_report}[args.cmd](args)
+
+
+if __name__ == "__main__":
+    sys.exit(main())
