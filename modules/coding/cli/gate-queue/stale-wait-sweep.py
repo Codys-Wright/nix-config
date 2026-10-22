@@ -34,6 +34,8 @@ HOSTS = {  # ssh alias -> Paperclip agent
 }
 AGENT_HOST = {v[0]: h for h, v in HOSTS.items()}
 WAIT_RE = re.compile(r"\b(?:lease|leases|gate|gates|waiter|waiters)\b", re.I)  # whole words: "release" must not match
+# A finished gate is not a wait on one ("ready, gate green on abc123; Commander merges"): skip actions that say the gate is done.
+DONE_GATE_RE = re.compile(r"\bgate\s+(?:is\s+|was\s+|run\s+)?(?:green|red|passed|finished|done)\b|\b(?:green|passed)\s+gate\b", re.I)
 COOLDOWN = 6 * 3600  # an issue the sweep woke is not woken again for this long, so an agent that re-blocks cannot be churned
 PENDING_REPORT = (False, None)
 SPLIT = "---SPLIT---"
@@ -187,7 +189,7 @@ def main():
         a = i.get("assigneeAgentId")
         ud = i.get("unblockDescriptor") or {}
         owner = ud.get("owner")
-        if a in AGENT_HOST and isinstance(owner, dict) and owner.get("agentId") == a and WAIT_RE.search(str(ud.get("action", ""))):
+        if a in AGENT_HOST and isinstance(owner, dict) and owner.get("agentId") == a and WAIT_RE.search(str(ud.get("action", ""))) and not DONE_GATE_RE.search(str(ud.get("action", ""))):
             cands.append(i)
     note("blocked issues scanned: %d; lease/gate/waiter self-blocks on build-host agents: %d" % (len(issues), len(cands)))
 

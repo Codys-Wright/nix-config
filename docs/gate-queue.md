@@ -111,7 +111,7 @@ no-agent Hermes cron in the DevOps profile (`every 15m`, `--deliver local`; the 
 dies leaves its issue `blocked` on a lease that is already free. On battleship, airlock and voyager it reads
 `gate-queue status --json|--unreported`, `build-lease status` and the process list, and in Paperclip it considers only
 BLOCKED issues assigned to that host's agent whose `unblockDescriptor.owner` is that same agent and whose `action`
-mentions the whole word lease|gate|waiter (`release` and `investigate` do not match; STA-135 would have). It sets such an issue to `todo` with a comment only if ALL hold: no queued/running (or
+mentions the whole word lease|gate|waiter (`release` and `investigate` do not match; STA-135 would have) and does not say the gate is already green/red/done (STA-40: "gate green on ..., Commander merges"). It sets such an issue to `todo` with a comment only if ALL hold: no queued/running (or
 report-pending) gate-queue job for it, no open `blockedBy`, at least one live lease slot is free, no process on the host
 mentions the issue key (hand-made nohup/screen waiter), and the same was true on the previous sweep (>= 10 min earlier,
 issue unchanged). It never touches a lease, a job or any other issue, and `--dry-run` prints the full decision report without writing.
