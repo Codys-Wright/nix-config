@@ -85,6 +85,44 @@ Two airlock specifics:
    signals osascript, so the daemon (`GATE_QUEUE_EXIT_WITH_PARENT=1`) stops itself when its parent goes away
    and launchd starts a fresh pair; running gates are re-adopted.
 
+### voyager (macOS, user `CodyWright`, home `/Users/codywright`; manual placement) (STA-415)
+
+voyager is the Captain's own login and its nix-darwin config is parked on STA-240, so like airlock this is a
+hand placement (user-level LaunchAgent only; no rebuild, nothing system-wide). Same program, same
+osascript start (TCC grants live on `/usr/bin/osascript`; reads of `/Volumes/dev-drive`
+from a daemon-run gate were verified).
+
+```sh
+ssh voyager 'cp -p ~/.local/bin/pc ~/.local/bin/pc.pre-sta415.bak'          # the old pc lacks needs-captain/reclaim
+scp modules/coding/cli/gate-queue/gate-queue voyager:.local/bin/gate-queue
+ssh voyager 'ln -sf gate-queue ~/.local/bin/gate-submit; chmod +x ~/.local/bin/gate-queue; mkdir -p ~/gate-queue/{jobs,logs}'
+scp modules/coding/cli/gate-queue/ai.fts.gate-queue.voyager.plist voyager:Library/LaunchAgents/ai.fts.gate-queue.plist
+ssh voyager 'launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/ai.fts.gate-queue.plist'
+```
+
+The voyager plist is the airlock one with `/Users/codywright` paths and `~/.cargo/bin` on PATH. Invoke the tools by
+absolute path in non-interactive ssh (`~/.local/bin/gate-queue ...`): voyager's zsh does not put `~/.local/bin` on PATH there
+(Hermes' own shell does).
+
+## Stale-wait sweep (STA-415)
+
+`modules/coding/cli/gate-queue/stale-wait-sweep.py` (+ `stale-wait-sweep.selftest.py`, offline fixtures, no network) is a
+no-agent Hermes cron in the DevOps profile (`every 15m`, delivery `#fleet-alerts`). It exists because a gate waiter that
+dies leaves its issue `blocked` on a lease that is already free. On battleship, airlock and voyager it reads
+`gate-queue status --json|--unreported`, `build-lease status` and the process list, and in Paperclip it considers only
+BLOCKED issues assigned to that host's agent whose `unblockDescriptor.owner` is that same agent and whose `action`
+mentions lease|gate|waiter. It sets such an issue to `todo` with a comment only if ALL hold: no queued/running (or
+report-pending) gate-queue job for it, no open `blockedBy`, at least one live lease slot is free, no process on the host
+mentions the issue key (hand-made nohup/screen waiter), and the same was true on the previous sweep (>= 10 min earlier,
+issue unchanged). It never touches a lease, a job or any other issue, posts to #fleet-alerts only when it acts, and
+`--dry-run` prints the full decision report without writing.
+
+```sh
+cp modules/coding/cli/gate-queue/stale-wait-sweep.py /data/.hermes/profiles/devops/scripts/
+HERMES_HOME=/data/.hermes/profiles/devops hermes cron create --name stale-wait-sweep --no-agent \
+  --script stale-wait-sweep.py --deliver discord:1562163078555111485 'every 15m' </dev/null
+```
+
 ## Validation (STA-402)
 
 Run on the container (macOS code path, stubbed `pc`), on THEBATTLESHIP and airlock (real), details in the PR.
@@ -94,5 +132,7 @@ Run on the container (macOS code path, stubbed `pc`), on THEBATTLESHIP and airlo
 - Hand installs: `systemctl --user disable --now gate-queue; rm ~/.config/systemd/user/gate-queue.service
   ~/.local/bin/gate-{queue,submit}` / `launchctl bootout gui/$(id -u)/ai.fts.gate-queue; rm
   ~/Library/LaunchAgents/ai.fts.gate-queue.plist ~/.local/bin/gate-{queue,submit}`. `~/gate-queue` is state and
-  logs only; queued-but-unrun jobs are dropped, running scripts keep running.
+  logs only; queued-but-unrun jobs are dropped, running scripts keep running. voyager additionally:
+  `mv ~/.local/bin/pc.pre-sta415.bak ~/.local/bin/pc` restores the old pc.
+- Sweep: `hermes -p devops cron remove stale-wait-sweep` (it holds no state outside `stale-wait-sweep.state.json`).
 - Nix: revert this PR; the next switch removes the package and the unit (or `nixos-rebuild switch --rollback`).
