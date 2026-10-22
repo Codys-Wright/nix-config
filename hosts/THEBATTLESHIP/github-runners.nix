@@ -57,7 +57,7 @@ in
     # Rollback: restore the `github-fts-task`, `github-fts-task-deploy` and
     # per-kind (`task-tests` x2, `task-lint`, `task-wasm`) runners from git
     # history and switch.
-    # Codys-Wright/starcommand's own runner: merges to main deploy from here
+    # Codys-Wright/starcommand's own runner: release tags deploy from here
     # (deploy.yml, `runs-on: [self-hosted, starcommand]`). Registered through
     # the FTS - Forge GitHub App (installed on Codys-Wright, all repos), so no
     # PAT; the key is a THEBATTLESHIP host secret.
@@ -85,8 +85,8 @@ in
 
   # ── starcommand CI deploy credentials (github-starcommand only) ──────────
   #
-  # deploy.yml in Codys-Wright/starcommand deploys main to production from
-  # this runner. Its jobs run as a DEDICATED user, `starcommand-ci`, so the
+  # deploy.yml in Codys-Wright/starcommand deploys a release tag (vX.Y.Z)
+  # to production from this runner. Its jobs run as a DEDICATED user, `starcommand-ci`, so the
   # 14 FastTrackStudios runners (user github-runner, which run PR code) can
   # never read these keys. Both keys come from nix-secrets
   # sops/ci/starcommand-deploy.yaml, encrypted only to cody + this host and
@@ -97,8 +97,8 @@ in
   #   GIT_SSH_COMMAND      read-only deploy key on Codys-Wright/nix-secrets
   #                        (the starcommand flake input), pinned github.com
   #
-  # A job-started hook refuses every job that is not deploy.yml on main via
-  # push / workflow_dispatch, whatever a branch's workflow file says.
+  # A job-started hook refuses every job that is not deploy.yml on a vX.Y.Z
+  # tag via push / workflow_dispatch, whatever a branch's workflow file says.
   #
   # Revoke: remove the key line from starcommand's root authorized keys and
   # the nix-secrets deploy key "starcommand-ci (THEBATTLESHIP, read-only)",
@@ -128,11 +128,13 @@ in
         # ACTIONS_RUNNER_HOOK_JOB_STARTED (the runner requires a .sh name):
         # non-zero fails the job before any
         # of its steps run.
-        want="Codys-Wright/starcommand/.github/workflows/deploy.yml@refs/heads/main"
+        # Only a release tag deploys (starcommand is trunk-based: merging
+        # into main deploys nothing; `just release-tag` pushes vX.Y.Z).
+        ref="''${GITHUB_REF:-}"
         deny() { echo "starcommand-ci: refusing job ($1)" >&2; exit 1; }
         [ "''${GITHUB_REPOSITORY:-}" = "Codys-Wright/starcommand" ] || deny "repository ''${GITHUB_REPOSITORY:-?}"
-        [ "''${GITHUB_REF:-}" = "refs/heads/main" ] || deny "ref ''${GITHUB_REF:-?}"
-        [ "''${GITHUB_WORKFLOW_REF:-}" = "$want" ] || deny "workflow ''${GITHUB_WORKFLOW_REF:-?}"
+        [[ "$ref" =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$ ]] || deny "ref ''${ref:-?}"
+        [ "''${GITHUB_WORKFLOW_REF:-}" = "Codys-Wright/starcommand/.github/workflows/deploy.yml@$ref" ] || deny "workflow ''${GITHUB_WORKFLOW_REF:-?}"
         case "''${GITHUB_EVENT_NAME:-}" in
           push) ;;
           workflow_dispatch) [ "''${GITHUB_ACTOR:-}" = "Codys-Wright" ] || deny "dispatch by ''${GITHUB_ACTOR:-?}" ;;
