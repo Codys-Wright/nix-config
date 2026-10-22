@@ -25,6 +25,7 @@ issues = [
     iss(9, CMD, "waiting on the lease"),                                      # not a build-host agent
     iss(10, BATT, "gate lease", owner=BATT),                                  # STRANDED -> act (2nd action)
     iss(11, BATT, "lease expired holder"),                                    # only expired holder -> act
+    iss(12, VOY, "Commander merges the PR after the next v* release; Battleship to investigate"),  # 'release'/'investigate' are not lease/gate
 ]
 details = {i["id"]: {"blockedBy": []} for i in issues}
 details["id-5"] = {"blockedBy": [{"identifier": "STA-99", "status": "in_progress"}]}
@@ -46,10 +47,16 @@ st = tempfile.mktemp(suffix=".state.json")
 failures = []
 
 
+SENT = tempfile.mktemp(suffix=".sent")
+SENDER = tempfile.mktemp(suffix=".sh")
+open(SENDER, "w").write('#!/bin/sh\nprintf "%%s" "$1" > %s\n' % SENT)
+os.chmod(SENDER, 0o755)
+
+
 def run(extra, now, minage):
     fixture = {"issues": issues, "details": details, "hosts": hosts, "now": now}
     json.dump(fixture, open(fx.name, "w"))
-    env = dict(os.environ, SWEEP_FIXTURE=fx.name, SWEEP_STATE=st, SWEEP_MIN_AGE=str(minage))
+    env = dict(os.environ, SWEEP_FIXTURE=fx.name, SWEEP_STATE=st, SWEEP_MIN_AGE=str(minage), SWEEP_SEND_CMD=SENDER)
     p = subprocess.run([sys.executable, SWEEP] + extra, env=env, capture_output=True, text=True)
     return p.returncode, p.stdout, p.stderr
 
@@ -63,31 +70,41 @@ def check(name, cond, detail=""):
 # battleship: the 2-slot lease is 1 live (gate-STA-4) + 1 expired => a free slot exists
 rc, out, err = run(["--dry-run"], NOWT, 0)
 check("dry-run rc 0", rc == 0, err)
-check("dry-run prints a report and writes no state", "DRY RUN" in out and not os.path.exists(st), out)
+check("dry-run prints a report, writes no state, sends nothing", "DRY RUN" in out and not os.path.exists(st) and not os.path.exists(SENT), out)
 check("dry-run lists STA-1, STA-10, STA-11 as would-act", all(("%s (" % k) in out and "WOULD set todo" in out for k in ("STA-1", "STA-10", "STA-11")), out)
 for k, why in (("STA-4", "job"), ("STA-5", "open blockedBy"), ("STA-6", "process"), ("STA-7", "fully held"), ("STA-8", "report pending")):
     line = [l for l in out.splitlines() if l.strip().startswith(k + " ")]
     check("%s skipped (%s)" % (k, why), bool(line) and "skip" in line[0] and why in line[0], out)
-for k in ("STA-2", "STA-3", "STA-9"):
+for k in ("STA-2", "STA-3", "STA-9", "STA-12"):
     check("%s never considered" % k, not any(l.strip().startswith(k + " ") for l in out.splitlines()), out)
 
 # tick 1 (live mode, MIN_AGE 600): record only, no output, no write
 rc, out, err = run([], NOWT, 600)
-check("tick1 silent", rc == 0 and out == "", out + err)
-check("tick1 state has 3 candidates", sorted(json.load(open(st))) == ["STA-1", "STA-10", "STA-11"], open(st).read())
+check("tick1 silent and nothing sent", rc == 0 and out == "" and not os.path.exists(SENT), out + err)
+check("tick1 state has 3 candidates", sorted(k for k in json.load(open(st)) if not k.startswith("_")) == ["STA-1", "STA-10", "STA-11"], open(st).read())
 # tick 2 15 min later: acts. Writes can't be seen in-process (separate process), so use a write-fail fixture and a normal one.
 rc, out, err = run([], NOWT + 900, 600)
 check("tick2 posts summary for 3 issues", rc == 0 and "woke 3" in out and "STA-1 (Voyager)" in out and "STA-10 (Battleship)" in out, out + err)
-check("tick2 state emptied after success", json.load(open(st)) == {}, open(st).read())
+check("tick2 alert was posted via the send command", os.path.exists(SENT) and "woke 3" in open(SENT).read(), "")
+os.remove(SENT)
+stt = json.load(open(st))
+check("tick2 state: candidates cleared, 3 cooldown entries", sorted(k for k in stt if not k.startswith("_")) == [] and sorted(stt["_acted"]) == ["STA-1", "STA-10", "STA-11"], open(st).read())
+rc, out, err = run([], NOWT + 1800, 600)
+check("tick3 (same issues still blocked) is silent: cooldown", rc == 0 and out == "", out + err)
+rc, out, err = run(["--dry-run"], NOWT + 1800, 600)
+check("cooldown is explained in the dry-run report", "cooldown" in out and "STA-1 (voyager): skip - woken by the sweep" in out, out)
+rc, out, err = run([], NOWT + 6 * 3600 + 1000, 600)
+check("after the cooldown the clock restarts (tick records, no wake yet)", rc == 0 and out == "", out + err)
+os.remove(st)
 # issue changed between ticks => timer restarts
+run([], NOWT, 600)
 issues[0]["updatedAt"] = "u2"
 run([], NOWT + 1800, 600)
 issues[0]["updatedAt"] = "u3"
 rc, out, err = run([], NOWT + 1800 + 900, 600)
-check("changed issue restarts the clock", "STA-1 " not in out.replace("STA-10", "").replace("STA-11", ""), out)
+check("changed issue restarts the clock (nothing acted at the last tick)", out == "", out)
 # write failure is reported, not hidden
 os.remove(st)
-run([], NOWT, 0)
 fixture = {"issues": issues, "details": details, "hosts": hosts, "now": NOWT + 900, "write_fail": True}
 json.dump(fixture, open(fx.name, "w"))
 env = dict(os.environ, SWEEP_FIXTURE=fx.name, SWEEP_STATE=st, SWEEP_MIN_AGE="0")
@@ -96,7 +113,6 @@ check("write failure surfaces in the post", "write failed" in p.stdout, p.stdout
 # unreadable host => nothing acted for it
 hosts["voyager"] = None
 os.remove(st)
-run([], NOWT, 0)
 rc, out, err = run([], NOWT + 900, 0)
 check("unreadable host => its issues untouched", "STA-1 (" not in out and "STA-10" in out, out)
 

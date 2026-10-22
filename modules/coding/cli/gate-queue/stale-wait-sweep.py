@@ -14,7 +14,7 @@ and it sets such an issue to `todo` (with a comment) only if ALL of these also h
   (7) the same conclusion held on the previous sweep too (>= SWEEP_MIN_AGE s earlier) with the issue unchanged.
 It never touches a lease, a job or any other issue. Host unreachable / output unparseable => that host is skipped.
 
-stdout is delivered to #fleet-alerts, so it prints ONLY when it acted (or tried to). With --dry-run it prints the
+It prints (and posts to #fleet-alerts via Commander's bot, see post_alert) ONLY when it acted or tried to. With --dry-run it prints the
 full report and writes nothing (no Paperclip writes, no state file).
 Env (tests): SWEEP_FIXTURE=<json> (see selftest in STA-415), SWEEP_STATE=<path>, SWEEP_MIN_AGE=<seconds>.
 Usage: stale-wait-sweep.py [--dry-run]
@@ -33,7 +33,8 @@ HOSTS = {  # ssh alias -> Paperclip agent
     "voyager": ("3876f108-43d6-41fb-883c-122361bd1d86", "Voyager"),
 }
 AGENT_HOST = {v[0]: h for h, v in HOSTS.items()}
-WAIT_RE = re.compile(r"lease|gate|waiter", re.I)
+WAIT_RE = re.compile(r"\b(?:lease|leases|gate|gates|waiter|waiters)\b", re.I)  # whole words: "release" must not match
+COOLDOWN = 6 * 3600  # an issue the sweep woke is not woken again for this long, so an agent that re-blocks cannot be churned
 PENDING_REPORT = (False, None)
 SPLIT = "---SPLIT---"
 FIX = json.load(open(os.environ["SWEEP_FIXTURE"])) if os.environ.get("SWEEP_FIXTURE") else None
@@ -151,6 +152,22 @@ def parse_lease(text):
     return slots, live
 
 
+ALERT_CHANNEL = "discord:1562163078555111485"  # #fleet-alerts
+
+
+def post_alert(text):
+    """The devops profile has no Discord token, so cron's own --deliver discord:... fails ('platform discord not configured',
+    proven with a one-off job in STA-415). Post through Commander's bot like other proactive updates; stdout stays as the log."""
+    cmd = os.environ.get("SWEEP_SEND_CMD")  # tests: a command that receives the text as its last argument
+    argv = cmd.split() + [text] if cmd else ["hermes", "-p", "commander", "send", "-t", ALERT_CHANNEL, text]
+    try:
+        p = subprocess.run(argv, capture_output=True, text=True, timeout=60, env=dict(os.environ, HOME=os.environ.get("HOME") or "/data"))
+        if p.returncode != 0 or (not cmd and "sent" not in p.stdout + p.stderr):
+            print("stale-wait-sweep: alert not sent: rc=%s %s" % (p.returncode, (p.stdout + p.stderr).strip()[-300:]), file=sys.stderr)
+    except Exception as e:
+        print("stale-wait-sweep: alert not sent: %s" % e, file=sys.stderr)
+
+
 def main():
     state = {}
     if os.path.exists(STATE):
@@ -159,6 +176,7 @@ def main():
         except ValueError:
             state = {}
     new_state = {}
+    acted_at = {k: v for k, v in (state.get("_acted") or {}).items() if NOW - v < COOLDOWN}
 
     issues = api("GET", "/companies/%s/issues?status=blocked&limit=500" % CO)
     issues = issues if isinstance(issues, list) else issues.get("issues", [])
@@ -222,6 +240,8 @@ def main():
                     why = "a process mentions %s on %s: %s" % (ident, host, procs[0].strip()[:100])
         if why:
             note("  %s (%s): skip - %s" % (ident, host, why)); continue
+        if ident in acted_at:
+            note("  %s (%s): skip - woken by the sweep %d min ago (cooldown %dh)" % (ident, host, (NOW - acted_at[ident]) // 60, COOLDOWN // 3600)); continue
         sig = c.get("updatedAt")
         prev = state.get(ident)
         if prev and prev.get("sig") == sig:
@@ -251,11 +271,13 @@ def main():
             api("PATCH", "/issues/" + c["id"], {"status": "todo", "comment": msg})
             out.append("- %s (%s): was stuck on a dead lease/gate wait, lease %s; set to todo" % (ident, agent, lease_s))
             new_state.pop(ident, None)
+            acted_at[ident] = NOW
         except Exception as e:
             out.append("- %s (%s): needed waking but the write failed (%s)" % (ident, agent, str(e)[:120]))
     if len(acts) > MAX_ACTIONS:
         out.append("(+%d more candidates left for the next sweep)" % (len(acts) - MAX_ACTIONS))
     if not DRY:
+        new_state["_acted"] = acted_at
         tmp = STATE + ".tmp"
         json.dump(new_state, open(tmp, "w"))
         os.replace(tmp, STATE)
@@ -264,7 +286,10 @@ def main():
         print("\n".join(report))
         print("would act on %d issue(s)" % len(acts))
     elif out:
-        print("🧹 stale-wait sweep: woke %d stranded build-wait issue(s)\n%s" % (len([o for o in out if o.startswith("-")]), "\n".join(out)))
+        msg = "🧹 stale-wait sweep: woke %d stranded build-wait issue(s)\n%s" % (len([o for o in out if o.startswith("-")]), "\n".join(out))
+        print(msg)
+        if FIX is None or os.environ.get("SWEEP_SEND_CMD"):
+            post_alert(msg)
 
 
 try:

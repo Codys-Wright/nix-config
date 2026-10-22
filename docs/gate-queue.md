@@ -107,15 +107,22 @@ absolute path in non-interactive ssh (`~/.local/bin/gate-queue ...`): voyager's 
 ## Stale-wait sweep (STA-415)
 
 `modules/coding/cli/gate-queue/stale-wait-sweep.py` (+ `stale-wait-sweep.selftest.py`, offline fixtures, no network) is a
-no-agent Hermes cron in the DevOps profile (`every 15m`, delivery `#fleet-alerts`). It exists because a gate waiter that
+no-agent Hermes cron in the DevOps profile (`every 15m`, `--deliver local`; the script posts to `#fleet-alerts` itself, see below). It exists because a gate waiter that
 dies leaves its issue `blocked` on a lease that is already free. On battleship, airlock and voyager it reads
 `gate-queue status --json|--unreported`, `build-lease status` and the process list, and in Paperclip it considers only
 BLOCKED issues assigned to that host's agent whose `unblockDescriptor.owner` is that same agent and whose `action`
-mentions lease|gate|waiter. It sets such an issue to `todo` with a comment only if ALL hold: no queued/running (or
+mentions the whole word lease|gate|waiter (`release` and `investigate` do not match; STA-135 would have). It sets such an issue to `todo` with a comment only if ALL hold: no queued/running (or
 report-pending) gate-queue job for it, no open `blockedBy`, at least one live lease slot is free, no process on the host
 mentions the issue key (hand-made nohup/screen waiter), and the same was true on the previous sweep (>= 10 min earlier,
-issue unchanged). It never touches a lease, a job or any other issue, posts to #fleet-alerts only when it acts, and
-`--dry-run` prints the full decision report without writing.
+issue unchanged). It never touches a lease, a job or any other issue, and `--dry-run` prints the full decision report without writing.
+An issue it woke is not woken again for 6 h, so an agent that re-blocks with the same wording cannot be churned. Known
+limit: the match is on words, so a wait that merely says "gate green" while waiting for a human review is also woken once
+(the agent re-blocks; cooldown stops a loop).
+
+Alerts: the DevOps profile has no Discord token, and cron's own `--deliver discord:...` fails with `platform 'discord' not
+configured/enabled` for it (proven with a one-off job; the other devops monitors that deliver to #fleet-alerts share this
+problem). The script therefore posts only when it acts, through Commander's bot (`hermes -p commander send -t
+discord:1562163078555111485`), and logs the same text to stdout.
 
 Write attribution: the server refuses cross-issue writes without a heartbeat run of the acting agent (403
 `cross_issue...`), and a cron has none. The sweep sends the id of the newest running/succeeded DevOps run (a finished
@@ -125,7 +132,7 @@ server refuses, the write fails and the failure is posted to #fleet-alerts inste
 ```sh
 cp modules/coding/cli/gate-queue/stale-wait-sweep.py /data/.hermes/profiles/devops/scripts/
 HERMES_HOME=/data/.hermes/profiles/devops hermes cron create --name stale-wait-sweep --no-agent \
-  --script stale-wait-sweep.py --deliver discord:1562163078555111485 'every 15m' </dev/null
+  --script stale-wait-sweep.py --deliver local 'every 15m' </dev/null
 ```
 
 ## Validation (STA-402)
