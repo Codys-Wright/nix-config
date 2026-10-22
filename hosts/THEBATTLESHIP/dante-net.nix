@@ -1,7 +1,7 @@
 { den, ... }:
 {
   den.aspects.THEBATTLESHIP-dante-net = {
-    description = "Dante audio network: PTP-conflicting timesyncd off, Dante firewall ports and trusted interfaces";
+    description = "Dante audio network: timesyncd for the system clock, Dante firewall ports and trusted interfaces";
     nixos =
       {
         config,
@@ -12,8 +12,12 @@
       {
         # --- Dante / Inferno audio network configuration ---
 
-        # Disable systemd-timesyncd — it conflicts with statime-inferno PTP daemon
-        services.timesyncd.enable = false;
+        # Keep systemd-timesyncd on. statime-inferno runs with
+        # `virtual-system-clock = true` (based on monotonic_raw), so PTP never
+        # disciplines CLOCK_REALTIME and the two don't conflict. Without an NTP
+        # client the wall clock drifted 70 s, which broke T3 Connect's relay
+        # proofs (60 s skew limit). Captain approved re-enabling (STA-425).
+        services.timesyncd.enable = true;
 
         # Firewall rules for Dante audio network
         networking.firewall = {
