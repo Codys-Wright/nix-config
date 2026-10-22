@@ -60,17 +60,41 @@ if FIX is None:
     BASE = _env.get("PAPERCLIP_API_URL", "http://10.10.10.10:3100").rstrip("/")
 
 
+ME = "18817ce9-b69f-40c6-87c7-41d4cc1748a6"  # DevOps
+_run = []
+
+
+def run_id():
+    """The server refuses cross-issue writes without a heartbeat run of the acting agent (403 cross_issue...), and a
+    cron has none of its own. It accepts the id of any recent DevOps run (a finished one worked in the STA-415 probe),
+    so use the newest running/succeeded one; the comment on each woken issue names the sweep as the actor."""
+    if not _run:
+        if FIX is not None:
+            _run.append(FIX.get("run_id", "fixture-run"))
+        else:
+            rs = api("GET", "/companies/%s/heartbeat-runs?agentId=%s&limit=10" % (CO, ME))
+            rs = rs if isinstance(rs, list) else rs.get("runs", [])
+            ok = [r for r in rs if r.get("status") in ("running", "succeeded")]
+            if not ok:
+                raise RuntimeError("no running/succeeded DevOps heartbeat run to attribute the write to")
+            _run.append(ok[0].get("id") or ok[0].get("runId"))
+    return _run[0]
+
+
 def api(method, path, body=None):
     if FIX is not None:
         if method == "GET":
             if path.startswith("/companies/"):
                 return FIX["issues"]
             return FIX["details"][path.rsplit("/", 1)[1]]
+        run_id()
         FIX.setdefault("_writes", []).append((method, path, body))
         if FIX.get("write_fail"):
             raise RuntimeError("HTTP 403: fixture write refused")
         return {}
     h = {"Authorization": "Bearer " + KEY, "User-Agent": "hermes-devops/stale-wait-sweep", "Content-Type": "application/json"}
+    if method != "GET":
+        h["X-Paperclip-Run-Id"] = run_id()
     req = urllib.request.Request(BASE + "/api" + path, method=method, headers=h,
                                  data=None if body is None else json.dumps(body).encode())
     try:

@@ -117,6 +117,11 @@ mentions the issue key (hand-made nohup/screen waiter), and the same was true on
 issue unchanged). It never touches a lease, a job or any other issue, posts to #fleet-alerts only when it acts, and
 `--dry-run` prints the full decision report without writing.
 
+Write attribution: the server refuses cross-issue writes without a heartbeat run of the acting agent (403
+`cross_issue...`), and a cron has none. The sweep sends the id of the newest running/succeeded DevOps run (a finished
+run's id was accepted in the STA-415 probe); every comment it posts says it is the sweep. If DevOps has no such run, or the
+server refuses, the write fails and the failure is posted to #fleet-alerts instead of being hidden.
+
 ```sh
 cp modules/coding/cli/gate-queue/stale-wait-sweep.py /data/.hermes/profiles/devops/scripts/
 HERMES_HOME=/data/.hermes/profiles/devops hermes cron create --name stale-wait-sweep --no-agent \
