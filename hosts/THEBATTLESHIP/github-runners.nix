@@ -29,6 +29,16 @@ let
       }
       // args
     );
+  # Registration through the FTS - Forge GitHub App (org "self-hosted
+  # runners: write"), so no PAT. The PAT in tokenSopsFile was answering 401
+  # "Bad credentials" on 2026-10-22: already-registered runners don't need
+  # it, but any new or re-registered runner does.
+  ftsForge = {
+    id = 5391924;
+    login = "FastTrackStudios";
+    keySopsKey = "github_app_fts_forge_private_key";
+    keySopsFile = "${inputs.nix-secrets}/sops/hosts/THEBATTLESHIP.yaml";
+  };
   # name → label, one runner each.
   perProject = {
     github-fts-architect = "architect";
@@ -69,6 +79,29 @@ in
       name = "github-fts-task";
       labels = [ "task" ];
       count = 2;
+    })
+    # Task's checks, split by build kind (checks.yml jobs `lint`, `tests`,
+    # `wasm`). Clippy/docs (check mode), the test build (codegen) and the
+    # wasm32 check share no artifacts but proc macros and build scripts, so
+    # running them in one job only serialised them. Each kind gets its own
+    # label so an instance's target dir holds ONE kind of artifact and stays
+    # warm for it; the bare `task` pair keeps the plan job and everything else.
+    # Registered through the App (ftsForge above), not the dead PAT.
+    (runner {
+      name = "github-fts-task-tests";
+      githubApp = ftsForge;
+      labels = [ "task-tests" ];
+      count = 2;
+    })
+    (runner {
+      name = "github-fts-task-lint";
+      githubApp = ftsForge;
+      labels = [ "task-lint" ];
+    })
+    (runner {
+      name = "github-fts-task-wasm";
+      githubApp = ftsForge;
+      labels = [ "task-wasm" ];
     })
     # Codys-Wright/starcommand's own runner: merges to main deploy from here
     # (deploy.yml, `runs-on: [self-hosted, starcommand]`). Registered through
