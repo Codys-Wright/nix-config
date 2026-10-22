@@ -8,6 +8,7 @@
     description = "All CLI development tools - atuin, btop, direnv, eza, fzf, herdr, hunk, just, pi-coding-agent, perf/samply, rbw, sesh, yazi, zoxide";
 
     includes = [
+      fleet.coding._.cli._.agent-skills
       fleet.coding._.cli._.atuin
       fleet.coding._.cli._.btop
       fleet.coding._.cli._.den-fleet-skill
