@@ -116,8 +116,8 @@ report-pending) gate-queue job for it, no open `blockedBy`, at least one live le
 mentions the issue key (hand-made nohup/screen waiter), and the same was true on the previous sweep (>= 10 min earlier,
 issue unchanged). It never touches a lease, a job or any other issue, and `--dry-run` prints the full decision report without writing.
 An issue it woke is not woken again for 6 h, so an agent that re-blocks with the same wording cannot be churned. Known
-limit: the match is on words, so a wait that merely says "gate green" while waiting for a human review is also woken once
-(the agent re-blocks; cooldown stops a loop).
+limit: the match is on words, so some other wait that merely mentions a gate can still be woken once (the agent
+re-blocks; the cooldown stops a loop).
 
 Alerts: the DevOps profile has no Discord token, and cron's own `--deliver discord:...` fails with `platform 'discord' not
 configured/enabled` for it (proven with a one-off job; the other devops monitors that deliver to #fleet-alerts share this
