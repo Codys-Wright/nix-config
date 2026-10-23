@@ -74,6 +74,7 @@
         cody.secrets
         <fleet/apple-fonts>
         <fleet.coding/ghidra>
+        <fleet.coding/t3code>
         <fleet.coding._.tools/game-dev>
       ];
     };
