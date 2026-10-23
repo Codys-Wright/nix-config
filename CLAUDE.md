@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **MUST `git add` new `.nix` files before building** — import-tree uses git tracking; untracked files are silently ignored by `nix build` and `nix run .#write-flake`.
 - **Never commit `sops.key` or `keys.txt`** — these contain private decryption keys.
 - **Format before committing** — run `just fmt` to apply nixfmt-rfc-style.
-- **`main` is PRs-only** — a GitHub ruleset rejects direct pushes. Branch (`<type>/<issue>-<slug>`), push, `gh pr create`, then `gh pr merge --squash --auto`; it merges at once (no required checks — CI can't fetch the private nix-secrets input), the branch is deleted, and the PR is the history.
+- **`main` is PRs-only** — a GitHub ruleset rejects direct pushes. Branch (`<type>/<issue>-<slug>`), push, `gh pr create`, then `gh pr merge --squash` (squash-only; the branch is deleted on merge and the PR is the history). There are no required checks — CI can't fetch the private nix-secrets input — so `--auto` has nothing to wait for and GitHub refuses it.
 - **For den/framework specifics, read the source** — den lives at `github:denful/den` (clone it; the `docs/src/content/docs/` guides + `templates/ci/` tests are the reference). The den docs site is den.denful.dev.
 
 ---
