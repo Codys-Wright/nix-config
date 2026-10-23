@@ -55,16 +55,44 @@ in
           '';
         };
 
-        home.file.".local/bin/codex" = {
-          executable = true;
-          text = ''
-            #!/usr/bin/env bash
-            if [[ -x "$HOME/.local/bin/forgejo-env" ]]; then
-              exec "$HOME/.local/bin/forgejo-env" ${pkgs.codex}/bin/codex "$@"
-            fi
-            exec ${pkgs.codex}/bin/codex "$@"
-          '';
-        };
+        # codex and claude are the vendors' self-updating installs, not nix
+        # packages: T3 Code updates a provider only when it recognises the
+        # install (`codex update` needs $CODEX_HOME/packages/standalone,
+        # `claude update` needs ~/.local/bin/claude). Activation installs each
+        # once if missing; from then on the tools (or T3) keep them current.
+        home.activation.agentClis = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+          (
+          export PATH="$HOME/.local/bin:${
+            lib.makeBinPath (
+              with pkgs;
+              [
+                bash
+                coreutils
+                curl
+                findutils
+                gawk
+                gnugrep
+                gnused
+                gnutar
+                gzip
+                procps
+              ]
+            )
+          }"
+          if [ ! -e "$HOME/.codex/packages/standalone/current" ]; then
+            run curl -fsSL https://chatgpt.com/codex/install.sh -o "$HOME/.codex-install.sh" \
+              && CODEX_NON_INTERACTIVE=1 run sh "$HOME/.codex-install.sh" \
+              || warnEcho "codex standalone install failed; rerun activation when online"
+            rm -f "$HOME/.codex-install.sh"
+          fi
+          if [ ! -x "$HOME/.local/bin/claude" ]; then
+            run curl -fsSL https://claude.ai/install.sh -o "$HOME/.claude-install.sh" \
+              && run bash "$HOME/.claude-install.sh" \
+              || warnEcho "claude native install failed; rerun activation when online"
+            rm -f "$HOME/.claude-install.sh"
+          fi
+          )
+        '';
 
         # Fleet/agent claude: nix-pinned claude-code wrapped with forgejo-env,
         # installed under a distinct name and config dir so it never collides
@@ -90,7 +118,6 @@ in
 
           # amazon-q-cli
           # aider-chat
-          codex
           # copilot-cli
           # crush
           # cursor-cli
