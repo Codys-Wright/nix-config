@@ -28,6 +28,7 @@ let
   # nixpkgs already has attrs with these names — prefix to avoid shadowing.
   collides = [
     "davinci-resolve"
+    "gh-stack"
     "inferno"
     "melonloader-installer"
     "statime"
