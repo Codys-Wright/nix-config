@@ -63,13 +63,15 @@ let
   studioCount = 3;
   studioCache = pool: "/run/media/Development/ci/${pool}";
   # Task (FastTrackStudios/task): the same shape as Studio's. PR checks stay
-  # on the author's machine (Local CI) and GitHub's free runners; `task-main`
-  # takes every merge to main (a newer merge cancels the older run) and
-  # `task-release` the release commits' CI plus the release builds (images,
-  # the desktop cache; queued, never cancelled). Three instances a pool, so a
-  # run's Lint, Tests and Wasm build at once; the pool's instances share
-  # $TASK_CACHE_DIR, one target dir per build kind, so a merge compiles only
-  # what it changed. Every instance runs taskJobGate (below): the repo is
+  # on the author's machine (Local CI) and GitHub's free runners. The pools
+  # split by CACHE, not by event: `task-main` runs every dev-profile check
+  # build (checks.yml for each merge to main, a release commit's included:
+  # the same units, on the same warm dirs; a newer merge cancels the older
+  # run, a release commit's never), `task-release` only the release-profile
+  # artifacts (images, the desktop cache; queued, never cancelled). Three
+  # instances a pool, so a run's Lint, Tests and Wasm build at once; the
+  # pool's instances share $TASK_CACHE_DIR, one target dir per build kind,
+  # so a merge compiles only what it changed. Every instance runs taskJobGate (below): the repo is
   # public, so nothing but code already on main, release/v* or a v* tag runs
   # here. (Captain, 2026-10-24: main merges come back to THEBATTLESHIP;
   # supersedes the 2026-10-22 move to the Mac Pro VM, whose macpro-task-*
