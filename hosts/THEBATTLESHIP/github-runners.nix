@@ -266,14 +266,23 @@ in
         // lib.listToAttrs (
           map (inst: {
             name = inst.unit;
-            value.serviceConfig = {
-              ReadWritePaths = [ (taskCache inst.pool) ];
-              Environment = [
-                "TASK_CACHE_DIR=${taskCache inst.pool}"
-                # The runner runs this before every job; non-zero fails it
-                # before any step.
-                "ACTIONS_RUNNER_HOOK_JOB_STARTED=${taskJobGate}"
+            value = {
+              # nicknovitski/nix-develop (how checks.yml enters `.#ci`)
+              # needs openssl for its env-file delimiters; the module's PATH
+              # is a short explicit list without it (exit 127, 2026-10-24).
+              path = with pkgs; [
+                openssl
+                jq
               ];
+              serviceConfig = {
+                ReadWritePaths = [ (taskCache inst.pool) ];
+                Environment = [
+                  "TASK_CACHE_DIR=${taskCache inst.pool}"
+                  # The runner runs this before every job; non-zero fails it
+                  # before any step.
+                  "ACTIONS_RUNNER_HOOK_JOB_STARTED=${taskJobGate}"
+                ];
+              };
             };
           }) taskInstances
         );
