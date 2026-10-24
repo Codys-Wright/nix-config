@@ -282,6 +282,24 @@ in
                   # before any step.
                   "ACTIONS_RUNNER_HOOK_JOB_STARTED=${taskJobGate}"
                 ];
+              }
+              # task-release only: the Flatpak build (Task's
+              # scripts/desktop/linux.sh) has flatpak validate the exported
+              # icon under bwrap, which needs a user namespace and a /proc
+              # mount inside it. Measured 2026-10-24 (systemd-run with the
+              # unit's settings): exactly these three block it; PrivateUsers,
+              # NoNewPrivileges, ProtectSystem, ProtectProc and PrivateTmp
+              # don't, and stay. The job gate still admits only protected refs.
+              // lib.optionalAttrs (inst.pool == "task-release") {
+                RestrictNamespaces = lib.mkForce false;
+                ProtectKernelTunables = lib.mkForce false;
+                SystemCallFilter = lib.mkForce [
+                  "@system-service"
+                  "@mount"
+                  "pivot_root"
+                  "capset"
+                  "chroot"
+                ];
               };
             };
           }) taskInstances
