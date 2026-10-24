@@ -42,15 +42,26 @@ let
     # cache of their own; the other small repos stay on hosted runners.
     github-fts-editor = "editor";
     github-fts-extensions = "fts-extensions";
-    # Studio (FastTrackStudios/studio): PRs run on GitHub's free runners;
-    # every merge to main and every release build runs here, each on its
-    # own instance so each keeps its own warm target dir in $CI_CACHE_DIR
-    # (studio's checks.yml caps it at 200 GB). `studio-main` takes the
-    # merges (a newer merge cancels the older run); `studio-release` takes
-    # the release commits, which queue and always run to the end, so a
-    # release never waits behind ordinary merges.
+  };
+  # Studio (FastTrackStudios/studio): PRs run on GitHub's free runners;
+  # every merge to main and every release build runs here, each on its own
+  # instance so each keeps its own warm target dir in $CI_CACHE_DIR
+  # (studio's checks.yml caps it at 200 GB). `studio-main` takes the merges
+  # (a newer merge cancels the older run); `studio-release` takes the
+  # release commits, which queue and always run to the end, so a release
+  # never waits behind ordinary merges. Registered through the FTS - Forge
+  # GitHub App, like github-starcommand: a fresh registration token on every
+  # start, no stored token to expire (the shared `github-runner-token`
+  # returned 401 when these were first added, 2026-10-24).
+  studio = {
     github-fts-studio-main = "studio-main";
     github-fts-studio-release = "studio-release";
+  };
+  forgeApp = {
+    id = 5391924;
+    login = "FastTrackStudios";
+    keySopsKey = "github_app_fts_forge_private_key";
+    keySopsFile = "${inputs.nix-secrets}/sops/hosts/THEBATTLESHIP.yaml";
   };
 in
 {
@@ -90,6 +101,16 @@ in
         labels = [ label ];
       }
     ) perProject
+  )
+  ++ builtins.attrValues (
+    builtins.mapAttrs (
+      name: label:
+      runner {
+        inherit name;
+        labels = [ label ];
+        githubApp = forgeApp;
+      }
+    ) studio
   );
 
   # ── starcommand CI deploy credentials (github-starcommand only) ──────────
