@@ -10,9 +10,36 @@
   den.aspects.THEBATTLESHIP-hermes-desktop.nixos =
     { pkgs, ... }:
     let
-      cuaDriver = "${
-        inputs.hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.pm-cua-driver
-      }/cua-driver";
+      # hermes-agent's pm lock pins cua-driver 0.21.0; run a newer release
+      # through its own derivation (same unpack/install), swapping the source.
+      cuaDriverVersion = "0.38.0";
+      cuaDriverArtifacts = {
+        x86_64-linux = {
+          arch = "x86_64";
+          sha256 = "31ab9709dd91ce73677e49b9f3e75c6f0d3e4d9625c286c9e58262bfbea698dd";
+        };
+        aarch64-linux = {
+          arch = "arm64";
+          sha256 = "80c9ae66bc7322052dd426c6133c96086b33894bf06c972bca8215384400b33d";
+        };
+      };
+      cuaDriverPkg =
+        inputs.hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.pm-cua-driver.overrideAttrs
+          (_: {
+            version = cuaDriverVersion;
+            srcs = [
+              (
+                let
+                  a = cuaDriverArtifacts.${pkgs.stdenv.hostPlatform.system};
+                in
+                pkgs.fetchurl {
+                  url = "https://github.com/trycua/cua/releases/download/cua-driver-rs-v${cuaDriverVersion}/cua-driver-rs-${cuaDriverVersion}-linux-${a.arch}-binary.tar.gz";
+                  inherit (a) sha256;
+                }
+              )
+            ];
+          });
+      cuaDriver = "${cuaDriverPkg}/cua-driver";
       # Join the running graphical session: WAYLAND_DISPLAY / DISPLAY (XWayland)
       # come from the user manager's environment, which niri exports into.
       joinSession = ''
