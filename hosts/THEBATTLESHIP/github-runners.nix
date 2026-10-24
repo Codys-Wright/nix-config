@@ -42,6 +42,15 @@ let
     # cache of their own; the other small repos stay on hosted runners.
     github-fts-editor = "editor";
     github-fts-extensions = "fts-extensions";
+    # Studio (FastTrackStudios/studio): PRs run on GitHub's free runners;
+    # every merge to main and every release build runs here, each on its
+    # own instance so each keeps its own warm target dir in $CI_CACHE_DIR
+    # (studio's checks.yml caps it at 200 GB). `studio-main` takes the
+    # merges (a newer merge cancels the older run); `studio-release` takes
+    # the release commits, which queue and always run to the end, so a
+    # release never waits behind ordinary merges.
+    github-fts-studio-main = "studio-main";
+    github-fts-studio-release = "studio-release";
   };
 in
 {
