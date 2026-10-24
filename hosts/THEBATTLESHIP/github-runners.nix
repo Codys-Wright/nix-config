@@ -62,6 +62,26 @@ let
   };
   studioCount = 3;
   studioCache = pool: "/run/media/Development/ci/${pool}";
+  # Task (FastTrackStudios/task): the same shape as Studio's. PR checks stay
+  # on the author's machine (Local CI) and GitHub's free runners. The pools
+  # split by CACHE, not by event: `task-main` runs every dev-profile check
+  # build (checks.yml for each merge to main, a release commit's included:
+  # the same units, on the same warm dirs; a newer merge cancels the older
+  # run, a release commit's never), `task-release` only the release-profile
+  # artifacts (images, the desktop cache; queued, never cancelled). Three
+  # instances a pool, so a run's Lint, Tests and Wasm build at once; the
+  # pool's instances share $TASK_CACHE_DIR, one target dir per build kind,
+  # so a merge compiles only what it changed. Every instance runs taskJobGate (below): the repo is
+  # public, so nothing but code already on main, release/v* or a v* tag runs
+  # here. (Captain, 2026-10-24: main merges come back to THEBATTLESHIP;
+  # supersedes the 2026-10-22 move to the Mac Pro VM, whose macpro-task-*
+  # runners no Task workflow targets any more.)
+  taskPools = {
+    github-fts-task-main = "task-main";
+    github-fts-task-release = "task-release";
+  };
+  taskCount = 3;
+  taskCache = pool: "/run/media/Development/ci/${pool}";
   forgeApp = {
     id = 5391924;
     login = "FastTrackStudios";
@@ -74,14 +94,6 @@ in
     # The bare `nix-host` pool (github-fts-1, -2): the LAN-only deploys
     # (forum, the landing site) and repos not yet on a label of their own.
     (runner { count = 2; })
-    # Task's CI (checks per build kind, plan, desktop-cache and the release
-    # deploy) runs on the Mac Pro VM, not here (Captain, 2026-10-22: free
-    # THEBATTLESHIP for the engineers' work; supersedes STA-229). The runners
-    # live in Codys-Wright/starcommand hosts/toms-mac-pro-vm/github-runners.nix
-    # (macpro-task-1, -tests, -lint, -wasm, -deploy).
-    # Rollback: restore the `github-fts-task`, `github-fts-task-deploy` and
-    # per-kind (`task-tests` x2, `task-lint`, `task-wasm`) runners from git
-    # history and switch.
     # Codys-Wright/starcommand's own runner: release tags deploy from here
     # (deploy.yml, `runs-on: [self-hosted, starcommand]`). Registered through
     # the FTS - Forge GitHub App (installed on Codys-Wright, all repos), so no
@@ -117,6 +129,17 @@ in
         count = studioCount;
       }
     ) studioPools
+  )
+  ++ builtins.attrValues (
+    builtins.mapAttrs (
+      name: label:
+      runner {
+        inherit name;
+        labels = [ label ];
+        githubApp = forgeApp;
+        count = taskCount;
+      }
+    ) taskPools
   );
 
   # ── starcommand CI deploy credentials (github-starcommand only) ──────────
@@ -186,26 +209,74 @@ in
           }) (lib.range 1 studioCount)
         ) studioPools
       );
+      # The Task runners' gate. FastTrackStudios/task is PUBLIC, and a
+      # workflow in a fork's PR can name any label: without this, a PR could
+      # run its own code on this host with the pools' warm caches. Only code
+      # already on the repo's protected refs runs here — a push to main, a
+      # release/v* hotfix branch or a v* tag (deploy.yml's called workflows
+      # report the tag push) — or a manual dispatch, which takes write
+      # access to the repo.
+      taskJobGate = pkgs.writeShellScript "task-ci-job-gate.sh" ''
+        ref="''${GITHUB_REF:-}"
+        deny() { echo "task-ci: refusing job ($1)" >&2; exit 1; }
+        [ "''${GITHUB_REPOSITORY:-}" = "FastTrackStudios/task" ] || deny "repository ''${GITHUB_REPOSITORY:-?}"
+        case "''${GITHUB_EVENT_NAME:-}" in
+          push)
+            [[ "$ref" == refs/heads/main || "$ref" =~ ^refs/heads/release/v[0-9] || "$ref" =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$ ]] \
+              || deny "push to ''${ref:-?}" ;;
+          workflow_dispatch) ;;
+          *) deny "event ''${GITHUB_EVENT_NAME:-?}" ;;
+        esac
+      '';
+      taskInstances = lib.concatLists (
+        lib.mapAttrsToList (
+          name: pool:
+          map (i: {
+            unit = "github-runner-${name}-${toString i}";
+            inherit pool;
+          }) (lib.range 1 taskCount)
+        ) taskPools
+      );
     in
     {
-      # Studio's shared pool caches ($STUDIO_CACHE_DIR): made at activation
-      # like the module's own dirs on this disk (tmpfiles refuses the
-      # cody-owned mount as a parent), writable by every instance of the
+      # The pools' shared caches ($STUDIO_CACHE_DIR, $TASK_CACHE_DIR): made at
+      # activation like the module's own dirs on this disk (tmpfiles refuses
+      # the cody-owned mount as a parent), writable by every instance of the
       # pool, and named to each job.
       system.activationScripts.studio-runner-pool-caches = lib.stringAfter [ "users" "groups" ] (
         lib.concatMapStringsSep "\n" (
           pool: "install -d -m 0700 -o github-runner -g github-runner ${studioCache pool}"
         ) (lib.unique (builtins.attrValues studioPools))
       );
-      systemd.services = lib.listToAttrs (
-        map (inst: {
-          name = inst.unit;
-          value.serviceConfig = {
-            ReadWritePaths = [ (studioCache inst.pool) ];
-            Environment = [ "STUDIO_CACHE_DIR=${studioCache inst.pool}" ];
-          };
-        }) studioInstances
+      system.activationScripts.task-runner-pool-caches = lib.stringAfter [ "users" "groups" ] (
+        lib.concatMapStringsSep "\n" (
+          pool: "install -d -m 0700 -o github-runner -g github-runner ${taskCache pool}"
+        ) (lib.unique (builtins.attrValues taskPools))
       );
+      systemd.services =
+        lib.listToAttrs (
+          map (inst: {
+            name = inst.unit;
+            value.serviceConfig = {
+              ReadWritePaths = [ (studioCache inst.pool) ];
+              Environment = [ "STUDIO_CACHE_DIR=${studioCache inst.pool}" ];
+            };
+          }) studioInstances
+        )
+        // lib.listToAttrs (
+          map (inst: {
+            name = inst.unit;
+            value.serviceConfig = {
+              ReadWritePaths = [ (taskCache inst.pool) ];
+              Environment = [
+                "TASK_CACHE_DIR=${taskCache inst.pool}"
+                # The runner runs this before every job; non-zero fails it
+                # before any step.
+                "ACTIONS_RUNNER_HOOK_JOB_STARTED=${taskJobGate}"
+              ];
+            };
+          }) taskInstances
+        );
 
       users.users.starcommand-ci = {
         isSystemUser = true;
