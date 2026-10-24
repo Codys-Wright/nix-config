@@ -50,6 +50,9 @@ in
           home = "/home/agent";
           sopsFile = "${inputs.nix-secrets}/sops/hosts/THEBATTLESHIP.yaml";
         })
+        # agent's queued build gates (gate-submit) run lease-aware in a user unit
+        # and wake their Paperclip issue when done (STA-402).
+        (<fleet.coding.cli/gate-queue> { user = "agent"; })
         <fleet.system/agent-bot-desktop> # Hermes bot screen for agent sessions over SSH
         den.aspects.THEBATTLESHIP-hermes-desktop # Hermes can drive cody's real desktop (forced-command key)
 
