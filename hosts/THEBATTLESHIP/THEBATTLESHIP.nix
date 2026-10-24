@@ -67,6 +67,7 @@ in
         <fleet.hardware/cuda> # CUDA toolkit (RTX present; nvidia already on)
         <fleet.apps/comfyui> # ComfyUI (CUDA) on :8188, models on the Development drive
         <fleet.apps/odysseus> # Odysseus launcher (server runs in Starcommand on this host, :7000)
+        (fleet.apps._.task-desktop { user = "cody"; }) # Task desktop, follows the newest Task release tag (STA-96)
         <fleet.hardware/iphone> # tether: iPhone messages / notifications / calls over Bluetooth
         # RT core isolation for the audio path — currently DISABLED (see
         # modules/audio/rt-isolation.nix): pinning pipewire to a
