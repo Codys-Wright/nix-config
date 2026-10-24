@@ -15,8 +15,7 @@
       }/cua-driver";
       # Join the running graphical session: WAYLAND_DISPLAY / DISPLAY (XWayland)
       # come from the user manager's environment, which niri exports into.
-      launcher = pkgs.writeShellScriptBin "hermes-desktop-mcp" ''
-        set -eu
+      joinSession = ''
         export XDG_RUNTIME_DIR=/run/user/$(id -u)
         export DBUS_SESSION_BUS_ADDRESS=unix:path=$XDG_RUNTIME_DIR/bus
         eval "$(${pkgs.systemd}/bin/systemctl --user show-environment \
@@ -26,6 +25,19 @@
           echo "no graphical session for $(id -un) right now" >&2
           exit 1
         fi
+      '';
+      # The driver's own CLI (`cua-driver call …`, `skills install`, the route
+      # the cua-driver agent skill prefers), joined to the same session
+      # (fleet.coding._.cli._.cua-agent registers the MCP and the skills).
+      cli = pkgs.writeShellScriptBin "cua-driver" ''
+        set -eu
+        ${joinSession}
+        export CUA_DRIVER_RS_ENABLE_WAYLAND=1 CUA_DRIVER_RS_TELEMETRY_ENABLED=0
+        exec ${cuaDriver} "$@"
+      '';
+      launcher = pkgs.writeShellScriptBin "hermes-desktop-mcp" ''
+        set -eu
+        ${joinSession}
         case "''${1:-cuadriver}" in
           cuadriver)
             export CUA_DRIVER_RS_ENABLE_WAYLAND=1 CUA_DRIVER_RS_TELEMETRY_ENABLED=0
@@ -46,6 +58,25 @@
       '';
     in
     {
-      environment.systemPackages = [ launcher ];
+      environment.systemPackages = [
+        launcher
+        cli
+      ];
+
+      # The daemon `cua-driver call …` talks to (~/.cache/cua-driver/
+      # cua-driver.sock), up for cody's graphical session; the MCP route
+      # (`hermes-desktop-mcp cuadriver`) runs its own and doesn't need it.
+      systemd.user.services.cua-driver = {
+        description = "CuaDriver daemon (computer use) for cody's desktop session";
+        wantedBy = [ "graphical-session.target" ];
+        partOf = [ "graphical-session.target" ];
+        after = [ "graphical-session.target" ];
+        unitConfig.ConditionUser = "cody";
+        serviceConfig = {
+          ExecStart = "${cli}/bin/cua-driver serve";
+          Restart = "on-failure";
+          RestartSec = 5;
+        };
+      };
     };
 }
