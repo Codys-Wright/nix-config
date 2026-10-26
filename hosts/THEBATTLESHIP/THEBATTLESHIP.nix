@@ -45,9 +45,11 @@ in
         <fleet/stylix>
         <fleet.system/agent-user>
         # agent's `gh` / git push = fts-forge[bot]: workers open their own PRs.
+        # cody's are his own, except inside Claude Code / Codex.
         (<fleet.coding.cli/gh-forge> {
           user = "agent";
           home = "/home/agent";
+          humans = [ "cody" ];
           sopsFile = "${inputs.nix-secrets}/sops/hosts/THEBATTLESHIP.yaml";
         })
         # Claude Code + Codex go through the fleet proxy on starcommand (10G

@@ -10,14 +10,16 @@
 # installation (FastTrackStudios).
 #
 #   GH_FORGE=0 gh ...   run plain gh with your own login (no bot token)
+#   GH_FORGE=1 gh ...   act as the bot (the default on an agent account; a
+#                       human account's build defaults to 0)
 #
 # If no App key is readable here, it warns once and runs plain gh.
-# @GH@ / @TOKEN@ are substituted with store paths at build time.
+# @GH@ / @TOKEN@ / @DEFAULT@ are substituted with store paths at build time.
 GH=@GH@
 TOKEN=@TOKEN@
 APP=${GH_FORGE_APP:-fts-forge}
 
-[ "${GH_FORGE:-1}" = 0 ] && exec "$GH" "$@"
+[ "${GH_FORGE:-@DEFAULT@}" = 0 ] && exec "$GH" "$@"
 
 owner_of() { # owner from OWNER/REPO, a github URL, or nothing
   r=$1
