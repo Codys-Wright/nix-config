@@ -62,6 +62,8 @@ in
             agent = "agents";
           };
         })
+        # Paperclip's native agents: Claude Code + Codex, self-updating.
+        (<fleet.coding.cli/agent-clis> { users = [ "agent" ]; })
         <fleet.system/agent-bot-desktop> # Hermes bot screen for agent sessions over SSH
         den.aspects.THEBATTLESHIP-hermes-desktop # Hermes can drive cody's real desktop (forced-command key)
 
