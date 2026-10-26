@@ -25,6 +25,13 @@
     includes = [
       (<fleet.coding.cli/hermes-node> { user = "rat"; })
       # rat's `gh` / git push = fts-forge[bot] (key: sops/hosts/airlock.yaml).
+      # Claude Code + Codex go through the fleet proxy on starcommand (LAN).
+      # rat is the agent account, so everything here bills to the agents key.
+      (<fleet.coding.cli/cliproxyapi-client> {
+        baseUrl = "http://192.168.1.112:8317";
+        sopsFile = "${inputs.nix-secrets}/sops/hosts/airlock.yaml";
+        users.rat = "agents";
+      })
       (<fleet.coding.cli/gh-forge> {
         user = "rat";
         home = "/Users/rat";
