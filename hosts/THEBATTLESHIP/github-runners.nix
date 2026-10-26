@@ -350,5 +350,20 @@ in
           jq
         ];
       };
+
+      # One job kind per Task instance. A target dir is warm only for the
+      # ~/.cargo and checkout paths that built it, and each instance has its
+      # own, so Task's workflows keep one target dir per kind per instance
+      # ($TASK_CACHE_DIR/<kind>-<runner>) and pin each kind to one instance
+      # by these labels: the same runner builds it every time, on the dir it
+      # left warm. (Shared dirs made every job that changed instance
+      # recompile all ~1,575 units.) images is prod's critical path, so it
+      # has an instance to itself.
+      services.github-runners.github-fts-task-main-1.extraLabels = [ "task-main-tests" ];
+      services.github-runners.github-fts-task-main-2.extraLabels = [ "task-main-lint" ];
+      services.github-runners.github-fts-task-main-3.extraLabels = [ "task-main-wasm" ];
+      services.github-runners.github-fts-task-release-1.extraLabels = [ "task-release-images" ];
+      services.github-runners.github-fts-task-release-2.extraLabels = [ "task-release-node" ];
+      services.github-runners.github-fts-task-release-3.extraLabels = [ "task-release-desktop" ];
     };
 }
