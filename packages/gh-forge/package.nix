@@ -6,6 +6,9 @@
 #   bin/gh-forge          the real gh with GH_TOKEN = a fresh bot token
 #   bin/gh                exec gh-forge (install with lib.hiPrio to shadow pkgs.gh)
 #
+# `defaultOn = false` builds the variant for a human account: plain gh unless
+# GH_FORGE=1, which the agent tools (Claude Code, Codex, Paperclip) set.
+#
 # The App key is never in the store: the token tool reads
 # $GITHUB_APP_KEY_FILE (default /run/secrets/github-apps/<app>.pem, which
 # sops-nix decrypts owned by the agent user, 0400) or the usual
@@ -18,6 +21,7 @@
   gh,
   appId ? "5391924",
   keyFile ? "/run/secrets/github-apps/{app}.pem",
+  defaultOn ? true,
 }:
 let
   githubAppToken = writers.writePython3Bin "github-app-token" {
@@ -51,7 +55,8 @@ runCommand "gh-forge"
     EOF
     substitute ${./gh-forge.sh} $out/bin/gh-forge \
       --replace-fail @GH@ ${gh}/bin/gh \
-      --replace-fail @TOKEN@ $out/bin/github-app-token
+      --replace-fail @TOKEN@ $out/bin/github-app-token \
+      --replace-fail @DEFAULT@ ${if defaultOn then "1" else "0"}
     printf '#!/bin/sh\nexec %s "$@"\n' $out/bin/gh-forge > $out/bin/gh
     chmod +x $out/bin/*
   ''
