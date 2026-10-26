@@ -50,6 +50,16 @@ in
           home = "/home/agent";
           sopsFile = "${inputs.nix-secrets}/sops/hosts/THEBATTLESHIP.yaml";
         })
+        # Claude Code + Codex go through the fleet proxy on starcommand (10G
+        # fabric); per-user keys keep agent usage apart from Cody's.
+        (<fleet.coding.cli/cliproxyapi-client> {
+          baseUrl = "http://10.10.10.1:8317";
+          sopsFile = "${inputs.nix-secrets}/sops/hosts/THEBATTLESHIP.yaml";
+          users = {
+            cody = "cody";
+            agent = "agents";
+          };
+        })
         <fleet.system/agent-bot-desktop> # Hermes bot screen for agent sessions over SSH
         den.aspects.THEBATTLESHIP-hermes-desktop # Hermes can drive cody's real desktop (forced-command key)
 
