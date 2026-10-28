@@ -187,16 +187,19 @@ in
           dropIn = pkgs.writeText "60-gh-forge.json" (builtins.toJSON { env = agentEnv tokenBin; });
           dir = "/Library/Application Support/ClaudeCode/managed-settings.d";
         in
-        {
+        # airlock has no home-manager, so only touch it when there are humans.
+        lib.optionalAttrs (humans != [ ]) {
+          home-manager.users = lib.genAttrs humans (_: {
+            home.packages = [ (lib.hiPrio (humanGh pkgs)) ];
+          });
+        }
+        // {
           imports = [ inputs.sops-nix.darwinModules.sops ];
           # System-wide on darwin: the always-bot build when there is an agent
           # account, else the human build.
           environment.systemPackages = [
             (lib.hiPrio (if user != null then pkgs.gh-forge else humanGh pkgs))
           ];
-          home-manager.users = lib.genAttrs humans (_: {
-            home.packages = [ (lib.hiPrio (humanGh pkgs)) ];
-          });
           sops.age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
           # Every macOS login account is in staff.
           sops.secrets.${secretName} = secret // {
