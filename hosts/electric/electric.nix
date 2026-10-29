@@ -10,7 +10,8 @@
     description = "Carter's desktop system";
     timeZone = "America/Los_Angeles";
     deployment.ip = "100.65.190.11";
-    settings.desktop.session = "gnome";
+    settings.desktop.session = "niri";
+    settings.desktop.shell = "loft";
     users.carter = { };
   };
 
@@ -33,6 +34,7 @@
       <fleet.music/production>
 
       den.aspects.electric-remote
+      (<fleet.system/cua-desktop> { user = "carter"; })
 
       (<fleet.disk/btrfs> { device = "/dev/nvme0n1"; })
     ];
