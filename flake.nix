@@ -76,6 +76,10 @@
       url = "git+https://codeberg.org/FastTrackStudios/inferno-control";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    lanzaboote = {
+      url = "github:nix-community/lanzaboote/v1.2.0";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     loft = {
       url = "github:Codys-Wright/loft";
       inputs.nixpkgs.follows = "nixpkgs";
