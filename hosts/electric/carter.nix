@@ -1,13 +1,19 @@
 # Carter on electric: his own machine, so the primary account (not the co-op
 # shape he has on THEBATTLESHIP). Included from den.aspects.carter when the
 # host is electric (users/carter/carter.nix).
-{ fleet, __findFile, ... }:
+{
+  den,
+  fleet,
+  __findFile,
+  ...
+}:
 {
   den.aspects.carter-electric = {
     description = "Carter's account on electric: primary user, his apps, music, gaming";
 
     includes = [
       <den/primary-user>
+      den.aspects.carter-electric-unattended
 
       <fleet/coding>
       (<fleet.user/shell> "nushell")

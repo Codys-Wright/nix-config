@@ -4,7 +4,7 @@
 # key, which is appended to the firmware's factory db (BIOS updates reset db:
 # re-append it from Boot > Secure Boot > Expert Key Management).
 # Ported from github:electricsss/electric-flake.
-{ __findFile, ... }:
+{ den, __findFile, ... }:
 {
   den.hosts.x86_64-linux.electric = {
     description = "Carter's desktop system";
@@ -31,6 +31,8 @@
       <fleet/gaming>
       # Host half of music production; carter's half is in carter-electric.
       <fleet.music/production>
+
+      den.aspects.electric-remote
 
       (<fleet.disk/btrfs> { device = "/dev/nvme0n1"; })
     ];
