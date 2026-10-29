@@ -177,18 +177,13 @@ in
         ...
       }:
       let
-        # Loft's "Apps to leave alone" (Settings → Keyboard Shortcuts): with Loft
-        # on, xremap reads `loft keys xremap`'s copy of this config, which turns
-        # every remap off in those apps, and reloads it when the list changes.
-        loftOn = (config.programs ? loft) && config.programs.loft.enable;
-        xremapBase = pkgs.writeText "xremap-base.json" (builtins.toJSON xremapConfig);
-        loftXremapConfig = "${config.xdg.stateHome}/loft/xremap/config.json";
-        # Falls back to the plain config so a Loft failure never costs the remaps.
-        loftXremap = pkgs.writeShellScript "xremap-loft-config" ''
-          ${config.home.profileDirectory}/bin/loft keys xremap --base ${xremapBase} && exit 0
-          mkdir -p "$(dirname ${loftXremapConfig})"
-          cp ${xremapBase} ${loftXremapConfig}
-        '';
+        # With Loft's keyboard layer (programs.loft.keyboard, set in the loft
+        # aspect) Loft owns the keymap and runs xremap itself (loft-keys.service,
+        # runtime changes via `loft keys …`); this one stands down.
+        loftKeys =
+          (config.programs ? loft)
+          && config.programs.loft.enable
+          && ((config.programs.loft.keyboard or { }).enable or false);
 
         # Find the niri socket at runtime and inject it into the systemd user env.
         # niri does not call import-environment, so PassEnvironment gets nothing.
@@ -222,7 +217,7 @@ in
         imports = [ inputs.xremap-flake.homeManagerModules.default ];
 
         services.xremap = {
-          enable = true;
+          enable = !loftKeys;
           withNiri = true;
           # --mouse makes xremap listen to mouse devices, so mouse clicks count as
           # interruptions for multipurpose key decisions (Esc/CapsLock hold → Mod5)
@@ -231,15 +226,11 @@ in
         };
 
         # xremap needs NIRI_SOCKET for app-specific remaps (terminal vs non-terminal).
-        systemd.user.services.xremap.Unit.After = [ "niri.service" ];
-        systemd.user.services.xremap.Service.RestartSec = "2";
-        systemd.user.services.xremap.Service.ExecStartPre = [
-          "${findNiriSocket}"
-        ]
-        ++ lib.optional loftOn "${loftXremap}";
-        systemd.user.services.xremap.Service.ExecStart = lib.mkIf loftOn (
-          lib.mkForce "${lib.getExe config.services.xremap.package} --mouse --watch=config ${loftXremapConfig}"
-        );
+        systemd.user.services.xremap = lib.mkIf (!loftKeys) {
+          Unit.After = [ "niri.service" ];
+          Service.RestartSec = "2";
+          Service.ExecStartPre = [ "${findNiriSocket}" ];
+        };
       };
   };
 }
