@@ -66,6 +66,7 @@ in
         (<fleet.coding.cli/agent-clis> { users = [ "agent" ]; })
         <fleet.system/agent-bot-desktop> # Hermes bot screen for agent sessions over SSH
         den.aspects.THEBATTLESHIP-hermes-desktop # Hermes can drive cody's real desktop (forced-command key)
+        (<fleet.system/cua-desktop> { user = "cody"; }) # cua-driver CLI + daemon for cody's session
 
         <fleet/desktop>
         <fleet/grub>

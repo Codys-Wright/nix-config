@@ -16,7 +16,7 @@
       den.aspects.carter-electric-unattended
 
       <fleet/coding>
-      (<fleet.user/shell> "nushell")
+      (<fleet.user/shell> "fish")
       (<fleet.coding/user-terminal> "ghostty")
       (fleet.git-identity {
         name = "electricsss";
