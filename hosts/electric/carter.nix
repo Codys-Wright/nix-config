@@ -35,6 +35,9 @@
       })
     ];
 
+    # No Android SDK / emulator images / Android Studio (~16 GiB) on electric.
+    excludes = [ fleet.coding._.tools._.android ];
+
     nixos =
       { pkgs, ... }:
       {
@@ -44,7 +47,6 @@
           p7zip-rar
           carla
           raysession
-          davinci-resolve
           dexed
         ];
       };
