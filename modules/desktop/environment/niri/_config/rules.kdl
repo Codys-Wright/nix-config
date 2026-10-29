@@ -89,6 +89,25 @@ window-rule {
     open-maximized true
 }
 
+// Task: the dev desktop app (`dx serve` names it task-app-desktop-<hash>,
+// a new hash per build) and the installed one.
+window-rule {
+    match app-id="^task-app-desktop"
+    match app-id="^task$"
+    open-on-workspace "notes"
+    open-focused true
+}
+
+// FastTrackStudio Studio (app id `studio`) and Session (`session`), dev
+// builds under `dx serve` and the installed app alike.
+window-rule {
+    match app-id="^studio$"
+    match app-id="^session$"
+    match app-id=r#"^app\.fasttrackstudio\.studio$"#
+    open-on-workspace "music"
+    open-focused true
+}
+
 window-rule {
     match app-id="^obsidian$"
     open-on-workspace "notes"
