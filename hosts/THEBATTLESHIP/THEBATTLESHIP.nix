@@ -17,6 +17,11 @@ in
         dedicatedTo = [ "minecraft" ];
         nodeLabels = [ "fleet.fts/gpu=nvidia" ];
       };
+      # Hermes on starcommand reaches the model server over the 10G link.
+      settings.ai.llama-server.interfaces = [
+        "tailscale0"
+        "enp12s0"
+      ];
       deployment.ip = "100.68.255.30";
       users.cody = {
         extraGroups = [
@@ -81,6 +86,7 @@ in
         <fleet.apps/flatpaks> # Flatpak + Flathub (path to Flatpak bottles)
         <fleet.system/printing> # CUPS + mDNS network printer discovery
         <fleet.hardware/cuda> # CUDA toolkit (RTX present; nvidia already on)
+        <fleet.ai/llama-server> # local LLMs: llama.cpp router on :8012 (`llm` CLI)
         <fleet.apps/comfyui> # ComfyUI (CUDA) on :8188, models on the Development drive
         <fleet.apps/odysseus> # Odysseus launcher (server runs in Starcommand on this host, :7000)
         <fleet.hardware/iphone> # tether: iPhone messages / notifications / calls over Bluetooth

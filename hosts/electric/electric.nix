@@ -32,6 +32,7 @@
       <fleet.system/avahi>
       <fleet.system/printing>
       <fleet/gaming>
+      <fleet.ai/llama-server> # local LLMs: llama.cpp router on :8012 (`llm` CLI)
       # Host half of music production; carter's half is in carter-electric.
       <fleet.music/production>
 
