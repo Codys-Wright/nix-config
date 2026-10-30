@@ -52,6 +52,9 @@ in
           humans = [ "cody" ];
           sopsFile = "${inputs.nix-secrets}/sops/hosts/THEBATTLESHIP.yaml";
         })
+        # agent's queued build gates (gate-submit) run lease-aware in a user unit
+        # and wake their Paperclip issue when done (STA-402).
+        (<fleet.coding.cli/gate-queue> { user = "agent"; })
         # Claude Code + Codex go through the fleet proxy on starcommand (10G
         # fabric); per-user keys keep agent usage apart from Cody's.
         (<fleet.coding.cli/cliproxyapi-client> {

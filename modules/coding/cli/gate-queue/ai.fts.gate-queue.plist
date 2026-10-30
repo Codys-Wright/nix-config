@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>AbandonProcessGroup</key>
+	<true/>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>GATE_QUEUE_EXIT_WITH_PARENT</key>
+		<string>1</string>
+		<key>LANG</key>
+		<string>en_US.UTF-8</string>
+		<key>PATH</key>
+		<string>/Users/rat/.local/bin:/Users/rat/.nix-profile/bin:/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+		<key>PYTHONUNBUFFERED</key>
+		<string>1</string>
+	</dict>
+	<key>KeepAlive</key>
+	<true/>
+	<key>Label</key>
+	<string>ai.fts.gate-queue</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/usr/bin/osascript</string>
+		<string>-l</string>
+		<string>JavaScript</string>
+		<string>-e</string>
+		<string>ObjC.import("stdlib"); const status=$.system("exec /usr/bin/python3 /Users/rat/.local/bin/gate-queue daemon &gt;&gt; /Users/rat/gate-queue/daemon.log 2&gt;&amp;1"); const signal=status &amp; 127; $.exit(status === -1 ? 1 : signal === 0 ? (status &gt;&gt; 8) &amp; 255 : 128 + signal);</string>
+	</array>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>ThrottleInterval</key>
+	<integer>10</integer>
+	<key>WorkingDirectory</key>
+	<string>/Users/rat</string>
+</dict>
+</plist>
