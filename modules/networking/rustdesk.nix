@@ -33,6 +33,9 @@
             "systemd-user-sessions.service"
             "display-manager.service"
           ];
+          # It starts the per-session `rustdesk --server` with `sudo -u <user>`
+          # from PATH: the setuid wrapper.
+          path = [ "/run/wrappers" ];
           environment = {
             PULSE_LATENCY_MSEC = "60";
             PIPEWIRE_LATENCY = "1024/48000";
