@@ -25,6 +25,7 @@
       <fleet.networking/tailscale>
 
       <fleet/stylix>
+      <fleet/mactahoe> # MacTahoe-blue icons (Loft's icon theme), GTK theme, cursors, Nautilus
       <fleet/fonts>
       <fleet/kernel>
       <fleet.system/avahi>

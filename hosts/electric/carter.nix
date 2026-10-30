@@ -4,6 +4,7 @@
 {
   den,
   fleet,
+  inputs,
   __findFile,
   ...
 }:
@@ -16,6 +17,7 @@
       den.aspects.carter-electric-unattended
 
       <fleet/coding>
+      <fleet.coding/t3code>
       (<fleet.user/shell> "fish")
       (<fleet.coding/user-terminal> "ghostty")
       (fleet.git-identity {
@@ -58,9 +60,19 @@
       };
 
     homeManager =
-      { lib, ... }:
+      { lib, pkgs, ... }:
       {
         programs.ssh.enable = true;
+
+        # A launcher for Loft's Settings (the dock pins `loft-settings`); same
+        # IPC call as Loft's Mod+Comma bind.
+        xdg.desktopEntries.loft-settings = {
+          name = "Settings";
+          comment = "Loft Settings";
+          icon = "preferences-system";
+          exec = "${lib.getExe' pkgs.quickshell "quickshell"} ipc --path ${inputs.loft}/src call settings toggle";
+          categories = [ "Settings" ];
+        };
         # No flake-input pins in carter's registry: each pin is a source tree
         # that has to be copied to electric (the global registry still
         # resolves `nixpkgs#…`).
