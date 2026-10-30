@@ -14,6 +14,8 @@
     settings.desktop.shell = "loft";
     # Only the RX 7800 XT: Vulkan1 is the Raphael iGPU.
     settings.ai.llama-server.device = "Vulkan0";
+    # One slot: Hermes's turns reuse the cached prompt.
+    settings.ai.llama-server.parallel = 1;
     users.carter = { };
   };
 

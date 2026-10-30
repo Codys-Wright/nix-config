@@ -52,6 +52,12 @@
         example = "Vulkan0";
         description = "Only this device (`llama-server --list-devices`); null = all. Hosts with an iGPU pin the discrete card, else layers split onto the iGPU";
       };
+      parallel = lib.mkOption {
+        type = lib.types.nullOr lib.types.int;
+        default = null;
+        example = 1;
+        description = "Slots per model (null = llama.cpp's auto, 4). 1 keeps one prompt cache, so an agent's next turn reuses it instead of re-reading thousands of tokens; concurrent requests queue";
+      };
       modelsMax = lib.mkOption {
         type = lib.types.int;
         default = 1;
@@ -149,7 +155,8 @@
             sleep-idle-seconds = cfg.idleSleep;
             models-preset = presets;
           }
-          // lib.optionalAttrs (cfg.device != null) { inherit (cfg) device; };
+          // lib.optionalAttrs (cfg.device != null) { inherit (cfg) device; }
+          // lib.optionalAttrs (cfg.parallel != null) { inherit (cfg) parallel; };
         };
 
         # A fixed user instead of DynamicUser, so the model cache is a plain
