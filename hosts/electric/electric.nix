@@ -11,6 +11,10 @@
     timeZone = "America/Los_Angeles";
     deployment.ip = "100.65.190.11";
     settings.desktop.session = "niri";
+    # Only the RX 7800 XT: Vulkan1 is the Raphael iGPU.
+    settings.ai.llama-server.device = "Vulkan0";
+    # One slot: Hermes's turns reuse the cached prompt.
+    settings.ai.llama-server.parallel = 1;
     users.carter = { };
   };
 
@@ -31,6 +35,7 @@
       <fleet.system/avahi>
       <fleet.system/printing>
       <fleet/gaming>
+      <fleet.ai/llama-server> # local LLMs: llama.cpp router on :8012 (`llm` CLI)
       # Host half of music production; carter's half is in carter-electric.
       <fleet.music/production>
 
