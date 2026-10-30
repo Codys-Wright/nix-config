@@ -1,9 +1,10 @@
 # RustDesk remote desktop, reached over Tailscale by IP ("direct IP access",
 # TCP 21118, opened on tailscale0 only), so no relay server is involved.
 # The service is RustDesk's own `--service` (it starts the per-session server
-# in the logged-in user's session). On Wayland (niri) each incoming session
-# needs the screen-share portal approved at the machine; for unattended
-# access use Sunshine + Moonlight (<fleet.gaming/sunshine>).
+# in the logged-in user's session). The package is RustDesk's unattended
+# Wayland build (packages/rustdesk-unattended-wayland): it captures through
+# DRM/KMS, so there is no screen-share dialog, which also sidesteps RustDesk
+# 1.4.x's PipeWire failure on niri (rustdesk#15916).
 #
 # One-time, per host (not in nix: the password is a secret):
 #   sudo rustdesk --option direct-server Y
@@ -18,7 +19,7 @@
     nixos =
       { pkgs, ... }:
       let
-        rustdesk = pkgs.rustdesk-flutter;
+        rustdesk = pkgs.rustdesk-unattended-wayland;
       in
       {
         environment.systemPackages = [ rustdesk ];
@@ -39,12 +40,14 @@
           # is_server_running): without procps it falls back to the
           # RemoteDesktop portal, which niri's portal (gnome) doesn't have
           # ("Wayland requires higher version of linux distro"); with it,
-          # ScreenCast + uinput, and the share choice persists (restore token).
+          # ScreenCast + uinput (the fallback when DRM capture is unavailable).
           path = [
             "/run/wrappers"
             pkgs.procps
           ];
           environment = {
+            # The server runs share/rustdesk/rustdesk directly, not bin/rustdesk.
+            GST_PLUGIN_SYSTEM_PATH_1_0 = rustdesk.gstPluginPath;
             PULSE_LATENCY_MSEC = "60";
             PIPEWIRE_LATENCY = "1024/48000";
           };
