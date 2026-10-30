@@ -79,7 +79,14 @@
         };
       in
       lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
-        home.packages = [ t3code-desktop ];
+        home.packages = [
+          t3code-desktop
+          # The app icon (from the AppImage) ships with the config, so docks and
+          # launchers show it before t3code-desktop's first run extracts its own.
+          (pkgs.runCommand "t3code-icon" { } ''
+            install -Dm644 ${./_t3code/t3code.png} $out/share/icons/hicolor/512x512/apps/t3code.png
+          '')
+        ];
 
         xdg.desktopEntries.t3code = {
           name = "T3 Code";
