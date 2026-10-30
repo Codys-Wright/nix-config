@@ -35,8 +35,14 @@
       })
     ];
 
-    # No Android SDK / emulator images / Android Studio (~16 GiB) on electric.
-    excludes = [ fleet.coding._.tools._.android ];
+    # Not on electric: Android SDK / emulator images / Android Studio, and the
+    # unfree GUI editors and API clients (none are on the public binary cache).
+    excludes = [
+      fleet.coding._.tools._.android
+      fleet.coding._.editors._.cursor
+      fleet.coding._.editors._.vscode
+      fleet.coding._.tools._.api-clients
+    ];
 
     nixos =
       { pkgs, ... }:
@@ -51,8 +57,14 @@
         ];
       };
 
-    homeManager = {
-      programs.ssh.enable = true;
-    };
+    homeManager =
+      { lib, ... }:
+      {
+        programs.ssh.enable = true;
+        # No flake-input pins in carter's registry: each pin is a source tree
+        # that has to be copied to electric (the global registry still
+        # resolves `nixpkgs#…`).
+        nix.registry = lib.mkForce { };
+      };
   };
 }
