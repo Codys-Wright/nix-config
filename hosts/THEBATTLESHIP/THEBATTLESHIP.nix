@@ -74,6 +74,7 @@ in
         <fleet/hardware>
         <fleet.hardware/nvidia>
         <fleet.networking/tailscale>
+        <fleet.networking/rustdesk> # remote desktop over Tailscale (Sunshine is the unattended route)
         <fleet.hardware/zsa>
 
         <fleet/gaming>

@@ -23,6 +23,7 @@
 
       <fleet/hardware>
       <fleet.networking/tailscale>
+      <fleet.networking/rustdesk> # remote desktop over Tailscale (Sunshine is the unattended route)
 
       <fleet/stylix>
       <fleet/mactahoe> # MacTahoe-blue icons (Loft's icon theme), GTK theme, cursors, Nautilus
