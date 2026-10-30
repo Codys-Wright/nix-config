@@ -1127,11 +1127,11 @@
         "spectrum": "spectrum"
       },
       "locked": {
-        "lastModified": 1790526615,
-        "narHash": "sha256-33a6iTG1uFv12/zV8yo5VvdpftMNQms6TIHhMCVN6zE=",
+        "lastModified": 1793281488,
+        "narHash": "sha256-ErGIqtoWEX9KKC8NFtJDx2pGGG02Cr6LGxrvzLd2sqA=",
         "owner": "microvm-nix",
         "repo": "microvm.nix",
-        "rev": "81f70a2002254f75b572fc34c55e7df16e9bb176",
+        "rev": "b7bd556974fa8a171b5b639200e81d52244dfde4",
         "type": "github"
       },
       "original": {
@@ -1557,11 +1557,11 @@
     },
     "nixpkgs_10": {
       "locked": {
-        "lastModified": 1791637130,
-        "narHash": "sha256-Xdc4viyLXXA3qos9fo2Ezb+JxRasKk99tSasmSAdnSc=",
-        "rev": "ca1659429c950a11a565b5764e37a1b704e17ec8",
+        "lastModified": 1793225069,
+        "narHash": "sha256-GYpArmwi/iMuX2ov31oCBhAXRMJdNX9kOl2LZHCuR6M=",
+        "rev": "e62746b0b472753ef019baceab6f1e2e52014980",
         "type": "tarball",
-        "url": "https://releases.nixos.org/nixpkgs/nixpkgs-26.11pre1089329.ca1659429c95/nixexprs.tar.zst"
+        "url": "https://releases.nixos.org/nixpkgs/nixpkgs-26.11pre1104102.e62746b0b472/nixexprs.tar.zst"
       },
       "original": {
         "type": "tarball",

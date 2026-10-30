@@ -89,6 +89,7 @@ in
         <fleet.ai/llama-server> # local LLMs: llama.cpp router on :8012 (`llm` CLI)
         <fleet.apps/comfyui> # ComfyUI (CUDA) on :8188, models on the Development drive
         <fleet.apps/odysseus> # Odysseus launcher (server runs in Starcommand on this host, :7000)
+        (fleet.apps._.task-desktop { user = "cody"; }) # Task desktop, follows the newest Task release tag (STA-96)
         <fleet.hardware/iphone> # tether: iPhone messages / notifications / calls over Bluetooth
         # RT core isolation for the audio path — currently DISABLED (see
         # modules/audio/rt-isolation.nix): pinning pipewire to a
@@ -243,8 +244,8 @@ in
         # one file per concern in this directory.
         den.aspects.THEBATTLESHIP-audio-latency
         den.aspects.THEBATTLESHIP-niri-loft
-        <fleet.desktop/loft/greeter> # Loft's login screen (cody runs Loft; the others keep Noctalia)
         den.aspects.THEBATTLESHIP-storage
+        den.aspects.THEBATTLESHIP-target-sweep # hourly bounded cargo sweep of task/target under the build lease
         den.aspects.THEBATTLESHIP-starcommand-net
         den.aspects.THEBATTLESHIP-sops
         den.aspects.THEBATTLESHIP-studio-routing

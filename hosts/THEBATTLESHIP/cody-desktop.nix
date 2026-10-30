@@ -1,6 +1,6 @@
-# cody's desktop on THEBATTLESHIP: Loft (github:Codys-Wright/loft)
-# as the niri shell. The other users keep the host's shell (Noctalia) and the
-# login screen stays the host's — this is cody's alone.
+# cody's Loft (github:Codys-Wright/loft) on THEBATTLESHIP: the niri-loft
+# compositor, agent skills, phone, Spotify and the MacTahoe GTK base.
+# Every user gets Loft itself from fleet.desktop._.loft.
 { inputs, ... }:
 {
   den.aspects."cody@THEBATTLESHIP".homeManager =

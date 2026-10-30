@@ -54,6 +54,8 @@
         (<fleet.apps/default-browser> "brave")
         cody.opendeck
 
+        <fleet/creative>
+
         <fleet/coding>
         (<fleet.user/shell> "nushell")
         (<fleet.coding/user-terminal> "ghostty")
