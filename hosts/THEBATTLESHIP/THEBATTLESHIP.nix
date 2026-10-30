@@ -239,6 +239,7 @@ in
         den.aspects.THEBATTLESHIP-niri-loft
         <fleet.desktop/loft/greeter> # Loft's login screen (cody runs Loft; the others keep Noctalia)
         den.aspects.THEBATTLESHIP-storage
+        den.aspects.THEBATTLESHIP-target-sweep # hourly bounded cargo sweep of task/target under the build lease
         den.aspects.THEBATTLESHIP-starcommand-net
         den.aspects.THEBATTLESHIP-sops
         den.aspects.THEBATTLESHIP-studio-routing
