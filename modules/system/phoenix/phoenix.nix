@@ -37,7 +37,7 @@ in
           platformName = "NixOS";
         };
 
-        # niri and noctalia reload their own config; nothing to poke.
+        # niri and Loft reload their own config; nothing to poke.
         defaultPostHookScript = "";
       in
       {

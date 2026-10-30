@@ -11,7 +11,7 @@
 {
   fleet.desktop._.environment._.niri = {
     description = ''
-      Niri scrollable-tiling Wayland compositor with Noctalia shell.
+      Niri scrollable-tiling Wayland compositor (the shell is Loft, fleet.desktop._.loft).
 
       A Wayland compositor where windows are arranged in an infinite
       horizontal scrollable strip of columns.
@@ -65,7 +65,6 @@
 
         environment.systemPackages = with pkgs; [
           xwayland-satellite # XWayland support for legacy apps
-          noctalia-shell # Desktop shell (bar + launcher + notifications)
           ghostty # Alternative terminal (Mod+E)
           wlr-which-key # Which-key popup for keybind hints
           swaybg # Wallpaper setter
@@ -81,138 +80,55 @@
 
     # Per-user half. Host scope never delivers homeManager, so this rides
     # the explicit host→users edge to every user on hosts that include it.
-    # It reads the host (settings.desktop.shell), hence the context function.
     provides.to-users.includes = [
-      (
-        { host, ... }:
-        {
-          homeManager =
-            {
-              config,
-              lib,
-              pkgs,
-              ...
-            }:
-            let
-              configRoot = "${config.home.homeDirectory}/.flake/modules/desktop/environment/niri/_config";
-              mutableNoctaliaColors = "${configRoot}/noctalia/colors.json";
-              # Live-editable links into the ~/.flake checkout only for cody;
-              # everyone else (no checkout: carter on electric, the guest
-              # accounts) gets the tree from the store, as deployed.
-              editable = config.home.username == "cody";
-              # Per user: Loft when it's enabled for this user (e.g. one
-              # user on one host), otherwise the host's settings.desktop.shell.
-              shell =
-                if (config.programs ? loft) && config.programs.loft.enable then
-                  "loft"
-                else
-                  host.settings.desktop.shell;
-            in
-            {
-              # The desktop shell niri starts (see `shell` above), included
-              # last by _config/config.kdl. Loft brings its own services and
-              # a fragment with its keybinds + active theme (fleet.desktop._.loft).
-              xdg.configFile."fleet-niri/shell.kdl".text =
-                if shell == "loft" then
-                  ''
-                    include optional=true "${config.xdg.configHome}/loft/niri.kdl"
-                  ''
-                else
-                  ''
-                    spawn-at-startup "noctalia-shell"
-                    // Noctalia's per-workspace wallpaper (Loft has its own).
-                    spawn-at-startup "bash" "-lc" "pgrep -u \"$USER\" -f \"[n]iri-workspace-wallpaper\" >/dev/null || exec \"$HOME/.config/niri/bin/niri-workspace-wallpaper\""
-                  '';
+      {
+        homeManager =
+          {
+            config,
+            lib,
+            pkgs,
+            ...
+          }:
+          let
+            configRoot = "${config.home.homeDirectory}/.flake/modules/desktop/environment/niri/_config";
+            # Live-editable links into the ~/.flake checkout only for cody;
+            # everyone else (no checkout: carter on electric, the guest
+            # accounts) gets the tree from the store, as deployed.
+            editable = config.home.username == "cody";
+          in
+          {
+            # Override niri-flake's homeModules.config which sets enable = (finalConfig != null).
+            # Since we use a plain KDL tree instead of programs.niri.settings, finalConfig is null
+            # and niri-flake disables the xdg config file. Force it back on.
+            xdg.configFile."niri".enable = lib.mkForce true;
+            xdg.configFile."niri".force = true;
+            xdg.configFile."niri".source =
+              if editable then config.lib.file.mkOutOfStoreSymlink configRoot else ./_config;
 
-              # Override niri-flake's homeModules.config which sets enable = (finalConfig != null).
-              # Since we use a plain KDL tree instead of programs.niri.settings, finalConfig is null
-              # and niri-flake disables the xdg config file. Force it back on.
-              xdg.configFile."niri".enable = lib.mkForce true;
-              xdg.configFile."niri".force = true;
-              xdg.configFile."niri".source =
-                if editable then config.lib.file.mkOutOfStoreSymlink configRoot else ./_config;
-
-              # Noctalia colors are editable live so the shell can update themes in place.
-              xdg.configFile."noctalia/colors.json".source =
-                if editable then
-                  config.lib.file.mkOutOfStoreSymlink mutableNoctaliaColors
-                else
-                  ./_config/noctalia/colors.json;
-
-              home.activation.configureNoctaliaWallpaper = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-                settings="$HOME/.config/noctalia/settings.json"
-                if [ -f "$settings" ]; then
-                  tmp="$(${pkgs.coreutils}/bin/mktemp -t noctalia-settings.XXXXXX)"
-                  ${lib.getExe pkgs.jq} '
-                    .wallpaper.enabled = true
-                    | .wallpaper.overviewEnabled = true
-                    | .wallpaper.skipStartupTransition = true
-                    | .wallpaper.transitionDuration = 0
-                    | .noctaliaPerformance.disableWallpaper = false
-                  ' "$settings" > "$tmp"
-                  install -m 0644 "$tmp" "$settings"
-                  rm -f "$tmp"
-                fi
-              '';
-
-              # Wine/Steam export icons into ~/.local/share/icons/hicolor and write
-              # a minimal index.theme (48/128/256 apps only). XDG_DATA_HOME outranks
-              # XDG_DATA_DIRS in icon lookup, so that index shadows the real hicolor
-              # index for Qt/quickshell — every icon outside those sizes renders as
-              # the missing-texture grid in noctalia (e.g. zed, 512x512-only). Watch
-              # for the file and delete it the moment anything recreates it.
-              systemd.user.paths.fix-hicolor-index = {
-                Unit.Description = "Watch for Wine's bogus hicolor index.theme";
-                Path = {
-                  PathExists = "%h/.local/share/icons/hicolor/index.theme";
-                  Unit = "fix-hicolor-index.service";
-                };
-                Install.WantedBy = [ "default.target" ];
+            # Wine/Steam export icons into ~/.local/share/icons/hicolor and write
+            # a minimal index.theme (48/128/256 apps only). XDG_DATA_HOME outranks
+            # XDG_DATA_DIRS in icon lookup, so that index shadows the real hicolor
+            # index for Qt/quickshell — every icon outside those sizes renders as
+            # the missing-texture grid in Loft's shell (e.g. zed, 512x512-only). Watch
+            # for the file and delete it the moment anything recreates it.
+            systemd.user.paths.fix-hicolor-index = {
+              Unit.Description = "Watch for Wine's bogus hicolor index.theme";
+              Path = {
+                PathExists = "%h/.local/share/icons/hicolor/index.theme";
+                Unit = "fix-hicolor-index.service";
               };
-
-              systemd.user.services.fix-hicolor-index = {
-                Unit.Description = "Remove Wine's bogus hicolor index.theme (shadows real icon index)";
-                Service = {
-                  Type = "oneshot";
-                  ExecStart = "${pkgs.coreutils}/bin/rm -f %h/.local/share/icons/hicolor/index.theme %h/.local/share/icons/hicolor/.icon-theme.cache";
-                };
-              };
-
-              # Drives Noctalia's wallpaper; Loft has its own.
-              systemd.user.services.niri-workspace-wallpaper =
-                lib.mkIf (config.home.username == "cody" && shell == "noctalia")
-                  {
-                    Unit = {
-                      Description = "Switch niri wallpaper from the active workspace";
-                      After = [ "graphical-session.target" ];
-                      PartOf = [ "graphical-session.target" ];
-                    };
-
-                    Service = {
-                      ExecStart = "${config.home.homeDirectory}/.config/niri/bin/niri-workspace-wallpaper";
-                      Restart = "always";
-                      RestartSec = 2;
-                      Environment = [
-                        "PATH=${
-                          lib.makeBinPath [
-                            pkgs.bash
-                            pkgs.coreutils
-                            pkgs.findutils
-                            pkgs.jq
-                            pkgs.niri
-                            pkgs.noctalia-shell
-                            pkgs.procps
-                          ]
-                        }"
-                      ];
-                    };
-
-                    Install.WantedBy = [ "graphical-session.target" ];
-                  };
+              Install.WantedBy = [ "default.target" ];
             };
-        }
-      )
+
+            systemd.user.services.fix-hicolor-index = {
+              Unit.Description = "Remove Wine's bogus hicolor index.theme (shadows real icon index)";
+              Service = {
+                Type = "oneshot";
+                ExecStart = "${pkgs.coreutils}/bin/rm -f %h/.local/share/icons/hicolor/index.theme %h/.local/share/icons/hicolor/.icon-theme.cache";
+              };
+            };
+          };
+      }
     ];
   };
-
 }

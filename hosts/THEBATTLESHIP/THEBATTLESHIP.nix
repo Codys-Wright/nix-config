@@ -238,7 +238,6 @@ in
         # one file per concern in this directory.
         den.aspects.THEBATTLESHIP-audio-latency
         den.aspects.THEBATTLESHIP-niri-loft
-        <fleet.desktop/loft/greeter> # Loft's login screen (cody runs Loft; the others keep Noctalia)
         den.aspects.THEBATTLESHIP-storage
         den.aspects.THEBATTLESHIP-target-sweep # hourly bounded cargo sweep of task/target under the build lease
         den.aspects.THEBATTLESHIP-starcommand-net

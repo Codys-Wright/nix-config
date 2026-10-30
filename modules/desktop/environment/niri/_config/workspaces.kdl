@@ -14,8 +14,7 @@ workspace "gaming" {
     open-on-output "Microstep MPG491CX OLED Unknown"
 
     // No focus ring / border / top strut on this workspace so the game fills
-    // the screen cleanly (the top bar is already hidden here by the
-    // niri-workspace-wallpaper listener). Floating windows still work — they
+    // the screen cleanly. Floating windows still work — they
     // just lose the outline too.
     layout {
         struts {

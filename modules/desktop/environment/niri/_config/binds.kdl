@@ -1,7 +1,6 @@
 binds {
     Mod+Return { spawn "kitty"; }
     Mod+E { spawn "ghostty"; }
-    Mod+Space { spawn-sh "noctalia-shell ipc call launcher toggle"; }
 
     Mod+D { spawn-sh "wlr-which-key \"${NIRI_CONFIG_DIR:-$HOME/.config/niri}/which-key.yaml\""; }
 
