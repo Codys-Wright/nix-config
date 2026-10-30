@@ -117,8 +117,19 @@ let
           };
 
           networking.firewall = {
-            allowedTCPPorts = [ 10250 ]; # kubelet (logs/exec from control plane)
-            allowedUDPPorts = [ 8472 ]; # flannel VXLAN
+            allowedTCPPorts = [
+              10250 # kubelet (logs/exec from control plane)
+              7946 # MetalLB speaker memberlist
+            ];
+            allowedUDPPorts = [
+              8472 # flannel VXLAN
+              # MetalLB speaker memberlist. Closed, each speaker elects itself
+              # leader for every LoadBalancer IP: THEBATTLESHIP and starcommand
+              # both claimed the Pi-hole IP and MetalLB 0.16.1 hot-looped on the
+              # ServiceL2Status churn (starcommand
+              # docs/incidents/2026-10-22-k3s-control-plane-freeze.md).
+              7946
+            ];
           };
 
           environment.systemPackages = [

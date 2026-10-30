@@ -83,6 +83,12 @@
       # no build has touched in that long instead of growing forever (each
       # branch, toolchain and feature set adds its own copy). null = off.
       sweepDays ? 1,
+      # false = the runner units are not generated at all (the runner stops
+      # and GitHub lists it offline), but the declaration, its work and cache
+      # dirs and its sops secret stay. Rolling a runner back onto this host is
+      # flipping this to true. Used when a runner pool moves to another host
+      # (STA-156: Task's checks runners -> toms-mac-pro-vm).
+      enable ? true,
       ...
     }:
     {
@@ -169,7 +175,7 @@
           );
 
           services.github-runners = lib.genAttrs (map instanceName indices) (instance: {
-            enable = true;
+            inherit enable;
             inherit url;
             name = instance;
             # Static user/group -> module forces DynamicUser=false.

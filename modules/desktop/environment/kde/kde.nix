@@ -29,12 +29,34 @@
           okular
         ];
 
-        # drkonqi-coredump-launcher SEGV-loops on some crashes and floods
-        # the user systemd manager with transient units until the bus wedges
-        # ("Cannot add name, manager has too many units"). Mask the launcher;
-        # Plasma's on-demand crash dialog (drkonqi proper, via dbus) still works.
-        systemd.user.services."drkonqi-coredump-launcher@".enable = false;
-        systemd.user.sockets."drkonqi-coredump-launcher".enable = false;
+        # drkonqi-coredump-launcher can crash-loop: when it can't reach a
+        # display (or hits a Qt crash) it aborts, that abort is itself a
+        # coredump, and drkonqi-coredump-processor launches it again, until
+        # the user manager wedges ("manager has too many units"); KDE bugs
+        # 517353 / 524048, still seen on 6.7.5. Upstream's socket has
+        # TriggerLimitBurst=0 (unlimited). Guard it instead of masking it
+        # (masking broke live switches, and every crash then failed the
+        # system processor with "Connection refused"):
+        #   - only launch with a display in the user manager's environment;
+        #   - stop the socket if it fires more than 20 times a minute;
+        #   - reap launchers that linger (they hold the 16 socket slots).
+        # drkonqi ships these under share/systemd/user, so NixOS doesn't see
+        # them as package units: force drop-ins, or these would replace them.
+        systemd.user.services."drkonqi-coredump-launcher@" = {
+          overrideStrategy = "asDropin";
+          unitConfig.ConditionEnvironment = [
+            "|WAYLAND_DISPLAY"
+            "|DISPLAY"
+          ];
+          serviceConfig.RuntimeMaxSec = "15min";
+        };
+        systemd.user.sockets."drkonqi-coredump-launcher" = {
+          overrideStrategy = "asDropin";
+          socketConfig = {
+            TriggerLimitIntervalSec = "60s";
+            TriggerLimitBurst = 20;
+          };
+        };
 
         systemd.user.settings.Manager.DefaultTasksMax = 16384;
 

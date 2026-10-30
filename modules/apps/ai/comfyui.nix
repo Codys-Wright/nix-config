@@ -38,7 +38,9 @@
       {
         services.comfyui = {
           enable = true;
-          package = cudaWheels.comfyui.override { withManager = true; };
+          package = cudaWheels.comfyui;
+          # ComfyUI-Manager (custom-node installer) in its Python env.
+          extraPackages = ps: [ ps.comfyui-manager ];
           listen = [ "127.0.0.1" ];
           # Models are large: the Development drive.
           dataDir = lib.mkDefault "/run/media/Development/ComfyUI";
@@ -48,6 +50,22 @@
           serviceConfig.User = lib.mkForce "cody";
           serviceConfig.Group = lib.mkForce "users";
           unitConfig.RequiresMountsFor = [ "/run/media/Development" ];
+          # Triton (the int8 / fp8 kernels of LTX-2.5 and Qwen-Image) JIT-compiles
+          # a CUDA helper on first use: it needs a C compiler and the driver's
+          # libcuda. nixpkgs' triton-bin patches libcuda_dirs() to return a
+          # string, which Triton splats into one -L per character, so libcuda is
+          # found through LIBRARY_PATH (gcc's link search) instead.
+          # ProtectHome=tmpfs leaves $HOME read-only, so its kernel cache
+          # (~/.triton) and other XDG caches go to /var/cache/comfyui instead.
+          serviceConfig.CacheDirectory = "comfyui";
+          path = [ pkgs.stdenv.cc ];
+          environment = {
+            CC = "${pkgs.stdenv.cc}/bin/cc";
+            LIBRARY_PATH = "/run/opengl-driver/lib";
+            XDG_CACHE_HOME = "/var/cache/comfyui";
+            TRITON_HOME = "/var/cache/comfyui";
+            TRITON_CACHE_DIR = "/var/cache/comfyui/triton";
+          };
         };
       };
 

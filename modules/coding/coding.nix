@@ -13,6 +13,7 @@
       <fleet.coding._.tools/git>
       <fleet.coding._.tools/lazygit>
       <fleet.coding._.tools/dev-tools>
+      <fleet.coding._.tools/api-clients>
 
       # All editors
       <fleet.coding._.editors/nvf>
