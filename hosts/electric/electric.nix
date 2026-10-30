@@ -4,7 +4,12 @@
 # key, which is appended to the firmware's factory db (BIOS updates reset db:
 # re-append it from Boot > Secure Boot > Expert Key Management).
 # Ported from github:electricsss/electric-flake.
-{ den, __findFile, ... }:
+{
+  den,
+  fleet,
+  __findFile,
+  ...
+}:
 {
   den.hosts.x86_64-linux.electric = {
     description = "Carter's desktop system";
@@ -16,6 +21,9 @@
   };
 
   den.aspects.electric = {
+    # niri + Loft only: KDE's masked drkonqi socket fails a live switch.
+    excludes = [ fleet.desktop._.environment._.kde ];
+
     includes = [
       <fleet/unfree>
       <fleet/desktop>
