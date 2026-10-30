@@ -95,8 +95,9 @@ bench() {
     usage
     exit 1
   }
-  # Free the GPU: the router keeps the last model resident.
-  for m in $(models | jq -r '.data[] | select(.status.value != "unloaded") | .id'); do
+  # Free the GPU: the router keeps the last model resident. (Not downloads:
+  # unloading a downloading model cancels it.)
+  for m in $(models | jq -r '.data[] | select(.status.value | IN("loaded", "loading", "sleeping")) | .id'); do
     post /models/unload "$(json "$m")" >/dev/null || true
   done
   sleep 2

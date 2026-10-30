@@ -4,6 +4,13 @@
 # Clients (Hermes, pi, the built-in web UI) point at
 # http://<host>:<port>/v1 and pick a model by its `llm ls` id.
 #
+# `models` are named presets (the INI --models-preset): a short id clients
+# can rely on, with per-model flags; the first request downloads it.
+#
+# Every user of the host gets pi wired to it: a `local` provider in
+# ~/.pi/agent/models.json listing the presets, and `pi-local` (pi on
+# `defaultModel`).
+#
 # Models live in the service cache (/var/cache/llama-cpp), readable by
 # everyone so `llm bench` can run llama-bench on the same files.
 { fleet, lib, ... }:
@@ -44,6 +51,33 @@
         default = 1;
         description = "Models loaded at once; loading another unloads the least recently used";
       };
+      models = lib.mkOption {
+        type = lib.types.attrsOf (
+          lib.types.attrsOf (
+            lib.types.oneOf [
+              lib.types.str
+              lib.types.int
+              lib.types.float
+              lib.types.bool
+            ]
+          )
+        );
+        default = {
+          # OpenAI's recommended sampling; MXFP4 is the native release.
+          gpt-oss-20b = {
+            hf-repo = "ggml-org/gpt-oss-20b-GGUF:MXFP4";
+            temp = 1.0;
+            top-p = 1.0;
+            top-k = 0;
+          };
+        };
+        description = "Named model presets: llama-server flags per model id (hf-repo or model required)";
+      };
+      defaultModel = lib.mkOption {
+        type = lib.types.str;
+        default = "gpt-oss-20b";
+        description = "Preset `pi-local` starts pi on";
+      };
       idleSleep = lib.mkOption {
         type = lib.types.int;
         default = 900;
@@ -71,6 +105,17 @@
           }
           .${backend};
 
+        presets = pkgs.writeText "llama-models.ini" (
+          lib.generators.toINIWithGlobalSection { } {
+            globalSection.version = 1;
+            # Hide a preset's cached download from the list (one id per model).
+            sections = {
+              "*".dedup-cache-models = true;
+            }
+            // cfg.models;
+          }
+        );
+
         llm = pkgs.writeShellApplication {
           name = "llm";
           runtimeInputs = [
@@ -96,6 +141,7 @@
             ctx-size = cfg.ctxSize;
             models-max = cfg.modelsMax;
             sleep-idle-seconds = cfg.idleSleep;
+            models-preset = presets;
           };
         };
 
@@ -123,9 +169,57 @@
         environment.systemPackages = [
           llm
           package
+          (pkgs.writeShellScriptBin "pi-local" ''
+            exec pi --model local/${cfg.defaultModel} "$@"
+          '')
         ];
         # pi's built-in llama.cpp provider (/llama downloads, loads, unloads).
         environment.variables.LLAMA_BASE_URL = "http://127.0.0.1:${toString cfg.port}";
+      };
+
+    provides.to-users.homeManager =
+      { host, ... }:
+      let
+        cfg = host.settings.ai.llama-server;
+        # gpt-oss takes reasoning_effort low/medium/high.
+        piModel =
+          id:
+          {
+            inherit id;
+            name = "${id} (local llama.cpp)";
+            contextWindow = cfg.ctxSize;
+            maxTokens = 16384;
+            cost = {
+              input = 0;
+              output = 0;
+              cacheRead = 0;
+              cacheWrite = 0;
+            };
+          }
+          // lib.optionalAttrs (lib.hasPrefix "gpt-oss" id) {
+            reasoning = true;
+            thinkingLevelMap = {
+              minimal = "low";
+              low = "low";
+              medium = "medium";
+              high = "high";
+            };
+          };
+      in
+      {
+        home.file.".pi/agent/models.json".text = builtins.toJSON {
+          providers.local = {
+            baseUrl = "http://127.0.0.1:${toString cfg.port}/v1";
+            api = "openai-completions";
+            apiKey = "none";
+            compat = {
+              supportsReasoningEffort = true;
+              supportsDeveloperRole = false;
+              maxTokensField = "max_tokens";
+            };
+            models = map piModel (lib.attrNames cfg.models);
+          };
+        };
       };
   };
 }
