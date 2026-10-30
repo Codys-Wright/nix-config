@@ -348,7 +348,7 @@ OmniWM limitations vs niri:
 ## Niri-Specific Features to Leverage
 
 - **`preset-column-widths`** — cycle 1/3 → 1/2 → 2/3 → full with `Mod+W`
-- **`struts`** — reserve space for noctalia bar
+- **`struts`** — reserve space for the Loft bar
 - **`window-rules`** — auto open-on-workspace, default widths, block-out-from, floating
 - **`open-on-output`** — pin app categories to specific monitors when docked
 - **Animations** — tune spring for snappy-but-smooth scrolling

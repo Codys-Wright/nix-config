@@ -1,12 +1,10 @@
 # Loft — niri + its own Quickshell shell (Liquid Glass, runtime
 # themes) and a Spotlight launcher: github:Codys-Wright/loft.
 #
-# Opt-in per host; Noctalia stays the default:
-#   den.hosts.x86_64-linux.<host>.settings.desktop.shell = "loft";
-# or per user on one host (login screen unchanged):
-#   den.aspects."<user>@<host>".homeManager.programs.loft.enable = true;
+# The desktop shell on every host with fleet.desktop. A user opts out with
+#   den.aspects."<user>@<host>".homeManager.programs.loft.enable = false;
 #
-# Users then get Loft's home-manager module (shell + launcher services,
+# Users get Loft's home-manager module (shell + launcher services,
 # idle locking, the `loft` CLI). The niri aspect switches the shell it
 # starts and includes Loft's niri fragment (keybinds + the active theme).
 # The host's login screen becomes Loft's SDDM theme (same design as the
@@ -19,49 +17,38 @@
   };
 
   fleet.desktop._.loft = {
-    description = "Loft desktop shell + launcher (when settings.desktop.shell = \"loft\")";
+    description = "Loft desktop shell + launcher";
 
     # Loft's NixOS module: the login screen (SDDM theme `loft`) that follows
     # each user's lock screen design (`loft greeter sync`).
     nixos =
-      { host, lib, ... }:
+      { lib, ... }:
       {
         imports = [ inputs.loft.nixosModules.default ];
-        programs.loft.greeter.enable = lib.mkDefault (host.settings.desktop.shell == "loft");
+        programs.loft.greeter.enable = lib.mkDefault true;
       };
 
-    # Just the login screen, for hosts where only some users run Loft
-    # (den.aspects."<user>@<host>"): the others keep their shell.
-    provides.greeter = {
-      description = "Loft's SDDM login screen (without making Loft the host's shell)";
-      nixos.programs.loft.greeter.enable = true;
-    };
-
     provides.to-users.includes = [
-      (
-        { host, ... }:
-        {
-          homeManager = { lib, ... }: {
-            imports = [ inputs.loft.homeManagerModules.default ];
-            # A user can opt in on their own (den.aspects."<user>@<host>").
-            programs.loft.enable = lib.mkDefault (host.settings.desktop.shell == "loft");
-            # Loft's keyboard layer: the macOS-style remaps come from Loft
-            # (`loft keys show`), xremap runs them (loft-keys.service), agents
-            # change them at runtime (`loft keys app …`). The fleet's niri
-            # input (lv3:ralt_switch + lv3:lwin_switch) makes Left Super a mod
-            # key too, so the groups that rely on that are on here.
-            programs.loft.keyboard = {
-              enable = lib.mkDefault true;
-              groups = lib.mapAttrs (_: lib.mkDefault) {
-                right-ctrl-mod = true;
-                mac-screenshots = true;
-                symbols = true;
-                terminal-cmd-swallow = true;
-              };
+      {
+        homeManager = { lib, ... }: {
+          imports = [ inputs.loft.homeManagerModules.default ];
+          programs.loft.enable = lib.mkDefault true;
+          # Loft's keyboard layer: the macOS-style remaps come from Loft
+          # (`loft keys show`), xremap runs them (loft-keys.service), agents
+          # change them at runtime (`loft keys app …`). The fleet's niri
+          # input (lv3:ralt_switch + lv3:lwin_switch) makes Left Super a mod
+          # key too, so the groups that rely on that are on here.
+          programs.loft.keyboard = {
+            enable = lib.mkDefault true;
+            groups = lib.mapAttrs (_: lib.mkDefault) {
+              right-ctrl-mod = true;
+              mac-screenshots = true;
+              symbols = true;
+              terminal-cmd-swallow = true;
             };
           };
-        }
-      )
+        };
+      }
     ];
   };
 }

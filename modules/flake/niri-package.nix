@@ -25,7 +25,6 @@
           kitty
           librewolf
           niri
-          noctalia-shell
           procps
           slurp
           swappy

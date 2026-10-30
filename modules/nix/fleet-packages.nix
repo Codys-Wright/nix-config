@@ -32,7 +32,6 @@ let
     "inferno"
     "melonloader-installer"
     "statime"
-    "sunshine"
     "vcv-rack"
   ];
   attrName = n: if builtins.elem n collides then "fleet-${n}" else n;
