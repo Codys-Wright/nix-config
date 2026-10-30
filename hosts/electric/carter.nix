@@ -65,6 +65,17 @@
         # that has to be copied to electric (the global registry still
         # resolves `nixpkgs#…`).
         nix.registry = lib.mkForce { };
+
+        # MiniMeters (carter's own XDG autostart entry) docks to the top edge as
+        # a layer-shell surface; whichever surface maps first gets the edge, so
+        # start it after Loft's bar is up to keep the bar on top.
+        xdg.configFile."systemd/user/app-MiniMeters.AppImage@autostart.service.d/after-loft.conf".text = ''
+          [Unit]
+          After=loft-shell.service
+
+          [Service]
+          ExecStartPre=/run/current-system/sw/bin/sleep 3
+        '';
       };
   };
 }
