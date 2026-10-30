@@ -89,10 +89,6 @@ in
         # Re-enable deliberately, with a reboot, when chasing sub-1ms TX.
         # (fleet.audio._.rt-isolation { })
         (fleet.apps._.davinci-resolve { studio = true; })
-        # controller-split bundles polkit + sudoers + InputPlumber config +
-        # the launch-as / steam-as equivalents. Replaces the three modules
-        # that used to live here (launch-as, inputplumber, coop-launcher).
-        <fleet.gaming/controller-split>
 
         (<fleet.disk/btrfs> {
           device = "/dev/nvme2n1";

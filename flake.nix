@@ -18,10 +18,6 @@
       url = "github:Lyndeno/apple-fonts.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    controller-split = {
-      url = "path:/run/media/Development/Tools/controller-split";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     darwin = {
       url = "github:nix-darwin/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
