@@ -96,6 +96,10 @@
             let
               configRoot = "${config.home.homeDirectory}/.flake/modules/desktop/environment/niri/_config";
               mutableNoctaliaColors = "${configRoot}/noctalia/colors.json";
+              # Live-editable links into the ~/.flake checkout only for cody;
+              # everyone else (no checkout: carter on electric, the guest
+              # accounts) gets the tree from the store, as deployed.
+              editable = config.home.username == "cody";
               # Per user: Loft when it's enabled for this user (e.g. one
               # user on one host), otherwise the host's settings.desktop.shell.
               shell =
@@ -125,11 +129,15 @@
               # and niri-flake disables the xdg config file. Force it back on.
               xdg.configFile."niri".enable = lib.mkForce true;
               xdg.configFile."niri".force = true;
-              xdg.configFile."niri".source = config.lib.file.mkOutOfStoreSymlink configRoot;
+              xdg.configFile."niri".source =
+                if editable then config.lib.file.mkOutOfStoreSymlink configRoot else ./_config;
 
               # Noctalia colors are editable live so the shell can update themes in place.
               xdg.configFile."noctalia/colors.json".source =
-                config.lib.file.mkOutOfStoreSymlink mutableNoctaliaColors;
+                if editable then
+                  config.lib.file.mkOutOfStoreSymlink mutableNoctaliaColors
+                else
+                  ./_config/noctalia/colors.json;
 
               home.activation.configureNoctaliaWallpaper = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
                 settings="$HOME/.config/noctalia/settings.json"
