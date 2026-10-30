@@ -8,8 +8,8 @@
 # finds its per-session server with `ps aux | grep "rustdesk --server"`, which
 # a renamed wrapped binary would break. Libraries go through RUNPATH, not
 # LD_LIBRARY_PATH: the service starts the server with `sudo`, which drops LD_*.
-# librustdesk dlopens /usr/lib/rustdesk/libdrmtap.so.0, then libdrmtap.so.0
-# from its RUNPATH.
+# librustdesk dlopens only /usr/lib/rustdesk/libdrmtap.so.0: the NixOS
+# module (<fleet.networking/rustdesk>) links that path to lib/rustdesk.
 {
   lib,
   stdenv,

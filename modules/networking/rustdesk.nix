@@ -61,6 +61,12 @@
           };
         };
 
+        # The DRM capture library is dlopen()ed by this absolute path only (no
+        # soname fallback); without it RustDesk silently drops to PipeWire.
+        systemd.tmpfiles.rules = [
+          "L+ /usr/lib/rustdesk/libdrmtap.so.0 - - - - ${rustdesk}/lib/rustdesk/libdrmtap.so.0"
+        ];
+
         # Direct IP access only from the tailnet.
         networking.firewall.interfaces.tailscale0.allowedTCPPorts = [ 21118 ];
       };
