@@ -11,7 +11,6 @@
     timeZone = "America/Los_Angeles";
     deployment.ip = "100.65.190.11";
     settings.desktop.session = "niri";
-    settings.desktop.shell = "loft";
     # Only the RX 7800 XT: Vulkan1 is the Raphael iGPU.
     settings.ai.llama-server.device = "Vulkan0";
     # One slot: Hermes's turns reuse the cached prompt.
