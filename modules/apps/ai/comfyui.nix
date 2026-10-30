@@ -38,7 +38,9 @@
       {
         services.comfyui = {
           enable = true;
-          package = cudaWheels.comfyui.override { withManager = true; };
+          package = cudaWheels.comfyui;
+          # ComfyUI-Manager (custom-node installer) in its Python env.
+          extraPackages = ps: [ ps.comfyui-manager ];
           listen = [ "127.0.0.1" ];
           # Models are large: the Development drive.
           dataDir = lib.mkDefault "/run/media/Development/ComfyUI";

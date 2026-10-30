@@ -18,10 +18,6 @@
       url = "github:Lyndeno/apple-fonts.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    controller-split = {
-      url = "path:/run/media/Development/Tools/controller-split";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     darwin = {
       url = "github:nix-darwin/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -74,6 +70,10 @@
     import-tree.url = "github:denful/import-tree";
     inferno-control = {
       url = "git+https://codeberg.org/FastTrackStudios/inferno-control";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    lanzaboote = {
+      url = "github:nix-community/lanzaboote/v1.2.0";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     loft = {

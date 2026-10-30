@@ -54,6 +54,8 @@
         (<fleet.apps/default-browser> "brave")
         cody.opendeck
 
+        <fleet/creative>
+
         <fleet/coding>
         (<fleet.user/shell> "nushell")
         (<fleet.coding/user-terminal> "ghostty")
@@ -74,6 +76,7 @@
         cody.secrets
         <fleet/apple-fonts>
         <fleet.coding/ghidra>
+        <fleet.coding/t3code>
         <fleet.coding._.tools/game-dev>
       ];
     };

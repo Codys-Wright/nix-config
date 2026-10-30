@@ -10,11 +10,6 @@ window-rule {
     opacity 0.9
 }
 
-layer-rule {
-    match namespace="^noctalia-overview.*"
-    place-within-backdrop true
-}
-
 // Broad REAPER catch-all — every REAPER toplevel (main, Mixer, MIDI take,
 // FX windows, plugin floats, and any title we haven't enumerated) lands
 // on the music workspace. Specific titles below add layout overrides.
@@ -87,6 +82,25 @@ window-rule {
     open-on-workspace "comms"
     open-focused true
     open-maximized true
+}
+
+// Task: the dev desktop app (`dx serve` names it task-app-desktop-<hash>,
+// a new hash per build) and the installed one.
+window-rule {
+    match app-id="^task-app-desktop"
+    match app-id="^task$"
+    open-on-workspace "notes"
+    open-focused true
+}
+
+// FastTrackStudio Studio (app id `studio`) and Session (`session`), dev
+// builds under `dx serve` and the installed app alike.
+window-rule {
+    match app-id="^studio$"
+    match app-id="^session$"
+    match app-id=r#"^app\.fasttrackstudio\.studio$"#
+    open-on-workspace "music"
+    open-focused true
 }
 
 window-rule {

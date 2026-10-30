@@ -7,7 +7,6 @@
 # and silences all deprecation warnings.
 let
   p = config.pkgs;
-  noctaliaExe = lib.getExe p.noctalia-shell;
   grim = lib.getExe p.grim;
   slurp = lib.getExe p.slurp;
   swappy = lib.getExe p.swappy;
@@ -53,12 +52,6 @@ let
     "${lib.getExe p.wlr-which-key} ${yaml}";
 in
 {
-  options.spawnShell = lib.mkOption {
-    type = lib.types.bool;
-    default = true;
-    description = "Whether to spawn noctalia-shell on startup. Set false for nested/standalone use.";
-  };
-
   config.v2-settings = true;
 
   config.settings = {
@@ -242,7 +235,7 @@ in
     # Managed by wrapper — no spawn-at-startup needed
     xwayland-satellite.path = lib.getExe p.xwayland-satellite;
 
-    spawn-at-startup = lib.optionals config.spawnShell [ noctaliaExe ] ++ [
+    spawn-at-startup = [
       # Solid Catppuccin Mocha background (no image file needed)
       (lib.getExe (p.writeShellScriptBin "wallpaper" "${lib.getExe p.swaybg} -c '#1e1e2e'"))
     ];
@@ -251,7 +244,6 @@ in
       # ── Launchers ──────────────────────────────────────────────────────
       "Mod+Return".spawn = lib.getExe p.kitty;
       "Mod+E".spawn = lib.getExe p.ghostty;
-      "Mod+Space".spawn-sh = "${noctaliaExe} ipc call launcher toggle";
 
       # Which-key popup
       "Mod+D".spawn-sh = mkWhichKeyExe [
@@ -314,16 +306,6 @@ in
           key = "s";
           desc = "Sound";
           cmd = "${lib.getExe p.pavucontrol}";
-        }
-        {
-          key = "t";
-          desc = "Bluetooth";
-          cmd = "${noctaliaExe} ipc call bluetooth togglePanel";
-        }
-        {
-          key = "w";
-          desc = "WiFi";
-          cmd = "${noctaliaExe} ipc call wifi togglePanel";
         }
         {
           key = "p";

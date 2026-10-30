@@ -23,12 +23,11 @@
         <fleet/phoenix>
         # starcommand Hermes runs `voyager` profile sessions here over SSH.
         (<fleet.coding.cli/hermes-node> { user = "CodyWright"; })
-        # CodyWright's `gh` / git push to FastTrackStudios + Codys-Wright =
-        # fts-forge[bot] (key: sops/hosts/voyager.yaml). This is Cody's own
-        # login on voyager: `GH_FORGE=0 gh …` for his personal gh.
+        # Cody's own login: his `gh` / git push stay his, except inside
+        # Claude Code / Codex / Paperclip, which act as fts-forge[bot]
+        # (key: sops/hosts/voyager.yaml).
         (<fleet.coding.cli/gh-forge> {
-          user = "CodyWright";
-          home = "/Users/codywright";
+          humans = [ "CodyWright" ];
           sopsFile = "${inputs.nix-secrets}/sops/hosts/voyager.yaml";
         })
       ];

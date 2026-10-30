@@ -83,6 +83,13 @@ in
             hostname = "100.65.190.11";
             user = "root";
           };
+          # Carter's desktop booted into Windows (same machine as `electric`,
+          # which is its NixOS install). Win32-OpenSSH, admin account.
+          "battleship" = {
+            hostname = "battleship.tail666c4b.ts.net";
+            user = "electric";
+            identityFile = "~/.ssh/id_ed25519";
+          };
           # Forgejo git access. Forgejo now runs in the k3s cluster
           # (rootless image): SSH login user is `git`, git SSH on port 2222
           # (host :22 stays the admin sshd; a socat forward bridges :2222 ->

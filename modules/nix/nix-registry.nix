@@ -12,7 +12,11 @@
       { pkgs, ... }:
       {
         nix.registry = lib.mkIf pkgs.stdenv.hostPlatform.isLinux (
-          lib.mapAttrs (_name: v: { flake = v; }) (lib.filterAttrs (_name: value: value ? outputs) inputs)
+          lib.mapAttrs (_name: v: { flake = v; }) (
+            # nix-secrets is private: pinning it would copy its source into
+            # every host's world-readable /nix/store.
+            lib.filterAttrs (name: value: value ? outputs && name != "nix-secrets") inputs
+          )
         );
       };
   };

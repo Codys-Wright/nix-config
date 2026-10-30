@@ -28,10 +28,10 @@ let
   # nixpkgs already has attrs with these names — prefix to avoid shadowing.
   collides = [
     "davinci-resolve"
+    "gh-stack"
     "inferno"
     "melonloader-installer"
     "statime"
-    "sunshine"
     "vcv-rack"
   ];
   attrName = n: if builtins.elem n collides then "fleet-${n}" else n;

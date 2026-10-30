@@ -43,34 +43,58 @@ let
     github-fts-editor = "editor";
     github-fts-extensions = "fts-extensions";
   };
+  # Studio (FastTrackStudios/studio): PRs run on GitHub's free runners;
+  # every merge to main and every release build runs here. Two POOLS of
+  # three instances: `studio-main` takes the merges (a newer merge cancels
+  # the older run), `studio-release` the release commits (queued, never
+  # cancelled), so a release never waits behind ordinary merges. A run's
+  # Check, Tests and Wasm jobs are claimed by three instances of one pool at
+  # once. The pool's instances share one cache, $STUDIO_CACHE_DIR
+  # (<storageRoot>/ci/<pool>), where each build kind keeps its own target dir
+  # (check mode, test codegen and wasm32 share no artifacts), so every
+  # instance builds warm; studio's checks.yml caps a pool at 200 GB.
+  # Registered through the FTS - Forge GitHub App, like github-starcommand:
+  # a fresh registration token on every start, no stored token to expire
+  # (the shared `github-runner-token` returned 401, 2026-10-24).
+  studioPools = {
+    github-fts-studio-main = "studio-main";
+    github-fts-studio-release = "studio-release";
+  };
+  studioCount = 3;
+  studioCache = pool: "/run/media/Development/ci/${pool}";
+  # Task (FastTrackStudios/task): the same shape as Studio's. PR checks stay
+  # on the author's machine (Local CI) and GitHub's free runners. The pools
+  # split by CACHE, not by event: `task-main` runs every dev-profile check
+  # build (checks.yml for each merge to main, a release commit's included:
+  # the same units, on the same warm dirs; a newer merge cancels the older
+  # run, a release commit's never), `task-release` only the release-profile
+  # artifacts (images, the desktop cache; queued, never cancelled). Three
+  # instances a pool, so a run's Lint, Tests and Wasm build at once; the
+  # pool's instances share $TASK_CACHE_DIR, one target dir per build kind,
+  # so a merge compiles only what it changed. Every instance runs taskJobGate (below): the repo is
+  # public, so nothing but code already on main, release/v* or a v* tag runs
+  # here. (Captain, 2026-10-24: main merges come back to THEBATTLESHIP;
+  # supersedes the 2026-10-22 move to the Mac Pro VM, whose macpro-task-*
+  # runners no Task workflow targets any more.)
+  taskPools = {
+    github-fts-task-main = "task-main";
+    github-fts-task-release = "task-release";
+  };
+  taskCount = 3;
+  taskCache = pool: "/run/media/Development/ci/${pool}";
+  forgeApp = {
+    id = 5391924;
+    login = "FastTrackStudios";
+    keySopsKey = "github_app_fts_forge_private_key";
+    keySopsFile = "${inputs.nix-secrets}/sops/hosts/THEBATTLESHIP.yaml";
+  };
 in
 {
   den.aspects.THEBATTLESHIP-github-runners.includes = [
     # The bare `nix-host` pool (github-fts-1, -2): the LAN-only deploys
     # (forum, the landing site) and repos not yet on a label of their own.
     (runner { count = 2; })
-    # Task's deploy gets a slot of its own: with checks and deploy sharing
-    # the `task` runners, a deploy sat 45 minutes behind two PRs' test
-    # builds. Its cache holds the release target dir the deploy fast path
-    # builds incrementally.
-    (runner {
-      name = "github-fts-task-deploy";
-      labels = [ "task-deploy" ];
-    })
-    # Two: a deploy takes ~30 min of nix build and must not queue the next
-    # PR's checks behind it.
-    #
-    # STA-156: these two moved to toms-mac-pro-vm (starcommand repo,
-    # hosts/toms-mac-pro-vm/github-runners.nix) because CI here froze the
-    # engineers' own work. DISABLED, not deleted: rollback is `enable = true`
-    # below plus a switch (then drop "task" from the VM runners' labels).
-    (runner {
-      name = "github-fts-task";
-      labels = [ "task" ];
-      count = 2;
-      enable = false;
-    })
-    # Codys-Wright/starcommand's own runner: merges to main deploy from here
+    # Codys-Wright/starcommand's own runner: release tags deploy from here
     # (deploy.yml, `runs-on: [self-hosted, starcommand]`). Registered through
     # the FTS - Forge GitHub App (installed on Codys-Wright, all repos), so no
     # PAT; the key is a THEBATTLESHIP host secret.
@@ -94,12 +118,34 @@ in
         labels = [ label ];
       }
     ) perProject
+  )
+  ++ builtins.attrValues (
+    builtins.mapAttrs (
+      name: label:
+      runner {
+        inherit name;
+        labels = [ label ];
+        githubApp = forgeApp;
+        count = studioCount;
+      }
+    ) studioPools
+  )
+  ++ builtins.attrValues (
+    builtins.mapAttrs (
+      name: label:
+      runner {
+        inherit name;
+        labels = [ label ];
+        githubApp = forgeApp;
+        count = taskCount;
+      }
+    ) taskPools
   );
 
   # ── starcommand CI deploy credentials (github-starcommand only) ──────────
   #
-  # deploy.yml in Codys-Wright/starcommand deploys main to production from
-  # this runner. Its jobs run as a DEDICATED user, `starcommand-ci`, so the
+  # deploy.yml in Codys-Wright/starcommand deploys a release tag (vX.Y.Z)
+  # to production from this runner. Its jobs run as a DEDICATED user, `starcommand-ci`, so the
   # 14 FastTrackStudios runners (user github-runner, which run PR code) can
   # never read these keys. Both keys come from nix-secrets
   # sops/ci/starcommand-deploy.yaml, encrypted only to cody + this host and
@@ -110,8 +156,8 @@ in
   #   GIT_SSH_COMMAND      read-only deploy key on Codys-Wright/nix-secrets
   #                        (the starcommand flake input), pinned github.com
   #
-  # A job-started hook refuses every job that is not deploy.yml on main via
-  # push / workflow_dispatch, whatever a branch's workflow file says.
+  # A job-started hook refuses every job that is not deploy.yml on a vX.Y.Z
+  # tag via push / workflow_dispatch, whatever a branch's workflow file says.
   #
   # Revoke: remove the key line from starcommand's root authorized keys and
   # the nix-secrets deploy key "starcommand-ci (THEBATTLESHIP, read-only)",
@@ -141,19 +187,130 @@ in
         # ACTIONS_RUNNER_HOOK_JOB_STARTED (the runner requires a .sh name):
         # non-zero fails the job before any
         # of its steps run.
-        want="Codys-Wright/starcommand/.github/workflows/deploy.yml@refs/heads/main"
+        # Only a release tag deploys (starcommand is trunk-based: merging
+        # into main deploys nothing; `just release-tag` pushes vX.Y.Z).
+        ref="''${GITHUB_REF:-}"
         deny() { echo "starcommand-ci: refusing job ($1)" >&2; exit 1; }
         [ "''${GITHUB_REPOSITORY:-}" = "Codys-Wright/starcommand" ] || deny "repository ''${GITHUB_REPOSITORY:-?}"
-        [ "''${GITHUB_REF:-}" = "refs/heads/main" ] || deny "ref ''${GITHUB_REF:-?}"
-        [ "''${GITHUB_WORKFLOW_REF:-}" = "$want" ] || deny "workflow ''${GITHUB_WORKFLOW_REF:-?}"
+        [[ "$ref" =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$ ]] || deny "ref ''${ref:-?}"
+        [ "''${GITHUB_WORKFLOW_REF:-}" = "Codys-Wright/starcommand/.github/workflows/deploy.yml@$ref" ] || deny "workflow ''${GITHUB_WORKFLOW_REF:-?}"
         case "''${GITHUB_EVENT_NAME:-}" in
           push) ;;
           workflow_dispatch) [ "''${GITHUB_ACTOR:-}" = "Codys-Wright" ] || deny "dispatch by ''${GITHUB_ACTOR:-?}" ;;
           *) deny "event ''${GITHUB_EVENT_NAME:-?}" ;;
         esac
       '';
+      studioInstances = lib.concatLists (
+        lib.mapAttrsToList (
+          name: pool:
+          map (i: {
+            unit = "github-runner-${name}-${toString i}";
+            inherit pool;
+          }) (lib.range 1 studioCount)
+        ) studioPools
+      );
+      # The Task runners' gate. FastTrackStudios/task is PUBLIC, and a
+      # workflow in a fork's PR can name any label: without this, a PR could
+      # run its own code on this host with the pools' warm caches. Only code
+      # already on the repo's protected refs runs here — a push to main, a
+      # release/v* hotfix branch or a v* tag (deploy.yml's called workflows
+      # report the tag push) — or a manual dispatch, which takes write
+      # access to the repo.
+      taskJobGate = pkgs.writeShellScript "task-ci-job-gate.sh" ''
+        ref="''${GITHUB_REF:-}"
+        deny() { echo "task-ci: refusing job ($1)" >&2; exit 1; }
+        [ "''${GITHUB_REPOSITORY:-}" = "FastTrackStudios/task" ] || deny "repository ''${GITHUB_REPOSITORY:-?}"
+        case "''${GITHUB_EVENT_NAME:-}" in
+          push)
+            [[ "$ref" == refs/heads/main || "$ref" =~ ^refs/heads/release/v[0-9] || "$ref" =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$ ]] \
+              || deny "push to ''${ref:-?}" ;;
+          workflow_dispatch) ;;
+          *) deny "event ''${GITHUB_EVENT_NAME:-?}" ;;
+        esac
+      '';
+      taskInstances = lib.concatLists (
+        lib.mapAttrsToList (
+          name: pool:
+          map (i: {
+            unit = "github-runner-${name}-${toString i}";
+            inherit pool;
+          }) (lib.range 1 taskCount)
+        ) taskPools
+      );
     in
     {
+      # The pools' shared caches ($STUDIO_CACHE_DIR, $TASK_CACHE_DIR): made at
+      # activation like the module's own dirs on this disk (tmpfiles refuses
+      # the cody-owned mount as a parent), writable by every instance of the
+      # pool, and named to each job.
+      system.activationScripts.studio-runner-pool-caches = lib.stringAfter [ "users" "groups" ] (
+        lib.concatMapStringsSep "\n" (
+          pool: "install -d -m 0700 -o github-runner -g github-runner ${studioCache pool}"
+        ) (lib.unique (builtins.attrValues studioPools))
+      );
+      system.activationScripts.task-runner-pool-caches = lib.stringAfter [ "users" "groups" ] (
+        lib.concatMapStringsSep "\n" (
+          pool: "install -d -m 0700 -o github-runner -g github-runner ${taskCache pool}"
+        ) (lib.unique (builtins.attrValues taskPools))
+      );
+      systemd.services =
+        lib.listToAttrs (
+          map (inst: {
+            name = inst.unit;
+            value.serviceConfig = {
+              ReadWritePaths = [ (studioCache inst.pool) ];
+              Environment = [ "STUDIO_CACHE_DIR=${studioCache inst.pool}" ];
+            };
+          }) studioInstances
+        )
+        // lib.listToAttrs (
+          map (inst: {
+            name = inst.unit;
+            value = {
+              # nicknovitski/nix-develop (how checks.yml enters `.#ci`)
+              # needs openssl for its env-file delimiters; the module's PATH
+              # is a short explicit list without it (exit 127, 2026-10-24).
+              path = with pkgs; [
+                openssl
+                jq
+              ];
+              serviceConfig = {
+                ReadWritePaths = [ (taskCache inst.pool) ];
+                Environment = [
+                  "TASK_CACHE_DIR=${taskCache inst.pool}"
+                  # The runner runs this before every job; non-zero fails it
+                  # before any step.
+                  "ACTIONS_RUNNER_HOOK_JOB_STARTED=${taskJobGate}"
+                ];
+              }
+              # task-release only: the Flatpak build (Task's
+              # scripts/desktop/linux.sh) has flatpak validate the exported
+              # icon under bwrap, which needs a user namespace and a fresh /proc
+              # mounted inside it. Measured 2026-10-24 with transient system
+              # units as github-runner and this unit's settings: these four
+              # block it (ProtectHostname only in combination with the rest),
+              # plus the default syscall deny list (mount, capset, chroot…);
+              # PrivateUsers, NoNewPrivileges, ProtectSystem, ProtectHome,
+              # ProtectProc, PrivateDevices and the empty capability bounding
+              # set don't, and stay. The job gate still admits only protected
+              # refs, and task-main keeps every default.
+              // lib.optionalAttrs (inst.pool == "task-release") {
+                RestrictNamespaces = lib.mkForce false;
+                ProtectKernelTunables = lib.mkForce false;
+                ProtectKernelLogs = lib.mkForce false;
+                ProtectHostname = lib.mkForce false;
+                SystemCallFilter = lib.mkForce [
+                  "@system-service"
+                  "@mount"
+                  "pivot_root"
+                  "capset"
+                  "chroot"
+                ];
+              };
+            };
+          }) taskInstances
+        );
+
       users.users.starcommand-ci = {
         isSystemUser = true;
         group = "starcommand-ci";
@@ -193,5 +350,20 @@ in
           jq
         ];
       };
+
+      # One job kind per Task instance. A target dir is warm only for the
+      # ~/.cargo and checkout paths that built it, and each instance has its
+      # own, so Task's workflows keep one target dir per kind per instance
+      # ($TASK_CACHE_DIR/<kind>-<runner>) and pin each kind to one instance
+      # by these labels: the same runner builds it every time, on the dir it
+      # left warm. (Shared dirs made every job that changed instance
+      # recompile all ~1,575 units.) images is prod's critical path, so it
+      # has an instance to itself.
+      services.github-runners.github-fts-task-main-1.extraLabels = [ "task-main-tests" ];
+      services.github-runners.github-fts-task-main-2.extraLabels = [ "task-main-lint" ];
+      services.github-runners.github-fts-task-main-3.extraLabels = [ "task-main-wasm" ];
+      services.github-runners.github-fts-task-release-1.extraLabels = [ "task-release-images" ];
+      services.github-runners.github-fts-task-release-2.extraLabels = [ "task-release-node" ];
+      services.github-runners.github-fts-task-release-3.extraLabels = [ "task-release-desktop" ];
     };
 }

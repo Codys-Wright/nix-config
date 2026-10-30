@@ -45,16 +45,31 @@ in
         <fleet/stylix>
         <fleet.system/agent-user>
         # agent's `gh` / git push = fts-forge[bot]: workers open their own PRs.
+        # cody's are his own, except inside Claude Code / Codex.
         (<fleet.coding.cli/gh-forge> {
           user = "agent";
           home = "/home/agent";
+          humans = [ "cody" ];
           sopsFile = "${inputs.nix-secrets}/sops/hosts/THEBATTLESHIP.yaml";
         })
         # agent's queued build gates (gate-submit) run lease-aware in a user unit
         # and wake their Paperclip issue when done (STA-402).
         (<fleet.coding.cli/gate-queue> { user = "agent"; })
+        # Claude Code + Codex go through the fleet proxy on starcommand (10G
+        # fabric); per-user keys keep agent usage apart from Cody's.
+        (<fleet.coding.cli/cliproxyapi-client> {
+          baseUrl = "http://10.10.10.1:8317";
+          sopsFile = "${inputs.nix-secrets}/sops/hosts/THEBATTLESHIP.yaml";
+          users = {
+            cody = "cody";
+            agent = "agents";
+          };
+        })
+        # Paperclip's native agents: Claude Code + Codex, self-updating.
+        (<fleet.coding.cli/agent-clis> { users = [ "agent" ]; })
         <fleet.system/agent-bot-desktop> # Hermes bot screen for agent sessions over SSH
         den.aspects.THEBATTLESHIP-hermes-desktop # Hermes can drive cody's real desktop (forced-command key)
+        (<fleet.system/cua-desktop> { user = "cody"; }) # cua-driver CLI + daemon for cody's session
 
         <fleet/desktop>
         <fleet/grub>
@@ -62,6 +77,7 @@ in
         <fleet/hardware>
         <fleet.hardware/nvidia>
         <fleet.networking/tailscale>
+        <fleet.networking/rustdesk> # remote desktop over Tailscale (Sunshine is the unattended route)
         <fleet.hardware/zsa>
 
         <fleet/gaming>
@@ -70,6 +86,7 @@ in
         <fleet.hardware/cuda> # CUDA toolkit (RTX present; nvidia already on)
         <fleet.apps/comfyui> # ComfyUI (CUDA) on :8188, models on the Development drive
         <fleet.apps/odysseus> # Odysseus launcher (server runs in Starcommand on this host, :7000)
+        (fleet.apps._.task-desktop { user = "cody"; }) # Task desktop, follows the newest Task release tag (STA-96)
         <fleet.hardware/iphone> # tether: iPhone messages / notifications / calls over Bluetooth
         # RT core isolation for the audio path — currently DISABLED (see
         # modules/audio/rt-isolation.nix): pinning pipewire to a
@@ -77,10 +94,6 @@ in
         # Re-enable deliberately, with a reboot, when chasing sub-1ms TX.
         # (fleet.audio._.rt-isolation { })
         (fleet.apps._.davinci-resolve { studio = true; })
-        # controller-split bundles polkit + sudoers + InputPlumber config +
-        # the launch-as / steam-as equivalents. Replaces the three modules
-        # that used to live here (launch-as, inputplumber, coop-launcher).
-        <fleet.gaming/controller-split>
 
         (<fleet.disk/btrfs> {
           device = "/dev/nvme2n1";
@@ -228,8 +241,8 @@ in
         # one file per concern in this directory.
         den.aspects.THEBATTLESHIP-audio-latency
         den.aspects.THEBATTLESHIP-niri-loft
-        <fleet.desktop/loft/greeter> # Loft's login screen (cody runs Loft; the others keep Noctalia)
         den.aspects.THEBATTLESHIP-storage
+        den.aspects.THEBATTLESHIP-target-sweep # hourly bounded cargo sweep of task/target under the build lease
         den.aspects.THEBATTLESHIP-starcommand-net
         den.aspects.THEBATTLESHIP-sops
         den.aspects.THEBATTLESHIP-studio-routing
