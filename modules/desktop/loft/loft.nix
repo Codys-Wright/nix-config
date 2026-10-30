@@ -45,6 +45,20 @@
             imports = [ inputs.loft.homeManagerModules.default ];
             # A user can opt in on their own (den.aspects."<user>@<host>").
             programs.loft.enable = lib.mkDefault (host.settings.desktop.shell == "loft");
+            # Loft's keyboard layer: the macOS-style remaps come from Loft
+            # (`loft keys show`), xremap runs them (loft-keys.service), agents
+            # change them at runtime (`loft keys app …`). The fleet's niri
+            # input (lv3:ralt_switch + lv3:lwin_switch) makes Left Super a mod
+            # key too, so the groups that rely on that are on here.
+            programs.loft.keyboard = {
+              enable = lib.mkDefault true;
+              groups = lib.mapAttrs (_: lib.mkDefault) {
+                right-ctrl-mod = true;
+                mac-screenshots = true;
+                symbols = true;
+                terminal-cmd-swallow = true;
+              };
+            };
           };
         }
       )
