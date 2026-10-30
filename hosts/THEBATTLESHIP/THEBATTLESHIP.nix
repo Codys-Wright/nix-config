@@ -239,6 +239,7 @@ in
         den.aspects.THEBATTLESHIP-audio-latency
         den.aspects.THEBATTLESHIP-niri-loft
         den.aspects.THEBATTLESHIP-storage
+        den.aspects.THEBATTLESHIP-btrfs-maintenance
         den.aspects.THEBATTLESHIP-target-sweep # hourly bounded cargo sweep of task/target under the build lease
         den.aspects.THEBATTLESHIP-starcommand-net
         den.aspects.THEBATTLESHIP-sops

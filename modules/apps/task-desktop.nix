@@ -23,7 +23,8 @@
 # Usage: (fleet.apps._.task-desktop { user = "cody"; })
 { lib, ... }:
 {
-  fleet.apps._.task-desktop.description = "Task desktop app, following the newest Task release tag (NixOS)";
+  fleet.apps._.task-desktop.description =
+    "Task desktop app, following the newest Task release tag (NixOS)";
 
   fleet.apps._.task-desktop.__functor =
     _self:
