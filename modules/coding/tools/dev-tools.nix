@@ -54,10 +54,6 @@
             pandoc
             graphviz
 
-            # API development
-            postman
-            insomnia
-
             # Text processing
             jq
             yq-go # Go version of yq (mikefarah/yq) for YAML editing with anchor support-go
