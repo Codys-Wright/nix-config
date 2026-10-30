@@ -46,6 +46,12 @@
         default = 65536;
         description = "Context per model (Hermes refuses local models below 64K)";
       };
+      device = lib.mkOption {
+        type = lib.types.nullOr lib.types.str;
+        default = null;
+        example = "Vulkan0";
+        description = "Only this device (`llama-server --list-devices`); null = all. Hosts with an iGPU pin the discrete card, else layers split onto the iGPU";
+      };
       modelsMax = lib.mkOption {
         type = lib.types.int;
         default = 1;
@@ -142,7 +148,8 @@
             models-max = cfg.modelsMax;
             sleep-idle-seconds = cfg.idleSleep;
             models-preset = presets;
-          };
+          }
+          // lib.optionalAttrs (cfg.device != null) { inherit (cfg) device; };
         };
 
         # A fixed user instead of DynamicUser, so the model cache is a plain
@@ -160,6 +167,8 @@
           CacheDirectoryMode = "0755";
           MemoryDenyWriteExecute = lib.mkForce false;
           RestartSec = lib.mkForce 5;
+          # Mesa's shader cache (Vulkan) defaults to $HOME, which is /var/empty.
+          Environment = [ "MESA_SHADER_CACHE_DIR=/var/cache/llama-cpp/mesa" ];
         };
 
         networking.firewall.interfaces = lib.genAttrs cfg.interfaces (_: {
