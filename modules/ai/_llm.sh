@@ -49,7 +49,7 @@ pull() {
     case "$(jq -r .event <<<"$ev")" in
       download_finished)
         kill "$sse_pid"
-        echo "done"
+        printf "\ndone\n"
         exit 0
         ;;
       download_failed)
@@ -57,10 +57,22 @@ pull() {
         echo "download failed: $(jq -c .data <<<"$ev")" >&2
         exit 1
         ;;
-      *) printf '\r%s' "$(jq -c '.data // {}' <<<"$ev" | cut -c1-120)" ;;
+      download_progress)
+        printf '\r%s' "$(jq -r '[.data.progress[]] | (map(.done) | add) as $d | (map(.total) | add) as $t
+          | "\($d / 1e9 * 10 | floor / 10) / \($t / 1e9 * 10 | floor / 10) GB (\(if $t > 0 then $d * 100 / $t | floor else 0 end)%)"' <<<"$ev")"
+        ;;
     esac
   done
   models >/dev/null # refresh the router's model list
+}
+
+# The cached GGUF for owner/repo[:quant] (Hugging Face hub layout under
+# $LLAMA_CACHE; first shard of split models; any GGUF without a quant).
+gguf() {
+  local repo="${1%%:*}" quant=""
+  [ "$repo" = "$1" ] || quant="${1#*:}"
+  find "${LLAMA_CACHE:-/var/cache/llama-cpp}/models--${repo//\//--}/snapshots" ! -name 'mmproj*' \
+    \( -iname "*${quant}.gguf" -o -iname "*${quant}-00001-of-*.gguf" \) 2>/dev/null | sort | head -n1
 }
 
 bench() {
@@ -71,7 +83,7 @@ bench() {
       extra=("$@")
       break
     fi
-    p=$(models | jq -r --arg m "$1" '.data[] | select(.id == $m) | .path // empty')
+    p=$(gguf "$1")
     [ -n "$p" ] || {
       echo "no cached model '$1' (see llm ls)" >&2
       exit 1

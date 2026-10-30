@@ -80,7 +80,10 @@
             package
           ];
           text = builtins.readFile ./_llm.sh;
-          runtimeEnv.LLM_DEFAULT_URL = "http://127.0.0.1:${toString cfg.port}";
+          runtimeEnv = {
+            LLM_DEFAULT_URL = "http://127.0.0.1:${toString cfg.port}";
+            LLAMA_CACHE = "/var/cache/llama-cpp";
+          };
         };
       in
       {
