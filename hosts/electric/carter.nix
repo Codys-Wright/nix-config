@@ -64,6 +64,22 @@
       {
         programs.ssh.enable = true;
 
+        # Vesktop (Flatpak) with MacTahoe's Discord icon instead of its own:
+        # same id, so this shadows the Flatpak export.
+        xdg.desktopEntries."dev.vencord.Vesktop" = {
+          name = "Vesktop";
+          genericName = "Internet Messenger";
+          comment = "Vesktop is a custom Discord desktop app";
+          icon = "discord";
+          exec = "flatpak run --branch=stable --arch=x86_64 --command=startvesktop --file-forwarding dev.vencord.Vesktop @@u %U @@";
+          categories = [ "Network" ];
+          mimeType = [ "x-scheme-handler/discord" ];
+          settings = {
+            StartupWMClass = "vesktop";
+            Keywords = "discord;vencord;electron;chat;";
+          };
+        };
+
         # A launcher for Loft's Settings (the dock pins `loft-settings`); same
         # IPC call as Loft's Mod+Comma bind.
         xdg.desktopEntries.loft-settings = {
