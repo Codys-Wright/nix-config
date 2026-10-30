@@ -34,8 +34,16 @@
             "display-manager.service"
           ];
           # It starts the per-session `rustdesk --server` with `sudo -u <user>`
-          # from PATH: the setuid wrapper.
-          path = [ "/run/wrappers" ];
+          # from PATH: the setuid wrapper. The server inherits this PATH and
+          # detects the service with `ps aux | grep rustdesk` (scrap's
+          # is_server_running): without procps it falls back to the
+          # RemoteDesktop portal, which niri's portal (gnome) doesn't have
+          # ("Wayland requires higher version of linux distro"); with it,
+          # ScreenCast + uinput, and the share choice persists (restore token).
+          path = [
+            "/run/wrappers"
+            pkgs.procps
+          ];
           environment = {
             PULSE_LATENCY_MSEC = "60";
             PIPEWIRE_LATENCY = "1024/48000";
