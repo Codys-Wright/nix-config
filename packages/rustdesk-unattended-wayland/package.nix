@@ -134,6 +134,9 @@ stdenv.mkDerivation (finalAttrs: {
         xdotool
       ]
     } $out/share/rustdesk/lib/librustdesk.so
+    # libdrmtap dlopen()s libEGL.so.1 / libGLESv2.so.2 to detile scanout
+    # buffers the CPU can't map (AMD), from its own RUNPATH.
+    patchelf --add-rpath ${lib.makeLibraryPath [ libglvnd ]} $out/lib/rustdesk/libdrmtap.so.0.5.8
 
     mkdir -p $out/bin
     makeWrapper $out/share/rustdesk/rustdesk $out/bin/rustdesk \
