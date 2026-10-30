@@ -54,6 +54,11 @@
       # Don't wait 2 minutes for user sessions to stop on shutdown
       systemd.settings.Manager.DefaultTimeoutStopSec = "15s";
 
+      # Classic dbus, as on 26.05: nixpkgs now defaults to dbus-broker, and
+      # switching implementations is blocked on a live switch (needs a reboot).
+      # electric is deployed without rebooting.
+      services.dbus.implementation = "dbus";
+
       boot.supportedFilesystems = [ "ntfs-3g" ];
 
       # Windows drives, mounted on first access
