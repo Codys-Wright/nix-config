@@ -54,6 +54,8 @@
           ];
         };
 
+        # kache's shared store is on this drive too: hosts/THEBATTLESHIP/kache.nix.
+
         systemd.services.development-permissions = {
           description = "Ensure Development is writable by cody";
           wantedBy = [ "run-media-Development.mount" ];

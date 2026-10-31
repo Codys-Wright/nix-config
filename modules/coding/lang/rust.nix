@@ -53,7 +53,6 @@
           ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
             gdb
             llvmPackages.bintools
-            sccache
 
             # Development libraries commonly needed by Rust crates
             openssl.dev # Provides openssl.pc for pkg-config
