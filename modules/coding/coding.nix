@@ -37,6 +37,7 @@
 
       # All languages
       <fleet.coding._.lang/rust>
+      <fleet.coding._.lang/kache>
       <fleet.coding._.lang/typescript>
       <fleet.coding._.lang/python>
 

@@ -54,6 +54,15 @@
           ];
         };
 
+        # kache's store on this drive: restores are hardlinks/reflinks into
+        # the build trees, which Linux refuses across mounts, so the store
+        # lives on the same filesystem as the code (modules/coding/lang/kache.nix).
+        environment.etc."kache/config.toml".text = ''
+          [cache]
+          local_store = "/run/media/Development/.kache"
+          local_max_size = "400GiB"
+        '';
+
         systemd.services.development-permissions = {
           description = "Ensure Development is writable by cody";
           wantedBy = [ "run-media-Development.mount" ];
