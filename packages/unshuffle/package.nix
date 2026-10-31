@@ -70,6 +70,7 @@ python.pkgs.buildPythonApplication rec {
   pythonRelaxDeps = [
     "hnswlib"
     "mutagen" # pins <1.48; nixpkgs has 1.48.1
+    "pyside6" # pins <6.12; nixpkgs has 6.12.0
   ];
 
   pythonImportsCheck = [ "unshuffle" ];
