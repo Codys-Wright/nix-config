@@ -35,10 +35,12 @@
 { ... }:
 let
   store = "/run/media/Development/.kache";
-  # Who builds into the store. Add `agent` here for Paperclip's builds.
+  # Who builds into the store: cody, the FastTrackStudios runners, and
+  # `agent` (Paperclip's builds).
   members = [
     "cody"
     "github-runner"
+    "agent"
   ];
 in
 {
@@ -88,6 +90,21 @@ in
             # A daemon a `kache` command starts for its user goes once idle.
             daemon_idle_timeout_secs = 600
           '';
+
+          # `agent` has no home-manager, so it gets cody's Cargo config
+          # (modules/coding/lang/kache.nix) from here: every cargo it runs —
+          # Paperclip's builds, gate-queue — goes through kache.
+          environment.etc."kache/cargo-config.toml".text = ''
+            [net]
+            git-fetch-with-cli = true
+
+            [build]
+            rustc-wrapper = "${lib.getExe pkgs.kache}"
+          '';
+          systemd.tmpfiles.rules = [
+            "d /home/agent/.cargo 0755 agent users -"
+            "L+ /home/agent/.cargo/config.toml - - - - /etc/kache/cargo-config.toml"
+          ];
 
           # The store's directory, its ACL and index.db, once the drive is
           # mounted (tmpfiles refuses a kache-owned path under the cody-owned
