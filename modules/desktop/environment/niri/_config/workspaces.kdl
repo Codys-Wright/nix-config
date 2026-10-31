@@ -10,6 +10,16 @@ workspace "music" {
     open-on-output "Microstep MPG491CX OLED Unknown"
 }
 
+// Music across all three displays: the arrangement in the middle (music),
+// a panel either side — Studio's mixer on the right, say.
+workspace "music-left" {
+    open-on-output "Acer Technologies XV271U M3 1321033793LAJ"
+}
+
+workspace "music-right" {
+    open-on-output "Acer Technologies XV271U M3 13210337C3LAJ"
+}
+
 workspace "gaming" {
     open-on-output "Microstep MPG491CX OLED Unknown"
 
