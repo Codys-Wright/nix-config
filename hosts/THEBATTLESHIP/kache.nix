@@ -84,7 +84,9 @@ in
           environment.etc."kache/config.toml".text = ''
             [cache]
             local_store = "${store}"
-            local_max_size = "400GiB"
+            # About 1 TB of the 1.9 TB Development drive: every build tree,
+            # worktree and runner on this host draws on it.
+            local_max_size = "930GiB"
             # Per user, never the store (the runners and the daemon set
             # KACHE_RUNTIME_DIR instead; a runner's home is read-only to it).
             runtime_dir = "~/.cache/kache"
@@ -94,7 +96,11 @@ in
             auto_share_target_files = false
             auto_clean_idle_targets_days = 0
             auto_clean_unused_units_days = 0
-            auto_recover_min_free_bytes = 0
+            # Below 100 GiB free on the drive, builds evict cache entries
+            # (only entries: removing idle target dirs is
+            # `auto_recover_targets`, off by default), so a full store plus
+            # the build trees can never fill the disk.
+            auto_recover_min_free_bytes = 107374182400
             # Every daemon GC (at each daemon start and every 6 h) deletes
             # every `-C incremental` dir a compile registered in the shared
             # index; a user's own daemon (kache 2) can, and would wipe
