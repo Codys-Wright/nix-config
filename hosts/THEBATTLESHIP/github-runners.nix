@@ -88,6 +88,68 @@ let
     keySopsKey = "github_app_fts_forge_private_key";
     keySopsFile = "${inputs.nix-secrets}/sops/hosts/THEBATTLESHIP.yaml";
   };
+
+  # ── The generic pools (stage 1 of the consolidation, 2026-10-31) ─────────
+  #
+  # kache (kache.nix) restores a cold runner's build from the shared store in
+  # seconds, so a runner no longer has to be a project's warm target dir.
+  # Two pools serve every FastTrackStudios repo; the per-project singles and
+  # the studio/task pools above stay until the workflows move (stage 2) and
+  # are then removed (stage 3).
+  #
+  #   github-fts-thebattleship-1..8          label `thebattleship`
+  #       every check, test and build job. Eight for 32 threads / 192 GB:
+  #       a Rust job rarely keeps more than ~4 threads busy for long (link,
+  #       codegen tails), and a restore from kache is mostly I/O.
+  #   github-fts-thebattleship-release-1..2  label `thebattleship-release`
+  #       tag and release jobs only, so a release never queues behind checks.
+  #
+  # Both run `ciJobGate` before every job (non-zero fails it before any step):
+  #   - the repo must be FastTrackStudios/<repo>, in $GITHUB_REPOSITORY and in
+  #     the event payload ($GITHUB_EVENT_PATH) alike;
+  #   - a pull request from a fork (head repo != the repo) is always refused;
+  #   - visibility is the payload's `.repository.private`, never a list here:
+  #       private: any event;
+  #       public:  a push to main, release/v* or a v* tag, or workflow_dispatch
+  #                (which takes write access); anything else is refused;
+  #       unreadable payload or no boolean `private`: refused.
+  #
+  # ENV CONTRACT — what a job on either pool can rely on (stage 2 workflows
+  # use these and nothing host-specific):
+  #   CI_POOL          `thebattleship` or `thebattleship-release`. Guard on it
+  #                    (`${CI_POOL:?not a thebattleship runner}`).
+  #   CI_CACHE_DIR     /run/media/Development/ci/thebattleship/<owner>/<repo>:
+  #                    this repo's durable cache, made 0700 github-runner by
+  #                    the gate on first use, shared by every instance of both
+  #                    pools (so two jobs of one repo may use it at once: give
+  #                    each build kind its own subdir, which cargo's lock then
+  #                    serialises). Put target dirs here as
+  #                    `$CI_CACHE_DIR/<kind>/target` (kache rule: named
+  #                    `target`), cargo-rail evidence as
+  #                    `$CI_CACHE_DIR/rail-evidence`. (The runner module's own
+  #                    per-instance CI_CACHE_DIR is overridden by the gate.)
+  #   CARGO_HOME       $CI_CACHE_DIR/cargo-home: one stable cargo home per repo
+  #                    (registry, git deps, a repo's CI config.toml; cargo-rail
+  #                    evidence keys on it). Write config into it atomically
+  #                    (mktemp + mv): jobs share it.
+  #   RUSTC_WRAPPER, KACHE_RUNTIME_DIR, KACHE_OUT_DIR_ALIAS_ROOT
+  #                    kache, set by kache.nix on every github-runner unit;
+  #                    a job opts out with RUSTC_WRAPPER="".
+  # Workflows: `runs-on: [self-hosted, thebattleship]` (or
+  # `thebattleship-release`). Daily, artifacts untouched for 3 days are swept
+  # from every target dir under the pools' cache root.
+  genericPools = {
+    github-fts-thebattleship = {
+      label = "thebattleship";
+      count = 8;
+    };
+    github-fts-thebattleship-release = {
+      label = "thebattleship-release";
+      count = 2;
+    };
+  };
+  genericCacheRoot = "/run/media/Development/ci/thebattleship";
+  genericOrg = "FastTrackStudios";
 in
 {
   den.aspects.THEBATTLESHIP-github-runners.includes = [
@@ -140,6 +202,17 @@ in
         count = taskCount;
       }
     ) taskPools
+  )
+  ++ builtins.attrValues (
+    builtins.mapAttrs (
+      name: pool:
+      runner {
+        inherit name;
+        inherit (pool) count;
+        labels = [ pool.label ];
+        githubApp = forgeApp;
+      }
+    ) genericPools
   );
 
   # ── starcommand CI deploy credentials (github-starcommand only) ──────────
@@ -237,8 +310,93 @@ in
           }) (lib.range 1 taskCount)
         ) taskPools
       );
+      # The generic pools' gate (rules in the comment at the top), then the
+      # repo's cache dir and cargo home handed to the job's steps through
+      # $GITHUB_ENV. Every fact comes from the job's own environment and
+      # event payload; anything missing or unreadable is a refusal.
+      ciJobGate = pkgs.writeShellApplication {
+        # The runner runs a hook only if its name ends in .sh.
+        name = "fts-ci-job-gate.sh";
+        runtimeInputs = [
+          pkgs.jq
+          pkgs.coreutils
+        ];
+        text = ''
+          org=${genericOrg}
+          root=${genericCacheRoot}
+          deny() { echo "fts-ci: refusing job ($1)" >&2; exit 1; }
+
+          repo="''${GITHUB_REPOSITORY:-}"
+          event="''${GITHUB_EVENT_NAME:-}"
+          ref="''${GITHUB_REF:-}"
+          payload="''${GITHUB_EVENT_PATH:-}"
+
+          [[ "$repo" =~ ^''${org}/[A-Za-z0-9._-]+$ ]] || deny "repository ''${repo:-?}"
+          name="''${repo#*/}"
+          [[ "$name" != . && "$name" != .. ]] || deny "repository $repo"
+          [ "''${GITHUB_REPOSITORY_OWNER:-}" = "$org" ] || deny "owner ''${GITHUB_REPOSITORY_OWNER:-?}"
+          [ -n "$payload" ] && [ -r "$payload" ] || deny "no event payload"
+
+          # One jq pass, one fact a line (no name holds a newline): the
+          # payload's repo, owner, visibility and, for a pull request, whether
+          # its head is this repo. jq -e fails on malformed JSON.
+          facts="$(jq -er '[
+              (.repository.full_name // ""),
+              (.repository.owner.login // ""),
+              (.repository.private | if type == "boolean" then tostring else "unknown" end),
+              (if has("pull_request") then
+                 (if (.pull_request.head.repo.full_name // "") == .repository.full_name
+                  then "same" else "fork" end)
+               else "none" end)
+            ] | .[]' "$payload" 2>/dev/null)" || deny "unreadable event payload"
+          mapfile -t f <<<"$facts"
+          [ "''${#f[@]}" -eq 4 ] || deny "unreadable event payload"
+          p_repo="''${f[0]}" p_owner="''${f[1]}" private="''${f[2]}" pr="''${f[3]}"
+
+          [ "$p_repo" = "$repo" ] || deny "payload repository ''${p_repo:-?} != $repo"
+          [ "$p_owner" = "$org" ] || deny "payload owner ''${p_owner:-?}"
+          [ "$pr" != fork ] || deny "pull request from a fork"
+
+          case "$private" in
+            true) why="private repo, $event" ;;
+            false)
+              case "$event" in
+                push)
+                  [[ "$ref" == refs/heads/main || "$ref" =~ ^refs/heads/release/v[0-9] || "$ref" =~ ^refs/tags/v[0-9] ]] \
+                    || deny "public repo, push to ''${ref:-?}"
+                  why="public repo, push to $ref" ;;
+                workflow_dispatch) why="public repo, workflow_dispatch" ;;
+                *) deny "public repo, event ''${event:-?}" ;;
+              esac ;;
+            *) deny "repository visibility unknown" ;;
+          esac
+
+          dir="$root/$org/$name"
+          install -d -m 0700 "$root/$org" "$dir" "$dir/cargo-home"
+          [ -n "''${GITHUB_ENV:-}" ] || deny "no GITHUB_ENV"
+          {
+            echo "CI_CACHE_DIR=$dir"
+            echo "CARGO_HOME=$dir/cargo-home"
+          } >>"$GITHUB_ENV"
+          echo "fts-ci: allowed ($why); CI_POOL=''${CI_POOL:-?} CI_CACHE_DIR=$dir"
+        '';
+      };
+      genericInstances = lib.concatLists (
+        lib.mapAttrsToList (
+          name: pool:
+          map (i: {
+            unit = "github-runner-${name}-${toString i}";
+            inherit (pool) label;
+          }) (lib.range 1 pool.count)
+        ) genericPools
+      );
     in
     {
+      # The generic pools' cache root: per-repo dirs under it are made by the
+      # gate, as github-runner, on a repo's first job.
+      system.activationScripts.generic-runner-cache-root = lib.stringAfter [ "users" "groups" ] ''
+        install -d -m 0700 -o github-runner -g github-runner ${genericCacheRoot}
+      '';
       # The pools' shared caches ($STUDIO_CACHE_DIR, $TASK_CACHE_DIR): made at
       # activation like the module's own dirs on this disk (tmpfiles refuses
       # the cody-owned mount as a parent), writable by every instance of the
@@ -309,7 +467,61 @@ in
               };
             };
           }) taskInstances
-        );
+        )
+        // lib.listToAttrs (
+          map (inst: {
+            name = inst.unit;
+            value = {
+              # The gate's jq; openssl for nix-develop's env-file delimiters,
+              # as on the task pools.
+              path = with pkgs; [
+                openssl
+                jq
+              ];
+              serviceConfig = {
+                ReadWritePaths = [ genericCacheRoot ];
+                Environment = [
+                  "CI_POOL=${inst.label}"
+                  "ACTIONS_RUNNER_HOOK_JOB_STARTED=${lib.getExe ciJobGate}"
+                ];
+              };
+            };
+          }) genericInstances
+        )
+        // {
+          # Daily sweep of every target dir under the generic pools' cache
+          # root (a `.rustc_info.json` marks one; cargo homes have none):
+          # artifacts no build touched in 3 days go, so a long-lived per-repo
+          # cache does not grow forever.
+          github-runner-sweep-thebattleship = {
+            description = "cargo sweep of the generic runner pools' per-repo caches";
+            startAt = "04:45";
+            path = [
+              pkgs.cargo
+              pkgs.cargo-sweep
+              pkgs.findutils
+            ];
+            serviceConfig = {
+              Type = "oneshot";
+              User = "github-runner";
+              Group = "github-runner";
+              Nice = 19;
+              IOSchedulingClass = "idle";
+            };
+            script = ''
+              [ -d ${genericCacheRoot} ] || exit 0
+              pkg=$(mktemp -d)
+              trap 'rm -rf "$pkg"' EXIT
+              mkdir "$pkg/src"
+              printf '[package]\nname = "sweep"\nversion = "0.0.0"\nedition = "2021"\n' > "$pkg/Cargo.toml"
+              echo 'fn main() {}' > "$pkg/src/main.rs"
+              find ${genericCacheRoot} -maxdepth 6 -name .rustc_info.json -printf '%h\n' |
+                while read -r target; do
+                  CARGO_TARGET_DIR="$target" cargo sweep --time 3 "$pkg" || true
+                done
+            '';
+          };
+        };
 
       users.users.starcommand-ci = {
         isSystemUser = true;
