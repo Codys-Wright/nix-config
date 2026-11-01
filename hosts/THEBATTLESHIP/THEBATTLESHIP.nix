@@ -249,6 +249,7 @@ in
         den.aspects.THEBATTLESHIP-niri-loft
         den.aspects.THEBATTLESHIP-storage
         den.aspects.THEBATTLESHIP-kache # one kache store for cody and the FastTrackStudios runners
+        den.aspects.THEBATTLESHIP-kache-nix-sandbox # that store inside the nix sandbox, for builds that opt in (studio's release image)
         den.aspects.THEBATTLESHIP-remote-reboot # autologin at boot + safe-reboot (waits for CI jobs and nix builds)
         den.aspects.THEBATTLESHIP-btrfs-maintenance
         den.aspects.THEBATTLESHIP-target-sweep # hourly bounded cargo sweep of task/target under the build lease
