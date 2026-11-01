@@ -1074,6 +1074,29 @@
         "url": "https://codeberg.org/FastTrackStudios/inferno-control"
       }
     },
+    "kache": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "rust-overlay": "rust-overlay_5",
+        "treefmt-nix": "treefmt-nix_2"
+      },
+      "locked": {
+        "lastModified": 1793202351,
+        "narHash": "sha256-MhASqG56lHJYWTVYTXZ2JSy8f0RIwdB0gcNrZrtRyP8=",
+        "owner": "kunobi-ninja",
+        "repo": "kache",
+        "rev": "4fdc7ccc8bf07bb19c364414a271be96f107a75b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "kunobi-ninja",
+        "ref": "v2.0.0-rc.3",
+        "repo": "kache",
+        "type": "github"
+      }
+    },
     "lanzaboote": {
       "inputs": {
         "crane": "crane_5",
@@ -1081,7 +1104,7 @@
           "nixpkgs"
         ],
         "pre-commit": "pre-commit",
-        "rust-overlay": "rust-overlay_5"
+        "rust-overlay": "rust-overlay_6"
       },
       "locked": {
         "lastModified": 1790423250,
@@ -1964,7 +1987,7 @@
           "nixpkgs"
         ],
         "reaper-file": "reaper-file",
-        "rust-overlay": "rust-overlay_6"
+        "rust-overlay": "rust-overlay_7"
       },
       "locked": {
         "lastModified": 1782455529,
@@ -2001,6 +2024,7 @@
         "hunk": "hunk",
         "import-tree": "import-tree_2",
         "inferno-control": "inferno-control",
+        "kache": "kache",
         "lanzaboote": "lanzaboote",
         "loft": "loft",
         "microvm": "microvm",
@@ -2019,7 +2043,7 @@
         "nixpkgs-stable": "nixpkgs-stable_2",
         "nvf": "nvf",
         "reaper-flake": "reaper-flake",
-        "rust-overlay": "rust-overlay_7",
+        "rust-overlay": "rust-overlay_8",
         "sops-nix": "sops-nix",
         "spicetify-nix": "spicetify-nix",
         "stylix": "stylix",
@@ -2119,6 +2143,27 @@
     "rust-overlay_5": {
       "inputs": {
         "nixpkgs": [
+          "kache",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1793000331,
+        "narHash": "sha256-6sLQgHX/V/yF8VrhmsJroujeRua1GY3nDTEpnY7tHF4=",
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "rev": "0d0575988e4bb9ebc4cf1afb1cec1ceac0b5914e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "type": "github"
+      }
+    },
+    "rust-overlay_6": {
+      "inputs": {
+        "nixpkgs": [
           "lanzaboote",
           "nixpkgs"
         ]
@@ -2137,7 +2182,7 @@
         "type": "github"
       }
     },
-    "rust-overlay_6": {
+    "rust-overlay_7": {
       "inputs": {
         "nixpkgs": [
           "reaper-flake",
@@ -2158,7 +2203,7 @@
         "type": "github"
       }
     },
-    "rust-overlay_7": {
+    "rust-overlay_8": {
       "inputs": {
         "nixpkgs": [
           "nixpkgs"
@@ -2178,7 +2223,7 @@
         "type": "github"
       }
     },
-    "rust-overlay_8": {
+    "rust-overlay_9": {
       "inputs": {
         "nixpkgs": [
           "zellij-nix",
@@ -2609,6 +2654,27 @@
         "type": "github"
       }
     },
+    "treefmt-nix_2": {
+      "inputs": {
+        "nixpkgs": [
+          "kache",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1784369104,
+        "narHash": "sha256-47cxbcZODibHv3rELFQ9vZly0vUNkND/atn/U7HLeb0=",
+        "owner": "numtide",
+        "repo": "treefmt-nix",
+        "rev": "df3c0640565d04a0261253cdd89fce78ec50168a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "treefmt-nix",
+        "type": "github"
+      }
+    },
     "utils": {
       "inputs": {
         "systems": "systems"
@@ -2781,7 +2847,7 @@
         "flake-utils": "flake-utils_5",
         "multitask": "multitask",
         "nixpkgs": "nixpkgs_15",
-        "rust-overlay": "rust-overlay_8",
+        "rust-overlay": "rust-overlay_9",
         "zellij": "zellij"
       },
       "locked": {

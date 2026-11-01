@@ -5,8 +5,8 @@
 # cannot cross a mount. starcommand-ci (the deploy runner) is not in the
 # group and never sees the store.
 #
-# NOT one daemon for everyone: kache 1.0.0 cannot serve another user. Its
-# daemon binds the socket 0600 inside a 0700 directory it must own
+# NOT one daemon for everyone: kache (1.x and 2.x) cannot serve another
+# user. Its daemon binds the socket 0600 inside a 0700 directory it must own
 # (kunobi-daemon `unix_socket::ensure_private_dir` / `bind_private`), and
 # drops every connection, on the main socket and the control socket alike,
 # whose SO_PEERCRED uid is not its own (src/transport.rs
@@ -16,16 +16,24 @@
 #
 #   - The STORE is shared: group `kache`, setgid, with a default ACL so every
 #     file and directory a member creates is group read/write whatever its
-#     umask (the runners run with UMask=0066). The wrappers write the store
-#     themselves (Store::open + put in src/wrapper.rs); a local-only wrapper
-#     needs no daemon and starts none.
+#     umask (the runners run with UMask=0066). Every user's processes write
+#     the store as themselves.
 #   - index.db is made here, 0660: SQLite creates it 0644, which a default
 #     ACL turns into group read-only, and every other user's store then
 #     fails with "attempt to write a readonly database" (the build still
 #     passes, uncached). SQLite gives its -wal/-shm the database's mode.
-#   - ONE daemon, as user kache, maintains the store (the periodic GC every
-#     6 h, the index compaction); nothing connects to it. No user daemon:
-#     the target-dir features (seeding, orphan and unit cleaning, file
+#   - A daemon per runtime dir. kache 2 (still uid-locked, kache-ipc
+#     `require_self_peer`) starts one on the first compile that finds none
+#     (src/main.rs `run_wrapper_mode`), so cody, agent and each runner get
+#     their own, on demand, gone after daemon_idle_timeout_secs. Upstream
+#     supports exactly this: many daemons on one store, each with its own
+#     KACHE_RUNTIME_DIR (docs/remote-cache/ci.mdx); GC takes the store's GC
+#     lock, so two daemons never sweep at once. Where a client cannot hand
+#     its compile to the daemon (the runners: NoNewPrivileges, a syscall
+#     filter), it compiles and stores in-process.
+#   - The system daemon below (user kache, never idle) keeps the store's GC
+#     and index upkeep going when no one builds; nothing connects to it.
+#   - The target-dir features (seeding, orphan and unit cleaning, file
 #     sharing) read target_roots from the shared index, so a daemon of one
 #     user would act on, or fail on, the others' target dirs. They are off
 #     in the host config for every daemon.

@@ -72,6 +72,10 @@
       url = "git+https://codeberg.org/FastTrackStudios/inferno-control";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    kache = {
+      url = "github:kunobi-ninja/kache/v2.0.0-rc.3";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     lanzaboote = {
       url = "github:nix-community/lanzaboote/v1.2.0";
       inputs.nixpkgs.follows = "nixpkgs";
