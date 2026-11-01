@@ -7,7 +7,8 @@
 #
 # Simpler than THEBATTLESHIP (hosts/THEBATTLESHIP/kache.nix): one user, so no
 # group, no ACL, no pre-made index.db. The build disk mounts with ownership
-# on and rat owns all of it.
+# on; its root is root's, so the store goes in rat's home/ there, beside
+# ~/.cargo and the runners (home/cargo, home/runner-work*).
 #
 # NO daemon. macOS TCC refuses a launchd job access to an external volume
 # until someone clicks Allow for that job's binary on the Mac's screen (a
@@ -18,13 +19,13 @@
 # sessions already have the volume, so the wrappers and that gc do too.
 #
 # Disk not mounted: /Volumes is root's, so rat cannot create
-# /Volumes/build-disk/.kache, and kache builds uncached instead (it warns
+# /Volumes/build-disk/home/kache, and kache builds uncached instead (it warns
 # and passes through). Never run cargo as root here: root could create the
 # directory on the internal SSD, and the disk would then mount as
 # "build-disk 1".
 { ... }:
 let
-  store = "/Volumes/build-disk/.kache";
+  store = "/Volumes/build-disk/home/kache";
 in
 {
   den.aspects.airlock-kache = {
