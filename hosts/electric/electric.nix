@@ -1,8 +1,8 @@
 # electric — Carter's desktop (Gigabyte B650 GAMING X AX V2), NixOS on the
 # Inland QN450 NVMe, dual-booting Windows ("battleship" on Tailscale) from
-# the Samsung SSD. Secure Boot stays on: lanzaboote signs with the sbctl db
-# key, which is appended to the firmware's factory db (BIOS updates reset db:
-# re-append it from Boot > Secure Boot > Expert Key Management).
+# the Samsung SSD. Secure Boot stays on with the firmware's factory keys
+# (Valorant's Vanguard refuses custom ones): lanzaboote signs with the sbctl
+# db key, enrolled in shim's MOK list, and boots behind Ubuntu's signed shim.
 # Ported from github:electricsss/electric-flake.
 { den, __findFile, ... }:
 {
@@ -23,6 +23,7 @@
       <fleet/unfree>
       <fleet/desktop>
       <fleet/lanzaboote>
+      <fleet.lanzaboote/shim>
 
       <fleet/hardware>
       <fleet.networking/tailscale>
