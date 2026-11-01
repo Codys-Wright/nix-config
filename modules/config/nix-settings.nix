@@ -78,30 +78,42 @@ in
         # Builds never take the machine down. electric (32 GB, no swap) ran a
         # full rebuild out of memory: the OOM killer took plasmashell and the
         # Loft shell, the box crawled until it was power-cycled. Builds now
-        # stop at 90% of RAM (killed inside their own cgroup, desktop
-        # untouched), 95% of the CPUs, and yield to interactive work.
+        # leave 2 CPUs and 4 GiB of RAM to everything else (a runaway build
+        # is killed inside the daemon's cgroup, the desktop untouched), and
+        # yield to interactive work.
         nix = lib.mkIf config.nix.enable {
           daemonCPUSchedPolicy = lib.mkDefault "batch";
           daemonIOSchedClass = lib.mkDefault "best-effort";
           daemonIOSchedPriority = lib.mkDefault 7;
         };
-        systemd.services.nix-daemon.serviceConfig = lib.mkIf config.nix.enable {
-          MemoryHigh = lib.mkDefault "85%";
-          MemoryMax = lib.mkDefault "90%";
-          # When memory runs out anyway, a build goes before the desktop.
-          OOMScoreAdjust = lib.mkDefault 500;
-        };
-        # CPUQuota is absolute (100% = one CPU): 95% of however many this
-        # host has, set on every boot.
-        systemd.services.nix-daemon-cpu-quota = lib.mkIf config.nix.enable {
-          description = "Cap nix builds at 95% of the CPUs";
+        # When memory runs out anyway, a build goes before the desktop.
+        systemd.services.nix-daemon.serviceConfig.OOMScoreAdjust = lib.mkIf config.nix.enable (
+          lib.mkDefault 500
+        );
+        # The reserve depends on the host, and CPUQuota is absolute (100% =
+        # one CPU), so it is computed at boot. Bytes, not percentages: a
+        # MemoryHigh=N% set-property lands in 50-MemoryHighScale.conf, which
+        # sorts after (and silently beats) 50-MemoryHigh.conf.
+        systemd.services.nix-daemon-limits = lib.mkIf config.nix.enable {
+          description = "Leave 2 CPUs and 4 GiB of RAM free of nix builds";
           wantedBy = [ "multi-user.target" ];
+          before = [ "nix-daemon.service" ];
           serviceConfig = {
             Type = "oneshot";
             RemainAfterExit = true;
           };
           script = ''
-            systemctl set-property --runtime nix-daemon.service CPUQuota=$(( 95 * $(nproc) ))%
+            gib=$((1024 * 1024 * 1024))
+            cpus=$(nproc)
+            mem=$(( $(sed -n 's/^MemTotal: *\([0-9]*\) kB/\1/p' /proc/meminfo) * 1024 ))
+            quota=$(( cpus > 3 ? (cpus - 2) * 100 : 100 ))
+            max=$(( mem - 4 * gib ))
+            # Small hosts: never squeeze builds below half the RAM.
+            [ "$max" -lt $(( mem / 2 )) ] && max=$(( mem / 2 ))
+            high=$(( max - gib ))
+            systemctl set-property --runtime nix-daemon.service \
+              CPUQuota=''${quota}% MemoryHigh=$high MemoryMax=$max
+            echo "nix builds: CPUQuota=''${quota}% MemoryHigh=$high MemoryMax=$max"
           '';
         };
         # Root's builds bypass the daemon by default: `nix-daemon --stdio`
