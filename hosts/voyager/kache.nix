@@ -7,10 +7,13 @@
 # dev drive mounts with ownership ignored ("noowners") anyway: every file on
 # it reads as owned by whoever looks, so nothing could be private there.
 #
-# NO daemon, as on airlock (hosts/airlock/kache.nix): macOS TCC refuses a
-# launchd job access to an external volume until someone clicks Allow for
-# that binary, which every kache upgrade would ask again. The wrappers
-# write the store and start a detached `kache gc` over budget themselves.
+# NO launchd daemon, as on airlock (hosts/airlock/kache.nix): macOS TCC
+# refuses a launchd job access to an external volume until someone clicks
+# Allow for that binary, which every kache upgrade would ask again. kache 2
+# starts its own daemon on demand from the build process instead, so it
+# inherits that session's access to the drive; it exits after
+# daemon_idle_timeout_secs, and with none reachable the engine works
+# in-process.
 #
 # Disk not mounted: CodyWright cannot create /Volumes/dev-drive (root's
 # /Volumes), so kache builds uncached and never writes the internal SSD.
@@ -25,13 +28,18 @@
         # 3.6 TiB drive, ~2 TiB free.
         local_max_size = "300GiB"
         # Daemon features that act on target dirs: off, so nothing but cargo
-        # touches a checkout's target (and there is no daemon to run them).
+        # touches a checkout's target.
         seed_new_targets = false
         auto_clean_orphaned_targets = false
         auto_share_target_files = false
         auto_clean_idle_targets_days = 0
         auto_clean_unused_units_days = 0
-        # A daemon a `kache stats` starts goes once idle.
+        # Every daemon GC (at each daemon start and every 6 h) deletes every
+        # registered `-C incremental` dir; kache 2 starts a daemon whenever
+        # a build finds none, so this on would wipe target/*/incremental
+        # many times a day.
+        clean_incremental = false
+        # The on-demand daemon goes once idle.
         daemon_idle_timeout_secs = 600
       '';
     };
