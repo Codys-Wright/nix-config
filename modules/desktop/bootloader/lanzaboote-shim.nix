@@ -37,6 +37,7 @@
         sync = pkgs.writeShellApplication {
           name = "lanzaboote-shim-sync";
           runtimeInputs = with pkgs; [
+            diffutils # cmp
             efibootmgr
             util-linux
             gnugrep
