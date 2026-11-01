@@ -30,6 +30,7 @@
 { ... }:
 let
   store = "/Volumes/build-disk/home/kache";
+  tmp = "/Volumes/build-disk/home/tmp";
 in
 {
   den.aspects.airlock-kache = {
@@ -46,13 +47,16 @@ in
         environment.etc."kache/config.toml".text = ''
           [cache]
           local_store = "${store}"
-          # The build disk is 1.8 TiB and ~87% full. Restores are clones, so
-          # the store costs extra blocks only for what no target dir holds.
-          local_max_size = "120GiB"
-          # Below 60 GiB free a build evicts cache entries (the studio
-          # release jobs refuse to start under 50 GB). Set here because
+          # About 1 TB of the 1.8 TiB build disk (its old target dirs were
+          # cleared 2026-11-01: kache rebuilds them in seconds). Restores
+          # are clones, so the store costs extra blocks only for what no
+          # target dir holds.
+          local_max_size = "930GiB"
+          # Below 100 GiB free a build evicts cache entries (entries only:
+          # idle target dirs are auto_recover_targets, off), so the store
+          # plus the build trees never fill the disk. Set here because
           # kache's default is 0 in CI, and the runners are CI.
-          auto_recover_min_free_bytes = 64424509440
+          auto_recover_min_free_bytes = 107374182400
           # Daemon features that act on target dirs: off, so nothing but
           # cargo touches the runners' warm targets or the canonical
           # checkouts'.
@@ -84,8 +88,20 @@ in
 
           [build]
           rustc-wrapper = "${kache}"
+
+          # Temporary files on the build disk, not in macOS's per-user
+          # TMPDIR on the internal SSD (228 GB, nearly full): kache's
+          # staging, rustc's and the linker's temp files. `force`, because
+          # macOS always sets TMPDIR and [env] would otherwise keep it.
+          [env]
+          TMPDIR = { value = "${tmp}", force = true }
         '';
         system.activationScripts.postActivation.text = lib.mkAfter ''
+          # kache: rat's temp dir on the build disk, for builds (see the
+          # Cargo config's [env]); made only when the disk is mounted.
+          if [ -d /Volumes/build-disk/home ]; then
+            /usr/bin/sudo -u rat /bin/mkdir -p ${tmp}
+          fi
           # kache: link rat's Cargo config (needs the build disk mounted).
           cargo_home=/Users/rat/.cargo
           if [ ! -d "$cargo_home/" ]; then
