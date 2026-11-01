@@ -12,6 +12,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # nix-secrets is a private flake input (ssh://git@github.com/...), which a
+      # hosted runner has no key for. Mint a short-lived fts-forge App token
+      # that can only read it, and point the input's ssh URL at HTTPS with it.
+      - id: nix-secrets-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.FORGE_APP_ID }}
+          private-key: ${{ secrets.FORGE_APP_PRIVATE_KEY }}
+          owner: Codys-Wright
+          repositories: nix-secrets
+          permission-contents: read
+
+      - name: Read nix-secrets with the job's token
+        env:
+          TOKEN: ${{ steps.nix-secrets-token.outputs.token }}
+        run: |
+          git config --global \
+            url."https://x-access-token:${TOKEN}@github.com/Codys-Wright/nix-secrets".insteadOf \
+            "ssh://git@github.com/Codys-Wright/nix-secrets"
+
       - uses: wimpysworld/nothing-but-nix@main
 
       - uses: DeterminateSystems/nix-installer-action@main
@@ -32,6 +52,26 @@ jobs:
     needs: check
     steps:
       - uses: actions/checkout@v4
+
+      # nix-secrets is a private flake input (ssh://git@github.com/...), which a
+      # hosted runner has no key for. Mint a short-lived fts-forge App token
+      # that can only read it, and point the input's ssh URL at HTTPS with it.
+      - id: nix-secrets-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.FORGE_APP_ID }}
+          private-key: ${{ secrets.FORGE_APP_PRIVATE_KEY }}
+          owner: Codys-Wright
+          repositories: nix-secrets
+          permission-contents: read
+
+      - name: Read nix-secrets with the job's token
+        env:
+          TOKEN: ${{ steps.nix-secrets-token.outputs.token }}
+        run: |
+          git config --global \
+            url."https://x-access-token:${TOKEN}@github.com/Codys-Wright/nix-secrets".insteadOf \
+            "ssh://git@github.com/Codys-Wright/nix-secrets"
 
       - uses: wimpysworld/nothing-but-nix@main
 
@@ -54,6 +94,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # nix-secrets is a private flake input (ssh://git@github.com/...), which a
+      # hosted runner has no key for. Mint a short-lived fts-forge App token
+      # that can only read it, and point the input's ssh URL at HTTPS with it.
+      - id: nix-secrets-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.FORGE_APP_ID }}
+          private-key: ${{ secrets.FORGE_APP_PRIVATE_KEY }}
+          owner: Codys-Wright
+          repositories: nix-secrets
+          permission-contents: read
+
+      - name: Read nix-secrets with the job's token
+        env:
+          TOKEN: ${{ steps.nix-secrets-token.outputs.token }}
+        run: |
+          git config --global \
+            url."https://x-access-token:${TOKEN}@github.com/Codys-Wright/nix-secrets".insteadOf \
+            "ssh://git@github.com/Codys-Wright/nix-secrets"
+
       - uses: wimpysworld/nothing-but-nix@main
 
       - uses: DeterminateSystems/nix-installer-action@main
@@ -75,6 +135,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # nix-secrets is a private flake input (ssh://git@github.com/...), which a
+      # hosted runner has no key for. Mint a short-lived fts-forge App token
+      # that can only read it, and point the input's ssh URL at HTTPS with it.
+      - id: nix-secrets-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.FORGE_APP_ID }}
+          private-key: ${{ secrets.FORGE_APP_PRIVATE_KEY }}
+          owner: Codys-Wright
+          repositories: nix-secrets
+          permission-contents: read
+
+      - name: Read nix-secrets with the job's token
+        env:
+          TOKEN: ${{ steps.nix-secrets-token.outputs.token }}
+        run: |
+          git config --global \
+            url."https://x-access-token:${TOKEN}@github.com/Codys-Wright/nix-secrets".insteadOf \
+            "ssh://git@github.com/Codys-Wright/nix-secrets"
+
       - uses: DeterminateSystems/nix-installer-action@main
 
       - uses: DeterminateSystems/magic-nix-cache-action@main
@@ -93,6 +173,26 @@ jobs:
     needs: check
     steps:
       - uses: actions/checkout@v4
+
+      # nix-secrets is a private flake input (ssh://git@github.com/...), which a
+      # hosted runner has no key for. Mint a short-lived fts-forge App token
+      # that can only read it, and point the input's ssh URL at HTTPS with it.
+      - id: nix-secrets-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.FORGE_APP_ID }}
+          private-key: ${{ secrets.FORGE_APP_PRIVATE_KEY }}
+          owner: Codys-Wright
+          repositories: nix-secrets
+          permission-contents: read
+
+      - name: Read nix-secrets with the job's token
+        env:
+          TOKEN: ${{ steps.nix-secrets-token.outputs.token }}
+        run: |
+          git config --global \
+            url."https://x-access-token:${TOKEN}@github.com/Codys-Wright/nix-secrets".insteadOf \
+            "ssh://git@github.com/Codys-Wright/nix-secrets"
 
       - uses: wimpysworld/nothing-but-nix@main
 
