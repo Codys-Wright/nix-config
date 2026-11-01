@@ -74,6 +74,42 @@ in
         # do this. Remove once nixpkgs stops sending a `curl/` UA.
         systemd.services.nix-daemon.environment.NIX_CURL_FLAGS =
           lib.mkIf config.nix.enable "--user-agent Nixpkgs";
+
+        # Builds never take the machine down. electric (32 GB, no swap) ran a
+        # full rebuild out of memory: the OOM killer took plasmashell and the
+        # Loft shell, the box crawled until it was power-cycled. Builds now
+        # stop at 90% of RAM (killed inside their own cgroup, desktop
+        # untouched), 95% of the CPUs, and yield to interactive work.
+        nix = lib.mkIf config.nix.enable {
+          daemonCPUSchedPolicy = lib.mkDefault "batch";
+          daemonIOSchedClass = lib.mkDefault "best-effort";
+          daemonIOSchedPriority = lib.mkDefault 7;
+        };
+        systemd.services.nix-daemon.serviceConfig = lib.mkIf config.nix.enable {
+          MemoryHigh = lib.mkDefault "85%";
+          MemoryMax = lib.mkDefault "90%";
+          # When memory runs out anyway, a build goes before the desktop.
+          OOMScoreAdjust = lib.mkDefault 500;
+        };
+        # CPUQuota is absolute (100% = one CPU): 95% of however many this
+        # host has, set on every boot.
+        systemd.services.nix-daemon-cpu-quota = lib.mkIf config.nix.enable {
+          description = "Cap nix builds at 95% of the CPUs";
+          wantedBy = [ "multi-user.target" ];
+          serviceConfig = {
+            Type = "oneshot";
+            RemainAfterExit = true;
+          };
+          script = ''
+            systemctl set-property --runtime nix-daemon.service CPUQuota=$(( 95 * $(nproc) ))%
+          '';
+        };
+        # Root's builds bypass the daemon by default: `nix-daemon --stdio`
+        # under deploy-rs --remote-build, nixos-rebuild, nix-store -r over SSH
+        # all open the store directly, in the SSH session's cgroup, outside
+        # the limits above. Send them through the daemon instead (PAM session
+        # environment, so SSH commands get it too).
+        environment.sessionVariables.NIX_REMOTE = lib.mkIf config.nix.enable "daemon";
       };
   };
 }
