@@ -10,13 +10,17 @@
 # on; its root is root's, so the store goes in rat's home/ there, beside
 # ~/.cargo and the runners (home/cargo, home/runner-work*).
 #
-# NO daemon. macOS TCC refuses a launchd job access to an external volume
-# until someone clicks Allow for that job's binary on the Mac's screen (a
-# probe agent got "Operation not permitted" on the build disk, 2026-10-31),
-# and kache's binary is a new store path on every upgrade. The wrappers
-# don't need one: they write the store themselves, and a build that finds
-# the store over budget starts a detached `kache gc`. The runners and ssh
-# sessions already have the volume, so the wrappers and that gc do too.
+# NO launchd daemon. macOS TCC refuses a launchd job access to an external
+# volume until someone clicks Allow for that job's binary on the Mac's screen
+# (a probe agent got "Operation not permitted" on the build disk,
+# 2026-10-31), and kache's binary is a new store path on every upgrade.
+# kache 2 starts its own daemon on demand instead: the first compile that
+# finds none spawns `kache-engine daemon run` from the build process, so it
+# inherits that runner's or ssh session's access to the volume (checked
+# 2026-11-01: it opened the store's index.db and served a 28/28 restore).
+# Its runtime dir (daemon.sock, daemon.log) is the store itself, one daemon
+# for every rat process; it exits after daemon_idle_timeout_secs. With no
+# daemon reachable the engine compiles, looks up and stores in-process.
 #
 # Disk not mounted: /Volumes is root's, so rat cannot create
 # /Volumes/build-disk/home/kache, and kache builds uncached instead (it warns
@@ -51,13 +55,20 @@ in
           auto_recover_min_free_bytes = 64424509440
           # Daemon features that act on target dirs: off, so nothing but
           # cargo touches the runners' warm targets or the canonical
-          # checkouts' (and there is no daemon to run them anyway).
+          # checkouts'.
           seed_new_targets = false
           auto_clean_orphaned_targets = false
           auto_share_target_files = false
           auto_clean_idle_targets_days = 0
           auto_clean_unused_units_days = 0
-          # A daemon a `kache stats` starts goes once idle.
+          # Every daemon GC (at each daemon start and every 6 h) deletes
+          # every `-C incremental` dir a compile registered in the index. In
+          # kache 2 every build that finds no daemon starts one, so this on
+          # would wipe the runners' and checkouts' target/*/incremental
+          # many times a day (the first 2.0 daemon here "cleaned 2
+          # registered incremental dirs").
+          clean_incremental = false
+          # The on-demand daemon goes once idle.
           daemon_idle_timeout_secs = 600
         '';
 
