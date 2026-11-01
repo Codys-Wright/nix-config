@@ -95,6 +95,11 @@ in
             auto_clean_idle_targets_days = 0
             auto_clean_unused_units_days = 0
             auto_recover_min_free_bytes = 0
+            # Every daemon GC (at each daemon start and every 6 h) deletes
+            # every `-C incremental` dir a compile registered in the shared
+            # index; a user's own daemon (kache 2) can, and would wipe
+            # cody's target/*/incremental many times a day.
+            clean_incremental = false
             # A daemon a `kache` command starts for its user goes once idle.
             daemon_idle_timeout_secs = 600
           '';
