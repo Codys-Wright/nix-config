@@ -1,6 +1,7 @@
 {
   inputs,
   fleet,
+  den,
   __findFile,
   ...
 }:
@@ -19,6 +20,7 @@
   den.aspects = {
     voyager = {
       includes = [
+        den.aspects.voyager-kache # kache's store on the dev drive
         <fleet/fonts>
         <fleet/phoenix>
         # starcommand Hermes runs `voyager` profile sessions here over SSH.

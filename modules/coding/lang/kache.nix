@@ -14,6 +14,12 @@
 # store is shared by several users (hosts/THEBATTLESHIP/kache.nix) turns the
 # per-user daemon off with `kache.userDaemon = false`: it would GC and
 # manage target dirs over a store other users write too.
+#
+# On macOS there is no daemon at all, on purpose: the Macs keep their stores
+# on external volumes (hosts/{airlock,voyager}/kache.nix), and TCC refuses a
+# launchd job access to one until someone clicks Allow for that binary, again
+# for every kache store path. The wrappers write the store and start a
+# detached `kache gc` over budget without one.
 { ... }:
 {
   fleet.coding._.lang._.kache = {

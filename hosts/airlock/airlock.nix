@@ -3,6 +3,7 @@
   fleet,
   ssh-keys,
   lib,
+  den,
   __findFile,
   ...
 }:
@@ -23,6 +24,7 @@
   den.aspects.airlock = {
     # starcommand Hermes runs `airlock` profile sessions here over SSH.
     includes = [
+      den.aspects.airlock-kache # kache for rat and the runners, store on the build disk
       (<fleet.coding.cli/hermes-node> { user = "rat"; })
       # rat's `gh` / git push = fts-forge[bot] (key: sops/hosts/airlock.yaml).
       (<fleet.coding.cli/gh-forge> {
