@@ -114,9 +114,26 @@ in
             [build]
             rustc-wrapper = "${lib.getExe pkgs.kache}"
           '';
+          # A private OUT_DIR alias root per user. kache compiles some
+          # registry proc macros (paste, linkme-impl, …) against an empty
+          # read-only OUT_DIR under this root, so the path they bake in is
+          # the same in every checkout; without it each checkout bakes its
+          # own target/ path and everything downstream misses. The root must
+          # be owned by the building user and writable by no one else
+          # (src/out_dir_alias.rs `root_is_safe`), so the default
+          # <store>/out-dirs (cody's, created first) serves cody only; agent
+          # and the runners get their own. Crates downstream of an aliased
+          # macro therefore key per user.
+          environment.etc."kache/agent-config.toml".text = ''
+            [cache]
+            out_dir_alias_root = "${store}/out-dirs-agent"
+          '';
+
           systemd.tmpfiles.rules = [
             "d /home/agent/.cargo 0755 agent users -"
             "L+ /home/agent/.cargo/config.toml - - - - /etc/kache/cargo-config.toml"
+            "d /home/agent/.config/kache 0755 agent users -"
+            "L+ /home/agent/.config/kache/config.toml - - - - /etc/kache/agent-config.toml"
           ];
 
           # The store's directory, its ACL and index.db, once the drive is
@@ -198,6 +215,8 @@ in
               environment = {
                 RUSTC_WRAPPER = kache;
                 KACHE_RUNTIME_DIR = "/var/lib/github-runner/${name}/kache";
+                # One for every runner (one uid), so all of them key alike.
+                KACHE_OUT_DIR_ALIAS_ROOT = "${store}/out-dirs-github-runner";
               };
               serviceConfig.ReadWritePaths = [ "-${store}" ];
             }
