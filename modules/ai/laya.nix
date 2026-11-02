@@ -113,6 +113,19 @@
           extraModels = if cfg.extraModels == { } then null else builtins.toJSON cfg.extraModels;
         };
 
+        # On CUDA, ModernBERT's Triton kernels build a small C helper on first
+        # use: they need a writable cache (the service has no HOME), a C
+        # compiler and the driver's libcuda. The cache sits in the private
+        # /tmp because systemd mounts the DynamicUser state dir noexec, so a
+        # helper built there can't be loaded; it rebuilds (~0.5 s) per start.
+        systemd.services.laya-serve = lib.mkIf gpu {
+          path = [ pkgs.stdenv.cc ];
+          environment = {
+            TRITON_CACHE_DIR = "/tmp/triton";
+            TRITON_LIBCUDA_PATH = "/run/opengl-driver/lib";
+          };
+        };
+
         systemd.services.laya-serve-rebalance = lib.mkIf gpu {
           description = "Move laya-serve between GPU and CPU as free VRAM changes";
           serviceConfig.Type = "oneshot";
