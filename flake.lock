@@ -334,6 +334,23 @@
         "type": "github"
       }
     },
+    "devenv-fleet": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1793602472,
+        "narHash": "sha256-U606lXI/i+ibOjKgGQJbh5ggrrtiHgYGvjtmB2Qnp6E=",
+        "owner": "FastTrackStudios",
+        "repo": "devenv-fleet",
+        "rev": "ab6cb110c1a17c94048e8bafe3e44e7ac9260677",
+        "type": "github"
+      },
+      "original": {
+        "owner": "FastTrackStudios",
+        "ref": "v0.1.0",
+        "repo": "devenv-fleet",
+        "type": "github"
+      }
+    },
     "dioxus-flake": {
       "inputs": {
         "crane": "crane",
@@ -2050,6 +2067,7 @@
         "daw": "daw",
         "den": "den",
         "deploy-rs": "deploy-rs",
+        "devenv-fleet": "devenv-fleet",
         "dioxus-flake": "dioxus-flake",
         "disko": "disko",
         "erosanix": "erosanix",
