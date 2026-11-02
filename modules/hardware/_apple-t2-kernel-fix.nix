@@ -13,9 +13,13 @@
 #     own magicmouse_reset_resume, so t2linux reworked the trackpad stack
 #     (4001/4003/4004, 4005 folded in and deleted; "Fix trackpad" 05f8dce).
 #
-# t2linux's 6.18 branch carries rebased copies; we take exactly those
-# (pinned to 9f538c6, "Fix patching failure in patch 3001", KVER=6.18.53) and
-# keep every other patch from nixos-hardware unchanged. We deliberately do NOT
+#   * 2008-i915-4-lane-quirk-for-mbp15-1: fails from 6.18.59 (intel_quirks.c
+#     hunk #2, intel_quirks.h hunk #1) — 6.18.y moved the i915 quirk table.
+#
+# t2linux's 6.18 branch carries rebased copies; we take exactly those (3001
+# and 4001-4004 pinned to 9f538c6, "Fix patching failure in patch 3001",
+# KVER=6.18.53; 2008 pinned to 166c92f, "6.18.55") and keep every other patch
+# from nixos-hardware unchanged. We deliberately do NOT
 # adopt that branch wholesale: it renamed apple-bce to the t2bce driver stack,
 # which would also need nixos-hardware's Kconfig + initrd module list forked.
 #
@@ -29,17 +33,31 @@
 }:
 let
   stalePatchesRev = "facf1c778667c3ef62104949ef64c75ce7e43b0a";
-  rebasedPatchesRev = "9f538c646581ad805d9b4ff8690803306e3899db";
+  trackpadRev = "9f538c646581ad805d9b4ff8690803306e3899db";
+  i915QuirkRev = "166c92fba00154e1c66d2d690a30c3e6d4e51df1";
 
-  # name -> hash of the copy at rebasedPatchesRev
+  # name -> rev and hash of the rebased copy on t2linux's 6.18 branch
   rebased = {
-    "3001-applesmc-convert-static-structures-to-drvdata.patch" =
-      "sha256-c/d+c5eKzhbtfUKtLC7AB+6vMXge4ZzPJAUbNENWH7g=";
-    "4001-asahi-trackpad.patch" = "sha256-2h3TdPsX9HBXx5jkZ2S2GJkjFcdL8vKD1G69iqd9IWg=";
-    "4003-HID-apple-ignore-the-trackpad-on-T2-Macs.patch" =
-      "sha256-LLZzcysLTuQrSXWXbdq7AASxfMInQoqpWzRNZAKws9k=";
-    "4004-HID-magicmouse-Add-support-for-trackpads-found-on-T2.patch" =
-      "sha256-kUnbtl/54cihscirl9kP0Gsot7bdP0rYKlj6gQ10hk0=";
+    "2008-i915-4-lane-quirk-for-mbp15-1.patch" = {
+      rev = i915QuirkRev;
+      hash = "sha256-gTYP7WHV/Qulobdi1nNdYsv1CWgkM8pGvsCFQ+rvhrw=";
+    };
+    "3001-applesmc-convert-static-structures-to-drvdata.patch" = {
+      rev = trackpadRev;
+      hash = "sha256-c/d+c5eKzhbtfUKtLC7AB+6vMXge4ZzPJAUbNENWH7g=";
+    };
+    "4001-asahi-trackpad.patch" = {
+      rev = trackpadRev;
+      hash = "sha256-2h3TdPsX9HBXx5jkZ2S2GJkjFcdL8vKD1G69iqd9IWg=";
+    };
+    "4003-HID-apple-ignore-the-trackpad-on-T2-Macs.patch" = {
+      rev = trackpadRev;
+      hash = "sha256-LLZzcysLTuQrSXWXbdq7AASxfMInQoqpWzRNZAKws9k=";
+    };
+    "4004-HID-magicmouse-Add-support-for-trackpads-found-on-T2.patch" = {
+      rev = trackpadRev;
+      hash = "sha256-kUnbtl/54cihscirl9kP0Gsot7bdP0rYKlj6gQ10hk0=";
+    };
   };
   dropped = [ "4005-HID-magicmouse-fix-regression-breaking-support-for-M.patch" ];
 
@@ -54,8 +72,8 @@ let
       // {
         patch = pkgs.fetchurl {
           inherit (p) name;
-          url = "https://raw.githubusercontent.com/t2linux/linux-t2-patches/${rebasedPatchesRev}/${p.name}";
-          hash = rebased.${p.name};
+          url = "https://raw.githubusercontent.com/t2linux/linux-t2-patches/${rebased.${p.name}.rev}/${p.name}";
+          inherit (rebased.${p.name}) hash;
         };
       }
     else
