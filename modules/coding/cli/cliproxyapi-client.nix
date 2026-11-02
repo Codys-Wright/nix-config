@@ -21,7 +21,9 @@
 # - pi: /etc/pi/models.json points pi's built-in `anthropic` and `openai`
 #   providers at the proxy, with an `!command` apiKey that runs the same
 #   helper. pi only reads ~/.pi/agent/models.json, so each listed user gets
-#   a symlink to it, unless they already have their own models.json.
+#   a symlink to it, unless they already have their own models.json. On
+#   llama-server hosts home-manager owns that file and merges these
+#   providers in next to `local` (modules/ai/llama-server.nix).
 #
 # NixOS: the host must already import sops-nix (THEBATTLESHIP-sops does).
 # nix-darwin: this imports sops-nix's darwin module and decrypts with the

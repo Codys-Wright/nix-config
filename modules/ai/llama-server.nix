@@ -222,18 +222,33 @@
             };
           };
       in
+      { osConfig, ... }:
+      let
+        # pi reads one models.json; keep the host's other providers (the
+        # cliproxyapi-client's /etc/pi/models.json) alongside `local`.
+        # fromJSON refuses store-path context; the system closure already
+        # holds the key helper through /etc, so dropping it here is safe.
+        hostPi = lib.attrByPath [ "environment" "etc" "pi/models.json" "text" ] null osConfig;
+        hostProviders =
+          if hostPi == null then
+            { }
+          else
+            (builtins.fromJSON (builtins.unsafeDiscardStringContext hostPi)).providers or { };
+      in
       {
         home.file.".pi/agent/models.json".text = builtins.toJSON {
-          providers.local = {
-            baseUrl = "http://127.0.0.1:${toString cfg.port}/v1";
-            api = "openai-completions";
-            apiKey = "none";
-            compat = {
-              supportsReasoningEffort = true;
-              supportsDeveloperRole = false;
-              maxTokensField = "max_tokens";
+          providers = hostProviders // {
+            local = {
+              baseUrl = "http://127.0.0.1:${toString cfg.port}/v1";
+              api = "openai-completions";
+              apiKey = "none";
+              compat = {
+                supportsReasoningEffort = true;
+                supportsDeveloperRole = false;
+                maxTokensField = "max_tokens";
+              };
+              models = map piModel (lib.attrNames cfg.models);
             };
-            models = map piModel (lib.attrNames cfg.models);
           };
         };
       };
