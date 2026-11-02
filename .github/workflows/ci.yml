@@ -4,11 +4,25 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
+
+# The Linux jobs run on THEBATTLESHIP's `nix-config` runners (STA-621),
+# against the host's /nix/store and daemon: what the host already has is
+# not rebuilt or downloaded. The repo is public, so those jobs skip a fork's
+# PR (the `if:`), and the runners' job gate refuses one whatever a
+# workflow says. Builds land in the host's store, not in cachix. voyager
+# (Darwin) stays on a hosted runner.
+
+# A newer push to a PR branch cancels the older run; main's runs all finish.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   check:
     name: nix flake check
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, nix-config]
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
     steps:
       - uses: actions/checkout@v4
 
@@ -28,27 +42,20 @@ jobs:
         env:
           TOKEN: ${{ steps.nix-secrets-token.outputs.token }}
         run: |
-          git config --global \
+          # A gitconfig of the job's own, in RUNNER_TEMP (emptied after every
+          # job): the runner's HOME outlives the job.
+          echo "GIT_CONFIG_GLOBAL=$RUNNER_TEMP/gitconfig" >> "$GITHUB_ENV"
+          git config --file "$RUNNER_TEMP/gitconfig" \
             url."https://x-access-token:${TOKEN}@github.com/Codys-Wright/nix-secrets".insteadOf \
             "ssh://git@github.com/Codys-Wright/nix-secrets"
-
-      - uses: wimpysworld/nothing-but-nix@main
-
-      - uses: DeterminateSystems/nix-installer-action@main
-
-      - uses: DeterminateSystems/magic-nix-cache-action@main
-
-      - uses: cachix/cachix-action@v15
-        with:
-          name: fleet
-          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
 
       - name: Check flake
         run: nix flake check -L
 
   build-vm:
     name: Build THEBATTLESHIP-vm
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, nix-config]
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
     needs: check
     steps:
       - uses: actions/checkout@v4
@@ -69,27 +76,20 @@ jobs:
         env:
           TOKEN: ${{ steps.nix-secrets-token.outputs.token }}
         run: |
-          git config --global \
+          # A gitconfig of the job's own, in RUNNER_TEMP (emptied after every
+          # job): the runner's HOME outlives the job.
+          echo "GIT_CONFIG_GLOBAL=$RUNNER_TEMP/gitconfig" >> "$GITHUB_ENV"
+          git config --file "$RUNNER_TEMP/gitconfig" \
             url."https://x-access-token:${TOKEN}@github.com/Codys-Wright/nix-secrets".insteadOf \
             "ssh://git@github.com/Codys-Wright/nix-secrets"
-
-      - uses: wimpysworld/nothing-but-nix@main
-
-      - uses: DeterminateSystems/nix-installer-action@main
-
-      - uses: DeterminateSystems/magic-nix-cache-action@main
-
-      - uses: cachix/cachix-action@v15
-        with:
-          name: fleet
-          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
 
       - name: Build microvm runner
         run: nix build .#THEBATTLESHIP-vm -L
 
   build-THEBATTLESHIP:
     name: Build THEBATTLESHIP
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, nix-config]
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
     needs: check
     steps:
       - uses: actions/checkout@v4
@@ -110,20 +110,12 @@ jobs:
         env:
           TOKEN: ${{ steps.nix-secrets-token.outputs.token }}
         run: |
-          git config --global \
+          # A gitconfig of the job's own, in RUNNER_TEMP (emptied after every
+          # job): the runner's HOME outlives the job.
+          echo "GIT_CONFIG_GLOBAL=$RUNNER_TEMP/gitconfig" >> "$GITHUB_ENV"
+          git config --file "$RUNNER_TEMP/gitconfig" \
             url."https://x-access-token:${TOKEN}@github.com/Codys-Wright/nix-secrets".insteadOf \
             "ssh://git@github.com/Codys-Wright/nix-secrets"
-
-      - uses: wimpysworld/nothing-but-nix@main
-
-      - uses: DeterminateSystems/nix-installer-action@main
-
-      - uses: DeterminateSystems/magic-nix-cache-action@main
-
-      - uses: cachix/cachix-action@v15
-        with:
-          name: fleet
-          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
 
       - name: Build NixOS system
         run: nix build .#nixosConfigurations.THEBATTLESHIP.config.system.build.toplevel -L
@@ -169,7 +161,8 @@ jobs:
 
   render-cluster:
     name: Render + validate cluster manifests (nixidy)
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, nix-config]
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
     needs: check
     steps:
       - uses: actions/checkout@v4
@@ -190,20 +183,12 @@ jobs:
         env:
           TOKEN: ${{ steps.nix-secrets-token.outputs.token }}
         run: |
-          git config --global \
+          # A gitconfig of the job's own, in RUNNER_TEMP (emptied after every
+          # job): the runner's HOME outlives the job.
+          echo "GIT_CONFIG_GLOBAL=$RUNNER_TEMP/gitconfig" >> "$GITHUB_ENV"
+          git config --file "$RUNNER_TEMP/gitconfig" \
             url."https://x-access-token:${TOKEN}@github.com/Codys-Wright/nix-secrets".insteadOf \
             "ssh://git@github.com/Codys-Wright/nix-secrets"
-
-      - uses: wimpysworld/nothing-but-nix@main
-
-      - uses: DeterminateSystems/nix-installer-action@main
-
-      - uses: DeterminateSystems/magic-nix-cache-action@main
-
-      - uses: cachix/cachix-action@v15
-        with:
-          name: fleet
-          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
 
       # Renders all k8s/ apps to plain YAML — catches eval errors, typed-resource
       # mistakes, helm-inflation failures, and bad references before Argo ever
