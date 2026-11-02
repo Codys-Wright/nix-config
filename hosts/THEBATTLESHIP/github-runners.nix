@@ -150,6 +150,18 @@ let
   };
   genericCacheRoot = "/run/media/Development/ci/thebattleship";
   genericOrg = "FastTrackStudios";
+
+  # Codys-Wright/nix-config's own pool (STA-621): `nix flake check` and the
+  # host builds run against THEBATTLESHIP's /nix/store and daemon, so what
+  # this host already has costs nothing (the hosted runners start empty
+  # and ran out of disk, PR #83). Registered through the FTS - Forge App
+  # like github-starcommand. The repo is PUBLIC: every job runs
+  # nixConfigJobGate (below), and the jobs run as their own user,
+  # `nix-config-ci`, which cannot read the forge App key the FTS runners'
+  # user holds. Workflows: `runs-on: [self-hosted, nix-config]`.
+  nixConfigRunner = "github-nix-config";
+  nixConfigCount = 3;
+  nixConfigWorkRoot = "/run/media/Development/github-runner-work-nix-config";
 in
 {
   den.aspects.THEBATTLESHIP-github-runners.includes = [
@@ -169,6 +181,18 @@ in
         login = "Codys-Wright";
         keySopsKey = "github_app_fts_forge_private_key";
         keySopsFile = "${inputs.nix-secrets}/sops/hosts/THEBATTLESHIP.yaml";
+      };
+    })
+    # Codys-Wright/nix-config (nixConfigRunner above): one per job of a CI
+    # run's fan-out (check, build-vm, build THEBATTLESHIP).
+    (runner {
+      name = nixConfigRunner;
+      count = nixConfigCount;
+      url = "https://github.com/Codys-Wright/nix-config";
+      labels = [ "nix-config" ];
+      workRoot = nixConfigWorkRoot;
+      githubApp = forgeApp // {
+        login = "Codys-Wright";
       };
     })
   ]
@@ -381,6 +405,39 @@ in
           echo "fts-ci: allowed ($why); CI_POOL=''${CI_POOL:-?} CI_CACHE_DIR=$dir"
         '';
       };
+      # nix-config's gate. Codys-Wright/nix-config is PUBLIC, and a fork's PR
+      # can name any label: only a push to main, a manual dispatch (write
+      # access) or a pull request whose head branch is in this repo (its
+      # author can push here) runs on this host. Fork PRs are refused, as
+      # is every other event. The fork test reads the event payload; an
+      # unreadable payload is a refusal.
+      nixConfigJobGate = pkgs.writeShellApplication {
+        # The runner runs a hook only if its name ends in .sh.
+        name = "nix-config-ci-job-gate.sh";
+        runtimeInputs = [ pkgs.jq ];
+        text = ''
+          repo=Codys-Wright/nix-config
+          deny() { echo "nix-config-ci: refusing job ($1)" >&2; exit 1; }
+          event="''${GITHUB_EVENT_NAME:-}"
+          ref="''${GITHUB_REF:-}"
+          payload="''${GITHUB_EVENT_PATH:-}"
+          [ "''${GITHUB_REPOSITORY:-}" = "$repo" ] || deny "repository ''${GITHUB_REPOSITORY:-?}"
+          [ -n "$payload" ] && [ -r "$payload" ] || deny "no event payload"
+          p_repo="$(jq -er '.repository.full_name' "$payload" 2>/dev/null)" || deny "unreadable event payload"
+          [ "$p_repo" = "$repo" ] || deny "payload repository $p_repo"
+          case "$event" in
+            push) [ "$ref" = refs/heads/main ] || deny "push to ''${ref:-?}" ;;
+            workflow_dispatch) ;;
+            pull_request)
+              head="$(jq -er '.pull_request.head.repo.full_name' "$payload" 2>/dev/null)" \
+                || deny "pull request head unreadable"
+              [ "$head" = "$repo" ] || deny "pull request from a fork ($head)" ;;
+            *) deny "event ''${event:-?}" ;;
+          esac
+          echo "nix-config-ci: allowed ($event, $ref)"
+        '';
+      };
+      nixConfigInstances = map (i: "${nixConfigRunner}-${toString i}") (lib.range 1 nixConfigCount);
       genericInstances = lib.concatLists (
         lib.mapAttrsToList (
           name: pool:
@@ -522,6 +579,36 @@ in
             '';
           };
         };
+
+      # nix-config's instances run as their own user (nixConfigRunner).
+      # The work trees are made github-runner's by the runner aspect;
+      # hand them over after it.
+      users.users.nix-config-ci = {
+        isSystemUser = true;
+        group = "nix-config-ci";
+        description = "Codys-Wright/nix-config CI (github-nix-config runners)";
+        home = "/var/empty";
+      };
+      users.groups.nix-config-ci = { };
+      system.activationScripts.nix-config-runner-work =
+        lib.stringAfter [ "users" "groups" "github-runner-dirs-${nixConfigRunner}" ]
+          (
+            lib.concatMapStringsSep "\n" (
+              inst: "chown nix-config-ci:nix-config-ci ${nixConfigWorkRoot}/${inst}"
+            ) nixConfigInstances
+          );
+      # (An import, as services.github-runners.<name> is also set below.)
+      imports = [
+        {
+          services.github-runners = lib.genAttrs nixConfigInstances (_: {
+            user = lib.mkForce "nix-config-ci";
+            group = lib.mkForce "nix-config-ci";
+            # HOME is the work dir, on the Development disk: flake fetches
+            # and the eval cache stay off tmpfs (and go on every restart).
+            extraEnvironment.ACTIONS_RUNNER_HOOK_JOB_STARTED = lib.getExe nixConfigJobGate;
+          });
+        }
+      ];
 
       users.users.starcommand-ci = {
         isSystemUser = true;
