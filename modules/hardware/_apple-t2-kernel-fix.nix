@@ -13,8 +13,11 @@
 #     own magicmouse_reset_resume, so t2linux reworked the trackpad stack
 #     (4001/4003/4004, 4005 folded in and deleted; "Fix trackpad" 05f8dce).
 #
+#   * 2008-i915-4-lane-quirk-for-mbp15-1: fails from 6.18.59 (intel_quirks.c
+#     hunk #2, intel_quirks.h hunk #1) — t2linux rebased it in 166c92f.
+#
 # t2linux's 6.18 branch carries rebased copies; we take exactly those
-# (pinned to 9f538c6, "Fix patching failure in patch 3001", KVER=6.18.53) and
+# (pinned to 166c92f, "6.18.55"; vs 9f538c6 only 2008 changed) and
 # keep every other patch from nixos-hardware unchanged. We deliberately do NOT
 # adopt that branch wholesale: it renamed apple-bce to the t2bce driver stack,
 # which would also need nixos-hardware's Kconfig + initrd module list forked.
@@ -29,10 +32,11 @@
 }:
 let
   stalePatchesRev = "facf1c778667c3ef62104949ef64c75ce7e43b0a";
-  rebasedPatchesRev = "9f538c646581ad805d9b4ff8690803306e3899db";
+  rebasedPatchesRev = "166c92fba00154e1c66d2d690a30c3e6d4e51df1";
 
   # name -> hash of the copy at rebasedPatchesRev
   rebased = {
+    "2008-i915-4-lane-quirk-for-mbp15-1.patch" = "sha256-gTYP7WHV/Qulobdi1nNdYsv1CWgkM8pGvsCFQ+rvhrw=";
     "3001-applesmc-convert-static-structures-to-drvdata.patch" =
       "sha256-c/d+c5eKzhbtfUKtLC7AB+6vMXge4ZzPJAUbNENWH7g=";
     "4001-asahi-trackpad.patch" = "sha256-2h3TdPsX9HBXx5jkZ2S2GJkjFcdL8vKD1G69iqd9IWg=";
