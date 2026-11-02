@@ -49,6 +49,15 @@
             mode = "0400";
           };
 
+          # TypeSafe API key for the decision router (tools/laya-router), which
+          # runs as the `agent` user. Read it from the file; never copy it into
+          # config or logs. Path: /run/secrets/cody/ai_keys/typesafe
+          secrets."cody/ai_keys/typesafe" = {
+            owner = "agent";
+            group = "users";
+            mode = "0400";
+          };
+
           # Render the token into a dotenv file so any service can pull it in
           # via `serviceConfig.EnvironmentFile`, and it's available to source
           # for ad-hoc use — without the value ever landing in the nix store.
