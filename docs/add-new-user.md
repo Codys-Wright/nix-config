@@ -2,7 +2,7 @@
 
 A user is a `den.aspects.<name>` aspect (plus optionally a standalone
 `den.homes` entry) and one `users.<name> = { };` line on each host they live
-on. Conventions: [CLAUDE.md](../CLAUDE.md), [den-conventions.md](den-conventions.md).
+on. Conventions: [AGENTS.md](../AGENTS.md), [den-conventions.md](den-conventions.md).
 
 ## 1. User file
 

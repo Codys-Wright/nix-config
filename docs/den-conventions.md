@@ -1,7 +1,7 @@
 # den conventions in this repo
 
 How aspects are written here. For den's own concepts (classes, context
-pipeline, batteries) see CLAUDE.md and the den docs (den.denful.dev);
+pipeline, batteries) see AGENTS.md and the den docs (den.denful.dev);
 the den source's `docs/src/content/docs/explanation/where-config-lands.mdx`
 is the key reference.
 

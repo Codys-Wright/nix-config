@@ -1,7 +1,7 @@
 # Adding a New Host
 
 A host is **data** (a `den.hosts` entry) plus **an aspect** (`den.aspects.<name>`)
-that includes fleet features. Conventions: [CLAUDE.md](../CLAUDE.md),
+that includes fleet features. Conventions: [AGENTS.md](../AGENTS.md),
 [den-conventions.md](den-conventions.md).
 
 ## 1. Hardware report

@@ -60,4 +60,4 @@ just hosts            # list configured hosts
 - `docs/den-conventions.md` — how aspects are written in this repo
 - `docs/installing-software.md` — the decision tree for adding anything
 - `docs/refactor-verification.md` — proving a refactor changed nothing
-- `CLAUDE.md` — architecture deep dive (den concepts, context pipeline, angle brackets)
+- `AGENTS.md` — architecture deep dive (den concepts, context pipeline, angle brackets)
