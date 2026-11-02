@@ -80,6 +80,10 @@
       url = "github:nix-community/lanzaboote/v1.2.0";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    laya = {
+      url = "github:NandhaKishorM/laya/v0.4.21";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     loft = {
       url = "github:Codys-Wright/loft";
       inputs.nixpkgs.follows = "nixpkgs";

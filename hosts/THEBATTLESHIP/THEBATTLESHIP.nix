@@ -90,7 +90,7 @@ in
         <fleet.system/printing> # CUPS + mDNS network printer discovery
         <fleet.hardware/cuda> # CUDA toolkit (RTX present; nvidia already on)
         <fleet.ai/llama-server> # local LLMs: llama.cpp router on :8012 (`llm` CLI)
-        <fleet.ai/ollaya> # Laya decisions: Jev /v1/systemone on 127.0.0.1:11435, CPU (STA-630)
+        <fleet.ai/laya> # Laya decisions: Jev /v1/systemone on 127.0.0.1:11435, GPU when VRAM allows (STA-630)
         <fleet.apps/comfyui> # ComfyUI (CUDA) on :8188, models on the Development drive
         <fleet.apps/odysseus> # Odysseus launcher (server runs in Starcommand on this host, :7000)
         (fleet.apps._.task-desktop { user = "cody"; }) # Task desktop, follows the newest Task release tag (STA-96)
