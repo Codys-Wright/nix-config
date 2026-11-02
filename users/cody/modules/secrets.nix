@@ -4,7 +4,7 @@
 { inputs, ... }:
 {
   cody.secrets = {
-    description = "Cody's sops secrets — Codeberg SSH key, fly.io API token";
+    description = "Cody's sops secrets — Codeberg SSH key, fly.io API token, TypeSafe key";
     homeManager =
       { config, lib, ... }:
       let
@@ -31,6 +31,9 @@
           "cody/fly/api_token" = { };
           # Codeberg API token — exported as CODEBERG_TOKEN for tea/fj/berg
           "cody/codeberg/api_token" = { };
+          # TypeSafe (Jev) key — Claude Code's jev-compaction-plus plugin reads
+          # it through TYPESAFE_API_KEY_FILE, so the key never sits in settings.json
+          "cody/ai_keys/typesafe" = { };
         };
 
         programs.ssh.matchBlocks."codeberg.org" = {
