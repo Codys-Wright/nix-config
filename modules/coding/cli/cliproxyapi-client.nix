@@ -1,4 +1,4 @@
-# CLIProxyAPI client: Claude Code and Codex on this host talk to the fleet's
+# CLIProxyAPI client: Claude Code, Codex and pi on this host talk to the fleet's
 # subscription proxy on starcommand (Codys-Wright/starcommand
 # modules/services/cliproxyapi) instead of each holding its own login.
 #
@@ -18,6 +18,12 @@
 # - Codex: the system config (/etc/codex/config.toml, below the user's own)
 #   selects a `cliproxyapi` provider whose bearer token comes from the same
 #   file through `auth.command`.
+# - pi: /etc/pi/models.json points pi's built-in `anthropic` and `openai`
+#   providers at the proxy, with an `!command` apiKey that runs the same
+#   helper. pi only reads ~/.pi/agent/models.json, so each listed user gets
+#   a symlink to it, unless they already have their own models.json. On
+#   llama-server hosts home-manager owns that file and merges these
+#   providers in next to `local` (modules/ai/llama-server.nix).
 #
 # NixOS: the host must already import sops-nix (THEBATTLESHIP-sops does).
 # nix-darwin: this imports sops-nix's darwin module and decrypts with the
@@ -29,6 +35,19 @@ let
   claudeSettings = helper: baseUrl: {
     env.ANTHROPIC_BASE_URL = baseUrl;
     apiKeyHelper = helper;
+  };
+
+  piModels = helper: baseUrl: {
+    providers = {
+      anthropic = {
+        inherit baseUrl;
+        apiKey = "!${helper}";
+      };
+      openai = {
+        baseUrl = "${baseUrl}/v1";
+        apiKey = "!${helper}";
+      };
+    };
   };
 
   codexConfig = helper: baseUrl: ''
@@ -77,10 +96,10 @@ in
     in
     {
       name = "cliproxyapi-client";
-      description = "Claude Code and Codex go through the fleet CLIProxyAPI on starcommand";
+      description = "Claude Code, Codex and pi go through the fleet CLIProxyAPI on starcommand";
 
       nixos =
-        { pkgs, ... }:
+        { config, pkgs, ... }:
         let
           helper = mkHelper pkgs;
         in
@@ -90,6 +109,19 @@ in
             claudeSettings "${helper}" baseUrl
           );
           environment.etc."codex/config.toml".text = codexConfig "${helper}" baseUrl;
+          environment.etc."pi/models.json".text = builtins.toJSON (piModels "${helper}" baseUrl);
+          # `L` (not `L+`) leaves a user's own models.json alone.
+          systemd.tmpfiles.rules = builtins.concatMap (
+            user:
+            let
+              home = config.users.users.${user}.home;
+            in
+            [
+              "d ${home}/.pi 0700 ${user} - -"
+              "d ${home}/.pi/agent 0700 ${user} - -"
+              "L ${home}/.pi/agent/models.json - - - - /etc/pi/models.json"
+            ]
+          ) (builtins.attrNames users);
         };
 
       darwin =
@@ -106,12 +138,24 @@ in
           sops.age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
           sops.secrets = secrets "staff";
           environment.etc."codex/config.toml".text = codexConfig "${helper}" baseUrl;
+          environment.etc."pi/models.json".text = builtins.toJSON (piModels "${helper}" baseUrl);
           # nix-darwin only manages /etc; Claude Code's macOS managed dir is
-          # under /Library.
-          system.activationScripts.postActivation.text = lib.mkAfter ''
-            mkdir -p "${dir}"
-            ln -sfn ${dropIn} "${dir}/50-cliproxyapi.json"
-          '';
+          # under /Library. pi's per-user link is only made when missing, so a
+          # user's own models.json wins.
+          system.activationScripts.postActivation.text = lib.mkAfter (
+            ''
+              mkdir -p "${dir}"
+              ln -sfn ${dropIn} "${dir}/50-cliproxyapi.json"
+            ''
+            + lib.concatMapStrings (user: ''
+              home=$(dscl . -read /Users/${user} NFSHomeDirectory | awk '{print $2}')
+              if [ -n "$home" ] && [ ! -e "$home/.pi/agent/models.json" ] && [ ! -L "$home/.pi/agent/models.json" ]; then
+                install -d -m 0700 -o ${user} "$home/.pi" "$home/.pi/agent"
+                ln -s /etc/pi/models.json "$home/.pi/agent/models.json"
+                chown -h ${user} "$home/.pi/agent/models.json"
+              fi
+            '') (builtins.attrNames users)
+          );
         };
     };
 }
