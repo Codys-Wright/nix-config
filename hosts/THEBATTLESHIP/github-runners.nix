@@ -184,7 +184,7 @@ in
       };
     })
     # Codys-Wright/nix-config (nixConfigRunner above): one per job of a CI
-    # run's fan-out (build-vm, build THEBATTLESHIP, nixidy).
+    # run's fan-out (check, build-vm, build THEBATTLESHIP).
     (runner {
       name = nixConfigRunner;
       count = nixConfigCount;
