@@ -35,7 +35,7 @@ let
     };
 in
 {
-  flake-file.inputs.kache.url = lib.mkDefault "github:kunobi-ninja/kache/v2.0.0-rc.3";
+  flake-file.inputs.kache.url = lib.mkDefault "github:kunobi-ninja/kache/v2.0.0";
   flake-file.inputs.kache.inputs.nixpkgs.follows = "nixpkgs";
 
   fleet.nix._.kache-package = {
