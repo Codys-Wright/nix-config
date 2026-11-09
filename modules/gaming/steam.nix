@@ -263,10 +263,16 @@
         # Enable gamemode for better gaming performance
         programs.gamemode.enable = lib.mkForce true;
 
+        # capSysNice stays off: its setcap wrapper leaks cap_sys_nice into
+        # children and breaks Steam's bwrap sandbox (see steam-gamescope above).
         programs.gamescope = {
           enable = lib.mkForce true;
-          capSysNice = lib.mkDefault true;
+          capSysNice = lib.mkDefault false;
         };
+
+        # Valve's udev rules so the DualSense (and other controllers) are
+        # readable by the logged-in user inside Steam and nested gamescope.
+        hardware.steam-hardware.enable = lib.mkDefault true;
 
         # =============================================================================
         # GAMING LAUNCH OPTIONS
