@@ -13,6 +13,11 @@ in
     THEBATTLESHIP = {
       description = "The Main System, ready for everyday battle (all users)";
       timeZone = "America/Los_Angeles";
+      # t3code.service, served on the tailnet by Tailscale Serve (:8443).
+      t3 = {
+        url = "https://thebattleship.tail666c4b.ts.net:8443";
+        sshUser = "cody";
+      };
       settings.cluster.k3s-agent = {
         dedicatedTo = [ "minecraft" ];
         nodeLabels = [ "fleet.fts/gpu=nvidia" ];

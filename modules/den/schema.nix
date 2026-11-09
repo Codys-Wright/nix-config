@@ -39,6 +39,36 @@
     description = "deploy-rs deployment settings for this host";
   };
 
+  # hosts/<name>.t3 — the host's T3 Code server, as other fleet machines reach
+  # it. Read from den.hosts by fleet.coding._.cli._.fleet-t3.
+  den.schema.host.options.t3 = lib.mkOption {
+    type = lib.types.submodule (
+      { name, ... }:
+      {
+        options = {
+          url = lib.mkOption {
+            type = lib.types.nullOr lib.types.str;
+            default = null;
+            example = "https://airlock-2.example.ts.net";
+            description = "Tailnet URL of the host's T3 server (its MCP endpoint is <url>/mcp); null = no T3 server";
+          };
+          localUrl = lib.mkOption {
+            type = lib.types.str;
+            default = "http://127.0.0.1:3773";
+            description = "URL of the T3 server from the host itself";
+          };
+          sshUser = lib.mkOption {
+            type = lib.types.nullOr lib.types.str;
+            default = null;
+            description = "Account that runs T3 on the host; fleet-t3 pairs over SSH as this user (null = browser pairing only)";
+          };
+        };
+      }
+    );
+    default = { };
+    description = "The host's T3 Code server, for fleet-t3";
+  };
+
   # hosts/<name>.timeZone — the host's IANA timezone (NixOS; null = UTC).
   den.schema.host.options.timeZone = lib.mkOption {
     type = lib.types.nullOr lib.types.str;

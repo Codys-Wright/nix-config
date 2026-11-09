@@ -77,6 +77,7 @@
         <fleet/apple-fonts>
         <fleet.coding/ghidra>
         <fleet.coding/t3code>
+        <fleet.coding.cli/fleet-t3>
         <fleet.coding._.tools/game-dev>
       ];
     };
