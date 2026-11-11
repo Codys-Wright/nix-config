@@ -1,0 +1,165 @@
+# panix.yml, generated from the same host data deploy-rs reads
+# (den.hosts.*.*.deployment via modules/flake/deploy-targets.nix), so there is
+# one host list, not two.
+#
+#   nix run .#write-panix-manifest     # regenerate ./panix.yml
+#   nix flake check                    # checks.<system>.panix-manifest fails when stale
+#
+# Safety choices baked into the manifest (docs/panix.md explains each):
+#   - auto_rollback on: re-activate the pre-deploy generation when
+#     switch-to-configuration exits non-zero. It is NOT deploy-rs's magic
+#     rollback; it cannot catch a config that activates "fine" but cuts SSH.
+#   - A dead-man pre-activation hook on NixOS hosts covers that case, when
+#     the deploy goes through `just panix-deploy` (it disarms the timer).
+#   - No host gets bootstrap SSH, so Panix refuses to bootstrap (kexec/disko/
+#     nixos-install) any of them: Inspect errors on an unbootstrapped target.
+#   - beacon (the installer ISO) is listed but disabled: an installer is what
+#     Panix treats as "bootstrap me", and deploying onto a live ISO is
+#     meaningless anyway.
+#   - local_machine_hostname is a name no host has, so Panix never takes the
+#     "local machine, no SSH" path by matching this machine's hostname.
+#   - No secrets: sops-nix decrypts on the host; Panix's secrets phase is unused.
+{
+  inputs,
+  lib,
+  deployTargets,
+  ...
+}:
+let
+  # Hosts that must never be deployed by Panix, with the reason.
+  disabledHosts = {
+    beacon = "installer ISO, not a deploy target";
+  };
+
+  outputType = {
+    nixos = "nixosConfigurations";
+    darwin = "darwinConfigurations";
+  };
+
+  machineFor =
+    name: target:
+    {
+      tags = [ target.class ];
+      ssh = {
+        hostname = target.ip;
+        port = target.sshPort;
+        username = target.sshUser;
+      }
+      # The same per-host known_hosts deploy-rs pins (deploy-rs.nix).
+      // lib.optionalAttrs (builtins.pathExists (inputs.self + "/hosts/${name}/known_hosts")) {
+        known_hosts_file = "./hosts/${name}/known_hosts";
+      };
+    }
+    // lib.optionalAttrs (disabledHosts ? ${name}) { disabled = true; };
+
+  # Dead-man switch (NixOS only): Panix's own auto_rollback fires only when
+  # switch-to-configuration exits non-zero, so a config that activates
+  # "fine" but cuts SSH/network stays live. This pre-activation hook arms a
+  # target-side systemd timer that switches back to the pre-deploy generation
+  # unless `just panix-deploy` disarms it over a NEW SSH connection
+  # (ControlPath=none — Panix's own multiplexed session survives sshd and
+  # firewall changes, so it proves nothing). Proven on the lab VM, see
+  # docs/panix.md. A bare `panix deploy` without the disarm is reverted
+  # after the window: disarm by hand with `just panix-confirm <host>`.
+  deadmanSeconds = 300;
+  deadmanHook = lib.concatStringsSep " " [
+    "systemctl stop panix-deadman.timer panix-deadman.service 2>/dev/null;"
+    "systemctl reset-failed panix-deadman.timer panix-deadman.service 2>/dev/null;"
+    ''if [ "$PANIX_ACTIVATION_MODE" = switch ] && [ -n "$PANIX_PREV_GENERATION" ]; then''
+    "systemd-run --unit=panix-deadman --on-active=${toString deadmanSeconds} --timer-property=AccuracySec=1s"
+    ''/bin/sh -c "/run/current-system/sw/bin/nix-env -p /nix/var/nix/profiles/system --switch-generation $PANIX_PREV_GENERATION && /nix/var/nix/profiles/system/bin/switch-to-configuration switch"''
+    ''&& echo "panix-deadman armed: back to generation $PANIX_PREV_GENERATION in ${toString deadmanSeconds}s unless disarmed";''
+    "fi"
+  ];
+
+  # One installable per host: no two machines here share a build. Never list
+  # a host under two installables: a tag matching both runs both against the
+  # same machine concurrently (no per-host lock; seen on the lab VM).
+  installablesOf =
+    class:
+    lib.mapAttrs (
+      name: target:
+      {
+        machines.${name} = machineFor name target;
+      }
+      // lib.optionalAttrs (class == "nixos") {
+        activation_hooks.pre = [ deadmanHook ];
+      }
+    ) (lib.filterAttrs (_: t: t.class == class) deployTargets);
+
+  manifest = {
+    flags = {
+      local_machine_hostname = "panix-no-local-machine";
+      # THEBATTLESHIP's toplevel takes ~70 s to evaluate; Panix's default 60 s
+      # probe timeout then reports the output as "not found in flake".
+      runtime.flake_validation_timeout = "15m";
+      # v0.12.0 `panix eval` fails with "theme name must not be empty" unless
+      # the theme is set explicitly (fixed upstream after the tag, bebad67).
+      tui.theme = "panix";
+    };
+    fleet = {
+      auto_rollback = true;
+      flakes.nix-fleet = {
+        url = ".";
+        installables = lib.filterAttrs (_: v: v != { }) (
+          lib.mapAttrs' (class: type: lib.nameValuePair type (installablesOf class)) outputType
+        );
+      };
+    };
+  };
+
+  header = ''
+    # yaml-language-server: $schema=https://raw.githubusercontent.com/mihakrumpestar/panix/v0.12.0/gen/panix-schema.yaml
+    #
+    # GENERATED by modules/flake/panix-manifest.nix from den.hosts.*.*.deployment
+    # (the same data deploy-rs uses). Do not edit: change the host's den entry,
+    # then `nix run .#write-panix-manifest`. `nix flake check` fails when stale.
+    # Disabled hosts: ${
+      lib.concatStringsSep ", " (lib.mapAttrsToList (n: why: "${n} (${why})") disabledHosts)
+    }
+    # How to use it safely: docs/panix.md (`just panix-plan`, `just panix-deploy`).
+  '';
+in
+{
+  flake.panixManifest = manifest;
+
+  perSystem =
+    { pkgs, ... }:
+    let
+      generated = pkgs.runCommand "panix.yml" { } ''
+        {
+          cat ${pkgs.writeText "panix-header" header}
+          cat ${(pkgs.formats.yaml { }).generate "panix-body.yml" manifest}
+        } > $out
+      '';
+    in
+    {
+      packages.panix-manifest = generated;
+
+      apps.write-panix-manifest = {
+        type = "app";
+        meta.description = "Regenerate ./panix.yml from den.hosts";
+        program = toString (
+          pkgs.writeShellScript "write-panix-manifest" ''
+            set -eu
+            root=$(${pkgs.git}/bin/git rev-parse --show-toplevel)
+            install -m 0644 ${generated} "$root/panix.yml"
+            echo "wrote $root/panix.yml"
+          ''
+        );
+      };
+
+      checks.panix-manifest =
+        pkgs.runCommand "panix-manifest-up-to-date"
+          {
+            committed = inputs.self + "/panix.yml";
+          }
+          ''
+            if ! diff -u "$committed" ${generated}; then
+              echo "panix.yml is stale: run 'nix run .#write-panix-manifest' and commit it" >&2
+              exit 1
+            fi
+            touch $out
+          '';
+    };
+}

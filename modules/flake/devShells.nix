@@ -6,7 +6,7 @@
 }:
 {
   perSystem =
-    { pkgs, ... }:
+    { pkgs, self', ... }:
     {
       # Default dev shell - general development tools
       devShells.default = pkgs.mkShell {
@@ -27,6 +27,10 @@
           sops
           ssh-to-age
           openssl
+          # Panix deploy orchestrator, beside deploy-rs (docs/panix.md);
+          # rsync because Panix needs GNU rsync >= 3.2.3 on the control host.
+          self'.packages.panix
+          rsync
         ];
       };
 
@@ -51,6 +55,8 @@
           sops
           ssh-to-age
           openssl
+          self'.packages.panix
+          rsync
         ];
       };
     };

@@ -11,6 +11,8 @@ This guide covers the three deployment workflows: testing in a VM, installing on
 | `just deploy <host>` | Push config updates to a running host via deploy-rs |
 | `just switch` | Apply config locally (current machine) |
 
+Panix is being evaluated beside deploy-rs (`just panix-plan|panix-deploy|panix-rollback`); read [panix.md](panix.md) first. Its rollback does not protect against a config that cuts SSH.
+
 ---
 
 ## 1. Test an Install in a VM
