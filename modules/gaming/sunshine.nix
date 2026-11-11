@@ -19,6 +19,24 @@
 
     nixos =
       { pkgs, lib, ... }:
+      let
+        # Steam is single-instance per user. If the desktop Steam client is
+        # already running, `steam` inside gamescope just hands off to it and
+        # exits, gamescope has nothing to host, and Sunshine falls back to
+        # streaming the bare desktop. So from Moonlight, shut the desktop
+        # client down first and wait for it to exit before starting Big Picture.
+        steam-stream = pkgs.writeShellScript "steam-stream" ''
+          uid="$(${pkgs.coreutils}/bin/id -u)"
+          if ${pkgs.procps}/bin/pgrep -u "$uid" -x steam >/dev/null 2>&1; then
+            steam -shutdown >/dev/null 2>&1 || true
+            for _ in $(seq 1 60); do
+              ${pkgs.procps}/bin/pgrep -u "$uid" -x steam >/dev/null 2>&1 || break
+              sleep 0.5
+            done
+          fi
+          exec ${pkgs.gamescope}/bin/gamescope -W 2560 -H 1440 -f --steam -- steam -gamepadui
+        '';
+      in
       {
         # Moonlight client, so this host can also stream FROM other
         # Sunshine/GameStream hosts (not just serve via Sunshine below).
@@ -86,9 +104,7 @@
                 # Stream Steam Big Picture in a virtual 1440p gamescope.
                 name = "Steam Big Picture 1440p";
                 image-path = "steam.png";
-                detached = [
-                  "/run/current-system/sw/bin/gamescope -W 2560 -H 1440 -f --steam -- steam -gamepadui"
-                ];
+                detached = [ "${steam-stream}" ];
                 auto-detach = "true";
               }
             ];
