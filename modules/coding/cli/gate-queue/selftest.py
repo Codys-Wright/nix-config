@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Self-test for gate-queue with a stubbed `pc` and a temp HOME (no network, no real lease).
+"""Self-test for gate-queue with a stubbed `pc` and a temp HOME (no network).
 
     python3 selftest.py            # ~90 s
 
 Covers: FIFO + HEAD swap/restore, green/red reporting with the submitting run id, 409 -> comment-only,
 403 -> retry (reported stays false), daemon kill -9 mid-job -> re-adoption, vanished process -> lost,
-timeout, cancel, dirty tree refusal, lease taken/released.
+timeout, cancel, dirty tree refusal, linked-worktree refusal.
 """
 import json, os, shutil, signal, subprocess, sys, tempfile, time
 
@@ -16,7 +16,7 @@ HOME = os.path.join(T, "home")
 BIN = os.path.join(HOME, ".local", "bin")
 os.makedirs(BIN)
 ENV = dict(os.environ, HOME=HOME, GATE_QUEUE_DIR=os.path.join(HOME, "gate-queue"),
-           BUILD_LEASE_DIR=os.path.join(T, "lease"), HERMES_PROFILE="selftest",
+           HERMES_PROFILE="selftest",
            PCLOG=os.path.join(T, "pc.log"), PCFAIL=os.path.join(T, "pc.fail"))
 ENV.pop("PAPERCLIP_RUN_ID", None)
 
@@ -27,19 +27,7 @@ if [ "$4" = STA-409 ] && [ "$3" = status ]; then echo 'pc: PATCH -> HTTP 409: un
 if [ -f "$PCFAIL" ]; then echo 'pc: PATCH -> HTTP 403: cross_issue_influence_run_context_required' >&2; exit 1; fi
 exit 0
 ''')
-with open(os.path.join(BIN, "build-lease"), "w") as f:  # minimal mkdir lease, same CLI
-    f.write('''#!/bin/sh
-L="$BUILD_LEASE_DIR"; c=$1; o=$2
-case $c in
- acquire) if mkdir "$L" 2>/dev/null; then echo "$o" > "$L/owner"; echo ACQUIRED; else echo "BUSY - lease held:"; echo "owner=$(cat $L/owner)"; exit 1; fi;;
- renew) exit 0;;
- release) [ "$(cat $L/owner 2>/dev/null)" = "$o" ] && rm -rf "$L"; exit 0;;
- slots) echo "slots=1";;
- status) ls "$L" >/dev/null 2>&1 && echo "HELD $L: $(cat $L/owner)" || echo FREE;;
-esac
-''')
-for n in ("pc", "build-lease"):
-    os.chmod(os.path.join(BIN, n), 0o755)
+os.chmod(os.path.join(BIN, "pc"), 0o755)
 
 REPO = os.path.join(T, "repo")
 def sh(*a, **k):
@@ -105,7 +93,6 @@ try:
     check("summary.md used as body", "# custom" in ja["summary"])
     check("red reported (rc 3)", jc["rc"] == 3 and jc["reported"] == "status" and "Gate RED" in jc["summary"])
     check("409 -> comment-only, logged", je["reported"] == "comment-only" and "NOT WOKEN" in open(os.path.join(ENV["GATE_QUEUE_DIR"], "logs", e, "events.log")).read())
-    check("lease released", not os.path.exists(ENV["BUILD_LEASE_DIR"]))
 
     open(ENV["PCFAIL"], "w").close()
     f = submit("STA-904", "true")
@@ -142,6 +129,11 @@ try:
     n = r.stdout.split()[1]
     jn = wait(n, lambda j: j["state"] == "done", 30); time.sleep(6)
     check("--no-run-id job is never reported (n/a, no pc call)", job(n)["reported"] == "n/a" and "STA-931" not in open(ENV["PCLOG"]).read())
+
+    wt = os.path.join(T, "linked")
+    git("worktree", "add", "-q", wt, "feat")
+    w = sh(sys.executable, GQ, "submit", "STA-922", wt, "true", "--no-run-id")
+    check("linked worktree refused (rc 2)", w.returncode == 2 and "linked git worktree" in w.stderr)
 
     open(os.path.join(REPO, "f"), "a").write("dirty\n")
     k = submit("STA-923", "true", "--sha", FEAT)

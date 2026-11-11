@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""gate-queue: durable, lease-aware build gates that wake their Paperclip issue (STA-402).
+"""gate-queue: durable, queued build gates that wake their Paperclip issue (STA-402).
 
-  gate-submit <ISSUE> <repo-tree> <script> [--sha SHA] [--timeout S] [--exclusive] [--no-lease]
+  gate-submit <ISSUE> <repo-tree> <script> [--sha SHA] [--timeout S]
               [--profile P] [--run-id ID] [--on-done todo|in_review]
   gate-queue daemon                     # run by systemd --user (Linux) / LaunchAgent (macOS)
   gate-queue status [--unreported] [--json] [JOB]
@@ -9,8 +9,9 @@
   gate-queue retry-report <JOB>         # re-arm the Paperclip report for a done/lost job
 
 Model
-  * One FIFO per repo tree (realpath). Jobs in different trees may run side by side, each holding
-    its own build-lease slot (owner "gate-<ISSUE>-<4 hex>"), renewed while the job runs.
+  * One FIFO per repo tree (realpath): one gate at a time per tree. Jobs in different trees may run
+    side by side. There is no build lease (removed STA-567); cargo's own build-directory lock guards
+    the shared target/. The tree must be a canonical checkout, not a linked git worktree.
   * With --sha the daemon checks the tree is clean (tracked files), detaches HEAD at the sha under
     a flock, runs the script, then restores the previous branch/sha. It never resets or force-checks
     out: if the restore fails it says so in the report.
@@ -48,10 +49,7 @@ JOBS = os.path.join(ROOT, "jobs")
 LOGS = os.path.join(ROOT, "logs")
 HOST = socket.gethostname().split(".")[0]
 IS_LINUX = sys.platform.startswith("linux")
-LEASE_TTL = 1800
-LEASE_RENEW_EVERY = 60
 POLL = 3
-LEASE_POLL = 10
 REPORT_GIVE_UP_S = 24 * 3600
 STOP = threading.Event()
 SAVE_LOCK = threading.Lock()
@@ -155,55 +153,6 @@ def pid_matches(pid, jid):
     return rc == 0 and jid in out
 
 
-# ---------------------------------------------------------------- build-lease
-def lease_cmd(*args):
-    bl = which("build-lease")
-    if not bl:
-        return 127, "build-lease not found"
-    return run([bl] + list(args), timeout=60)
-
-
-def lease_slots():
-    rc, out = lease_cmd("slots")
-    m = re.search(r"slots=(\d+)", out)
-    return int(m.group(1)) if rc == 0 and m else 1
-
-
-def lease_owners(job):
-    if job.get("no_lease"):
-        return []
-    base = job["lease_owner"]
-    n = lease_slots() if job.get("exclusive") else 1
-    return [base] + ["%s~%d" % (base, i) for i in range(2, n + 1)]
-
-
-def lease_acquire(job):
-    """All-or-nothing acquire. Returns (ok, holder-note)."""
-    got = []
-    for o in lease_owners(job):
-        rc, out = lease_cmd("acquire", o, str(LEASE_TTL))
-        if rc != 0:
-            for g in got:
-                lease_cmd("release", g)
-            held = [l.strip() for l in out.splitlines() if l.startswith("HELD") or l.startswith("owner=")]
-            lines = [l for l in out.splitlines() if l.strip()]
-            return False, "; ".join(held) or (lines[-1].strip() if lines else "busy") + " (build-lease rc=%d, %d output bytes)" % (rc, len(out))
-        got.append(o)
-    return True, ""
-
-
-def lease_renew(job):
-    for o in lease_owners(job):
-        rc, out = lease_cmd("renew", o, str(LEASE_TTL))
-        if rc != 0:  # expired and taken, or never held: try to take it again
-            lease_cmd("acquire", o, str(LEASE_TTL))
-
-
-def lease_release(job):
-    for o in lease_owners(job):
-        lease_cmd("release", o)
-
-
 # ---------------------------------------------------------------- tree swap
 def tree_lock_path(tree):
     rc, out = git(tree, "rev-parse", "--absolute-git-dir")
@@ -283,7 +232,7 @@ def swap_back(job):
 
 # ---------------------------------------------------------------- launching
 ENV_KEEP = ["PATH", "HOME", "USER", "LOGNAME", "LANG", "LC_ALL", "NIX_PATH", "NIX_SSL_CERT_FILE",
-            "SSL_CERT_FILE", "XDG_RUNTIME_DIR", "XDG_CONFIG_HOME", "XDG_CACHE_HOME", "BUILD_LEASE_DIR",
+            "SSL_CERT_FILE", "XDG_RUNTIME_DIR", "XDG_CONFIG_HOME", "XDG_CACHE_HOME",
             "RUSTUP_HOME", "CARGO_HOME", "TMPDIR"]
 
 
@@ -412,8 +361,6 @@ def finalize(job, state, rc, reason=None):
         event(job, "RESTORE FAILED: " + err)
     elif job.get("restore"):
         event(job, "tree restored to %s %s" % (job["restore"]["kind"], job["restore"]["name"][:12]))
-    lease_release(job)
-    event(job, "lease released (%s)" % ",".join(lease_owners(job)))
     job["reported"] = "n/a" if (state == "cancelled" or job.get("no_run_id")) else False
     job["report_attempts"] = 0
     job["next_report_at"] = 0
@@ -423,7 +370,6 @@ def finalize(job, state, rc, reason=None):
 
 def monitor(job):
     """Watch a launched job until it ends. Returns when finalised or when the daemon is stopping."""
-    last_renew = 0
     misses = 0
     while not STOP.is_set():
         rc = read_rc(job)
@@ -448,35 +394,20 @@ def monitor(job):
             stop_job(job)
             time.sleep(2)
             return finalize(job, "done", 124, "timeout after %ss" % job["timeout"])
-        if now() - last_renew > LEASE_RENEW_EVERY:
-            lease_renew(job)
-            last_renew = now()
         STOP.wait(POLL)
 
 
 def start(job):
-    """Wait for the lease, swap HEAD, launch. Returns False if the job ended (failed to start)."""
-    waited_note = None
-    while not STOP.is_set():
-        if os.path.exists(cancel_marker(job)):
-            event(job, "cancelled while queued")
-            job["state"] = "cancelled"
-            job["finished_at"] = now()
-            job["reported"] = "n/a"
-            save(job)
-            return False
-        ok, holder = lease_acquire(job)
-        if ok:
-            break
-        if holder != waited_note:
-            waited_note = holder
-            job["waiting_for"] = holder[:300]
-            save(job)
-            event(job, "waiting for build-lease: %s" % holder[:300])
-        STOP.wait(LEASE_POLL)
-    else:
+    """Swap HEAD, launch. Returns False if the job ended (failed to start)."""
+    if STOP.is_set():
         return False
-    event(job, "lease acquired (%s)" % (",".join(lease_owners(job)) or "none: --no-lease"))
+    if os.path.exists(cancel_marker(job)):
+        event(job, "cancelled while queued")
+        job["state"] = "cancelled"
+        job["finished_at"] = now()
+        job["reported"] = "n/a"
+        save(job)
+        return False
     job.pop("waiting_for", None)
     if job.get("sha"):
         with TreeLock(job["tree"]):
@@ -510,7 +441,6 @@ def worker(tree, workers):
                 if not job.get("started_at"):
                     job["started_at"] = now()
                 event(job, "adopted running job")
-                lease_renew(job)
                 monitor(job)
             else:
                 job = mine[0]  # FIFO by submit time
@@ -648,7 +578,7 @@ def cmd_daemon(args):
         return 1
     signal.signal(signal.SIGTERM, lambda *a: STOP.set())
     signal.signal(signal.SIGINT, lambda *a: STOP.set())
-    log("daemon up pid=%d host=%s root=%s lease=%s" % (os.getpid(), HOST, ROOT, which("build-lease")))
+    log("daemon up pid=%d host=%s root=%s" % (os.getpid(), HOST, ROOT))
     threading.Thread(target=reporter, daemon=True).start()
     workers = {}
     hb = os.path.join(ROOT, "heartbeat")
@@ -694,6 +624,13 @@ def cmd_submit(args):
     if rc != 0:
         print("gate-submit: %s is not a git tree: %s" % (tree, out.strip()), file=sys.stderr)
         return 2
+    gd = git(tree, "rev-parse", "--absolute-git-dir")[1].strip()
+    cd = git(tree, "rev-parse", "--path-format=absolute", "--git-common-dir")[1].strip()
+    if gd and cd and os.path.realpath(gd) != os.path.realpath(cd):
+        print("gate-submit: %s is a linked git worktree. Gates run in the canonical checkout only\n"
+              "  (%s); submit that tree with --sha <your commit>." % (tree, os.path.dirname(os.path.realpath(cd))),
+              file=sys.stderr)
+        return 2
     script = args.script
     if "/" not in script:
         script = shutil.which(script) or script
@@ -725,9 +662,9 @@ def cmd_submit(args):
     job = {
         "id": jid, "issue": args.issue.upper(), "tree": tree, "script": script, "sha": sha,
         "profile": profile, "run_id": run_id or "00000000-no-run-id", "no_run_id": bool(args.no_run_id and not run_id),
-        "timeout": args.timeout, "exclusive": args.exclusive, "no_lease": args.no_lease, "on_done": args.on_done,
+        "timeout": args.timeout, "on_done": args.on_done,
         "submitted_at": t, "submitted_by": os.environ.get("USER", ""), "host": HOST, "state": "queued",
-        "lease_owner": "gate-%s-%s" % (args.issue.upper(), jid[-4:]), "reported": False, "report_attempts": 0,
+        "reported": False, "report_attempts": 0,
         "next_report_at": 0,
     }
     if job["no_run_id"]:
@@ -810,9 +747,8 @@ def main():
     s.add_argument("script")
     s.add_argument("--sha")
     s.add_argument("--timeout", type=int, default=7200)
-    s.add_argument("--exclusive", action="store_true")
-    s.add_argument("--no-lease", action="store_true",
-                   help="do not take a build-lease slot (canaries / non-compiling checks only)")
+    s.add_argument("--exclusive", action="store_true", help="ignored (the build lease was removed)")
+    s.add_argument("--no-lease", action="store_true", help="ignored (the build lease was removed)")
     s.add_argument("--profile")
     s.add_argument("--run-id")
     s.add_argument("--no-run-id", action="store_true")

@@ -20,11 +20,11 @@ issues = [
     iss(4, BATT, "waiter ~/wt/x.sh waits for the lease"),                     # queued gate-queue job
     iss(5, BATT, "gate pending on lease"),                                    # open blockedBy
     iss(6, VOY, "lease wait, waiter in screen"),                              # process mentions it
-    iss(7, AIR, "gate after lease"),                                          # lease fully held (v1 format)
+    iss(7, AIR, "gate after lease"),                                          # running gate-queue job
     iss(8, BATT, "gate pending lease"),                                       # done job, report pending
     iss(9, CMD, "waiting on the lease"),                                      # not a build-host agent
     iss(10, BATT, "gate lease", owner=BATT),                                  # STRANDED -> act (2nd action)
-    iss(11, BATT, "lease expired holder"),                                    # only expired holder -> act
+    iss(11, BATT, "lease expired holder"),                                    # its job already reported -> act
     iss(13, VOY, "Commander reviews and merges PR #211 (ready, gate green on cceeb51). Voyager resumes only if review asks for changes."),  # gate already finished
     iss(12, VOY, "Commander merges the PR after the next v* release; Battleship to investigate"),  # 'release'/'investigate' are not lease/gate
 ]
@@ -33,14 +33,14 @@ details["id-5"] = {"blockedBy": [{"identifier": "STA-99", "status": "in_progress
 details["id-4"] = {"blockedBy": [{"identifier": "STA-98", "status": "done"}]}
 NOWT = 1_800_000_000
 hosts = {
-    "voyager": {"jobs": [], "unreported_text": "(no jobs)", "lease_text": "0/1 slot(s) held (/x/.build-lease)\nFREE (/x/.build-lease)",
+    "voyager": {"jobs": [], "unreported_text": "(no jobs)",
                 "ps": "/usr/bin/python3 gate-queue daemon\nSCREEN -dmS sta-6 bash\n"},
     "battleship": {"jobs": [{"id": "J4", "issue": "STA-4", "state": "queued", "reported": False},
                             {"id": "J8", "issue": "STA-8", "state": "done", "reported": False},
                             {"id": "J0", "issue": "STA-11", "state": "done", "reported": "status"}],
-                   "unreported_text": "", "lease_text": "HELD /d/.build-lease: gate-STA-4-aa (expires in 100s)\nHELD /d/.build-lease.1: old (expires in -50s)\n2/2 slot(s) held (/d/.build-lease)",
+                   "unreported_text": "",
                    "ps": "sh run.sh\n"},
-    "airlock": {"jobs": [], "unreported_text": "", "lease_text": "HELD at /v/.build-lease\nowner=STA-93\nhost=airlock\nacquired=%d\nexpires=%d" % (NOWT - 10, NOWT + 3000),
+    "airlock": {"jobs": [{"id": "J7", "issue": "STA-7", "state": "running", "reported": False}], "unreported_text": "",
                 "ps": "SCREEN -dmS sta-6 bash\n"},
 }
 fx = tempfile.NamedTemporaryFile("w", suffix=".json", delete=False)
@@ -68,12 +68,11 @@ def check(name, cond, detail=""):
         failures.append(name); print("   ", detail)
 
 
-# battleship: the 2-slot lease is 1 live (gate-STA-4) + 1 expired => a free slot exists
 rc, out, err = run(["--dry-run"], NOWT, 0)
 check("dry-run rc 0", rc == 0, err)
 check("dry-run prints a report, writes no state, sends nothing", "DRY RUN" in out and not os.path.exists(st) and not os.path.exists(SENT), out)
 check("dry-run lists STA-1, STA-10, STA-11 as would-act", all(("%s (" % k) in out and "WOULD set todo" in out for k in ("STA-1", "STA-10", "STA-11")), out)
-for k, why in (("STA-4", "job"), ("STA-5", "open blockedBy"), ("STA-6", "process"), ("STA-7", "fully held"), ("STA-8", "report pending")):
+for k, why in (("STA-4", "job"), ("STA-5", "open blockedBy"), ("STA-6", "process"), ("STA-7", "job"), ("STA-8", "report pending")):
     line = [l for l in out.splitlines() if l.strip().startswith(k + " ")]
     check("%s skipped (%s)" % (k, why), bool(line) and "skip" in line[0] and why in line[0], out)
 for k in ("STA-2", "STA-3", "STA-9", "STA-12", "STA-13"):

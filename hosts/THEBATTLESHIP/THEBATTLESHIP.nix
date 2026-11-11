@@ -57,7 +57,7 @@ in
           humans = [ "cody" ];
           sopsFile = "${inputs.nix-secrets}/sops/hosts/THEBATTLESHIP.yaml";
         })
-        # agent's queued build gates (gate-submit) run lease-aware in a user unit
+        # agent's queued build gates (gate-submit) run in a user unit
         # and wake their Paperclip issue when done (STA-402).
         (<fleet.coding.cli/gate-queue> { user = "agent"; })
         # Claude Code + Codex go through the fleet proxy on starcommand (10G
@@ -253,7 +253,7 @@ in
         den.aspects.THEBATTLESHIP-kache-nix-sandbox # that store inside the nix sandbox, for builds that opt in (studio's release image)
         den.aspects.THEBATTLESHIP-remote-reboot # autologin at boot + safe-reboot (waits for CI jobs and nix builds)
         den.aspects.THEBATTLESHIP-btrfs-maintenance
-        den.aspects.THEBATTLESHIP-target-sweep # hourly bounded cargo sweep of task/target under the build lease
+        den.aspects.THEBATTLESHIP-target-sweep # hourly bounded cargo sweep of task/target
         den.aspects.THEBATTLESHIP-starcommand-net
         den.aspects.THEBATTLESHIP-sops
         den.aspects.THEBATTLESHIP-studio-routing
