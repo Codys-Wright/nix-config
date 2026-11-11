@@ -11,6 +11,11 @@
   den.hosts.aarch64-darwin = {
     voyager = {
       description = "Portable laptop to take into the field";
+      # Cody's T3 server, served on the tailnet by Tailscale Serve.
+      t3 = {
+        url = "https://voyager.tail666c4b.ts.net";
+        sshUser = "CodyWright";
+      };
       users.cody = {
         userName = "CodyWright";
       };

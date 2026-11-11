@@ -13,6 +13,11 @@
   den.hosts.aarch64-darwin = {
     airlock = {
       description = "An Mac Mini that holds all the proprietary garbage that can't run on linux";
+      # rat's T3 server, served on the tailnet by Tailscale Serve.
+      t3 = {
+        url = "https://airlock-2.tail666c4b.ts.net";
+        sshUser = "rat";
+      };
       deployment = {
         ip = "192.168.1.116"; # DHCP — reserve it on the router
         sshPort = 22;
