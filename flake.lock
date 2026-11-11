@@ -29,6 +29,22 @@
         "type": "github"
       }
     },
+    "architect": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1794419989,
+        "narHash": "sha256-OvRIBb3m4CzkDiSujht4sf9e/52PIoq6gjEiaygn+Lg=",
+        "owner": "FastTrackStudios",
+        "repo": "architect",
+        "rev": "4f80e9a71661da38128707a4d122975e407658b9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "FastTrackStudios",
+        "repo": "architect",
+        "type": "github"
+      }
+    },
     "base16": {
       "inputs": {
         "fromYaml": "fromYaml"
@@ -2046,6 +2062,7 @@
     "root": {
       "inputs": {
         "apple-fonts": "apple-fonts",
+        "architect": "architect",
         "darwin": "darwin",
         "daw": "daw",
         "den": "den",
