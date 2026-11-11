@@ -546,16 +546,26 @@ in
           }) genericInstances
         )
         // {
-          # Daily sweep of every target dir under the generic pools' cache
-          # root (a `.rustc_info.json` marks one; cargo homes have none):
-          # artifacts no build touched in 3 days go, so a long-lived per-repo
-          # cache does not grow forever.
+          # Hourly sweep of every target dir under the generic pools' cache
+          # root (a `.rustc_info.json` marks one; cargo homes have none).
+          #
+          # Every compile goes through kache, so a runner's target dir is
+          # only a working copy: what a job restores from the store is a
+          # reflink of the store's blocks. A big long-lived target dir pins
+          # those blocks, so kache's local_max_size can evict entries
+          # without freeing disk. That filled the Development drive
+          # (2026-11-07: ~100G per runner per job, 1.5T in all, while the
+          # store read 1.5 TiB of its 930 GiB). So a target dir over
+          # `maxTargetGB` that no job wrote in the last 30 minutes is
+          # removed whole; the next job restores it from kache. Smaller
+          # ones get the old `cargo sweep --time 3`.
           github-runner-sweep-thebattleship = {
-            description = "cargo sweep of the generic runner pools' per-repo caches";
-            startAt = "04:45";
+            description = "Hourly: drop idle oversized runner target dirs (kache restores them), cargo sweep the rest";
+            startAt = "hourly";
             path = [
               pkgs.cargo
               pkgs.cargo-sweep
+              pkgs.coreutils
               pkgs.findutils
             ];
             serviceConfig = {
@@ -572,9 +582,20 @@ in
               mkdir "$pkg/src"
               printf '[package]\nname = "sweep"\nversion = "0.0.0"\nedition = "2021"\n' > "$pkg/Cargo.toml"
               echo 'fn main() {}' > "$pkg/src/main.rs"
+              maxTargetGB=20
               find ${genericCacheRoot} -maxdepth 6 -name .rustc_info.json -printf '%h\n' |
                 while read -r target; do
-                  CARGO_TARGET_DIR="$target" cargo sweep --time 3 "$pkg" || true
+                  # A job wrote here in the last 30 minutes: it may be running.
+                  if [ -n "$(find "$target" -newermt '-30 minutes' -print -quit 2>/dev/null)" ]; then
+                    continue
+                  fi
+                  gb=$(du -s --block-size=1G "$target" 2>/dev/null | cut -f1)
+                  if [ "''${gb:-0}" -gt "$maxTargetGB" ]; then
+                    echo "remove $target (''${gb}G, idle)"
+                    rm -rf "$target"
+                  else
+                    CARGO_TARGET_DIR="$target" cargo sweep --time 3 "$pkg" || true
+                  fi
                 done
             '';
           };
