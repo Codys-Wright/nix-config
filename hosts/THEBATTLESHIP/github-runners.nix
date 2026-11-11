@@ -110,8 +110,10 @@ let
   #   - a pull request from a fork (head repo != the repo) is always refused;
   #   - visibility is the payload's `.repository.private`, never a list here:
   #       private: any event;
-  #       public:  a push to main, release/v* or a v* tag, or workflow_dispatch
-  #                (which takes write access); anything else is refused;
+  #       public:  a push to main, release/v* or a v* tag, workflow_dispatch
+  #                (which takes write access), or a schedule (which only the
+  #                default branch's workflow can start); anything else is
+  #                refused;
   #       unreadable payload or no boolean `private`: refused.
   #
   # ENV CONTRACT — what a job on either pool can rely on (stage 2 workflows
@@ -390,6 +392,9 @@ in
                     || deny "public repo, push to ''${ref:-?}"
                   why="public repo, push to $ref" ;;
                 workflow_dispatch) why="public repo, workflow_dispatch" ;;
+                # GitHub runs a schedule only from the default branch's
+                # workflow file, at its head: as trusted as a push to main.
+                schedule) why="public repo, schedule" ;;
                 *) deny "public repo, event ''${event:-?}" ;;
               esac ;;
             *) deny "repository visibility unknown" ;;
