@@ -79,6 +79,8 @@
         <fleet.coding/t3code>
         <fleet.coding.cli/fleet-t3>
         <fleet.coding._.tools/game-dev>
+        # Panix deploy CLI on Cody's admin machines (docs/panix.md)
+        <fleet.deployment/panix>
       ];
     };
   };
