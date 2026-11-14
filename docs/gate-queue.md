@@ -1,4 +1,4 @@
-# gate-queue: durable, lease-aware build gates that wake their issue (STA-402)
+# gate-queue: durable, queued build gates that wake their issue (STA-402)
 
 Evidence and the failure analysis: Researcher STA-377 (`task-reports/research/gate-waiters.md`).
 Eight queued gates finished and none woke its issue: the detached notifier had no run id (403), a green
@@ -16,14 +16,17 @@ One Python (stdlib, 3.9+) program, `modules/coding/cli/gate-queue/gate-queue`, t
 | `gate-queue status [--unreported] [--json] [JOB\|ISSUE]`, `cancel <JOB>`, `retry-report <JOB>` | operate |
 
 `gate-submit` flags: `--sha SHA` (detach the tree there for the run, restore afterwards), `--timeout S`
-(default 7200), `--exclusive` (all lease slots), `--no-lease` (canaries only), `--profile P` (Paperclip
+(default 7200), `--profile P` (Paperclip
 profile, inferred when `~/.hermes/profiles/` has exactly one), `--run-id ID` (default `$PAPERCLIP_RUN_ID`;
-required, `--no-run-id` only for a gate you collect by hand), `--on-done todo|in_review`.
+required, `--no-run-id` only for a gate you collect by hand), `--on-done todo|in_review`. `--exclusive` and
+`--no-lease` are still accepted and ignored: the build lease was removed (STA-567).
 
 ## Behaviour
 
-- **FIFO per repo tree** (realpath). Different trees run side by side, each under its own build-lease slot
-  (`gate-<ISSUE>-<4 hex>`), renewed every 60 s (ttl 30 min), released in all outcomes.
+- **FIFO per repo tree** (realpath): one gate at a time per tree, different trees side by side. There is no
+  build lease; cargo's own build-directory lock guards a shared `target/`.
+- **Canonical checkouts only**: `gate-submit` refuses a linked git worktree (rc 2) and names the canonical
+  checkout to submit with `--sha` instead.
 - **HEAD swap** (`--sha`): refuses a tree with uncommitted tracked changes, takes a flock on `<gitdir>/gate.lock`,
   `git checkout --detach <sha>`, and afterwards restores the previous branch or sha. It never resets or forces;
   if the restore fails the report says so.
@@ -80,7 +83,7 @@ Two airlock specifics:
    `/Volumes/build-disk` (removable-volume TCC; only sshd-keygen-wrapper and the user-DB grant behind
    `/usr/bin/osascript` have it). The plist therefore starts the daemon the same way `ai.hermes.gateway` does,
    through `osascript -l JavaScript` + `$.system("exec python3 ...")`. Do not simplify it to a bare python
-   `ProgramArguments` or the lease and every build-disk gate fail silently.
+   `ProgramArguments` or every build-disk gate fails silently.
 2. **AbandonProcessGroup** is set so launchd never signals a running gate's group. launchd then only
    signals osascript, so the daemon (`GATE_QUEUE_EXIT_WITH_PARENT=1`) stops itself when its parent goes away
    and launchd starts a fresh pair; running gates are re-adopted.
@@ -108,13 +111,13 @@ absolute path in non-interactive ssh (`~/.local/bin/gate-queue ...`): voyager's 
 
 `modules/coding/cli/gate-queue/stale-wait-sweep.py` (+ `stale-wait-sweep.selftest.py`, offline fixtures, no network) is a
 no-agent Hermes cron in the DevOps profile (`every 15m`, `--deliver local`; the script posts to `#fleet-alerts` itself, see below). It exists because a gate waiter that
-dies leaves its issue `blocked` on a lease that is already free. On battleship, airlock and voyager it reads
-`gate-queue status --json|--unreported`, `build-lease status` and the process list, and in Paperclip it considers only
+dies leaves its issue `blocked` on a gate nobody runs. On battleship, airlock and voyager it reads
+`gate-queue status --json|--unreported` and the process list, and in Paperclip it considers only
 BLOCKED issues assigned to that host's agent whose `unblockDescriptor.owner` is that same agent and whose `action`
-mentions the whole word lease|gate|waiter (`release` and `investigate` do not match; STA-135 would have) and does not say the gate is already green/red/done (STA-40: "gate green on ..., Commander merges"). It sets such an issue to `todo` with a comment only if ALL hold: no queued/running (or
-report-pending) gate-queue job for it, no open `blockedBy`, at least one live lease slot is free, no process on the host
+mentions the whole word lease|gate|waiter (old blocks still say "lease"; `release` and `investigate` do not match; STA-135 would have) and does not say the gate is already green/red/done (STA-40: "gate green on ..., Commander merges"). It sets such an issue to `todo` with a comment only if ALL hold: no queued/running (or
+report-pending) gate-queue job for it, no open `blockedBy`, no process on the host
 mentions the issue key (hand-made nohup/screen waiter), and the same was true on the previous sweep (>= 10 min earlier,
-issue unchanged). It never touches a lease, a job or any other issue, and `--dry-run` prints the full decision report without writing.
+issue unchanged). It never touches a job or any other issue, and `--dry-run` prints the full decision report without writing.
 An issue it woke is not woken again for 6 h, so an agent that re-blocks with the same wording cannot be churned. Known
 limit: the match is on words, so some other wait that merely mentions a gate can still be woken once (the agent
 re-blocks; the cooldown stops a loop).

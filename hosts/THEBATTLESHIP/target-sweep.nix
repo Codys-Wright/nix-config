@@ -7,19 +7,17 @@
 #
 # Each run:
 #   1. logs df of the drive;
-#   2. takes the host build lease (~agent/.local/bin/build-lease, the same
-#      lease every agent build holds) and SKIPS the run if it is BUSY, so it
-#      never touches a tree that is mid-build;
-#   3. also skips a project when one of its cargo locks (.cargo-lock /
-#      .cargo-build-lock) is held, which catches a build run without the lease;
-#   4. runs `cargo sweep --maxsize <N>GB` as the target dir's owner (cody);
-#   5. prunes the oldest incremental crate dirs until the target dir is under
+#   2. skips a project when one of its cargo locks (.cargo-lock /
+#      .cargo-build-lock) is held, so it never touches a tree that is
+#      mid-build (there is no build lease; it was removed in STA-567);
+#   3. runs `cargo sweep --maxsize <N>GB` as the target dir's owner (cody);
+#   4. prunes the oldest incremental crate dirs until the target dir is under
 #      the same budget. cargo-sweep 0.8 cannot map `incremental/<crate>-<hash>`
 #      dirs to a fingerprint, so it never deletes them: after the manual sweep
 #      task/target was still 250G, 226G of it incremental. Dirs touched in the
 #      last `keepMinutes` are kept. A pruned dir only costs that crate an
 #      incremental cold start; rustc recreates it;
-#   6. releases the lease and logs df again.
+#   5. logs df again.
 #
 # Additive only: it deletes build output under <project>/target, nothing
 # else. It never runs `cargo clean`.
@@ -32,14 +30,12 @@
 { den, ... }:
 {
   den.aspects.THEBATTLESHIP-target-sweep = {
-    description = "Hourly bounded cargo sweep of the Development drive's warm target dirs, under the build lease";
+    description = "Hourly bounded cargo sweep of the Development drive's warm target dirs";
     nixos =
       { lib, pkgs, ... }:
       let
         drive = "/run/media/Development";
-        lease = "/home/agent/.local/bin/build-lease";
-        leaseOwner = "dev-target-sweep";
-        # The agent user holds the lease and prunes incremental dirs. Its
+        # The agent user prunes incremental dirs. Its
         # write ACL covers the whole drive outside the CI dirs, including
         # files cody created. cody cannot delete inside agent-owned dirs
         # (there is no user:cody ACL entry), so the prune does not run as cody.
@@ -128,23 +124,13 @@
           ];
           text = ''
             drive=${drive}
-            lease=${lease}
-            owner=${leaseOwner}
 
             df_line() { df -h --output=size,used,avail,pcent "$drive" | tail -1; }
 
             mountpoint -q "$drive" || { echo "SKIP: $drive is not mounted"; exit 0; }
             echo "df before: $(df_line)"
 
-            if [ ! -x "$lease" ]; then
-              echo "SKIP: $lease is missing, so the sweep cannot take the build lease"
-              exit 0
-            fi
-            if ! runuser -u ${pruneUser} -- "$lease" acquire "$owner" 3600; then
-              echo "SKIP: build lease is BUSY"
-              exit 0
-            fi
-            trap 'runuser -u ${pruneUser} -- "$lease" release "$owner" || true; echo "df after: $(df_line)"' EXIT
+            trap 'echo "df after: $(df_line)"' EXIT
 
             sweep_project() {
               local proj=$1 target=$2 max=$3
@@ -152,7 +138,7 @@
                 echo "$proj: no target dir, skipping"
                 return 0
               fi
-              # A cargo build that ignored the lease still holds its locks.
+              # A running cargo build holds its target dir's locks.
               local f fd
               local -a fds=()
               while IFS= read -r f; do
@@ -194,11 +180,11 @@
       in
       {
         systemd.services.dev-target-sweep = {
-          description = "Bounded cargo sweep of the Development drive's warm target dirs (under the build lease)";
+          description = "Bounded cargo sweep of the Development drive's warm target dirs";
           unitConfig.RequiresMountsFor = drive;
           serviceConfig = {
             Type = "oneshot";
-            # root only to switch users: the lease and the prune run as agent,
+            # root only to switch users: the prune runs as agent,
             # cargo sweep as the target dir's owner.
             ExecStart = lib.getExe sweep;
             Nice = 19;

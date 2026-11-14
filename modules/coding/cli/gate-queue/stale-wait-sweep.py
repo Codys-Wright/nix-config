@@ -1,18 +1,17 @@
 #!/usr/bin/env python3
-"""stale-wait sweep (STA-415). DevOps no-agent cron, every 15 min. Never lets a build issue sit on a dead lease/gate wait.
+"""stale-wait sweep (STA-415). DevOps no-agent cron, every 15 min. Never lets a build issue sit on a dead gate wait.
 
-Per build host (battleship, airlock, voyager) it reads `gate-queue status --json`, `gate-queue status --unreported`,
-`build-lease status` and the process list over SSH. Then in Paperclip it looks at BLOCKED issues that are
+Per build host (battleship, airlock, voyager) it reads `gate-queue status --json`, `gate-queue status --unreported`
+and the process list over SSH. Then in Paperclip it looks at BLOCKED issues that are
   (1) assigned to that host's agent (Battleship / Airlock / Voyager),
-  (2) unblockDescriptor.owner.agentId == the assignee itself, and unblockDescriptor.action mentions lease|gate|waiter,
+  (2) unblockDescriptor.owner.agentId == the assignee itself, and unblockDescriptor.action mentions lease|gate|waiter
+      (old blocks still say "lease"; the build lease itself was removed in STA-567),
 and it sets such an issue to `todo` (with a comment) only if ALL of these also hold:
   (3) the host has no queued/running gate-queue job for the issue, and no finished job whose report is still pending,
   (4) the issue has no open blockedBy,
-  (5) the host build lease is not fully held by live (unexpired) holders, i.e. at least one slot is free
-      (a waiter would have taken a free slot within a minute, so a free slot that stays free means nobody waits),
-  (6) no process on the host mentions the issue key (a hand-rolled nohup/screen waiter may still be alive),
-  (7) the same conclusion held on the previous sweep too (>= SWEEP_MIN_AGE s earlier) with the issue unchanged.
-It never touches a lease, a job or any other issue. Host unreachable / output unparseable => that host is skipped.
+  (5) no process on the host mentions the issue key (a hand-rolled nohup/screen waiter may still be alive),
+  (6) the same conclusion held on the previous sweep too (>= SWEEP_MIN_AGE s earlier) with the issue unchanged.
+It never touches a job or any other issue. Host unreachable / output unparseable => that host is skipped.
 
 It prints (and posts to #fleet-alerts via Commander's bot, see post_alert) ONLY when it acted or tried to. With --dry-run it prints the
 full report and writes nothing (no Paperclip writes, no state file).
@@ -109,49 +108,24 @@ def api(method, path, body=None):
 
 
 def probe(host):
-    """-> dict(jobs, unreported_text, lease_text, ps) or None when the host can't be read."""
+    """-> dict(jobs, unreported_text, ps) or None when the host can't be read."""
     if FIX is not None:
         return FIX["hosts"].get(host)
     cmd = ("~/.local/bin/gate-queue status --json; echo %s; ~/.local/bin/gate-queue status --unreported; echo %s; "
-           "~/.local/bin/build-lease status; echo %s; ps -axo args") % (SPLIT, SPLIT, SPLIT)
+           "ps -axo args") % (SPLIT, SPLIT)
     try:
         p = subprocess.run(["ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=10", host, cmd],
                            capture_output=True, text=True, timeout=60)
     except Exception as e:
         note("%s: ssh failed (%s)" % (host, e)); return None
     parts = p.stdout.split(SPLIT)
-    if p.returncode != 0 or len(parts) != 4:
+    if p.returncode != 0 or len(parts) != 3:
         note("%s: probe failed rc=%s %s" % (host, p.returncode, p.stderr.strip()[:200])); return None
     try:
         jobs = json.loads(parts[0].strip() or "[]")
     except ValueError:
         note("%s: gate-queue status --json unparseable" % host); return None
-    return {"jobs": jobs, "unreported_text": parts[1].strip().strip("\n"), "lease_text": parts[2].strip(), "ps": parts[3]}
-
-
-def parse_lease(text):
-    """-> (slots, live_held, [descr]) or None. Handles build-lease v2 (slots) and v1 (single exclusive)."""
-    held = []
-    slots = None
-    m = re.search(r"(\d+)/(\d+) slot", text)
-    if m:
-        slots = int(m.group(2))
-        for mm in re.finditer(r"^HELD (\S+): (.*?) \(expires in (-?\d+)s\)", text, re.M):
-            held.append((mm.group(2), int(mm.group(3))))
-    elif text.startswith("HELD at") or "\nowner=" in text:
-        slots = 1
-        o = re.search(r"^owner=(.*)$", text, re.M)
-        e = re.search(r"^expires=(\d+)", text, re.M)
-        if o and e:
-            held.append((o.group(1), int(e.group(1)) - int(NOW)))
-        else:
-            held.append(("(no info)", 1))  # being created: treat as live
-    elif text.startswith("FREE"):
-        slots = 1
-    if slots is None:
-        return None
-    live = [(o, r) for o, r in held if r > 0]
-    return slots, live
+    return {"jobs": jobs, "unreported_text": parts[1].strip().strip("\n"), "ps": parts[2]}
 
 
 ALERT_CHANNEL = "discord:1562163078555111485"  # #fleet-alerts
@@ -191,7 +165,7 @@ def main():
         owner = ud.get("owner")
         if a in AGENT_HOST and isinstance(owner, dict) and owner.get("agentId") == a and WAIT_RE.search(str(ud.get("action", ""))) and not DONE_GATE_RE.search(str(ud.get("action", ""))):
             cands.append(i)
-    note("blocked issues scanned: %d; lease/gate/waiter self-blocks on build-host agents: %d" % (len(issues), len(cands)))
+    note("blocked issues scanned: %d; gate/waiter self-blocks on build-host agents: %d" % (len(issues), len(cands)))
 
     hostinfo = {}
     for host in HOSTS:
@@ -200,14 +174,9 @@ def main():
         pr = probe(host)
         if pr is None:
             hostinfo[host] = None; continue
-        lease = parse_lease(pr["lease_text"])
-        if lease is None:
-            note("%s: build-lease status unparseable: %r" % (host, pr["lease_text"][:120])); hostinfo[host] = None; continue
-        pr["lease"] = lease
         hostinfo[host] = pr
-        slots, live = lease
-        note("%s: lease %d/%d live slot(s) held %s; gate-queue jobs queued/running: %s; unreported: %s" % (
-            host, len(live), slots, [o for o, _ in live],
+        note("%s: gate-queue jobs queued/running: %s; unreported: %s" % (
+            host,
             [j["issue"] + ":" + j["state"] for j in pr["jobs"] if j.get("state") in ("queued", "running")] or "none",
             (pr["unreported_text"].replace("\n", " | ")[:160] or "none")))
 
@@ -220,7 +189,6 @@ def main():
         if pr is None:
             why = "host not readable this tick"
         else:
-            slots, live = pr["lease"]
             for j in pr["jobs"]:
                 if j.get("issue") == ident and (j.get("state") in ("queued", "running") or (j.get("state") in ("done", "lost") and j.get("reported") in PENDING_REPORT)):
                     why = "gate-queue job %s is %s%s" % (j["id"], j["state"], "" if j["state"] in ("queued", "running") else " (report pending)")
@@ -233,8 +201,6 @@ def main():
                     openb = [b.get("identifier", "?") for b in (d["blockedBy"] or []) if b.get("status") not in ("done", "cancelled")]
                     if openb:
                         why = "open blockedBy %s" % openb
-            if why is None and len(live) >= slots:
-                why = "lease fully held by live holder(s) %s" % [o for o, _ in live]
             if why is None:
                 key = re.compile(re.escape(ident), re.I)
                 procs = [l for l in pr["ps"].splitlines() if key.search(l) and "ps -axo" not in l and "gate-queue status" not in l]
@@ -254,24 +220,22 @@ def main():
         age = NOW - first
         if age < MIN_AGE:
             note("  %s (%s): stranded candidate, first seen %ds ago; acts when it holds for >= %ds (next sweep)" % (ident, host, age, MIN_AGE)); continue
-        slots, live = pr["lease"]
-        acts.append((c, host, slots, live, age))
+        acts.append((c, host, age))
 
     out = []
-    for c, host, slots, live, age in acts[:MAX_ACTIONS]:
+    for c, host, age in acts[:MAX_ACTIONS]:
         ident = c["identifier"]
         agent = HOSTS[host][1]
-        lease_s = "%d/%d slot(s) held%s" % (len(live), slots, (" by " + ", ".join(o for o, _ in live)) if live else "")
-        msg = ("Stale-wait sweep (DevOps, STA-415): this issue was blocked waiting on a build lease/gate, but nothing is "
-               "waiting for it on %s: no queued/running gate-queue job for %s, no open blockers, no waiter process, and the build "
-               "lease has a free slot (%s). It stayed that way for %d min across two sweeps. Setting it to todo so you resume. "
+        msg = ("Stale-wait sweep (DevOps, STA-415): this issue was blocked waiting on a gate, but nothing is "
+               "waiting for it on %s: no queued/running gate-queue job for %s, no open blockers, no waiter process. "
+               "It stayed that way for %d min across two sweeps. Setting it to todo so you resume. "
                "If you still need a queued gate, resubmit with `gate-submit` (skill rust-build-efficiency) instead of a hand-made waiter."
-               % (host, ident, lease_s, age // 60))
+               % (host, ident, age // 60))
         if DRY:
-            note("  %s (%s): WOULD set todo (lease %s)" % (ident, host, lease_s)); continue
+            note("  %s (%s): WOULD set todo" % (ident, host)); continue
         try:
             api("PATCH", "/issues/" + c["id"], {"status": "todo", "comment": msg})
-            out.append("- %s (%s): was stuck on a dead lease/gate wait, lease %s; set to todo" % (ident, agent, lease_s))
+            out.append("- %s (%s): was stuck on a dead gate wait; set to todo" % (ident, agent))
             new_state.pop(ident, None)
             acted_at[ident] = NOW
         except Exception as e:

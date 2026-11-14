@@ -1,4 +1,4 @@
-# gate-queue for an agent account (STA-402): durable, lease-aware build gates that
+# gate-queue for an agent account (STA-402): durable, queued build gates that
 # wake their Paperclip issue when they finish.
 #
 #   (<fleet.coding.cli/gate-queue> { user = "agent"; })
@@ -24,7 +24,7 @@
     }:
     {
       name = "gate-queue(${user})";
-      description = "Durable lease-aware build gates that wake their Paperclip issue, for ${user}";
+      description = "Durable queued build gates that wake their Paperclip issue, for ${user}";
       nixos =
         { lib, pkgs, ... }:
         let
@@ -44,10 +44,10 @@
         {
           environment.systemPackages = [ gate-queue ];
           systemd.user.services.gate-queue = {
-            description = "gate-queue: lease-aware build gates that wake their Paperclip issue";
+            description = "gate-queue: queued build gates that wake their Paperclip issue";
             wantedBy = [ "default.target" ];
             unitConfig.ConditionUser = user;
-            # ${home}/.local/bin carries the hand-placed build-lease and pc.
+            # ${home}/.local/bin carries the hand-placed pc.
             environment = {
               PATH = lib.mkForce (
                 lib.concatStringsSep ":" [
