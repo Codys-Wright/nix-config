@@ -332,6 +332,105 @@ deploy-darwin host:
 
     echo "Done!"
 
+# ── Panix (beside deploy-rs; docs/panix.md) ────────────────────────────────
+# panix.yml is generated from den.hosts (nix run .#write-panix-manifest).
+# None of these recipes is wired into CI or any timer.
+
+# Preview a Panix deploy: the exact commands, as which user. With a host it
+# also runs Panix's read-only Inspect over SSH (echo, uname, id,
+# cat /etc/os-release, nix-env --list-generations) because a config-only
+# --dry-run previews the bootstrap path for every host, even installed ones.
+# Builds nothing, copies nothing, activates nothing.
+# Usage: just panix-plan            (config-only preview, all hosts)
+#        just panix-plan electric   (preview with real inspect)
+# Preview a Panix deploy (dry run; shows every command it would run)
+panix-plan host="":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cd "{{justfile_directory()}}"
+    log=$(mktemp -t panix-plan.XXXXXX.log)
+    if [ -z "{{host}}" ]; then
+      mode=(--dry-run)
+    else
+      mode=(--dry-run-with-inspect -t "{{host}}")
+    fi
+    rc=0
+    nix run .#panix -- deploy "${mode[@]}" --output-mode console > "$log" 2>&1 || rc=$?
+    echo "Panix plan (${mode[*]}), full log: $log"
+    grep -oE 'xpath=[^ ]+|command="[^"]*"|error="[^"]*"' "$log" \
+      | sed -E 's/-o ControlMaster=auto -o ControlPath=[^ ]+ -o ControlPersist=60 //; s/NIX_SSHOPTS=.*StrictHostKeyChecking=[a-z-]+ //' \
+      | awk '!seen[$0]++'
+    exit $rc
+
+# Deploy ONE host with Panix: asks first, prints the live generation before
+# and after, disarms the dead-man timer over a fresh SSH connection.
+# Usage: just panix-deploy electric
+# Deploy one host with Panix (confirms; shows live generation before/after)
+panix-deploy host:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cd "{{justfile_directory()}}"
+    tgt=$(nix eval --json ".#deployTargets.{{host}}" 2>/dev/null) || { echo "{{host}} has no deployment entry in den.hosts"; exit 1; }
+    if [ "$(nix eval --json '.#panixManifest' | jq -r --arg h "{{host}}" '[.. | objects | select(has($h)) | .[$h] | objects | .disabled? // false] | any')" = true ]; then
+      echo "{{host}} is disabled in panix.yml"; exit 1
+    fi
+    nix build --no-link .#checks.x86_64-linux.panix-manifest >/dev/null || { echo "panix.yml is stale: nix run .#write-panix-manifest"; exit 1; }
+    ip=$(jq -r .ip <<<"$tgt"); user=$(jq -r .sshUser <<<"$tgt"); port=$(jq -r .sshPort <<<"$tgt"); class=$(jq -r .class <<<"$tgt")
+    ssh_opts=(-n -o ControlMaster=no -o ControlPath=none -o BatchMode=yes -o ConnectTimeout=10 -p "$port")
+    [ -f "hosts/{{host}}/known_hosts" ] && ssh_opts+=(-o UserKnownHostsFile="hosts/{{host}}/known_hosts")
+    live() { ssh "${ssh_opts[@]}" "$user@$ip" 'echo "$(readlink /run/current-system) | $(nix-env -p /nix/var/nix/profiles/system --list-generations | tail -1 | tr -s " ")"' 2>&1 | tail -1; }
+    echo "Panix deploy of {{host}} ($class) to $user@$ip:$port"
+    echo "  live before: $(live)"
+    echo "  Activation: switch. Auto-rollback only if switch-to-configuration fails;"
+    [ "$class" = nixos ] && echo "  dead-man timer reverts in 300s unless this recipe can reconnect afterwards."
+    read -r -p "Deploy {{host}} with Panix? Type the host name to confirm: " answer
+    [ "$answer" = "{{host}}" ] || { echo "Aborted."; exit 1; }
+    rc=0
+    nix run .#panix -- deploy -t "{{host}}" --exit-on-complete || rc=$?
+    if [ "$class" = nixos ]; then
+      if ssh "${ssh_opts[@]}" "$user@$ip" 'systemctl stop panix-deadman.timer 2>/dev/null; echo "dead-man disarmed"'; then :; else
+        echo "!! {{host}} is NOT reachable over a fresh SSH connection: the dead-man timer will"
+        echo "!! switch it back to the previous generation within 300s. Check it after that."
+      fi
+    fi
+    echo "  live after:  $(live)"
+    exit $rc
+
+# Disarm the dead-man timer by hand (after a bare `panix deploy` you have
+# verified), so it does not revert a good deploy.
+# Disarm the Panix dead-man timer on a host
+panix-confirm host:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cd "{{justfile_directory()}}"
+    tgt=$(nix eval --json ".#deployTargets.{{host}}")
+    ip=$(jq -r .ip <<<"$tgt"); user=$(jq -r .sshUser <<<"$tgt"); port=$(jq -r .sshPort <<<"$tgt")
+    opts=(-n -o ControlMaster=no -o ControlPath=none -o ConnectTimeout=10 -p "$port")
+    [ -f "hosts/{{host}}/known_hosts" ] && opts+=(-o UserKnownHostsFile="hosts/{{host}}/known_hosts")
+    ssh "${opts[@]}" "$user@$ip" 'systemctl stop panix-deadman.timer && echo "dead-man disarmed on $(hostname)"'
+
+# Roll ONE host back with Panix (default: the generation before the current
+# one; pass --gen=N for another). Asks first, prints before/after.
+# Usage: just panix-rollback electric
+#        just panix-rollback electric --gen=-2
+# Roll one host back with Panix (confirms; shows before/after)
+panix-rollback host *args:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cd "{{justfile_directory()}}"
+    tgt=$(nix eval --json ".#deployTargets.{{host}}")
+    ip=$(jq -r .ip <<<"$tgt"); user=$(jq -r .sshUser <<<"$tgt"); port=$(jq -r .sshPort <<<"$tgt")
+    ssh_opts=(-n -o ControlMaster=no -o ControlPath=none -o BatchMode=yes -o ConnectTimeout=10 -p "$port")
+    [ -f "hosts/{{host}}/known_hosts" ] && ssh_opts+=(-o UserKnownHostsFile="hosts/{{host}}/known_hosts")
+    live() { ssh "${ssh_opts[@]}" "$user@$ip" 'echo "$(readlink /run/current-system) | $(nix-env -p /nix/var/nix/profiles/system --list-generations | tail -1 | tr -s " ")"' 2>&1 | tail -1; }
+    echo "  live before: $(live)"
+    read -r -p "Roll {{host}} back with Panix ({{args}})? Type the host name to confirm: " answer
+    [ "$answer" = "{{host}}" ] || { echo "Aborted."; exit 1; }
+    rc=0
+    nix run .#panix -- rollback -t "{{host}}" {{args}} --exit-on-complete || rc=$?
+    echo "  live after:  $(live)"
+    exit $rc
+
 # Run a VM for a NixOS host (old vm command removed - use the new one at line 70)
 
 # Check VM CPU cores and memory (run this inside the VM)

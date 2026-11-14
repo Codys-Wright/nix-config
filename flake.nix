@@ -128,6 +128,10 @@
       url = "github:notashelf/nvf";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    panix = {
+      url = "github:mihakrumpestar/panix/v0.12.0";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     reaper-flake = {
       url = "github:FastTrackStudios/reaper-flake";
       inputs.nixpkgs.follows = "nixpkgs";
