@@ -21,11 +21,14 @@
 
     # Loft's NixOS module: the login screen (SDDM theme `loft`) that follows
     # each user's lock screen design (`loft greeter sync`).
+    # And the "Loft" login session (Plasma with Loft's shell instead of
+    # plasmashell) wherever Plasma is installed.
     nixos =
-      { lib, ... }:
+      { config, lib, ... }:
       {
         imports = [ inputs.loft.nixosModules.default ];
         programs.loft.greeter.enable = lib.mkDefault true;
+        programs.loft.plasma.enable = lib.mkDefault config.services.desktopManager.plasma6.enable;
       };
 
     provides.to-users.includes = [

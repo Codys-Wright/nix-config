@@ -24,6 +24,9 @@
         "tailscale0"
         "enp12s0"
       ];
+      # Boots (autologin) into KDE Plasma with Loft's shell; "Plasma" and
+      # "niri" stay at the login screen.
+      settings.desktop.session = "loft";
       deployment.ip = "100.68.255.30";
       users.cody = {
         extraGroups = [
