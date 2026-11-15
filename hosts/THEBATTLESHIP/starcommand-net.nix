@@ -16,7 +16,7 @@ in
       }:
       let
         # Starcommand hosts Nextcloud. Keep the WebDAV URL on the canonical
-        # TLS hostname, but resolve it to Starcommand's 10G/Dante address on
+        # TLS hostname, but resolve it to Starcommand's 10G address on
         # THEBATTLESHIP so traffic stays on the direct 10.10 link.
         nextcloudWebdavHost = "cloud.${domain}";
         nextcloudWebdavUser = "codywright";
@@ -33,6 +33,18 @@ in
         # server settings are the real switch-over; this only affects
         # THEBATTLESHIP itself.
         networking.nameservers = [ "192.168.1.254" ];
+
+        # The 10G link to starcommand (enp12s0, 10.10.10.10) is trusted: the
+        # cluster, NFS and the model servers talk over it. (Was in
+        # dante-net.nix, along with the Dante ports that went with Dante.)
+        networking.firewall.trustedInterfaces = [
+          "enp12s0"
+          "wlp14s0u4i2"
+        ];
+
+        # Without an NTP client the wall clock drifted 70 s, which broke T3
+        # Connect's relay proofs (60 s skew limit, STA-425).
+        services.timesyncd.enable = true;
 
         environment.variables = {
           TASK_VAULT = "${nextcloudWebdavMediaMount}/Projects";
@@ -125,7 +137,7 @@ in
             # noauto + automount: do NOT pull this bind mount in at boot.
             # Without these it mounts as part of remote-fs.target, which
             # (via the requires below) triggers the mnt-starcommand NFS mount
-            # during boot. When the 10G/Dante network isn't up yet that NFS
+            # during boot. When the 10G network isn't up yet that NFS
             # mount times out (30s) and fails this dependency, stalling boot.
             # As an automount it only activates on first access instead.
             "noauto"

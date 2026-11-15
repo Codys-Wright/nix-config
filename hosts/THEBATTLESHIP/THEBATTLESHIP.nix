@@ -5,9 +5,6 @@
   __findFile,
   ...
 }:
-let
-  danteChannels = import ./_data/dante-channels.nix;
-in
 {
   den.hosts.x86_64-linux = {
     THEBATTLESHIP = {
@@ -123,76 +120,8 @@ in
         <fleet.audio/studio> # musnix RT tuning + RaySession
         <fleet.music._.production/mioctl> # iConnectivity mioXM MIDI router CLI
 
-        # Dante: netaudio + inferno-control, plus this host's device/clock
-        # below. Dante / Inferno: this host is "THEBATTLESHIP" on the 10G Dante
-        # network, bound to the enp12s0 NIC. Statime does PTP clock sync,
-        # Inferno exposes a 128-channel virtual Dante soundcard.
-        (fleet.audio._.dante._.statime {
-          interface = "enp12s0";
-          # The Galaxy32's current Dante name (was the bare serial
-          # "AA-4202524000109"; renamed to "Galaxy32"). The re-assert oneshot
-          # looks the device up by this name, so it must match what the device
-          # advertises or it fails silently. The preferred-leader flag is also
-          # set directly on the device (persists in its NVRAM).
-          preferredLeader = "Galaxy32";
-          # MUST stay "debug" (or "trace"): at "warn" this statime fork loses a
-          # startup race — it hits the announce-receipt timeout and self-promotes
-          # to a PTPv1 master (unimplemented stub) before processing the leader's
-          # first Sync, so the clock never locks and no Dante audio flows. The
-          # extra per-packet logging delay lets the Sync win the race. Heisenbug.
-          loglevel = "debug";
-          # Belt-and-suspenders against the documented startup-race heisenbug
-          # (see loglevel note above): ride through ~60 announce intervals before
-          # ever declaring the master lost and self-promoting to the broken PTPv1
-          # master stub. statime has no real clock and must NEVER be a grandmaster.
-          # In normal operation it stays a clean follower anyway (BMCA only ever
-          # recommends slave state) — this just removes the timeout edge case.
-          announceReceiptTimeout = 60;
-          # When the watchdog recovers a lost PTP lock, re-open the Inferno
-          # PipeWire node against the now-valid clock (otherwise it stays frozen
-          # in "init"). studio-routing-links is partOf wireplumber and re-wires.
-          reinitOnRecovery = [ "wireplumber.service" ];
-          # Without a clock the Inferno nodes wedge PipeWire's main loop and
-          # stall the whole graph (TF included): gate them out when the clock
-          # is lost for good, back in when it returns (studio-routing.nix).
-          onLockLost = [ "/run/current-system/sw/bin/inferno-gate off || true" ];
-          onLocked = [ "/run/current-system/sw/bin/inferno-gate on || true" ];
-        })
-        (fleet.audio._.dante._.inferno {
-          bindIp = "10.10.10.10";
-          deviceId = "00000A0A0A0A0001";
-          channels = 64;
-          # Dante TX+RX buffer for our inferno_aoip device. This value is ALSO
-          # inferno's `max_lag_samples` (flows_tx.rs: "we set max_lag_samples to
-          # tx latency because it doesn't make sense to send samples older than
-          # that"): if the transmit thread is scheduled more than this late, the
-          # flow is declared lagged and reset, producing continuous dropouts.
-          # 0.5 ms (=24 samples @48k) was too tight — with RT isolation OFF and
-          # the box under game/browser load, real scheduling jitter measured
-          # ~29 samples (0.6 ms), so it tripped "tx lag of 29 samples" ~500x/30s
-          # and NO audio transmitted. 2 ms (=96 samples) leaves comfortable
-          # margin. Drop back toward 1 ms only after re-enabling RT core
-          # isolation (see rt-isolation aspect) and confirming clean dante-soak.
-          # The per-hop HARDWARE device RX latency (Galaxy32/TF/x16D, also 1 ms)
-          # is set in Dante Controller — inferno-control can't change third-party
-          # devices over ARC.
-          # 2026-07-21: 0.5/0.5 ms — the rest of the Dante fleet runs
-          # comfortably at 0.5 ms, and the fork (7a809db) split the
-          # semantics: txLatencyNs = TX max_lag + ADVERTISED latency
-          # (what receivers buffer for our flows); rxLatencyNs = playout
-          # floor for incoming flows (network jitter only; clamped up by
-          # the sender's advertised min). The old 0.5 ms pops predate
-          # rt-pin + the source-led clock. Revert toward 2 ms if tx-lag
-          # flow resets return.
-          txLatencyNs = 500000;
-          rxLatencyNs = 500000;
-          # Labels live in ./_data/dante-channels.nix (rx ≡ what Reaper
-          # records from; tx placeholders until the output layout is final).
-          rxChannelNames = danteChannels.rx;
-          txChannelNames = danteChannels.tx;
-        })
-
-        <fleet/audio/dante>
+        # No Dante here any more: a Raspberry Pi is the Dante interface and
+        # joins as a USB audio device. The fleet.audio.dante aspects stay for it.
 
         <fleet.system/samba-client>
 
@@ -263,7 +192,6 @@ in
         den.aspects.THEBATTLESHIP-sops
         den.aspects.THEBATTLESHIP-studio-routing
         den.aspects.THEBATTLESHIP-net-analysis
-        den.aspects.THEBATTLESHIP-dante-net
       ];
 
       nixos =
