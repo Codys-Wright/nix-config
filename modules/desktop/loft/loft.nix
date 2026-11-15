@@ -33,9 +33,14 @@
 
     provides.to-users.includes = [
       {
-        homeManager = { lib, ... }: {
+        homeManager = { config, lib, ... }: {
           imports = [ inputs.loft.homeManagerModules.default ];
           programs.loft.enable = lib.mkDefault true;
+          # A Plasma login (the "loft" session) rewrites ~/.gtkrc-2.0 and
+          # mimeapps.list; home-manager then refuses to activate once its
+          # backup name is taken. Its own versions win instead.
+          gtk.gtk2.force = lib.mkDefault true;
+          xdg.configFile."mimeapps.list".force = lib.mkIf config.xdg.mimeApps.enable true;
           # Loft's keyboard layer: the macOS-style remaps come from Loft
           # (`loft keys show`), xremap runs them (loft-keys.service), agents
           # change them at runtime (`loft keys app …`). The fleet's niri
