@@ -24,11 +24,22 @@
     # And the "Loft" login session (Plasma with Loft's shell instead of
     # plasmashell) wherever Plasma is installed.
     nixos =
-      { config, lib, ... }:
+      {
+        config,
+        lib,
+        pkgs,
+        ...
+      }:
       {
         imports = [ inputs.loft.nixosModules.default ];
         programs.loft.greeter.enable = lib.mkDefault true;
         programs.loft.plasma.enable = lib.mkDefault config.services.desktopManager.plasma6.enable;
+        # Option-drag tiles windows, like macOS: KWin with Loft's
+        # tile-while-moving-modifier patch (only KWin rebuilds; Alt is applied
+        # only while Loft's shell runs, plain Plasma keeps Shift).
+        programs.loft.plasma.kwinPackage = lib.mkIf config.services.desktopManager.plasma6.enable (
+          lib.mkDefault inputs.loft.packages.${pkgs.stdenv.hostPlatform.system}.loft-kwin-patched
+        );
       };
 
     provides.to-users.includes = [
