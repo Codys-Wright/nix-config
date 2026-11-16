@@ -36,7 +36,7 @@
           gtk4.theme.name = lib.mkForce "MacTahoe-Dark-blue";
           iconTheme.name = lib.mkForce "MacTahoe-blue";
           cursorTheme = {
-            name = lib.mkForce "MacTahoe-dark-cursors";
+            name = lib.mkForce "MacTahoe-cursors";
             size = lib.mkForce 24;
           };
           gtk3.extraConfig.gtk-application-prefer-dark-theme = true;
@@ -48,7 +48,7 @@
             color-scheme = "prefer-dark";
             gtk-theme = "MacTahoe-Dark-blue";
             icon-theme = "MacTahoe-blue";
-            cursor-theme = "MacTahoe-dark-cursors";
+            cursor-theme = "MacTahoe-cursors";
             cursor-size = 24;
           };
         };
