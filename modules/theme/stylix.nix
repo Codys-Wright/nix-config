@@ -31,8 +31,10 @@
           image = null;
           polarity = "dark";
 
+          # macOS's pointer: black with a white outline (MacTahoe-cursors);
+          # MacTahoe-dark-cursors is the inverted, white one.
           cursor = {
-            name = "MacTahoe-dark-cursors";
+            name = "MacTahoe-cursors";
             package = pkgs.mactahoe-cursor-theme;
             size = 24;
           };

@@ -41,7 +41,7 @@
           gtk4.theme.name = lib.mkForce "MacTahoe-Dark-blue";
           iconTheme.name = lib.mkForce "MacTahoe-blue";
           cursorTheme = {
-            name = lib.mkForce "MacTahoe-dark-cursors";
+            name = lib.mkForce "MacTahoe-cursors";
             size = lib.mkForce 24;
           };
           gtk3.extraConfig.gtk-application-prefer-dark-theme = true;
@@ -88,13 +88,18 @@
             fi
 
             plasma-apply-colorscheme MacTahoeDark
-            plasma-apply-cursortheme --size 24 MacTahoe-dark-cursors
+            plasma-apply-cursortheme --size 24 MacTahoe-cursors
             plasma-apply-desktoptheme MacTahoe-Dark
             kwriteconfig6 --file kdeglobals --group Icons --key Theme MacTahoe-blue
             dbus-send --session --dest=org.kde.KIconLoader /KIconLoader org.kde.KIconLoader.iconChanged int32:0 2>/dev/null || true
             kwriteconfig6 --file kdeglobals --group KDE --key widgetStyle kvantum-dark
 
-            # Window decorations — Aurorae MacTahoe-Dark, buttons on left (macOS style)
+            # Window decorations — Aurorae MacTahoe-Dark, buttons on left (macOS
+            # style). Not in Loft's session: loft-plasma-shell puts Loft's own
+            # decoration on (and restores this one when Loft stops).
+            if command -v loft-plasma >/dev/null && loft-plasma check loft; then
+              exit 0
+            fi
             kwriteconfig6 --file kwinrc --group org.kde.kdecoration2 --key library org.kde.kwin.aurorae
             kwriteconfig6 --file kwinrc --group org.kde.kdecoration2 --key theme __aurorae__svg__MacTahoe-Dark
             kwriteconfig6 --file kwinrc --group org.kde.kdecoration2 --key ButtonsOnLeft XIA

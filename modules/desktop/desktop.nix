@@ -2,6 +2,8 @@
 #
 # The default session is a per-host setting; under niri the shell is Loft:
 #   den.hosts.x86_64-linux.<host>.settings.desktop.session = "gnome";
+# "loft" is KDE Plasma with Loft's shell in place of plasmashell (Loft's
+# programs.loft.plasma); the plain "Plasma" and "niri" entries stay.
 {
   lib,
   fleet,
@@ -13,6 +15,7 @@ let
     niri = "niri";
     gnome = "gnome";
     kde = "plasma";
+    loft = "loft";
   };
 in
 {

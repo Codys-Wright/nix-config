@@ -21,18 +21,37 @@
 
     # Loft's NixOS module: the login screen (SDDM theme `loft`) that follows
     # each user's lock screen design (`loft greeter sync`).
+    # And the "Loft" login session (Plasma with Loft's shell instead of
+    # plasmashell) wherever Plasma is installed.
     nixos =
-      { lib, ... }:
+      {
+        config,
+        lib,
+        pkgs,
+        ...
+      }:
       {
         imports = [ inputs.loft.nixosModules.default ];
         programs.loft.greeter.enable = lib.mkDefault true;
+        programs.loft.plasma.enable = lib.mkDefault config.services.desktopManager.plasma6.enable;
+        # Option-drag tiles windows, like macOS: KWin with Loft's
+        # tile-while-moving-modifier patch (only KWin rebuilds; Alt is applied
+        # only while Loft's shell runs, plain Plasma keeps Shift).
+        programs.loft.plasma.kwinPackage = lib.mkIf config.services.desktopManager.plasma6.enable (
+          lib.mkDefault inputs.loft.packages.${pkgs.stdenv.hostPlatform.system}.loft-kwin-patched
+        );
       };
 
     provides.to-users.includes = [
       {
-        homeManager = { lib, ... }: {
+        homeManager = { config, lib, ... }: {
           imports = [ inputs.loft.homeManagerModules.default ];
           programs.loft.enable = lib.mkDefault true;
+          # A Plasma login (the "loft" session) rewrites ~/.gtkrc-2.0 and
+          # mimeapps.list; home-manager then refuses to activate once its
+          # backup name is taken. Its own versions win instead.
+          gtk.gtk2.force = lib.mkDefault true;
+          xdg.configFile."mimeapps.list".force = lib.mkIf config.xdg.mimeApps.enable true;
           # Loft's keyboard layer: the macOS-style remaps come from Loft
           # (`loft keys show`), xremap runs them (loft-keys.service), agents
           # change them at runtime (`loft keys app …`). The fleet's niri
