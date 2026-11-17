@@ -4,7 +4,7 @@
 { inputs, ... }:
 {
   den.aspects."cody@THEBATTLESHIP".homeManager =
-    { pkgs, ... }:
+    { pkgs, lib, ... }:
     let
       # MacTahoe's libadwaita CSS (the `-l` install) as the GTK 4 base under
       # Loft's theme: Tahoe toolbars and buttons; Loft keeps the palette and
@@ -25,14 +25,23 @@
       # Downloads is one list, not folders then files (GTK 4 file chooser too).
       dconf.settings."org/gtk/gtk4/settings/file-chooser".sort-directories-first = false;
 
+      # Loft's gtk-4.0/gtk.css imports MacTahoe underneath itself (gtkBase
+      # below), so home-manager mustn't import MacTahoe's GTK 4 CSS again after
+      # Loft's: that put MacTahoe's rules last and they won over Loft's menus
+      # (loft#68, docs/KWIN.md §4.19). Beats the MacTahoe module's mkForce.
+      gtk.gtk4.theme = lib.mkOverride 40 null;
+
       programs.loft = {
         enable = true;
         # The `loft` (configuring Loft, window rules) and `loft-drive` agent
         # skills in ~/.claude/skills.
         agentSkills.enable = true;
-        # Dolphin themed like Files' glass (Kvantum + a KDE colour scheme per
-        # Loft theme, set in dolphinrc only — no global Qt style).
+        # Every Qt / KDE app (and KWin's own menus, after a re-login) in Loft's
+        # Kvantum style + colour scheme while Loft is the shell; the previous
+        # values come back when Loft stops (loft#55, docs/KWIN.md §4.14).
+        # mactahoe-apply leaves those keys alone while this is on.
         qt.enable = true;
+        qt.global = true;
         # Must match the compositor (hosts/THEBATTLESHIP/niri-loft.nix): turns
         # on per-workspace wallpapers (the layer rule + the shell's surfaces).
         niriPackage =

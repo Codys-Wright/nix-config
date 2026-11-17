@@ -87,12 +87,20 @@
               plasma-apply-lookandfeel --apply com.github.vinceliuice.MacTahoe-Dark
             fi
 
-            plasma-apply-colorscheme MacTahoeDark
+            # Loft's global Qt mode owns the colour scheme and widget style
+            # while Loft is the shell (loft qt global, docs/KWIN.md §4.14).
+            loft_qt=0
+            if command -v loft-plasma >/dev/null && loft-plasma check loft \
+              && command -v loft >/dev/null && loft qt global status --json 2>/dev/null | grep -q '"enabled": true'; then
+              loft_qt=1
+            fi
+
+            [ "$loft_qt" = 1 ] || plasma-apply-colorscheme MacTahoeDark
             plasma-apply-cursortheme --size 24 MacTahoe-cursors
             plasma-apply-desktoptheme MacTahoe-Dark
             kwriteconfig6 --file kdeglobals --group Icons --key Theme MacTahoe-blue
             dbus-send --session --dest=org.kde.KIconLoader /KIconLoader org.kde.KIconLoader.iconChanged int32:0 2>/dev/null || true
-            kwriteconfig6 --file kdeglobals --group KDE --key widgetStyle kvantum-dark
+            [ "$loft_qt" = 1 ] || kwriteconfig6 --file kdeglobals --group KDE --key widgetStyle kvantum-dark
 
             # Window decorations — Aurorae MacTahoe-Dark, buttons on left (macOS
             # style). Not in Loft's session: loft-plasma-shell puts Loft's own
