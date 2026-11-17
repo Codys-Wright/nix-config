@@ -71,7 +71,7 @@ in
         # It hits anything vendoring crates through nix — importCargoLock,
         # crane, fetchCrate — and it reads like a dependency problem in
         # whatever happened to be building. It is what actually stopped
-        # THEBATTLESHIP rebuilding (via fts-rigs → reaper-launcher).
+        # THEBATTLESHIP rebuilding (via the since-removed fts-rigs → reaper-launcher).
         #
         # Dropping the version is enough; bare "Nixpkgs" is accepted.
         # fetchurl declares NIX_CURL_FLAGS impure precisely so a host can

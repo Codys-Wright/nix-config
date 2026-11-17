@@ -1,5 +1,5 @@
 # Reaper DAW with extensions
-# Uses reaper-flake's custom reaper derivation (v7.75) instead of nixpkgs
+# Uses reaper-flake's custom reaper derivation (v7.86) instead of nixpkgs
 {
   fleet,
   inputs,
@@ -10,7 +10,7 @@
   flake-file.inputs.reaper-flake.inputs.nixpkgs.follows = "nixpkgs";
 
   fleet.music._.production._.reaper = {
-    description = "Reaper digital audio workstation with SWS and ReaPack extensions (v7.75 via reaper-flake)";
+    description = "Reaper digital audio workstation with SWS and ReaPack extensions (v7.86 via reaper-flake)";
 
     # reaper-flake's reaper (and the SWS/ReaPack extensions, which ship
     # x86_64-linux .so files) declare linux-only meta.platforms, so the whole

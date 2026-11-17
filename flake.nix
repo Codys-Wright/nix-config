@@ -26,10 +26,6 @@
       url = "github:nix-darwin/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    daw = {
-      url = "github:FastTrackStudios/daw";
-      flake = false;
-    };
     den.url = "github:denful/den";
     deploy-rs.url = "github:serokell/deploy-rs";
     devenv-fleet = {
@@ -50,13 +46,6 @@
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
       inputs.nixpkgs-lib.follows = "nixpkgs";
-    };
-    fts-reaper-flake = {
-      url = "github:FastTrackStudios/fts-reaper-flake";
-      inputs = {
-        daw.follows = "daw";
-        reaper-flake.follows = "reaper-flake";
-      };
     };
     ghidra-cli.url = "github:Codys-Wright/ghidra-cli/fix/ghidra-12-compat";
     herdr = {

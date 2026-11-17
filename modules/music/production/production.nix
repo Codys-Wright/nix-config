@@ -10,13 +10,12 @@
 {
   # Host half: the system side of a production machine. Included by hosts.
   fleet.music._.production = {
-    description = "Music production host — musnix + plugin paths, millisecond, easyeffects, fts-rigs";
+    description = "Music production host — musnix + plugin paths, millisecond, easyeffects";
 
     includes = [
       fleet.music._.production._.environment
       fleet.music._.production._.easyeffects
       fleet.music._.production._.millisecond
-      fleet.music._.production._.ftsRigs
     ];
   };
 

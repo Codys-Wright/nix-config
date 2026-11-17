@@ -117,7 +117,7 @@
         <fleet/kernel>
 
         # Music production host half (musnix plugin paths, millisecond,
-        # easyeffects, fts-rigs); cody's per-user half is
+        # easyeffects); cody's per-user half is
         # <fleet.music._.production/producer> in his own aspect.
         <fleet.music/production>
         <fleet.audio/studio> # musnix RT tuning + RaySession
