@@ -23,7 +23,7 @@
   # the user (cody), not the host — co-op/guest accounts on a studio host
   # shouldn't receive REAPER and several GB of plugins.
   fleet.music._.production._.producer = {
-    description = "Per-user music production — REAPER, plugins + plugin-dir links, guitar tooling, Axe-Edit, Spicetify";
+    description = "Per-user music production — REAPER, plugins + plugin-dir links, guitar tooling, Axe-Edit, Spicetify, MuseScore";
 
     includes = [
       fleet.music._.production._.plugin-links
@@ -32,6 +32,7 @@
       fleet.music._.production._.guitar
       fleet.music._.production._.axeEdit
       fleet.music._.production._.spicetify
+      fleet.music._.production._.musescore
     ];
   };
 }
