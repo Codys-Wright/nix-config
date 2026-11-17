@@ -2036,11 +2036,11 @@
         "rust-overlay": "rust-overlay_7"
       },
       "locked": {
-        "lastModified": 1794894545,
-        "narHash": "sha256-m9l4tO9RDsY+gZh4oVVsu2/m5vkbtxZU1RRhiFWJnZU=",
+        "lastModified": 1794895802,
+        "narHash": "sha256-Bq33mP5zBp7mSKzjQqHWFDqR0uzpYmsOtlNTv6Y7yPQ=",
         "owner": "FastTrackStudios",
         "repo": "reaper-flake",
-        "rev": "3747594fa934b9f2da7e964c7754b447966f85ce",
+        "rev": "4bc2f732ccbfc1174e04907fb8b6c40b9acbfcf4",
         "type": "github"
       },
       "original": {
