@@ -164,6 +164,19 @@ let
   nixConfigRunner = "github-nix-config";
   nixConfigCount = 3;
   nixConfigWorkRoot = "/run/media/Development/github-runner-work-nix-config";
+
+  # Codys-Wright/loft's runner, the same shape as nix-config's: checks.yml's
+  # one job (`nix flake check`) builds against THEBATTLESHIP's /nix/store,
+  # where niri-loft, the patched KWin and the Loft crates already are, so a
+  # run builds only what the push changed (~40 min on a hosted runner, which
+  # rebuilt all of it). One instance: a run is one job, and the workflow's
+  # concurrency group queues the next push behind it. The repo is PUBLIC:
+  # every job runs loftJobGate (below), and the job runs as its own user,
+  # `loft-ci`, which cannot read the forge App key. Workflows:
+  # `runs-on: [self-hosted, loft]`.
+  loftRunner = "github-loft";
+  loftCount = 1;
+  loftWorkRoot = "/run/media/Development/github-runner-work-loft";
 in
 {
   den.aspects.THEBATTLESHIP-github-runners.includes = [
@@ -193,6 +206,17 @@ in
       url = "https://github.com/Codys-Wright/nix-config";
       labels = [ "nix-config" ];
       workRoot = nixConfigWorkRoot;
+      githubApp = forgeApp // {
+        login = "Codys-Wright";
+      };
+    })
+    # Codys-Wright/loft (loftRunner above): checks.yml's `nix flake check`.
+    (runner {
+      name = loftRunner;
+      count = loftCount;
+      url = "https://github.com/Codys-Wright/loft";
+      labels = [ "loft" ];
+      workRoot = loftWorkRoot;
       githubApp = forgeApp // {
         login = "Codys-Wright";
       };
@@ -443,6 +467,38 @@ in
         '';
       };
       nixConfigInstances = map (i: "${nixConfigRunner}-${toString i}") (lib.range 1 nixConfigCount);
+      # Loft's gate. Codys-Wright/loft is PUBLIC and its CI no longer runs
+      # on pull requests, so only a push to main or a manual dispatch (write
+      # access) runs here; every other event, a fork PR included, is
+      # refused. The payload's repository must match, as on nix-config's.
+      loftJobGate = pkgs.writeShellApplication {
+        # The runner runs a hook only if its name ends in .sh.
+        name = "loft-ci-job-gate.sh";
+        runtimeInputs = [ pkgs.jq ];
+        text = ''
+          repo=Codys-Wright/loft
+          deny() { echo "loft-ci: refusing job ($1)" >&2; exit 1; }
+          event="''${GITHUB_EVENT_NAME:-}"
+          ref="''${GITHUB_REF:-}"
+          payload="''${GITHUB_EVENT_PATH:-}"
+          [ "''${GITHUB_REPOSITORY:-}" = "$repo" ] || deny "repository ''${GITHUB_REPOSITORY:-?}"
+          [ -n "$payload" ] && [ -r "$payload" ] || deny "no event payload"
+          p_repo="$(jq -er '.repository.full_name' "$payload" 2>/dev/null)" || deny "unreadable event payload"
+          [ "$p_repo" = "$repo" ] || deny "payload repository $p_repo"
+          case "$event" in
+            push) [ "$ref" = refs/heads/main ] || deny "push to ''${ref:-?}" ;;
+            workflow_dispatch) ;;
+            *) deny "event ''${event:-?}" ;;
+          esac
+          echo "loft-ci: allowed ($event, $ref)"
+        '';
+      };
+      # The runner aspect's naming: a lone instance has no -N suffix.
+      loftInstances =
+        if loftCount == 1 then
+          [ loftRunner ]
+        else
+          map (i: "${loftRunner}-${toString i}") (lib.range 1 loftCount);
       genericInstances = lib.concatLists (
         lib.mapAttrsToList (
           name: pool:
@@ -634,7 +690,32 @@ in
             extraEnvironment.ACTIONS_RUNNER_HOOK_JOB_STARTED = lib.getExe nixConfigJobGate;
           });
         }
+        {
+          # Loft's, the same way (loftRunner).
+          services.github-runners = lib.genAttrs loftInstances (_: {
+            user = lib.mkForce "loft-ci";
+            group = lib.mkForce "loft-ci";
+            extraEnvironment.ACTIONS_RUNNER_HOOK_JOB_STARTED = lib.getExe loftJobGate;
+          });
+        }
       ];
+
+      # Loft's instance runs as its own user (loftRunner), like nix-config's:
+      # a plain Nix daemon client (no trusted-users entry), so its builds
+      # land in and reuse the host's /nix/store. Work tree handed over after
+      # the runner aspect makes it github-runner's.
+      users.users.loft-ci = {
+        isSystemUser = true;
+        group = "loft-ci";
+        description = "Codys-Wright/loft CI (github-loft runner)";
+        home = "/var/empty";
+      };
+      users.groups.loft-ci = { };
+      system.activationScripts.loft-runner-work =
+        lib.stringAfter [ "users" "groups" "github-runner-dirs-${loftRunner}" ]
+          (
+            lib.concatMapStringsSep "\n" (inst: "chown loft-ci:loft-ci ${loftWorkRoot}/${inst}") loftInstances
+          );
 
       users.users.starcommand-ci = {
         isSystemUser = true;
