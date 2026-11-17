@@ -28,6 +28,9 @@ let
             "https://fasttrackstudio.cachix.org"
             "https://microvm.cachix.org"
             "https://fleet.cachix.org"
+            # Loft and its patched KWin, pushed by THEBATTLESHIP after each
+            # switch (hosts/THEBATTLESHIP/loft-cache.nix).
+            "https://loft.cachix.org"
             # devenv's own builds (the repos' pinned devenv CLI, CI runners
             # building `github:cachix/devenv/<tag>`): fetched, never compiled.
             "https://devenv.cachix.org"
@@ -37,6 +40,7 @@ let
             "fasttrackstudio.cachix.org-1:r7v7WXBeSZ7m5meL6w0wttnvsOltRvTpXeVNItcy9f4="
             "microvm.cachix.org-1:oXnAttsRgXtB2wXwwITVq3+NzJIhWQz9MKPAF8FcVPs="
             "fleet.cachix.org-1:OXtbUqSc/c0fVhiq9pBAmb/4eGVcfz7qlNWFmvQpNj8="
+            "loft.cachix.org-1:4SweroAW5BT2ukjC7IlXPSKDvQ40N/vrcK8Un8SsnSs="
             "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="
           ];
         };
