@@ -48,11 +48,16 @@
         <fleet/apps>
         <fleet.apps._.misc/cuteatum>
         <fleet.apps._.misc/unshuffle>
-        <fleet.apps._.misc/opendeck>
+        # OpenDeck off for now (2026-11-17): its per-app profile switching polls
+        # the active window through kdotool's KWin scripts ~4×/s, and the
+        # load/run/stop churn (KWin reuses script ids) kept stopping Loft's
+        # KWin scripts under Plasma. Re-enable both lines once that's fixed;
+        # the layout stays in users/cody/opendeck/config.
+        # <fleet.apps._.misc/opendeck>
         <fleet.apps/browsers/firefox_webapps>
         (<fleet.apps/default-file-manager> "nautilus")
         (<fleet.apps/default-browser> "brave")
-        cody.opendeck
+        # cody.opendeck
 
         <fleet/creative>
 
