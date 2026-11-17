@@ -2012,11 +2012,11 @@
         "rust-overlay": "rust-overlay_7"
       },
       "locked": {
-        "lastModified": 1794891552,
-        "narHash": "sha256-TQ4iakRdFJ8H6h/LJWTHfe8St2/OjQ/qgF0X4mHhe80=",
+        "lastModified": 1794893551,
+        "narHash": "sha256-Qho+l6Fm/I+oXrVGglLL4PqOTa/TG6wxB60L0X0JcGU=",
         "owner": "FastTrackStudios",
         "repo": "reaper-flake",
-        "rev": "487eac54ccfa9e0c4348dbb8d2cea2f977535d15",
+        "rev": "3f254ce245c71d2e198f8842b5f96b633550c40f",
         "type": "github"
       },
       "original": {
