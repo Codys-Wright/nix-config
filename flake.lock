@@ -1344,10 +1344,10 @@
     },
     "nix-secrets": {
       "locked": {
-        "lastModified": 1793606011,
-        "narHash": "sha256-k+c+gPtonTse+18SvuePphFf4+clSzTUUodwNMp6G6A=",
+        "lastModified": 1794934422,
+        "narHash": "sha256-dO1ITt6D+oN9BZo68lTEx1QfXHReqvMUcS0PVDkLKh8=",
         "ref": "main",
-        "rev": "8ab7cf45cc64df13ecd8597ddc62d7e0ae26d4ff",
+        "rev": "fbd7cbfd4adb4ebf225a735407939e5285b8331a",
         "shallow": true,
         "type": "git",
         "url": "ssh://git@github.com/Codys-Wright/nix-secrets.git"

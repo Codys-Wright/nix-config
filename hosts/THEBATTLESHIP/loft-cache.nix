@@ -12,10 +12,8 @@
 # no-op when everything is already there). It runs in the background, so
 # a switch never waits for an upload.
 #
-# Token: a Cachix write token for the `loft` cache, in
-# /var/lib/loft-cache/cachix-token (root, 0600). It is put there by hand for
-# now; moving it into nix-secrets (sops) is Keeper's. Without the file the
-# unit is skipped.
+# Token: a Cachix write token for the `loft` cache, from nix-secrets
+# (sops/hosts/THEBATTLESHIP.yaml, loft/cachix-token).
 { inputs, ... }:
 {
   den.aspects.THEBATTLESHIP-loft-cache = {
@@ -28,7 +26,6 @@
         ...
       }:
       let
-        tokenFile = "/var/lib/loft-cache/cachix-token";
         loftPkgs = lib.filterAttrs (
           n: v: n != "default" && lib.isDerivation v
         ) inputs.loft.packages.${pkgs.stdenv.hostPlatform.system};
@@ -41,6 +38,11 @@
         );
       in
       {
+        sops.secrets."loft/cachix-token" = {
+          sopsFile = "${inputs.nix-secrets}/sops/hosts/THEBATTLESHIP.yaml";
+          mode = "0400";
+        };
+
         systemd.services.loft-cache-push = {
           description = "Push Loft's packages to loft.cachix.org";
           wantedBy = [ "multi-user.target" ];
@@ -50,7 +52,6 @@
             "nix-daemon.socket"
           ];
           restartTriggers = [ list ];
-          unitConfig.ConditionPathExists = tokenFile;
           path = [
             pkgs.cachix
             config.nix.package
@@ -61,7 +62,7 @@
             DynamicUser = true;
             CacheDirectory = "loft-cache";
             Environment = "HOME=/var/cache/loft-cache";
-            LoadCredential = "token:${tokenFile}";
+            LoadCredential = "token:${config.sops.secrets."loft/cachix-token".path}";
             Nice = 10;
             IOSchedulingClass = "idle";
           };
