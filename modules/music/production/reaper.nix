@@ -25,6 +25,11 @@
           inherit pkgs;
           cfg = inputs.reaper-flake.presets.full // {
             headless.enable = false;
+            # Global menu: REAPER's menu goes to Loft's top bar (DBusMenu) and
+            # the in-window menu bar hides while a registrar is up.
+            extensions = inputs.reaper-flake.presets.full.extensions // {
+              appmenu = true;
+            };
           };
         };
       in
@@ -43,6 +48,8 @@
           source = "${pkgs.reaper-sws-extension}/UserPlugins/reaper_sws-x86_64.so";
           force = true;
         };
+        home.file.".config/REAPER/UserPlugins/reaper_appmenu-x86_64.so".source =
+          "${reaperPkgs.appmenu}/UserPlugins/reaper_appmenu-x86_64.so";
         home.file.".config/REAPER/UserPlugins/reaper_reapack-x86_64.so" = {
           source = "${pkgs.reaper-reapack-extension}/UserPlugins/reaper_reapack-x86_64.so";
           force = true;

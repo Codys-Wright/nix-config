@@ -1986,6 +1986,29 @@
         "type": "github"
       }
     },
+    "reaper-appmenu": {
+      "inputs": {
+        "nixpkgs": [
+          "reaper-flake",
+          "nixpkgs"
+        ],
+        "reaper-sdk": "reaper-sdk",
+        "wdl": "wdl"
+      },
+      "locked": {
+        "lastModified": 1794894485,
+        "narHash": "sha256-uKnYh3raHNaBAOiQJhf5diLE76Q6NqVCtRVE6LXTLX8=",
+        "owner": "Codys-Wright",
+        "repo": "reaper-appmenu",
+        "rev": "2aa102ebe1c4c83d368f14221a107665e412e115",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Codys-Wright",
+        "repo": "reaper-appmenu",
+        "type": "github"
+      }
+    },
     "reaper-file": {
       "flake": false,
       "locked": {
@@ -2008,20 +2031,37 @@
         "nixpkgs": [
           "nixpkgs"
         ],
+        "reaper-appmenu": "reaper-appmenu",
         "reaper-file": "reaper-file",
         "rust-overlay": "rust-overlay_7"
       },
       "locked": {
-        "lastModified": 1794893551,
-        "narHash": "sha256-Qho+l6Fm/I+oXrVGglLL4PqOTa/TG6wxB60L0X0JcGU=",
+        "lastModified": 1794894545,
+        "narHash": "sha256-m9l4tO9RDsY+gZh4oVVsu2/m5vkbtxZU1RRhiFWJnZU=",
         "owner": "FastTrackStudios",
         "repo": "reaper-flake",
-        "rev": "3f254ce245c71d2e198f8842b5f96b633550c40f",
+        "rev": "3747594fa934b9f2da7e964c7754b447966f85ce",
         "type": "github"
       },
       "original": {
         "owner": "FastTrackStudios",
         "repo": "reaper-flake",
+        "type": "github"
+      }
+    },
+    "reaper-sdk": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1794604467,
+        "narHash": "sha256-3x3UVUJ+yTDk3ZHyvQ1ujZSTDw1XhvaURft65MreZgg=",
+        "owner": "justinfrankel",
+        "repo": "reaper-sdk",
+        "rev": "61cc0d4ada1e4d8438186ed8ba5e5f9d72b148b9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "justinfrankel",
+        "repo": "reaper-sdk",
         "type": "github"
       }
     },
@@ -2754,6 +2794,22 @@
       "original": {
         "owner": "pyproject-nix",
         "repo": "uv2nix",
+        "type": "github"
+      }
+    },
+    "wdl": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1794604538,
+        "narHash": "sha256-MsKBbCLlkG+JI0MhTOh5lNqcXpl06WaKEkSy7M4qUCI=",
+        "owner": "justinfrankel",
+        "repo": "WDL",
+        "rev": "6a67ec5788ca6ee252b19cd8071796db49d763a7",
+        "type": "github"
+      },
+      "original": {
+        "owner": "justinfrankel",
+        "repo": "WDL",
         "type": "github"
       }
     },
