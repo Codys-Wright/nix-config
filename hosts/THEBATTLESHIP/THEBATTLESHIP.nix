@@ -185,6 +185,7 @@
         # one file per concern in this directory.
         den.aspects.THEBATTLESHIP-audio-latency
         den.aspects.THEBATTLESHIP-niri-loft
+        den.aspects.THEBATTLESHIP-loft-cache # push Loft + patched KWin to loft.cachix.org after each switch
         den.aspects.THEBATTLESHIP-storage
         den.aspects.THEBATTLESHIP-kache # one kache store for cody and the FastTrackStudios runners
         den.aspects.THEBATTLESHIP-kache-nix-sandbox # that store inside the nix sandbox, for builds that opt in (studio's release image)
