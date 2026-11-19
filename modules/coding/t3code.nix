@@ -74,7 +74,12 @@
             done
 
             export T3CODE_HOME="''${T3CODE_DESKTOP_HOME:-$HOME/.t3-desktop}"
-            exec appimage-run "$img" "$@"
+            # Pin Electron's safeStorage to gnome-keyring. Electron otherwise
+            # picks the backend from XDG_CURRENT_DESKTOP (KDE → kwallet6,
+            # niri → gnome-libsecret), and switching sessions leaves the
+            # connection catalog encrypted under the other keyring's key, so
+            # the desktop can't load any server connections.
+            exec appimage-run "$img" --password-store=gnome-libsecret "$@"
           '';
         };
       in
