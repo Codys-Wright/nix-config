@@ -170,6 +170,7 @@
         # GitHub Actions runners: the nix-host pool plus one per project
         # (github-runners.nix).
         den.aspects.THEBATTLESHIP-github-runners
+        den.aspects.THEBATTLESHIP-ci-slice # all runners share one CPU cap (ci.slice)
 
         <fleet.system/avahi>
         <fleet.system/virtualization>
