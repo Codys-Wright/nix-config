@@ -1077,16 +1077,16 @@
         "treefmt-nix": "treefmt-nix_2"
       },
       "locked": {
-        "lastModified": 1793620549,
-        "narHash": "sha256-1O4JrN2zzKS7QgBT2fnih2W+zvEqBT5dvEuxCuyU3Kg=",
+        "lastModified": 1794493703,
+        "narHash": "sha256-5461iJuvDpibacLGgx7dzA6Dix5UleDnqklgmfQ5p8w=",
         "owner": "kunobi-ninja",
         "repo": "kache",
-        "rev": "e465eff90d87669d7b0a9ee1010f1ee1e44090ed",
+        "rev": "7fe0b281f939ce0b7a99734f22437e0aad69468d",
         "type": "github"
       },
       "original": {
         "owner": "kunobi-ninja",
-        "ref": "v2.0.0",
+        "ref": "v2.1.1",
         "repo": "kache",
         "type": "github"
       }
