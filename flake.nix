@@ -49,7 +49,7 @@
     };
     ghidra-cli.url = "github:Codys-Wright/ghidra-cli/fix/ghidra-12-compat";
     herdr = {
-      url = "github:ogulcancelik/herdr/v0.7.4";
+      url = "github:ogulcancelik/herdr/v0.9.5";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     hermes-agent = {

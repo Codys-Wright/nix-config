@@ -6,7 +6,7 @@
   ...
 }:
 {
-  flake-file.inputs.herdr.url = lib.mkDefault "github:ogulcancelik/herdr/v0.7.4";
+  flake-file.inputs.herdr.url = lib.mkDefault "github:ogulcancelik/herdr/v0.9.5";
   flake-file.inputs.herdr.inputs.nixpkgs.follows = "nixpkgs";
 
   fleet.coding._.cli._.herdr = {
@@ -22,7 +22,7 @@
         # Agent skill shipped with herdr — pinned to the same tag as the binary
         # so it always describes the installed CLI. ~/.claude/skills is otherwise
         # unmanaged; this only owns the herdr/ subdir.
-        home.file.".claude/skills/herdr/SKILL.md".source = "${inputs.herdr}/SKILL.md";
+        home.file.".claude/skills/herdr/SKILL.md".source = "${inputs.herdr}/skills/herdr/SKILL.md";
       };
   };
 }
