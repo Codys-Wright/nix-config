@@ -34,6 +34,8 @@ let
             # devenv's own builds (the repos' pinned devenv CLI, CI runners
             # building `github:cachix/devenv/<tag>`): fetched, never compiled.
             "https://devenv.cachix.org"
+            # numtide llm-agents.nix (Herdr desktop app + herdr-core).
+            "https://cache.numtide.com"
           ];
           trusted-public-keys = [
             "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
@@ -42,6 +44,7 @@ let
             "fleet.cachix.org-1:OXtbUqSc/c0fVhiq9pBAmb/4eGVcfz7qlNWFmvQpNj8="
             "loft.cachix.org-1:4SweroAW5BT2ukjC7IlXPSKDvQ40N/vrcK8Un8SsnSs="
             "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="
+            "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
           ];
         };
         gc = lib.optionalAttrs config.nix.enable {

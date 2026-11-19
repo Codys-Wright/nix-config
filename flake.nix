@@ -81,6 +81,7 @@
       url = "github:NandhaKishorM/laya/v0.4.21";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    llm-agents.url = "github:numtide/llm-agents.nix";
     loft = {
       url = "github:Codys-Wright/loft";
       inputs.nixpkgs.follows = "nixpkgs";

@@ -48,6 +48,7 @@
         <fleet/apps>
         <fleet.apps._.misc/cuteatum>
         <fleet.apps._.misc/unshuffle>
+        <fleet.apps._.misc/herdr-app>
         # OpenDeck polls the active window through kdotool's KWin scripts
         # ~4×/s. Stock KWin reuses script ids, so that churn stopped Loft's
         # KWin scripts; Loft's patched KWin (loft #71) gives every script a
