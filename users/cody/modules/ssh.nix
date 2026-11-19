@@ -104,7 +104,8 @@ in
         };
 
         # Peer reachability between THEBATTLESHIP and voyager, in priority
-        # order: 10G hardwired (10.10) -> home LAN (192) -> Tailscale
+        # order: 10G hardwired (10.10) -> direct ethernet (192.168.1) ->
+        # home LAN (192.168.0) -> Tailscale
         # MagicDNS (works across networks). Each Match-exec probes a port
         # with a 1s timeout; the first reachable tier sets HostName (ssh
         # uses the first value it sees), otherwise it falls through to the
@@ -112,6 +113,8 @@ in
         extraConfig = ''
           Match host voyager exec "nc -z -w1 10.10.10.186 22 2>/dev/null"
             HostName 10.10.10.186
+          Match host voyager exec "nc -z -w1 192.168.1.10 22 2>/dev/null"
+            HostName 192.168.1.10
           Match host voyager exec "nc -z -w1 192.168.0.132 22 2>/dev/null"
             HostName 192.168.0.132
           Host voyager
