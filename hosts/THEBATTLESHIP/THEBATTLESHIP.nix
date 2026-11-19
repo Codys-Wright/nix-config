@@ -65,16 +65,8 @@
         # agent's queued build gates (gate-submit) run in a user unit
         # and wake their Paperclip issue when done (STA-402).
         (<fleet.coding.cli/gate-queue> { user = "agent"; })
-        # Claude Code + Codex go through the fleet proxy on starcommand (10G
-        # fabric); per-user keys keep agent usage apart from Cody's.
-        (<fleet.coding.cli/cliproxyapi-client> {
-          baseUrl = "http://10.10.10.1:8317";
-          sopsFile = "${inputs.nix-secrets}/sops/hosts/THEBATTLESHIP.yaml";
-          users = {
-            cody = "cody";
-            agent = "agents";
-          };
-        })
+        # No cliproxyapi-client here: Claude Code signs in directly
+        # (claude.ai login) so Code Mode works — it refuses third-party base URLs.
         # Paperclip's native agents: Claude Code + Codex, self-updating.
         (<fleet.coding.cli/agent-clis> { users = [ "agent" ]; })
         <fleet.system/agent-bot-desktop> # Hermes bot screen for agent sessions over SSH
