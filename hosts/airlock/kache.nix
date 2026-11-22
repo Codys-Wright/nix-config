@@ -44,7 +44,25 @@ in
         environment.systemPackages = [ pkgs.kache ];
 
         # Read by every kache process, under ~/.config/kache and KACHE_*.
+        # kache signs every S3 request and won't without keys; the Drive
+        # agent's endpoint (loopback only) ignores them, so any value works.
+        environment.variables = {
+          KACHE_S3_ACCESS_KEY = "drive";
+          KACHE_S3_SECRET_KEY = "drive";
+        };
+
         environment.etc."kache/config.toml".text = ''
+          # Misses go to the Drive agent on this computer, which asks the other
+          # computers of its build group (THEBATTLESHIP + the VPS, Airlock +
+          # Voyager) over Drive's peer connections: no cloud bucket
+          # (FastTrackStudios/drive docs/kache.md, drive#45). No agent running:
+          # the connection is refused at once and kache just compiles.
+          [cache.remote]
+          type = "s3"
+          bucket = "kache"
+          endpoint = "http://127.0.0.1:9778"
+          region = "us-east-1"
+
           [cache]
           local_store = "${store}"
           # About 1 TB of the 1.8 TiB build disk (its old target dirs were
