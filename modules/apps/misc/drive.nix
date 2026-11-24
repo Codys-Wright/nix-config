@@ -6,15 +6,17 @@
 # downloads them and compiles nothing. Following our nixpkgs would make new
 # paths no cache has.
 #
-# macOS: (<fleet.apps.misc/drive-launchd> { user = "rat"; }) runs that
+# macOS: (<fleet.apps.misc/drive-launchd> { user = "rat"; }) installs
+# Drive.app from the release (packages/drive-app-release) and runs that
 # account's agent (`drive serve`, its state in ~/.local/share/drive-agent)
-# as a LaunchDaemon, from the release's macOS tarball (packages/drive-release).
+# from inside it, as a LaunchAgent; the CLI is the release's tarball
+# (packages/drive-release).
 #
 # Bump: point the url at the new tag, `nix flake update drive`, and run
 # packages/drive-release/update.sh <tag>; switch.
 { inputs, lib, ... }:
 {
-  flake-file.inputs.drive.url = lib.mkDefault "github:FastTrackStudios/drive/v26.11.6";
+  flake-file.inputs.drive.url = lib.mkDefault "github:FastTrackStudios/drive/v26.11.7";
 
   fleet.apps._.misc._.drive = {
     description = "Drive CLI (the agent, `drive`) from the release's Nix package";
@@ -36,32 +38,41 @@
     }:
     {
       name = "drive-launchd(${user})";
-      description = "Drive's agent (drive serve) as a boot-time LaunchDaemon run as ${user}";
+      description = "Drive.app and its agent (drive serve) in ${user}'s session";
       darwin =
         { lib, pkgs, ... }:
         let
           log = "${home}/Library/Logs/drive-agent.log";
-          # The hand-installed LaunchAgent this replaces: one agent per
-          # state dir, so it is stopped and set aside before the daemon loads.
+          agentLabel = "app.fasttrackstudio.drive.agent";
+          # What ran the agent before: the hand-installed LaunchAgent, then
+          # a LaunchDaemon running the release's bare binary. One agent per
+          # state dir, so both are stopped before this one loads.
           legacy = "${home}/Library/LaunchAgents/app.fasttrackstudio.drive-agent.plist";
+          oldDaemon = "/Library/LaunchDaemons/app.fasttrackstudio.drive.plist";
         in
         {
+          # `drive` on PATH (the CLI), from the release's tarball.
           environment.systemPackages = [ pkgs.drive-release ];
 
-          launchd.daemons.drive-agent.serviceConfig = {
-            Label = "app.fasttrackstudio.drive";
+          # The agent is Drive.app's own (Contents/MacOS/drive), in the
+          # user's session: macOS 15 lets only Drive.app's code, there, into
+          # the app group's folder, where the agent serves the socket
+          # Finder's Drive (the File Provider) uses. A LaunchDaemon, or the
+          # bare binary, is refused. So it runs while ${user} is logged in.
+          # Any other account that logs in gets no agent (exit 0, not kept
+          # alive).
+          launchd.agents.drive-agent.serviceConfig = {
+            Label = agentLabel;
             ProgramArguments = [
-              (lib.getExe pkgs.drive-release)
-              "serve"
+              "/bin/sh"
+              "-c"
+              ''[ "$(id -un)" = ${lib.escapeShellArg user} ] || exit 0; exec /Applications/Drive.app/Contents/MacOS/drive serve''
             ];
-            UserName = user;
+            LimitLoadToSessionType = "Aqua";
             RunAtLoad = true;
-            KeepAlive = true;
+            KeepAlive.SuccessfulExit = false;
             ThrottleInterval = 10;
-            EnvironmentVariables = {
-              HOME = home;
-              RUST_LOG = "drive_agent=info,drive=info,drive_native=warn";
-            };
+            EnvironmentVariables.RUST_LOG = "drive_agent=info,drive=info,drive_native=warn";
             StandardOutPath = log;
             StandardErrorPath = log;
           };
@@ -80,6 +91,9 @@
               chmod -R u+w /Applications/Drive.app
               mkdir -p "$(dirname "$mark")"
               echo "$app" >"$mark"
+              # The agent runs from the app: onto the new one.
+              uid=$(id -u ${lib.escapeShellArg user})
+              launchctl kickstart -k "gui/$uid/${agentLabel}" 2>/dev/null || true
             fi
           '';
 
@@ -99,15 +113,25 @@
           };
 
           system.activationScripts.preActivation.text = lib.mkAfter ''
+            if [ -f ${oldDaemon} ]; then
+              echo "drive: replacing the agent's LaunchDaemon with Drive.app's agent"
+              launchctl bootout system/app.fasttrackstudio.drive 2>/dev/null || true
+              rm -f ${oldDaemon}
+              for _ in $(seq 30); do
+                pgrep -f 'drive-release-[^/]*/bin/drive serve' >/dev/null || break
+                sleep 1
+              done
+              pkill -f 'drive-release-[^/]*/bin/drive serve' 2>/dev/null || true
+            fi
             if [ -f ${lib.escapeShellArg legacy} ]; then
-              echo "drive: replacing ${user}'s hand-installed LaunchAgent with the LaunchDaemon"
+              echo "drive: replacing ${user}'s hand-installed LaunchAgent"
               uid=$(id -u ${lib.escapeShellArg user})
               # Loaded from a login (gui) or over SSH (user): either domain.
               for domain in "gui/$uid" "user/$uid"; do
                 launchctl bootout "$domain/app.fasttrackstudio.drive-agent" 2>/dev/null || true
               done
               mv ${lib.escapeShellArg legacy} ${lib.escapeShellArg "${legacy}.replaced-by-nix"}
-              # Gone before the daemon loads: never two agents on one state dir.
+              # Gone before the new agent loads: never two agents on one state dir.
               for _ in $(seq 30); do
                 pgrep -u "$uid" -f ${lib.escapeShellArg "${home}/.local/bin/drive"} >/dev/null || break
                 sleep 1
