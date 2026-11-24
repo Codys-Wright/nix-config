@@ -54,7 +54,10 @@ in
         Install.WantedBy = [ "default.target" ];
       };
 
-      # The agent, serving ~/Drive. fusermount3 is the setuid wrapper.
+      # The agent, serving ~/Drive. fusermount3 is the setuid wrapper. No
+      # unmount before it starts: one started beside a running agent
+      # (a switch while another is serving) would take that agent's mount
+      # away.
       systemd.user.services.drive = {
         Unit = {
           Description = "Drive agent and its mount at ~/Drive";
@@ -63,8 +66,6 @@ in
         Service = {
           Environment = [ "PATH=/run/wrappers/bin:${pkgs.fuse3}/bin:/run/current-system/sw/bin" ];
           ExecStart = "${drive.drive}/bin/drive mount %h/Drive";
-          # A mount left behind by a crash would make the next start fail.
-          ExecStartPre = "-/run/wrappers/bin/fusermount3 -uz %h/Drive";
           Restart = "on-failure";
           RestartSec = 5;
         };
