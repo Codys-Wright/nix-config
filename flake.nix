@@ -40,7 +40,7 @@
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    drive.url = "github:FastTrackStudios/drive/v26.11.4";
+    drive.url = "github:FastTrackStudios/drive/v26.11.6";
     erosanix.url = "github:emmanuelrosa/erosanix";
     flake-aspects.url = "github:vic/flake-aspects";
     flake-file.url = "github:denful/flake-file";

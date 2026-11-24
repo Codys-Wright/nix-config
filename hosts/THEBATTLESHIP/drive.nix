@@ -44,7 +44,7 @@ in
           After = [ "graphical-session.target" ];
         };
         Service = {
-          ExecStart = "${drive.drive-desktop}/bin/drive-desktop --background";
+          ExecStart = "${drive.drive-desktop}/bin/drive-app --background";
           Restart = "on-failure";
           RestartSec = 5;
         };
