@@ -119,12 +119,17 @@ in
   # Flake `packages.*` outputs derived from the same overlay. Exposed on
   # x86_64-linux only (the old per-package shims' behavior): forcing these
   # derivations on darwin aborts inside callPackage for the linux-only
-  # packages, and nothing consumes the outputs there.
+  # packages, and nothing consumes the outputs there. A package whose
+  # meta.platforms leaves out x86_64-linux (the macOS-only drive-release,
+  # drive-app-release) is left out too, so `nix flake check` does not
+  # refuse it.
   perSystem =
     { pkgs, system, ... }:
     {
       packages = lib.optionalAttrs (system == "x86_64-linux") (
-        lib.getAttrs fleetAttrNames (pkgs.extend overlay)
+        lib.filterAttrs (_: p: lib.meta.availableOn pkgs.stdenv.hostPlatform p) (
+          lib.getAttrs fleetAttrNames (pkgs.extend overlay)
+        )
       );
     };
 }
