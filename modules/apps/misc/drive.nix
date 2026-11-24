@@ -15,7 +15,7 @@
 # packages/drive-release/update.sh <tag>; switch.
 { inputs, lib, ... }:
 {
-  flake-file.inputs.drive.url = lib.mkDefault "github:FastTrackStudios/drive/v26.11.7";
+  flake-file.inputs.drive.url = lib.mkDefault "github:FastTrackStudios/drive/v26.11.8";
 
   fleet.apps._.misc._.drive = {
     description = "Drive CLI (the agent, `drive`) from the release's Nix package";
