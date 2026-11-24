@@ -30,6 +30,11 @@
         <fleet/phoenix>
         # starcommand Hermes runs `voyager` profile sessions here over SSH.
         (<fleet.coding.cli/hermes-node> { user = "CodyWright"; })
+        # Drive's agent for CodyWright, from the release tarball (modules/apps/misc/drive.nix).
+        (<fleet.apps.misc/drive-launchd> {
+          user = "CodyWright";
+          home = "/Users/codywright";
+        })
         # Cody's own login: his `gh` / git push stay his, except inside
         # Claude Code / Codex / Paperclip, which act as fts-forge[bot]
         # (key: sops/hosts/voyager.yaml).
