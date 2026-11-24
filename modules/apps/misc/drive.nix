@@ -14,7 +14,7 @@
 # packages/drive-release/update.sh <tag>; switch.
 { inputs, lib, ... }:
 {
-  flake-file.inputs.drive.url = lib.mkDefault "github:FastTrackStudios/drive/v26.11.2";
+  flake-file.inputs.drive.url = lib.mkDefault "github:FastTrackStudios/drive/v26.11.4";
 
   fleet.apps._.misc._.drive = {
     description = "Drive CLI (the agent, `drive`) from the release's Nix package";
@@ -64,6 +64,38 @@
             };
             StandardOutPath = log;
             StandardErrorPath = log;
+          };
+
+          # Drive.app (the desktop app, in the menu bar, and the File
+          # Provider that puts Drive in Finder), copied into /Applications:
+          # the system takes an app's extensions from a real install, not a
+          # link into the store. Copied again only when the release changes.
+          system.activationScripts.postActivation.text = lib.mkAfter ''
+            app=${pkgs.drive-app-release}/Applications/Drive.app
+            mark="/Library/Application Support/Drive/installed-from"
+            if [ "$(cat "$mark" 2>/dev/null)" != "$app" ]; then
+              echo "drive: installing Drive.app ${pkgs.drive-app-release.version}"
+              rm -rf /Applications/Drive.app
+              ditto "$app" /Applications/Drive.app
+              chmod -R u+w /Applications/Drive.app
+              mkdir -p "$(dirname "$mark")"
+              echo "$app" >"$mark"
+            fi
+          '';
+
+          # In the menu bar at login (the app's own "Open at Login" would
+          # make a second entry: leave it off).
+          launchd.agents.drive-app.serviceConfig = {
+            Label = "app.fasttrackstudio.drive.app";
+            ProgramArguments = [
+              "/usr/bin/open"
+              "-g"
+              "-a"
+              "/Applications/Drive.app"
+              "--args"
+              "--background"
+            ];
+            RunAtLoad = true;
           };
 
           system.activationScripts.preActivation.text = lib.mkAfter ''

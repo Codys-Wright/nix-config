@@ -27,7 +27,29 @@ in
       ];
     in
     {
-      home.packages = [ drive.drive ];
+      # drive-desktop: Drive in the tray, its window a click away (and in
+      # the launcher, from its .desktop entry).
+      home.packages = [
+        drive.drive
+        drive.drive-desktop
+      ];
+
+      # The tray icon for the session (`--background`: no window until
+      # it is clicked). The app's own "Open at Login" would make a second
+      # entry pointing into the store: leave it off.
+      systemd.user.services.drive-desktop = {
+        Unit = {
+          Description = "Drive in the system tray";
+          PartOf = [ "graphical-session.target" ];
+          After = [ "graphical-session.target" ];
+        };
+        Service = {
+          ExecStart = "${drive.drive-desktop}/bin/drive-desktop --background";
+          Restart = "on-failure";
+          RestartSec = 5;
+        };
+        Install.WantedBy = [ "graphical-session.target" ];
+      };
 
       systemd.user.services.drive-node = {
         Unit = {
