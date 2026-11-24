@@ -70,8 +70,17 @@
             if [ -f ${lib.escapeShellArg legacy} ]; then
               echo "drive: replacing ${user}'s hand-installed LaunchAgent with the LaunchDaemon"
               uid=$(id -u ${lib.escapeShellArg user})
-              launchctl bootout "gui/$uid/app.fasttrackstudio.drive-agent" 2>/dev/null || true
+              # Loaded from a login (gui) or over SSH (user): either domain.
+              for domain in "gui/$uid" "user/$uid"; do
+                launchctl bootout "$domain/app.fasttrackstudio.drive-agent" 2>/dev/null || true
+              done
               mv ${lib.escapeShellArg legacy} ${lib.escapeShellArg "${legacy}.replaced-by-nix"}
+              # Gone before the daemon loads: never two agents on one state dir.
+              for _ in $(seq 30); do
+                pgrep -u "$uid" -f ${lib.escapeShellArg "${home}/.local/bin/drive"} >/dev/null || break
+                sleep 1
+              done
+              pkill -u "$uid" -f ${lib.escapeShellArg "${home}/.local/bin/drive"} 2>/dev/null || true
             fi
           '';
         };
