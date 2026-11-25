@@ -28,10 +28,13 @@
         home.packages =
           with pkgs;
           [
-            # Rust toolchain from rust-overlay
-            # Uses latest stable Rust with default profile (rustc, cargo, rustfmt, clippy, etc.)
-            # This replaces rustup with a pure, reproducible Rust toolchain
-            (rust-bin.stable.latest.default.override {
+            # Rust toolchain from rust-overlay (default profile: rustc, cargo,
+            # rustfmt, clippy, …). Pinned to the version every FastTrackStudio
+            # repo's rust-toolchain.toml names, not `latest`: kache keys on
+            # `rustc -vV`, so a cargo run outside a dev shell with another
+            # version shares no cache entries with the repos' builds. Bump it
+            # with the repos.
+            (rust-bin.stable."1.99.1".default.override {
               targets = [ "wasm32-unknown-unknown" ];
             })
             rust-analyzer

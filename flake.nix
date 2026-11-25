@@ -72,7 +72,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     kache = {
-      url = "github:kunobi-ninja/kache/v2.1.1";
+      url = "github:kunobi-ninja/kache/v2.3.1";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     lanzaboote = {
