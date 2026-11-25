@@ -5,7 +5,7 @@
 # cannot cross a mount. starcommand-ci (the deploy runner) is not in the
 # group and never sees the store.
 #
-# NOT one daemon for everyone: kache (1.x and 2.x) cannot serve another
+# NOT one daemon for everyone: kache (1.x and 2.x, through 2.3.1) cannot serve another
 # user. Its daemon binds the socket 0600 inside a 0700 directory it must own
 # (kunobi-daemon `unix_socket::ensure_private_dir` / `bind_private`), and
 # drops every connection, on the main socket and the control socket alike,
@@ -126,6 +126,11 @@ in
             clean_incremental = false
             # A daemon a `kache` command starts for its user goes once idle.
             daemon_idle_timeout_secs = 600
+            # The runners' scheduled and merge-queue jobs may publish to the
+            # remote (kache >= 2.3 makes both read-only unless listed; still
+            # only on a protected or queue branch, and pull requests never).
+            # Only the remote: the local store is written either way.
+            github_writes = ["schedule", "merge_group"]
           '';
 
           # `agent` has no home-manager, so it gets cody's Cargo config

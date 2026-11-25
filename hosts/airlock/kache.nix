@@ -92,6 +92,11 @@ in
           clean_incremental = false
           # The on-demand daemon goes once idle.
           daemon_idle_timeout_secs = 600
+          # The runners' scheduled and merge-queue jobs may publish to the
+          # remote (kache >= 2.3 makes both read-only unless listed; still
+          # only on a protected or queue branch, and pull requests never).
+          # Only the remote: the local store is written either way.
+          github_writes = ["schedule", "merge_group"]
         '';
 
         # rat has no home-manager, so the Cargo config that
