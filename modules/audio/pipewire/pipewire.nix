@@ -105,7 +105,9 @@ let
           # With 192 GiB of RAM that's pointlessly tight for large sample
           # libraries pinned via mlock(). Re-state @pipewire memlock as
           # unlimited so the audio path wins regardless of group order.
-          security.pam.loginLimits = [
+          # mkAfter: without it this line lands BEFORE nixpkgs' 4194304 one
+          # in the generated limits.conf, and the later line wins.
+          security.pam.loginLimits = lib.mkAfter [
             {
               domain = "@pipewire";
               item = "memlock";

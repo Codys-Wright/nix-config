@@ -1708,6 +1708,22 @@
         "type": "github"
       }
     },
+    "nixpkgs-tone3000": {
+      "locked": {
+        "lastModified": 1795234589,
+        "narHash": "sha256-f/VVvxf5RsQgWVhUtefoca5ktVg0DA2bnkMOcmSnozo=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "2786a2a72088ecf32aea5b3ec52099e6a7cff78f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "2786a2a72088ecf32aea5b3ec52099e6a7cff78f",
+        "type": "github"
+      }
+    },
     "nixpkgs-x86_64-darwin": {
       "locked": {
         "lastModified": 1792526774,
@@ -2268,6 +2284,7 @@
         "nixpkgs": "nixpkgs_11",
         "nixpkgs-pipewire": "nixpkgs-pipewire",
         "nixpkgs-stable": "nixpkgs-stable_2",
+        "nixpkgs-tone3000": "nixpkgs-tone3000",
         "nvf": "nvf",
         "panix": "panix",
         "reaper-flake": "reaper-flake",
@@ -2569,7 +2586,7 @@
     "sf-pro": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-dvGLO786y9ygKRSKDJlhIF6AGmn2NTJ5tBulKinPRxY=",
+        "narHash": "sha256-vDM+4k+glslI427ijDZNXR+5zEfve8FhR1/IiTVNlRQ=",
         "type": "file",
         "url": "https://devimages-cdn.apple.com/design/resources/download/SF-Pro.dmg"
       },
