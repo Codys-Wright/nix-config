@@ -33,6 +33,8 @@
       (<fleet.coding.cli/hermes-node> { user = "rat"; })
       # Teley (:8787) + OTLP collector (:4318), always on, run as rat.
       (<fleet.coding.cli/teley-launchd> { user = "rat"; })
+      # Drive's agent for rat, from the release tarball (modules/apps/misc/drive.nix).
+      (<fleet.apps.misc/drive-launchd> { user = "rat"; })
       # rat's `gh` / git push = fts-forge[bot] (key: sops/hosts/airlock.yaml).
       (<fleet.coding.cli/gh-forge> {
         user = "rat";

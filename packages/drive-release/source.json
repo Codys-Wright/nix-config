@@ -1,0 +1,11 @@
+{
+  "version": "26.11.9",
+  "hashes": {
+    "aarch64-apple-darwin": "sha256-s2GzoGklMin4FfpoiAswqxGUk40c3+tV465PY/k+xD0=",
+    "x86_64-apple-darwin": "sha256-+qy80xRA/Q5OV6YB9YTkLt+lpsjJVC/579R/JtFq+Ko="
+  },
+  "apps": {
+    "aarch64-apple-darwin": "sha256-5KZpi4S9fYESySTGXGkcvfJahu6VZMiYfX1sTlbwpLo=",
+    "x86_64-apple-darwin": "sha256-uf61SZfypfeFsneqln1sXlCE80Etg9ZO12aPoL1m5Ok="
+  }
+}
