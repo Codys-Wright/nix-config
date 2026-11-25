@@ -29,9 +29,10 @@
     den.url = "github:denful/den";
     deploy-rs.url = "github:serokell/deploy-rs";
     devenv-fleet = {
-      url = "github:FastTrackStudios/devenv-fleet/v0.1.0";
+      url = "github:FastTrackStudios/devenv-fleet/1db17ab179518fc418c385d2a72fa886116c59c4";
       flake = false;
     };
+    devenv-fleet-nixpkgs.url = "github:NixOS/nixpkgs/8ce4ef6cb6f871616146b9fe26d2a5ae594e94fe";
     dioxus-flake = {
       url = "github:FastTrackStudios/Dioxus-Flake";
       inputs.nixpkgs.follows = "nixpkgs";

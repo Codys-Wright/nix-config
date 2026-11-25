@@ -371,17 +371,33 @@
     "devenv-fleet": {
       "flake": false,
       "locked": {
-        "lastModified": 1793602472,
-        "narHash": "sha256-U606lXI/i+ibOjKgGQJbh5ggrrtiHgYGvjtmB2Qnp6E=",
+        "lastModified": 1795510829,
+        "narHash": "sha256-o13SxnjSew23KZl5Tn0E1ZI8bfkhkMW6BdoIMpRZkDI=",
         "owner": "FastTrackStudios",
         "repo": "devenv-fleet",
-        "rev": "ab6cb110c1a17c94048e8bafe3e44e7ac9260677",
+        "rev": "1db17ab179518fc418c385d2a72fa886116c59c4",
         "type": "github"
       },
       "original": {
         "owner": "FastTrackStudios",
-        "ref": "v0.1.0",
         "repo": "devenv-fleet",
+        "rev": "1db17ab179518fc418c385d2a72fa886116c59c4",
+        "type": "github"
+      }
+    },
+    "devenv-fleet-nixpkgs": {
+      "locked": {
+        "lastModified": 1789006805,
+        "narHash": "sha256-xB8mKMOx1IA9vTDNLmJZ6n4wCMq/cuWBBOzGCRnqxrU=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "8ce4ef6cb6f871616146b9fe26d2a5ae594e94fe",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "8ce4ef6cb6f871616146b9fe26d2a5ae594e94fe",
         "type": "github"
       }
     },
@@ -2251,6 +2267,7 @@
         "den": "den",
         "deploy-rs": "deploy-rs",
         "devenv-fleet": "devenv-fleet",
+        "devenv-fleet-nixpkgs": "devenv-fleet-nixpkgs",
         "dioxus-flake": "dioxus-flake",
         "disko": "disko",
         "drive": "drive",
