@@ -35,6 +35,8 @@
       (<fleet.coding.cli/teley-launchd> { user = "rat"; })
       # Drive's agent for rat, from the release tarball (modules/apps/misc/drive.nix).
       (<fleet.apps.misc/drive-launchd> { user = "rat"; })
+      # Shared agent skills (fleet-skills) + den-fleet for rat, who has no home-manager.
+      (<fleet.coding.cli/agent-skills-launchd> { user = "rat"; })
       # rat's `gh` / git push = fts-forge[bot] (key: sops/hosts/airlock.yaml).
       (<fleet.coding.cli/gh-forge> {
         user = "rat";
