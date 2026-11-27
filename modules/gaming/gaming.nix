@@ -20,6 +20,7 @@
       <fleet.gaming/proton>
       <fleet.gaming/melonloader>
       <fleet.gaming/r2modman>
+      <fleet.gaming/deadlock-mod-manager>
       <fleet.gaming/sunshine>
     ];
 
@@ -41,6 +42,7 @@
       <fleet.gaming/proton>
       <fleet.gaming/melonloader>
       <fleet.gaming/r2modman>
+      <fleet.gaming/deadlock-mod-manager>
     ];
   };
 }
