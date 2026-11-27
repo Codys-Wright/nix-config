@@ -400,7 +400,9 @@ in
                  (if (.pull_request.head.repo.full_name // "") == .repository.full_name
                   then "same" else "fork" end)
                else "none" end),
-              (.pull_request.user.login // "")
+              # Never empty: $(...) strips trailing newlines, so an empty
+              # last fact would vanish and fail the count below.
+              (.pull_request.user.login // "-")
             ] | .[]' "$payload" 2>/dev/null)" || deny "unreadable event payload"
           mapfile -t f <<<"$facts"
           [ "''${#f[@]}" -eq 5 ] || deny "unreadable event payload"
