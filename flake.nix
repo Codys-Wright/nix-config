@@ -26,6 +26,7 @@
       url = "github:nix-darwin/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    deadlock-mod-manager.url = "github:deadlock-mod-manager/deadlock-mod-manager/v2.3.0";
     den.url = "github:denful/den";
     deploy-rs.url = "github:serokell/deploy-rs";
     devenv-fleet = {
