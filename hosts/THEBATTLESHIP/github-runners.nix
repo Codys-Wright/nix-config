@@ -112,8 +112,9 @@ let
   #       private: any event;
   #       public:  a push to main, release/v* or a v* tag, workflow_dispatch
   #                (which takes write access), or a schedule (which only the
-  #                default branch's workflow can start); anything else is
-  #                refused;
+  #                default branch's workflow can start), or a pull_request
+  #                from a branch of the repo itself opened by fts-forge[bot]
+  #                or Codys-Wright; anything else is refused;
   #       unreadable payload or no boolean `private`: refused.
   #
   # ENV CONTRACT — what a job on either pool can rely on (stage 2 workflows
@@ -389,7 +390,8 @@ in
 
           # One jq pass, one fact a line (no name holds a newline): the
           # payload's repo, owner, visibility and, for a pull request, whether
-          # its head is this repo. jq -e fails on malformed JSON.
+          # its head is this repo and who opened it. jq -e fails on malformed
+          # JSON.
           facts="$(jq -er '[
               (.repository.full_name // ""),
               (.repository.owner.login // ""),
@@ -397,11 +399,12 @@ in
               (if has("pull_request") then
                  (if (.pull_request.head.repo.full_name // "") == .repository.full_name
                   then "same" else "fork" end)
-               else "none" end)
+               else "none" end),
+              (.pull_request.user.login // "")
             ] | .[]' "$payload" 2>/dev/null)" || deny "unreadable event payload"
           mapfile -t f <<<"$facts"
-          [ "''${#f[@]}" -eq 4 ] || deny "unreadable event payload"
-          p_repo="''${f[0]}" p_owner="''${f[1]}" private="''${f[2]}" pr="''${f[3]}"
+          [ "''${#f[@]}" -eq 5 ] || deny "unreadable event payload"
+          p_repo="''${f[0]}" p_owner="''${f[1]}" private="''${f[2]}" pr="''${f[3]}" author="''${f[4]}"
 
           [ "$p_repo" = "$repo" ] || deny "payload repository ''${p_repo:-?} != $repo"
           [ "$p_owner" = "$org" ] || deny "payload owner ''${p_owner:-?}"
@@ -419,6 +422,15 @@ in
                 # GitHub runs a schedule only from the default branch's
                 # workflow file, at its head: as trusted as a push to main.
                 schedule) why="public repo, schedule" ;;
+                # A branch of this repo (pushing one takes write access),
+                # opened by a trusted author: the fts-forge bot or the owner.
+                # Quoted: a bare [bot] would be a glob bracket.
+                pull_request)
+                  [ "$pr" = same ] || deny "public repo, pull request without a same-repo head"
+                  case "$author" in
+                    "fts-forge[bot]" | "Codys-Wright") why="public repo, same-repo pull request by $author" ;;
+                    *) deny "public repo, pull request by ''${author:-?}" ;;
+                  esac ;;
                 *) deny "public repo, event ''${event:-?}" ;;
               esac ;;
             *) deny "repository visibility unknown" ;;
