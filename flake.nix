@@ -26,7 +26,6 @@
       url = "github:nix-darwin/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    deadlock-mod-manager.url = "github:deadlock-mod-manager/deadlock-mod-manager/v2.3.0";
     den.url = "github:denful/den";
     deploy-rs.url = "github:serokell/deploy-rs";
     devenv-fleet = {
@@ -119,6 +118,7 @@
       };
     };
     nixpkgs.url = "https://channels.nixos.org/nixpkgs-unstable/nixexprs.tar.zst";
+    nixpkgs-deadlock-mod-manager.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs-pipewire.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.11";
     nixpkgs-tone3000.url = "github:nixos/nixpkgs/2786a2a72088ecf32aea5b3ec52099e6a7cff78f";
