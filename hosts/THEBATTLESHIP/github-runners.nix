@@ -417,7 +417,7 @@ in
             false)
               case "$event" in
                 push)
-                  [[ "$ref" == refs/heads/main || "$ref" =~ ^refs/heads/release/v[0-9] || "$ref" =~ ^refs/tags/v[0-9] ]] \
+                  [[ "$ref" == refs/heads/main || "$ref" =~ ^refs/heads/release/v[0-9] || "$ref" =~ ^refs/tags/v[0-9] || "$ref" =~ ^refs/tags/studio-v[0-9]+\.[0-9]+\.[0-9]+$ ]] \
                     || deny "public repo, push to ''${ref:-?}"
                   why="public repo, push to $ref" ;;
                 workflow_dispatch) why="public repo, workflow_dispatch" ;;
