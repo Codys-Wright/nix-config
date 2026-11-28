@@ -1,11 +1,11 @@
 {
-  "version": "26.11.11",
+  "version": "26.11.12",
   "hashes": {
-    "aarch64-apple-darwin": "sha256-ro8YVIGIFkSvokOH1/+RfCyz2M9DUIgfmuIChVqeTSQ=",
-    "x86_64-apple-darwin": "sha256-J1ihMlXHqH4Zkp75AELFP6Xtm3zpmCdstI++gOFCsRM="
+    "aarch64-apple-darwin": "sha256-DU9PWgMClyUgp6WopNYYOp4SKegjnBsB/UpwJrzy91E=",
+    "x86_64-apple-darwin": "sha256-ynHxkepqF5Kdy1VVePhuqdo808WxEn42cWJCcrqjbo0="
   },
   "apps": {
-    "aarch64-apple-darwin": "sha256-u0G3xYpuUv/PXZhkU4SJInfZqJuAZR2CgOIvhPUSWQo=",
-    "x86_64-apple-darwin": "sha256-gchLK5kKq6fgEfBMwnpeCQHtNkDRHeKognendvGOVVs="
+    "aarch64-apple-darwin": "sha256-kP/sFsn/UQRzjo1EYPr4REyuqQ4JyUc9e0mNt5L6aKA=",
+    "x86_64-apple-darwin": "sha256-bIOJtnLIVMtdydu9sherAI3UgqVB0yyr89PJtcRHxeY="
   }
 }
